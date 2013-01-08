@@ -1,0 +1,196 @@
+Robot {
+  translation IS translation
+  rotation IS rotation
+  children [
+    DEF DBodyShape Shape {
+    }
+    LED {
+      translation -0.005 -0.01 -0.076
+      children [
+        DEF BackLedShape Shape
+      ]
+    }
+    LED {
+      translation 0 -0.01 -0.076
+    }
+    LED {
+      translation 0.005 -0.01 -0.076
+    }
+    Accelerometer {
+      translation 0 -0.0684064 -0.01
+      rotation 0.0 0.707107 0.707107 3.14159
+    }
+    Gyro {
+      translation 0 -0.0684064 0.01
+      rotation -0.57735 0.57735 0.57735 2.0944
+    }
+    DEF DNeck Servo {
+      translation 0 0.051 0
+      rotation 0 1 0 0
+      position 0.00
+      children [
+        DEF DNeckShape
+        DEF DHead Servo {
+          rotation -1 0 0 -0.7854
+          position 0.19
+          children [
+            DEF DHeadShape Group
+            Camera {
+              translation 0 0.0329074 0.0359816
+              rotation 0 -1 0 3.14159
+              children [
+                DEF DCameraShape
+              ]
+            }
+            DEF DEyeLED LED {
+              rotation 1 0 0 0
+              children [
+                DEF DEyeLEDShape
+              ]
+            }
+            DEF DHeadLED LED {
+              rotation 1 0 0 0
+            }
+          ]
+        }
+      ]
+    }
+    DEF DPelvYL Servo {
+      translation 0.037 -0.1222 -0.005
+      rotation 0 -1 0 0
+      position -0.02
+      children [
+        DEF DPelvYLShape Shape
+        DEF DPelvL Servo {
+          rotation 0 0 -1 0
+          position -0.01
+          children [
+            DEF DPelvLShape Shape
+            DEF DLegUpperL Servo {
+              rotation -1 0 0 0
+              position 1.15
+              children [
+                DEF DLegUpperLShape
+                DEF DLegLowerL Servo {
+                  translation -0 -0.093 0
+                  rotation -1 0 0 0
+                  position -2.25
+                  children [
+                    DEF DLegLowerLShape Shape
+                    DEF DAnkleL Servo {
+                      translation 0 -0.093 0
+                      rotation 1 0 0 0
+                      position -1.23
+                      children [
+                        DEF DAnkleLShape Shape
+                        DEF DFootL Servo {
+                          rotation 0 0 1 0
+                          position -0.02
+                          children [
+                            DEF DFootLShape Group
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    DEF DPelvYR Servo {
+      translation -0.037 -0.1222 -0.005
+      rotation 0 -1 0 0
+      position -0.01
+      children [
+        DEF DPelvYRShape Shape
+        DEF DPelvR Servo {
+          rotation 0 0 -1 0
+          position 0.02
+          children [
+            DEF DPelvRShape Shape
+            DEF DLegUpperR Servo {
+              rotation 1 0 0 0
+              position -1.15
+              children [
+                DEF DLegUpperRShape Group
+                DEF DLegLowerR Servo {
+                  translation -0 -0.093 0
+                  rotation 1 0 0 0
+                  position 2.25
+                  children [
+                    DEF DLegLowerRShape Shape
+                    DEF DAnkleR Servo {
+                      translation 0 -0.093 0
+                      rotation -1 0 0 0
+                      position 1.22
+                      children [
+                        DEF DAnkleRShape Shape
+                        DEF DFootR Servo {
+                          rotation 0 0 1 0
+                          position 0.05
+                          children [
+                            DEF DFootRShape Group
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    DEF DShoulderL Servo {
+      translation 0.082 0 0
+      rotation 1 0 0 0
+      position 0.72
+      children [
+        DEF DShoulderLShape Shape
+        DEF DArmUpperL Servo {
+          translation 0 -0.016 0
+          rotation 0 0 -1 -0.7854
+          position 0.36
+          children [
+            DEF DArmUpperLShape Group
+            DEF DArmLowerL Servo {
+              translation 0 -0.06 0.016
+              rotation 1 0 0 -1.5708
+              position -0.52
+              children [
+                DEF DArmLowerLShape Group
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    DEF DShoulderR Servo {
+      translation -0.082 0 0
+      rotation -1 0 0 0
+      position -0.84
+      children [
+        DEF DShoulderRShape
+        DEF DArmUpperR Servo {
+          translation 0 -0.016 0
+          rotation 0 0 -1 0.7854
+          position -0.33
+          children [
+            DEF DArmUpperRShape Group
+            DEF DArmLowerR Servo {
+              translation 0 -0.06 0.016
+              rotation -1 0 0 1.5708
+              position 0.51
+              children [
+                DEF DArmLowerRShape Group 
+              ]
+            }
+          ]
+        }
+      ]
+    }
+}

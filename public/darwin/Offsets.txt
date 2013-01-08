@@ -1,0 +1,75 @@
+Body
+translation 0 0 0
+rotation  0 1 0 0
+
+Head
+rotation -1 0 0 -0.7854
+position 0.19
+
+Neck
+translation 0 0.051 0
+rotation 0 1 0 0
+position 0.00
+
+Camera
+translation 0 0.0329074 0.0359816
+rotation 0 -1 0 3.14159
+
+EyeLED
+rotation 1 0 0 0
+
+HeadLED
+rotation 1 0 0 0
+
+HeadBoundingBox
+translation 0 0.022 -0.012
+rotation 1 0 0 1.5708
+
+NeckBoundingBox
+translation 0 -0.009 0
+
+LeftPelvisY
+translation 0.037 -0.1222 -0.005
+rotation 0 -1 0 0
+
+LeftPelvis
+rotation 0 0 -1 0
+position -0.01
+
+LeftUpperLeg
+rotation -1 0 0 0
+position 1.15
+
+LeftLowerLeg
+translation -0 -0.093 0
+rotation -1 0 0 0
+position -2.25
+
+LeftAnkle
+translation 0 -0.093 0
+rotation 1 0 0 0
+position -1.23
+
+LeftFoot
+rotation 0 0 1 0
+position -0.02
+translation 0.011 -0.027 -0.001
+
+LeftAnkleBoundingBox
+translation 0 0.01 -0.0205
+
+LeftLowerLegBoundingBox
+translation 0 -0.058 -0.001
+
+LeftLowerLegBoundingBox2
+translation 0 -0.02 0.016
+rotation 1 0 0 0.04
+
+LeftUpperLegBoundingBox
+translation 0 -0.058 0.006
+
+LeftPelvisBoundingBox
+translation 0 -0.0105 -0.023
+
+LeftPelvisY
+translation 0 0.017 0.001

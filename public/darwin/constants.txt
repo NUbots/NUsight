@@ -1,0 +1,29 @@
+material DEF DPlasticMaterial Material {
+          diffuseColor IS 0.301961 0.301961 0.301961
+          specularColor 0.401201 0.401201 0.401201
+        }
+
+material DEF DMetalMaterial Material {
+              diffuseColor 0.7 0.7 0.7
+              specularColor 0.401201 0.401201 0.401201
+            }
+
+                    material DEF DEyeMaterial Material {
+                      diffuseColor 0.14 0.14 0.14
+                      specularColor 0.401201 0.401201 0.401201
+                    }
+
+                    material DEF DCameraMaterial Material {
+                      diffuseColor 0 0 0
+                      specularColor 0.401201 0.401201 0.401201
+                    }
+
+material DEF DLEDMaterial Material {
+                      ambientIntensity 0
+                      diffuseColor 0.7 0.7 0.7
+                    }
+
+                material DEF DServoMaterial Material {
+                  diffuseColor 0.14 0.14 0.14
+                  specularColor 0.168737 0.168737 0.168737
+                }
