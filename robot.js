@@ -4,7 +4,13 @@ net = require('net');
 util = require('util');
 events = require('events');
 
-function Robot () {
+function Robot (host, port) {
+    if (port === undefined) {
+        port = 12000;
+    }
+    
+    this.host = host;
+    this.port = port;
     this.socket = null;
 }
 
@@ -17,8 +23,8 @@ Robot.prototype.connect = function () {
     self = this;
     
     socket = net.createConnection({
-        host: '10.0.1.54',
-        port: 12000
+        host: self.host,
+        port: self.port
     }, function (socket) {
        //console.log("connected!"); 
     });
@@ -59,8 +65,14 @@ Robot.prototype.onData = function (data) {
     self = this;
     
     if (typeof data === Buffer) {
-        data = data.toString();
+        try {
+            data = data.toString();
+        } catch (err) {
+            console.log(err);
+        }
     }
+    
+   // console.log(data);
     
     index = data.indexOf('\n');
     if (index > -1) {

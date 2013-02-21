@@ -1,11 +1,11 @@
-var Robot = require('./robot');
+var Robot = require('./Robot');
 
 function NUbugger (io) {
     
     var self = this;
     
     self.io = io;
-    self.robot = new Robot();
+    self.robot = new Robot('10.0.1.54');
     self.robot.connect();
     self.robot.on('error', function () {
 	
@@ -30,6 +30,13 @@ function NUbugger (io) {
 	self.robot.on("state", function (event) {
 	    
 	    socket.emit("state", event);
+	    
+	});
+	
+	self.robot.on("image", function (event) {
+	    
+	    console.log("image!");
+	    socket.emit("image", event);
 	    
 	});
         

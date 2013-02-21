@@ -18,8 +18,9 @@
 	Ball = function () {
 
 		var sphere, mesh;
-		//The ball
-		this.ball = new THREE.Object3D();
+
+		//Call super constructor
+		THREE.Object3D.call(this);
 
 		//Create a sphere
 		sphere = new THREE.SphereGeometry(RADIUS, 24, 24);
@@ -33,8 +34,10 @@
 		mesh.position.y = RADIUS;
 
 		//Add this mesh to the object
-		this.ball.add(mesh);
+		this.add(mesh);
 	};
+
+	Ball.prototype = Object.create(THREE.Object3D.prototype);
 
 	//Export the object
 	window.Ball = Ball;

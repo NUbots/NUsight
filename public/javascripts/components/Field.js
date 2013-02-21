@@ -1,30 +1,35 @@
 (function (THREE) {
 	"use strict";
 
-	var Field, FieldMap, FIELD_LENGTH, FIELD_WIDTH, GOAL_DEPTH, GOAL_WIDTH,
+	var Field, FieldMap, SCALE, FIELD_LENGTH, FIELD_WIDTH, GOAL_DEPTH, GOAL_WIDTH,
 	GOAL_HEIGHT, GOAL_AREA_LENGTH, GOAL_AREA_WIDTH, PENALTY_MARK_DISTANCE,
 	PENALTY_MARK_LENGTH, CENTRE_CIRCLE_RADIUS, BORDER_STRIP_WIDTH, LINE_WIDTH,
 	POLE_RADIUS;
 
-	FIELD_LENGTH = 600;
-	FIELD_WIDTH = 400;
-	GOAL_DEPTH = 50;
-	GOAL_WIDTH = 150;
-	GOAL_HEIGHT = 80;
-	GOAL_AREA_LENGTH = 60;
-	GOAL_AREA_WIDTH = 220;
-	PENALTY_MARK_DISTANCE = 180;
-	PENALTY_MARK_LENGTH = 10;
-	CENTRE_CIRCLE_RADIUS = 60;
-	BORDER_STRIP_WIDTH = 70;
-	LINE_WIDTH = 5;
-	POLE_RADIUS = 5;
+	SCALE = 1;
+	FIELD_LENGTH = 600 * SCALE;
+	FIELD_WIDTH = 400 * SCALE;
+	GOAL_DEPTH = 50 * SCALE;
+	GOAL_WIDTH = 150 * SCALE;
+	GOAL_HEIGHT = 80 * SCALE;
+	GOAL_AREA_LENGTH = 60 * SCALE;
+	GOAL_AREA_WIDTH = 220 * SCALE;
+	PENALTY_MARK_DISTANCE = 180 * SCALE;
+	PENALTY_MARK_LENGTH = 10 * SCALE;
+	CENTRE_CIRCLE_RADIUS = 60 * SCALE;
+	BORDER_STRIP_WIDTH = 70 * SCALE;
+	LINE_WIDTH = 5 * SCALE;
+	POLE_RADIUS = 5 * SCALE;
 
 	Field = function () {
 		var tube, post, i;
 
 		//Create a new container object
+		THREE.Object3D.call(this);
+		
 		this.field = new THREE.Object3D();
+		this.field.rotation.y = Math.PI / 2;
+		//this.field.rotation.x = Math.PI / 2;
 
 		//Create the field
 		this.map = new FieldMap();
@@ -42,6 +47,7 @@
 		//this.ground.position.z = this.map.canvas.height/200;
 
 		this.field.add(this.ground);
+		this.add(this.field);
 
 		var splines = [];
 		//Build our Squircle spline
@@ -75,6 +81,8 @@
 
 		//this.field.add(this.goals);
 	};
+	
+	Field.prototype = Object.create(THREE.Object3D.prototype);
 
 	FieldMap = function () {
 		this.canvas = document.createElement("canvas");

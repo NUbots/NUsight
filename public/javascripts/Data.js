@@ -101,7 +101,7 @@
 				orientation: [0, 0],
 				battery: 0
 			},
-			localization: {
+			localisation: {
 				position: [0, 0],
 				angle: 0
 			}

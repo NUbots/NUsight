@@ -8,184 +8,180 @@
 	var DarwinOP, DarwinComponent;
 
 	/**
-	 * Creates a new Darwin-OP model. Creates the hierachy of objects so that
-	 * they move as expected. To get the root element (to add to a scene) after
-	 *  this has been consructed call getRootElement().
-	 *
-	 * @constructor
-	 */
+     * Creates a new Darwin-OP model. Creates the hierachy of objects so that
+     * they move as expected. To get the root element (to add to a scene) after
+     *  this has been consructed call getRootElement().
+     *
+     * @constructor
+     */
 	DarwinOP = function () {
-		//Create an object to hold our components
-		this.components = {};
+		//Call super constructor
+		THREE.Object3D.call(this);
 
 		//Setup Body Container
-		this.components.body = new DarwinComponent({
+		this.body = new DarwinComponent({
 			url: "darwin/Body.json",
 			baseOffset: new THREE.Vector3(0, 0.3422, 0),
 			rotationAxis: "y"
 		});
+		this.add(this.body);
 
 		//Setup Head Containers
-		this.components.neck = new DarwinComponent({
-			parent: this.components.body,
+		this.neck = new DarwinComponent({
 			url: "darwin/Neck.json",
 			baseOffset: new THREE.Vector3(0, 0.051, 0),
 			rotationAxis: "y"
 		});
-		this.components.head = new DarwinComponent({
-			parent: this.components.neck,
+		this.body.add(this.neck);
+		this.head = new DarwinComponent({
 			url: "darwin/Head.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
-		this.components.eyeLED = new DarwinComponent({
-			parent: this.components.head,
+		this.neck.add(this.head);
+		this.eyeLED = new DarwinComponent({
 			url: "darwin/EyeLED.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "none"
 		});
-		this.components.headLED = new DarwinComponent({
-			parent: this.components.head,
+		this.head.add(this.eyeLED);
+		this.headLED = new DarwinComponent({
 			url: "darwin/HeadLED.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "none"
 		});
-		this.components.camera = new DarwinComponent({
-			parent: this.components.head,
+		this.head.add(this.headLED);
+		this.camera = new DarwinComponent({
 			url: "darwin/Camera.json",
 			baseOffset: new THREE.Vector3(0, 0.0329074, 0.0359816),
 			rotationAxis: "none"
 		});
+		this.head.add(this.camera);
 
 		//Setup Left Leg containers
-		this.components.leftPelvisY = new DarwinComponent({
-			parent: this.components.body,
+		this.leftPelvisY = new DarwinComponent({
 			url: "darwin/LeftPelvisY.json",
 			baseOffset: new THREE.Vector3(0.037, -0.1222, -0.005),
 			rotationAxis: "y"
 		});
-		this.components.leftPelvis = new DarwinComponent({
-			parent: this.components.leftPelvisY,
+		this.body.add(this.leftPelvisY);
+		this.leftPelvis = new DarwinComponent({
 			url: "darwin/LeftPelvis.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
-		this.components.leftUpperLeg = new DarwinComponent({
-			parent: this.components.leftPelvis,
+		this.leftPelvisY.add(this.leftPelvis);
+		this.leftUpperLeg = new DarwinComponent({
 			url: "darwin/LeftUpperLeg.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
-		this.components.leftLowerLeg = new DarwinComponent({
-			parent: this.components.leftUpperLeg,
+		this.leftPelvis.add(this.leftUpperLeg);
+		this.leftLowerLeg = new DarwinComponent({
 			url: "darwin/LeftLowerLeg.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
-		this.components.leftAnkle = new DarwinComponent({
-			parent: this.components.leftLowerLeg,
+		this.leftUpperLeg.add(this.leftLowerLeg);
+		this.leftAnkle = new DarwinComponent({
 			url: "darwin/LeftAnkle.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
-		this.components.leftFoot = new DarwinComponent({
-			parent: this.components.leftAnkle,
+		this.leftLowerLeg.add(this.leftAnkle);
+		this.leftFoot = new DarwinComponent({
 			url: "darwin/LeftFoot.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
+		this.leftAnkle.add(this.leftFoot);
 
 		//Setup Right Leg containers
-		this.components.rightPelvisY = new DarwinComponent({
-			parent: this.components.body,
+		this.rightPelvisY = new DarwinComponent({
 			url: "darwin/RightPelvisY.json",
 			baseOffset: new THREE.Vector3(-0.037, -0.1222, -0.005),
 			rotationAxis: "y"
 		});
-		this.components.rightPelvis = new DarwinComponent({
-			parent: this.components.rightPelvisY,
+		this.body.add(this.rightPelvisY);
+		this.rightPelvis = new DarwinComponent({
 			url: "darwin/RightPelvis.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
-		this.components.rightUpperLeg = new DarwinComponent({
-			parent: this.components.rightPelvis,
+		this.rightPelvisY.add(this.rightPelvis);
+		this.rightUpperLeg = new DarwinComponent({
 			url: "darwin/RightUpperLeg.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
-		this.components.rightLowerLeg = new DarwinComponent({
-			parent: this.components.rightUpperLeg,
+		this.rightPelvis.add(this.rightUpperLeg);
+		this.rightLowerLeg = new DarwinComponent({
 			url: "darwin/RightLowerLeg.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
-		this.components.rightAnkle = new DarwinComponent({
-			parent: this.components.rightLowerLeg,
+		this.rightUpperLeg.add(this.rightLowerLeg);
+		this.rightAnkle = new DarwinComponent({
 			url: "darwin/RightAnkle.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
-		this.components.rightFoot = new DarwinComponent({
-			parent: this.components.rightAnkle,
+		this.rightLowerLeg.add(this.rightAnkle);
+		this.rightFoot = new DarwinComponent({
 			url: "darwin/RightFoot.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
+		this.rightAnkle.add(this.rightFoot);
 
 		//Setup Left Arm Containers
-		this.components.leftShoulder = new DarwinComponent({
-			parent: this.components.body,
+		this.leftShoulder = new DarwinComponent({
 			url: "darwin/LeftShoulder.json",
 			baseOffset: new THREE.Vector3(0.082, 0, 0),
 			rotationAxis: "x"
 		});
-		this.components.leftUpperArm = new DarwinComponent({
-			parent: this.components.leftShoulder,
+		this.body.add(this.leftShoulder);
+		this.leftUpperArm = new DarwinComponent({
 			url: "darwin/LeftUpperArm.json",
 			baseOffset: new THREE.Vector3(0, -0.016, 0),
 			rotationAxis: "z"
 		});
-		this.components.leftLowerArm = new DarwinComponent({
-			parent: this.components.leftUpperArm,
+		this.leftShoulder.add(this.leftUpperArm);
+		this.leftLowerArm = new DarwinComponent({
 			url: "darwin/LeftLowerArm.json",
 			baseOffset: new THREE.Vector3(0, -0.06, 0.016),
 			rotationAxis: "x"
 		});
+		this.leftUpperArm.add(this.leftLowerArm);
 
 		//Setup Right Arm Containers
-		this.components.rightShoulder = new DarwinComponent({
-			parent: this.components.body,
+		this.rightShoulder = new DarwinComponent({
 			url: "darwin/RightShoulder.json",
 			baseOffset: new THREE.Vector3(-0.082, 0, 0),
 			rotationAxis: "x"
 		});
-		this.components.rightUpperArm = new DarwinComponent({
-			parent: this.components.rightShoulder,
+		this.body.add(this.rightShoulder);
+		this.rightUpperArm = new DarwinComponent({
 			url: "darwin/RightUpperArm.json",
 			baseOffset: new THREE.Vector3(0, -0.016, 0),
 			rotationAxis: "z"
 		});
-		this.components.rightLowerArm = new DarwinComponent({
-			parent: this.components.rightUpperArm,
+		this.rightShoulder.add(this.rightUpperArm);
+		this.rightLowerArm = new DarwinComponent({
 			url: "darwin/RightLowerArm.json",
 			baseOffset: new THREE.Vector3(0, -0.06, 0.016),
 			rotationAxis: "x"
 		});
+		this.rightUpperArm.add(this.rightLowerArm);
 	};
 
-	/**
-	 * Gets the root element for this DarwinOP object (the body container)
-	 */
-	DarwinOP.prototype.getRootElement = function () {
-		//Return the body container
-		return this.components.body.container;
-	};
+	//We inherit from Object3D
+	DarwinOP.prototype = Object.create(THREE.Object3D.prototype);
 
 	/**
-	 * This method binds the robot's position and movement to the data model so
-	 * that updates to the data model update the robot's position and rotation
-	 */
+     * This method binds the robot's position and movement to the data model so
+     * that updates to the data model update the robot's position and rotation
+     */
 	DarwinOP.prototype.bindToData = function (data) {
 		var key, self, createCallbackForKey;
 
@@ -194,68 +190,66 @@
 
 		//Create a factory to make our callback functions
 		createCallbackForKey = function (key) {
-			data.robot.motors[key].angle.onUpdate(function (event) {
-				self.components[key].setAngle(event.detail.newValue);
+			data.motors[key].angle.onUpdate(function (event) {
+				self[key].setAngle(event.detail.newValue);
 			});
 		};
 
 		//Bind to all the motor angles
-		for (key in this.components) {
-			if (data.robot.motors[key] !== undefined) {
+		for (key in this) {
+			if (this.hasOwnProperty(key) && data.motors[key] !== undefined) {
 				createCallbackForKey(key);
 			}
 		}
 
-		//Bind to the localization position
-		data.robot.localization.position.onUpdate(function (event) {
-			self.components.body.setPosition(new THREE.Vector3(event.detail.newValue[0], 0, event.detail.newValue[1]));
+		//Bind to the localisation position
+		data.localisation.position.onUpdate(function (event) {
+			//self.setPosition(new THREE.Vector3(event.detail.newValue[0], 0, event.detail.newValue[1]));
+			self.position.x = event.detail.newValue[0];
+			self.position.z = event.detail.newValue[1];
 		});
 
-		//Bind to the localization angle
-		data.robot.localization.angle.onUpdate(function (event) {
-			self.components.body.setAngle(event.detail.newValue);
+		//Bind to the localisation angle
+		data.localisation.angle.onUpdate(function (event) {
+			//self.setAngle(event.detail.newValue);
+			self.rotation.y = event.detail.newValue;
 		});
 
 		//Bind to the orientation angle
-		data.robot.sensors.orientation.onUpdate(function (event) {
-			self.components.body.setRotation(new THREE.Vector3(event.detail.newValue[0], undefined, event.detail.newValue[1]));
+		data.sensors.orientation.onUpdate(function (event) {
+			//self.setRotation(new THREE.Vector3(event.detail.newValue[0], undefined, event.detail.newValue[1]));
+			self.rotation.x = event.detail.newValue[0];
+			self.rotation.y = event.detail.newValue[1];
 
-			//TODO calculate his vertical position and set the y position so that he is always touching the ground
-			//Should be some simple trig, he will rotate around body.baseOffset off the ground (until it goes upside down and he will be underground)
+		//TODO calculate his vertical position and set the y position so that he is always touching the ground
+		//Should be some simple trig, he will rotate around body.baseOffset off the ground (until it goes upside down and he will be underground)
 		});
 	};
 
 	/**
-	 * This constructs a new DarwinComponent which loads in the data for each
-	 * component and builds the hieracy of objects
-	 *
-	 * @param params an object containing the values
-	 *              parent (another darwin component [optional])
-	 *              url to load the component from,
-	 *              initial offset (all positions will use this offset)
-	 *              axisOfRotation a position that is used to set where this object rotates around
-	 *
-	 * @constructor
-	 */
+     * This constructs a new DarwinComponent which loads in the data for each
+     * component and builds the hieracy of objects
+     *
+     * @param params an object containing the values
+     *              url to load the component from,
+     *              initial offset (all positions will use this offset)
+     *              axisOfRotation a position that is used to set where this object rotates around
+     *
+     * @constructor
+     */
 	DarwinComponent = function (params) {
+		//Setup our variables
+		THREE.Object3D.call(this);
 
 		//Maintan scope
 		var self = this;
 
-		//Create our container
-		this.container = new THREE.Object3D();
-
 		//Store our rotation axis
 		this.rotationAxis = params.rotationAxis;
 
-		//Add ourselves to our parent (if it exists)
-		if (params.parent !== undefined) {
-			params.parent.container.add(this.container);
-		}
-
 		//Load this URL into our container
 		new THREE.JSONLoader().load(params.url, function (geom, materials) {
-			var material, mesh;
+			var mesh;
 
 			//Merge the verticies
 			geom.mergeVertices();
@@ -264,7 +258,7 @@
 			mesh = new THREE.Mesh(geom, new THREE.MeshFaceMaterial(materials));
 
 			//Add it to the appropriate container
-			self.container.add(mesh);
+			self.add(mesh);
 		});
 
 		//Try to get our base offsets
@@ -275,55 +269,58 @@
 		this.setAngle(0);
 	};
 
+	//We inherit from Object3D
+	DarwinComponent.prototype = Object.create(THREE.Object3D.prototype);
+
 	/**
-	 * Sets the rotation of this object in the defined axis of rotation
-	 *
-	 * @param angle the angle to set the motor at in radians
-	 */
+     * Sets the rotation of this object in the defined axis of rotation
+     *
+     * @param angle the angle to set the motor at in radians
+     */
 	DarwinComponent.prototype.setAngle = function (angle) {
 		switch (this.rotationAxis) {
 			case "x":
-				this.container.rotation.x = angle;
+				this.rotation.x = angle;
 				break;
 			case "y":
-				this.container.rotation.y = angle;
+				this.rotation.y = angle;
 				break;
 			case "z":
-				this.container.rotation.z = angle;
+				this.rotation.z = angle;
 				break;
 		}
 	};
 
 	/**
-	 * Sets the position of this object (taking into account the base position)
-	 *
-	 * @param pos the position to set (undefined will be left as is)
-	 */
+     * Sets the position of this object (taking into account the base position)
+     *
+     * @param pos the position to set (undefined will be left as is)
+     */
 	DarwinComponent.prototype.setPosition = function (pos) {
 		var x, y, z;
 
 		//Work out what our X Y and Z should be
-		x = pos.x === undefined ? this.container.position.x : pos.x + this.basePosition.x;
-		y = pos.y === undefined ? this.container.position.y : pos.y + this.basePosition.y;
-		z = pos.z === undefined ? this.container.position.z : pos.z + this.basePosition.z;
+		x = pos.x === undefined ? this.position.x : pos.x + this.basePosition.x;
+		y = pos.y === undefined ? this.position.y : pos.y + this.basePosition.y;
+		z = pos.z === undefined ? this.position.z : pos.z + this.basePosition.z;
 
-		this.container.position.set(x, y, z);
+		this.position.set(x, y, z);
 	};
 
 	/**
-	 * Sets the rotation of this object
-	 *
-	 * @param rot the rotation to set (undefined will be left as is)
-	 */
+     * Sets the rotation of this object
+     *
+     * @param rot the rotation to set (undefined will be left as is)
+     */
 	DarwinComponent.prototype.setRotation = function (rot) {
 		var x, y, z;
 
 		//Work out what our X Y and Z should be
-		x = rot.x === undefined ? this.container.rotation.x : rot.x;
-		y = rot.y === undefined ? this.container.rotation.y : rot.y;
-		z = rot.z === undefined ? this.container.rotation.z : rot.z;
+		x = rot.x === undefined ? this.rotation.x : rot.x;
+		y = rot.y === undefined ? this.rotation.y : rot.y;
+		z = rot.z === undefined ? this.rotation.z : rot.z;
 
-		this.container.rotation.set(x, y, z);
+		this.rotation.set(x, y, z);
 	};
 
 	//Export our DarwinOP model
