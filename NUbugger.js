@@ -7,36 +7,23 @@ function NUbugger (io) {
     self.io = io;
     self.robot = new Robot('10.0.1.54');
     self.robot.connect();
-    self.robot.on('error', function () {
-	
+    self.robot.on('error', function (e) {
+	console.log('error!', e);
     });
     
+    var count = 0;
+    setInterval(function () {
+	console.log('count', count);
+	count = 0;
+    }, 1000);
     self.io.sockets.on('connection', function (socket) {
 	
-//        var i = 1;
-//        setInterval(function () {
-//	    var buf = new Buffer([20,50,70]);
-//            socket.emit('camera_image', { message: i, image: buf.toString()});
-//            i++;
-//        }, 1000);
-        
-	//socket.emit('news', { hello: 'world', position: self.robot.getPosition() });
-	//socket.on('my other event', function (data) {
-	//	
-	//	console.log(data);
-	//	
-	//});
+	// TODO: make it one callback!?
 	
-	self.robot.on("state", function (event) {
+	self.robot.on("message", function (message) {
 	    
-	    socket.emit("state", event);
-	    
-	});
-	
-	self.robot.on("image", function (event) {
-	    
-	    console.log("image!");
-	    socket.emit("image", event);
+	    count++;
+	    socket.emit("message", message.toString('base64'));
 	    
 	});
         

@@ -37,8 +37,8 @@ Ext.define('NUbugger.view.Viewport', {
         items: [{
             xtype: 'window',
             title: 'Main Display',
-            x: 0,
-            y: 0,
+            x: 345,
+            y: 5,
             width: 800,
             height: 648,
             autoShow: true,
@@ -110,9 +110,28 @@ Ext.define('NUbugger.view.Viewport', {
             autoShow: false
         }, {
             xtype: 'window',
-            title: 'Highcharts',
-            width: 640,
-            height: 480,
+            title: 'Image Display',
+            x: 5,
+            y: 5,
+            width: 334,
+            height: 274,
+            autoShow: true,
+            constrain: true,
+            layout: 'fit',
+            items: [{
+                layout: 'fit',
+                //html: '<canvas id="image_display" style="width: 320px; height: 240px;"></div>'
+                //<img id="image_display" style="display: none; width: 320px; height: 240px; -webkit-transform: scaleX(-1); position: absolute;" />
+                html: '<canvas id="the_canvas" width="320" height="240"></canvas>'
+            }],
+            autoShow: true
+        }, {
+            xtype: 'window',
+            title: 'Chart Display',
+            width: 334,
+            height: 368,
+            x: 5,
+            y: 285,
             autoShow: true,
             layout: 'fit',
             items: [{
@@ -147,10 +166,16 @@ Ext.define('NUbugger.view.Viewport', {
                     yAxis: {
                         min: -1200,
                         max: 1200,
+                        title: {
+                            text: 'Proper Acceleration'
+                        }
                     },
                     xAxis: {
                         labels: {
                             enabled: false
+                        },
+                        title: {
+                            text: 'Time'
                         }
                     }
                 }

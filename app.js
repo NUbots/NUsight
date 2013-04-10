@@ -14,7 +14,7 @@ var server = http.createServer(app);
 
 app.configure(function () {
 	
-	app.set('port', 9090);
+	app.set('port', 9090, '10.0.1.126');
 	//app.set('views', __dirname + '/views');
 	//app.set('view engine', 'jade');
 	app.use(express.favicon());

@@ -31,10 +31,16 @@
     // static
     LocalisationVisualiser.localise = function (object, parameters) {
         
+        var newObject = new THREE.Object3D();
         var visualiser = new LocalisationVisualiser(parameters);
         
-        object.visualiser = visualiser;
-        object.add(visualiser);
+        newObject.visualiser = visualiser;
+        newObject.add(visualiser);
+        
+        newObject.object = object;
+        newObject.add(object);
+        
+        return newObject;
         
     }
     

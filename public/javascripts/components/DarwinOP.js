@@ -17,6 +17,8 @@
 	DarwinOP = function () {
 		//Call super constructor
 		THREE.Object3D.call(this);
+		
+		this.eulerOrder = "YZX"; // rotation doesn't work correctly otherwise, since the the robot uses yaw pitch roll
 
 		//Setup Body Container
 		this.body = new DarwinComponent({
@@ -24,6 +26,7 @@
 			baseOffset: new THREE.Vector3(0, 0.3422, 0),
 			rotationAxis: "y"
 		});
+		this.body.rotation.y = Math.PI/2;
 		this.add(this.body);
 
 		//Setup Head Containers
@@ -219,7 +222,7 @@
 		data.sensors.orientation.onUpdate(function (event) {
 			//self.setRotation(new THREE.Vector3(event.detail.newValue[0], undefined, event.detail.newValue[1]));
 			self.rotation.x = event.detail.newValue[0];
-			self.rotation.y = event.detail.newValue[1];
+			self.rotation.z = event.detail.newValue[1];
 
 		//TODO calculate his vertical position and set the y position so that he is always touching the ground
 		//Should be some simple trig, he will rotate around body.baseOffset off the ground (until it goes upside down and he will be underground)
@@ -227,16 +230,16 @@
 	};
 
 	/**
-     * This constructs a new DarwinComponent which loads in the data for each
-     * component and builds the hieracy of objects
-     *
-     * @param params an object containing the values
-     *              url to load the component from,
-     *              initial offset (all positions will use this offset)
-     *              axisOfRotation a position that is used to set where this object rotates around
-     *
-     * @constructor
-     */
+	 * This constructs a new DarwinComponent which loads in the data for each
+	 * component and builds the hieracy of objects
+	 *
+	 * @param params an object containing the values
+	 *              url to load the component from,
+	 *              initial offset (all positions will use this offset)
+	 *              axisOfRotation a position that is used to set where this object rotates around
+	 *
+	 * @constructor
+	 */
 	DarwinComponent = function (params) {
 		//Setup our variables
 		THREE.Object3D.call(this);
