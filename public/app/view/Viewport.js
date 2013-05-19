@@ -65,7 +65,7 @@ Ext.define('NUbugger.view.Viewport', {
                 handler: function () {
                     
                     var controls = this.findParentByType('window').getComponent('mainscene').controls;
-                    controls.yawObject.position.set(0, 3.5, 0);
+                    controls.yawObject.position.set(0, 3.5 * 100, 0);
                     controls.yawObject.rotation.set(0, 0, 0);
                     controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
                     
@@ -75,7 +75,7 @@ Ext.define('NUbugger.view.Viewport', {
                 handler: function () {
                     
                     var controls = this.findParentByType('window').getComponent('mainscene').controls;
-                    controls.yawObject.position.set(-3, 1.6, 3);
+                    controls.yawObject.position.set(-3 * 100, 1.6 * 100, 3 * 100);
                     controls.yawObject.rotation.set(0, -6.9, 0);
                     controls.pitchObject.rotation.set(-0.5, 0, 0);
                     
@@ -85,7 +85,7 @@ Ext.define('NUbugger.view.Viewport', {
                 handler: function () {
                     
                     var controls = this.findParentByType('window').getComponent('mainscene').controls;
-                    controls.yawObject.position.set(0, 1.9, -4.5);
+                    controls.yawObject.position.set(0, 1.9 * 100, -4.5 * 100);
                     controls.yawObject.rotation.set(0, Math.PI, 0);
                     controls.pitchObject.rotation.set(-0.6, 0, 0);
                     

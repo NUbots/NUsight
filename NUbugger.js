@@ -5,7 +5,7 @@ function NUbugger (io) {
     var self = this;
     
     self.io = io;
-    self.robot = new Robot('10.0.1.54');
+    self.robot = new Robot('10.0.1.51');
     self.robot.connect();
     self.robot.on('error', function (e) {
 	console.log('error!', e);

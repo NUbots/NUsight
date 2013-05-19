@@ -5,6 +5,7 @@
     var LocalisationVisualiser = function () {
         
         THREE.Circle.apply(this, arguments);
+        this.position.y = Math.random();
         
     };
     

@@ -36,7 +36,7 @@
         Ext.getCmp('mainscene')
             .setComponents(self.mainScene.scene, self.mainScene.renderer, self.mainScene.camera)
             .enableControls({
-                movementSpeed: 200/100
+                movementSpeed: 200
             })
             .on("animate", function () {
                 
@@ -44,7 +44,7 @@
                 
             });
             var controls = Ext.getCmp('mainscene').controls;
-            controls.yawObject.position.set(0, 3.5, 0);
+            controls.yawObject.position.set(0, 3.5 * 100, 0);
             controls.yawObject.rotation.set(0, 0, 0);
             controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
         
@@ -76,7 +76,7 @@
         var darwin, field, ball, camera, scene, renderer;
         
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.00001, 10000);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
         
         camera.lookAt(scene.position);
         
@@ -84,7 +84,6 @@
         //var DarwinModel = window.dm = Modeler.model(DataModel);
         darwin.bindToData(Data.robot);
         darwin = LocalisationVisualiser.localise(darwin);//, new THREE.Vector3(0, -0.343, 0)
-        darwin.position.y = 0.001;
         window.darwin = darwin;
         
         field = new Field();
@@ -106,7 +105,7 @@
         // green = y
         // blue = z
         //Axis array[x,y,z]
-        var axisLength = 4;
+        var axisLength = 4 * 100;
         
         var info = [[-axisLength,0,0,axisLength,0,0,0xff0000],[0,-axisLength,0,0,axisLength,0,0x00ff00],[0,0,-axisLength,0,0,axisLength,0x0000ff]];
         
@@ -161,7 +160,6 @@
         
         var count = 0;
         var last = Date.now();
-        var scale = 1 / 100;
         
         var socket = io.connect(document.location.origin);
         
@@ -280,35 +278,35 @@
                 // update robots position
                 
                 // local Z is robots negative Y
-                Data.robot.localisation.position.set([data.localisation.self.wmX * scale, -data.localisation.self.wmY * scale]);
+                Data.robot.localisation.position.set([data.localisation.self.wmX, -data.localisation.self.wmY]);
                 Data.robot.localisation.angle.set(data.localisation.self.heading + Math.PI / 2);
                 
                 //darwin.visualiser.rotation.x = -data.sensors.orientation[0];
                 darwin.visualiser.rotation.y = Math.PI / 2;
                 //darwin.visualiser.rotation.z = data.sensors.orientation[1];
-                darwin.visualiser.setWidth(data.localisation.self.sdX * scale);
-                darwin.visualiser.setHeight(data.localisation.self.sdY * scale);
+                darwin.visualiser.setWidth(data.localisation.self.sdX);
+                darwin.visualiser.setHeight(data.localisation.self.sdY);
                 
                 //circle.rotation.y = data.localisation.self.heading;
                 
                 // local Z is robots Y
-                //circle.position.x = data.localisation.self.wmX * scale;
-                //circle.position.z = data.localisation.self.wmY * scale;
+                //circle.position.x = data.localisation.self.wmX;
+                //circle.position.z = data.localisation.self.wmY;
                 
                 // local Z is robots Y
-                //circle.scale.x = data.localisation.self.sdX * scale * 2;
-                //circle.scale.z = data.localisation.self.sdY * scale * 2;
+                //circle.scale.x = data.localisation.self.sdX * 2;
+                //circle.scale.z = data.localisation.self.sdY * 2;
                 
                 // local Z is robots negative Y
-                ball.object.position.x = data.localisation.ball.X * scale;
-                ball.object.position.z = -data.localisation.ball.Y * scale;
+                ball.object.position.x = data.localisation.ball.X;
+                ball.object.position.z = -data.localisation.ball.Y;
                 
                 var result = CalculateErrorElipse(data.localisation.ball.srXX, data.localisation.ball.srXY, data.localisation.ball.srYY);
                 //console.log(result.x, result.y, result.angle);
-                //ball.visualiser.setWidth(result.x * scale);
-                //ball.visualiser.setHeight(result.y * scale);
-                ball.visualiser.scale.x = result.x * scale;
-                ball.visualiser.scale.z = result.y * scale;
+                //ball.visualiser.setWidth(result.x);
+                //ball.visualiser.setHeight(result.y);
+                ball.visualiser.scale.x = result.x;
+                ball.visualiser.scale.z = result.y;
                 ball.visualiser.rotation.y = result.angle;
             }
             
@@ -476,28 +474,28 @@
                         var api_ball = api_message.localisation.field_object[1];
                         
                         // local Z is robots negative Y
-                        darwin.position.x = api_self.wm_x * scale;
-                        darwin.position.z = -api_self.wm_y * scale;
+                        darwin.position.x = api_self.wm_x;
+                        darwin.position.z = -api_self.wm_y;
                         
                         Data.robot.localisation.angle.set(api_self.heading);
                         
                         //darwin.visualiser.rotation.x = -data.sensors.orientation[0];
                         darwin.visualiser.rotation.y = Math.PI / 2;
                         //darwin.visualiser.rotation.z = data.sensors.orientation[1];
-                        darwin.visualiser.setWidth(api_self.sd_x * scale);
-                        darwin.visualiser.setHeight(api_self.sd_y * scale);
+                        darwin.visualiser.setWidth(api_self.sd_x);
+                        darwin.visualiser.setHeight(api_self.sd_y);
                         
                         // local Z is robots negative Y
-                        ball.position.x = api_ball.wm_x * scale;
-                        ball.position.z = -api_ball.wm_y * scale;
+                        ball.position.x = api_ball.wm_x;
+                        ball.position.z = -api_ball.wm_y;
                         
                         var result = CalculateErrorElipse(api_ball.sr_xx, api_ball.sr_xy, api_ball.sr_yy);
                         //console.log(result.x, result.y, result.angle);
-                        //ball.visualiser.setWidth(result.x * scale);
-                        //ball.visualiser.setHeight(result.y * scale);
+                        //ball.visualiser.setWidth(result.x);
+                        //ball.visualiser.setHeight(result.y);
                         // local Z is robots negative Y
-                        ball.visualiser.scale.x = result.x * scale;
-                        ball.visualiser.scale.z = result.y * scale;
+                        ball.visualiser.scale.x = result.x;
+                        ball.visualiser.scale.z = result.y;
                         ball.visualiser.rotation.y = result.angle;
                         
                         break;

@@ -8,7 +8,7 @@
         
         this.resolution = 128;
         //this.scale.set(50, 1, 50);
-        this.scale.set(.5, 1, .5);
+        this.scale.set(.5*100, 1*100, .5*100);
         
         this.color = (parameters && parameters.color) || 0xff00ff;
         
@@ -29,6 +29,7 @@
         this.add(circle);
         
         material = new THREE.LineBasicMaterial({linewidth: 5, color: 0x0, opacity: 0.5, transparent: true})
+        geometry = new THREE.ShapeGeometry(shape);
         var line = new THREE.Line(geometry, material);
         line.position.set(0, 0.001, 0);
         line.rotation.set(-Math.PI/2, 0, 0);

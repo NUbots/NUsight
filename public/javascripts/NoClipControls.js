@@ -27,13 +27,13 @@
         
         this.pitchObject = new THREE.Object3D();
 	this.pitchObject.add(this.camera);
-        
-        this.light = new THREE.DirectionalLight( 0xffffff );
-        this.light.position.set(0, 0, 1);
-        this.pitchObject.add(this.light);
 
 	this.yawObject = new THREE.Object3D();
 	this.yawObject.add(this.pitchObject);
+        
+        this.light = new THREE.PointLight( 0xffffff );
+        //this.light.position.set(0, 0, 1);
+        this.yawObject.add(this.light);
         
         function addEventListener(element, event, listener) {
             

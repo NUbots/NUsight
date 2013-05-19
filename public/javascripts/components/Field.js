@@ -35,7 +35,7 @@
 		this.map = new FieldMap();
 
 		//Create a plane which is the size of the field (/100 because field is measured in centimeters while the 3d is in meters)
-		this.plane = new THREE.PlaneGeometry(this.map.canvas.width/100, this.map.canvas.height/100);
+		this.plane = new THREE.PlaneGeometry(this.map.canvas.width, this.map.canvas.height);
 		this.plane.overdraw = true;
 
 		//Create a new mesh which is made from this texture
