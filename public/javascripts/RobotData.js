@@ -3,7 +3,7 @@
  * data, the data is stored in magical javascript land). It just defines
  * the data model that the getters/setters are based off.
  */
-DataModel = {
+DarwinDataModel = {
 	motors: {
 		head: {
 			angle: 0,
@@ -92,7 +92,7 @@ DataModel = {
 		orientation: [0, 0],
 		battery: 0
 	},
-	localization: {
+	localisation: {
 		position: [0, 0],
 		angle: 0
 	}

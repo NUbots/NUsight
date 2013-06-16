@@ -60,66 +60,117 @@ API.VisionFieldObject = PROTO.Message("API.VisionFieldObject",{
 	Type: PROTO.Enum("API.VisionFieldObject.Type",{
 		CIRCLE :1,
 		RECTANGLE :2,
-		POLYGON :3	}),
+		POLYGON :3,
+		UNKNOWN :4	}),
 	type: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return API.VisionFieldObject.Type;},
 		id: 1
 	},
+	id: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 2
+	},
 	name: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return PROTO.string;},
-		id: 2
+		id: 3
 	},
 	visible: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return PROTO.bool;},
-		id: 3
+		id: 4
 	},
 	screen_x: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return PROTO.Float;},
-		id: 4
+		id: 5
 	},
 	screen_y: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return PROTO.Float;},
-		id: 5
+		id: 6
 	},
 	rotation: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return PROTO.Float;},
-		id: 6
+		id: 7
 	},
 	radius: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return PROTO.uint32;},
-		id: 7
+		id: 8
 	},
 	width: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return PROTO.uint32;},
-		id: 8
+		id: 9
 	},
 	height: {
 		options: {},
 		multiplicity: PROTO.optional,
 		type: function(){return PROTO.uint32;},
-		id: 9
+		id: 10
 	},
 	points: {
 		options: {},
 		multiplicity: PROTO.repeated,
 		type: function(){return PROTO.uint32;},
-		id: 10
+		id: 11
+	}});
+API.VisionClassifiedSegment = PROTO.Message("API.VisionClassifiedSegment",{
+	start_x: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 1
+	},
+	start_y: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 2
+	},
+	end_x: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 3
+	},
+	end_y: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 4
+	},
+	colour: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 5
+	}});
+API.VisionClassifiedImage = PROTO.Message("API.VisionClassifiedImage",{
+	num_segments: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 1
+	},
+	segment: {
+		options: {},
+		multiplicity: PROTO.repeated,
+		type: function(){return API.VisionClassifiedSegment;},
+		id: 2
 	}});
 API.Vision = PROTO.Message("API.Vision",{
 	image: {
@@ -133,6 +184,12 @@ API.Vision = PROTO.Message("API.Vision",{
 		multiplicity: PROTO.repeated,
 		type: function(){return API.VisionFieldObject;},
 		id: 2
+	},
+	classified_image: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return API.VisionClassifiedImage;},
+		id: 3
 	}});
 API.Motor = PROTO.Message("API.Motor",{
 	name: {

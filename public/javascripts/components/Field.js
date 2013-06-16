@@ -1,43 +1,42 @@
 (function (THREE) {
 	"use strict";
 
-	var Field, FieldMap, SCALE, FIELD_LENGTH, FIELD_WIDTH, GOAL_DEPTH, GOAL_WIDTH,
+	var Field, FieldMap, FIELD_LENGTH, FIELD_WIDTH, GOAL_DEPTH, GOAL_WIDTH,
 	GOAL_HEIGHT, GOAL_AREA_LENGTH, GOAL_AREA_WIDTH, PENALTY_MARK_DISTANCE,
 	PENALTY_MARK_LENGTH, CENTRE_CIRCLE_RADIUS, BORDER_STRIP_WIDTH, LINE_WIDTH,
 	POLE_RADIUS;
 
-	SCALE = 1;
-	FIELD_LENGTH = 600 * SCALE;
-	FIELD_WIDTH = 400 * SCALE;
-	GOAL_DEPTH = 50 * SCALE;
-	GOAL_WIDTH = 150 * SCALE;
-	GOAL_HEIGHT = 80 * SCALE;
-	GOAL_AREA_LENGTH = 60 * SCALE;
-	GOAL_AREA_WIDTH = 220 * SCALE;
-	PENALTY_MARK_DISTANCE = 180 * SCALE;
-	PENALTY_MARK_LENGTH = 10 * SCALE;
-	CENTRE_CIRCLE_RADIUS = 60 * SCALE;
-	BORDER_STRIP_WIDTH = 70 * SCALE;
-	LINE_WIDTH = 5 * SCALE;
-	POLE_RADIUS = 5 * SCALE;
+	FIELD_LENGTH = 600;
+	FIELD_WIDTH = 400;
+	GOAL_DEPTH = 50;
+	GOAL_WIDTH = 150;
+	GOAL_HEIGHT = 80;
+	GOAL_AREA_LENGTH = 60;
+	GOAL_AREA_WIDTH = 220;
+	PENALTY_MARK_DISTANCE = 180;
+	PENALTY_MARK_LENGTH = 10;
+	CENTRE_CIRCLE_RADIUS = 60;
+	BORDER_STRIP_WIDTH = 70;
+	LINE_WIDTH = 5;
+	POLE_RADIUS = 5;
 
 	Field = function () {
 		var tube, post, i;
-
+		
 		//Create a new container object
 		THREE.Object3D.call(this);
 		
 		this.field = new THREE.Object3D();
 		this.field.rotation.y = Math.PI / 2;
 		//this.field.rotation.x = Math.PI / 2;
-
+		
 		//Create the field
 		this.map = new FieldMap();
-
+		
 		//Create a plane which is the size of the field (/100 because field is measured in centimeters while the 3d is in meters)
 		this.plane = new THREE.PlaneGeometry(this.map.canvas.width, this.map.canvas.height);
 		this.plane.overdraw = true;
-
+		
 		//Create a new mesh which is made from this texture
 		this.ground = new THREE.Mesh(this.plane, new THREE.MeshBasicMaterial({
 			map: this.map.texture
@@ -45,40 +44,40 @@
 		this.ground.rotation.x = (3/2) * Math.PI;
 		//this.ground.position.x = this.map.canvas.width/200;
 		//this.ground.position.z = this.map.canvas.height/200;
-
+		
 		this.field.add(this.ground);
 		this.add(this.field);
-
+		
 		var splines = [];
 		//Build our Squircle spline
 		for(i = -Math.PI; i < Math.PI; i += Math.PI/180) {
 			var x = (1/(Math.pow(Math.pow(Math.tan(i), 20) + 1, 1/20)));
 			var y = (Math.pow(1 - Math.pow(x, 20), 1/20));
-
-			x *= GOAL_WIDTH/100;
-			y *= GOAL_HEIGHT/100;
-
+			
+			x *= GOAL_WIDTH;
+			y *= GOAL_HEIGHT;
+			
 			//console.log("x:" + x + " y:" + y);
-
+			
 			splines.push(new THREE.Vector3(x, y, 0));
 		}
-
+		
 		//Build the poles
 		post = new THREE.SplineCurve3([
 			new THREE.Vector3(0, 0, 0),
 			new THREE.Vector3(0, 0.8, 0),
 			new THREE.Vector3(1.8, 0.8, 0),
 			new THREE.Vector3(1.8, 0, 0),
-			]);
-
+		]);
+		
 		post = new THREE.SplineCurve3(splines);
-
-		tube = new THREE.TubeGeometry(post, 20, POLE_RADIUS/100, 12, false);
-
-		this.goals = new THREE.Mesh(tube, new THREE.MeshPhongMaterial({
-			color: 0x11BB11
+		
+		tube = new THREE.TubeGeometry(post, 20, POLE_RADIUS, 12, false);
+		
+		this.goals = new THREE.Mesh(tube, new THREE.MeshLambertMaterial({
+			color: 0xb9bb11
 		}));
-
+		
 		//this.field.add(this.goals);
 	};
 	

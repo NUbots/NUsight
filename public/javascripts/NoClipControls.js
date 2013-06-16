@@ -64,11 +64,12 @@
             addEventListener(document, 'mozpointerlockerror', this.pointerLockError);
             addEventListener(document, 'webkitpointerlockerror', this.pointerLockError);
             
-            
+            //window.document.requestFullscreen = this.domElement.mozRequestFullscreen || this.domElement.mozRequestFullScreen || this.domElement.webkitRequestFullscreen;
             this.domElement.requestPointerLock = this.domElement.requestPointerLock || this.domElement.mozRequestPointerLock || this.domElement.webkitRequestPointerLock;
             
             addEventListener('click', function () {
                 
+                //window.document.requestFullscreen();
                 this.domElement.requestPointerLock();
                 
             });

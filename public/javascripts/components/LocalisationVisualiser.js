@@ -5,9 +5,11 @@
     var LocalisationVisualiser = function () {
         
         THREE.Circle.apply(this, arguments);
-        this.position.y = Math.random();
+        this.position.y = (LocalisationVisualiser.initialY += 0.1); // keep the slightly apart
         
     };
+    
+    LocalisationVisualiser.initialY = 0.01;
     
     LocalisationVisualiser.prototype = Object.create(THREE.Circle.prototype);
     

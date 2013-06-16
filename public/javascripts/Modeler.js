@@ -274,4 +274,4 @@
 
 	//Export our Modeler to the world!
 	window.Modeler = Modeler;
-}(window.CustomEvent, window.document.implementation.createHTMLDocument()));
+}(window.CustomEvent, window.document));

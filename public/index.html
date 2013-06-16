@@ -8,16 +8,15 @@
         <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
         <meta http-equiv="pragma" content="no-cache" />
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
-        <link rel="stylesheet" type="text/css" href="/javascripts/ext-4.1.1a/resources/css/ext-all.css">
-        <script type="text/javascript" src="/javascripts/ext-4.1.1a/ext-all-dev.js"></script>
-        <script type="text/javascript" src="/javascripts/jquery-1.8.3.min.js"></script>
-        <script type="text/javascript" src="/javascripts/raphael-min.js"></script>
-        <script type="text/javascript" src="/javascripts/g.raphael-min.js"></script>
-        <script type="text/javascript" src="/javascripts/g.line-min.js"></script>
-        <script type="text/javascript" src="/javascripts/three.js"></script>
+        <link rel="stylesheet" type="text/css" href="/javascripts/lib/ext-4.1.1a/resources/css/ext-all-gray.css">
+        <script type="text/javascript" src="/javascripts/lib/ext-4.1.1a/ext-all-dev.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/jquery-1.8.3.min.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/raphael-min.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/g.raphael-min.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/g.line-min.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/three.js"></script>
         <script type="text/javascript" src="/javascripts/NoClipControls.js"></script>
         <script type="text/javascript" src="/javascripts/Modeler.js"></script>
-        <script type="text/javascript" src="/javascripts/Data.js"></script>
         <script type="text/javascript" src="/javascripts/components/Circle.js"></script>
         <script type="text/javascript" src="/javascripts/components/LocalisationVisualiser.js"></script>
         <script type="text/javascript" src="/javascripts/components/DarwinOP.js"></script>
@@ -25,14 +24,19 @@
         <script type="text/javascript" src="/javascripts/components/Ball.js"></script>
         <script type="text/javascript" src="/javascripts/RobotData.js"></script>
         <script type="text/javascript" src="/socket.io/socket.io.js"></script>
-        <script type="text/javascript" src="/javascripts/Highcharts-2.3.5/js/highcharts.src.js"></script>
-        <script type="text/javascript" src="/javascripts/Highcharts-2.3.5/js/highcharts-more.src.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/Highcharts-2.3.5/js/highcharts.src.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/Highcharts-2.3.5/js/highcharts-more.src.js"></script>
         <script type="text/javascript" src="/javascripts/app.js"></script>
-        <script type="text/javascript" src="/javascripts/ThreeJS_Sencha/ThreeJS.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/ThreeJS_Sencha/ThreeJS.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/NU_Sencha/Network.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/NU_Sencha/DisplayWindow.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/NU_Sencha/VisionWindow.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/NU_Sencha/FieldWindow.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/NU_Sencha/FieldWindow/Robot.js"></script>
         <script type="text/javascript" src="/javascripts/NUbugger.js"></script>
-        <script type="text/javascript" src="/javascripts/base64-binary.js"></script>
-        <script type="text/javascript" src="/javascripts/protobuf.js"></script>
-        <script type="text/javascript" src="/javascripts/pbj.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/base64-binary.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/protobuf.js"></script>
+        <script type="text/javascript" src="/javascripts/lib/pbj.js"></script>
         <script type="text/javascript" src="/javascripts/proto/NUAPI.proto.js"></script>
     </head>
     <body>
@@ -41,8 +45,15 @@
                 
                 "use strict";
                 
-                var NU = new NUbugger();
-                window.NU = NU;
+                Ext.application({
+                    name: 'NUbugger',
+                    autoCreateViewport: true,
+                    launch: function() {
+                        
+                        
+                        
+                    }
+                });
                 
             }());
         </script>

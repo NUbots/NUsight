@@ -18,6 +18,8 @@
 		//Call super constructor
 		THREE.Object3D.call(this);
 		
+		this.dataModel = null;
+		
 		this.eulerOrder = "YZX"; // rotation doesn't work correctly otherwise, since the the robot uses yaw pitch roll
 		this.scale.set(100,100,100);
 
@@ -186,7 +188,7 @@
      * This method binds the robot's position and movement to the data model so
      * that updates to the data model update the robot's position and rotation
      */
-	DarwinOP.prototype.bindToData = function (data) {
+	DarwinOP.prototype.bindToData = function (dataModel) {
 		var key, self, createCallbackForKey;
 
 		//Maintain context
@@ -194,33 +196,33 @@
 
 		//Create a factory to make our callback functions
 		createCallbackForKey = function (key) {
-			data.motors[key].angle.onUpdate(function (event) {
+			dataModel.motors[key].angle.onUpdate(function (event) {
 				self[key].setAngle(event.detail.newValue);
 			});
 		};
 
 		//Bind to all the motor angles
 		for (key in this) {
-			if (this.hasOwnProperty(key) && data.motors[key] !== undefined) {
+			if (this.hasOwnProperty(key) && dataModel.motors[key] !== undefined) {
 				createCallbackForKey(key);
 			}
 		}
 
 		//Bind to the localisation position
-		data.localisation.position.onUpdate(function (event) {
+		dataModel.localisation.position.onUpdate(function (event) {
 			//self.setPosition(new THREE.Vector3(event.detail.newValue[0], 0, event.detail.newValue[1]));
 			self.position.x = event.detail.newValue[0];
 			self.position.z = event.detail.newValue[1];
 		});
 
 		//Bind to the localisation angle
-		data.localisation.angle.onUpdate(function (event) {
+		dataModel.localisation.angle.onUpdate(function (event) {
 			//self.setAngle(event.detail.newValue);
 			self.rotation.y = event.detail.newValue;
 		});
 
 		//Bind to the orientation angle
-		data.sensors.orientation.onUpdate(function (event) {
+		dataModel.sensors.orientation.onUpdate(function (event) {
 			//self.setRotation(new THREE.Vector3(event.detail.newValue[0], undefined, event.detail.newValue[1]));
 			self.rotation.x = event.detail.newValue[0];
 			self.rotation.z = event.detail.newValue[1];
@@ -228,6 +230,8 @@
 		//TODO calculate his vertical position and set the y position so that he is always touching the ground
 		//Should be some simple trig, he will rotate around body.baseOffset off the ground (until it goes upside down and he will be underground)
 		});
+		
+		this.dataModel = dataModel;
 	};
 
 	/**

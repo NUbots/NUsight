@@ -14,15 +14,19 @@
         
         var self = this;
         
-        this.mainScene = null;
-        this.clock = new THREE.Clock();
+        /*self.network.on("vision", function () {
+            console.log('test');
+        });*/
+        
+        self.mainScene = null;
+        self.clock = new THREE.Clock();
         
         Ext.application({
             name: 'NUbugger',
             autoCreateViewport: true,
             launch: function() {
                 
-                self.init();
+                //self.init();
                 
             }
         });
@@ -48,7 +52,7 @@
             controls.yawObject.rotation.set(0, 0, 0);
             controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
         
-        self.setupSocket();
+        //self.setupSocket();
         
         //var r = window.r = Raphael('graph_display');
         //
@@ -89,7 +93,7 @@
         field = new Field();
         ball = new Ball();
         ball = LocalisationVisualiser.localise(ball, {color: 0x0000ff});
-        ball.position.z = 0.2;
+        ball.position.x = 20;
         window.ball = ball;
         
         scene.add(darwin);
@@ -107,7 +111,7 @@
         //Axis array[x,y,z]
         var axisLength = 4 * 100;
         
-        var info = [[-axisLength,0,0,axisLength,0,0,0xff0000],[0,-axisLength,0,0,axisLength,0,0x00ff00],[0,0,-axisLength,0,0,axisLength,0x0000ff]];
+        var info = [[-axisLength, 0, 0, axisLength, 0, 0, 0xff0000], [0, -axisLength ,0 , 0, axisLength, 0, 0x00ff00], [0, 0, -axisLength, 0, 0, axisLength, 0x0000ff]];
         
         //Draw some helpfull axis
         for (var i = 0; i < 3; i++) {
@@ -157,6 +161,10 @@
     }
     
     NUbugger.prototype.setupSocket = function () {
+        
+        var self;
+        
+        self = this;
         
         var count = 0;
         var last = Date.now();
@@ -325,10 +333,17 @@
         var last = Date.now();
         var renderering = false;
         setInterval(function () {
-            console.log('count', count);
+            //console.log('count', count);
             count = 0;
         }, 1000);
-        socket.on('message', function (message) {
+        socket.on('message', function (robotIP, message) {
+            var api_message = new API.Message;
+            var array = Base64Binary.decodeArrayBuffer(message);
+            var stream = new PROTO.ArrayBufferStream(array, array.byteLength);
+            self.onMessage(robotIP, api_message);
+            if (robotIP != self.selectedRobotIP) {
+                return; // filter data which isn't selected!
+            }
             //console.log('message');
             //count++;
             //return;
@@ -350,7 +365,7 @@
                         var orientation = vectorToArray(api_sensor_data.orientation, "float");
                         Data.robot.sensors.orientation.set([orientation[0], -orientation[1]]);
                         
-                        var chart = window.chart = Ext.getCmp('main_chart');
+                        /*var chart = window.chart = Ext.getCmp('main_chart');
                         if (chart && Date.now() - last > 250 && count % 200 <= 80) {
                             //console.log(count, count / 100, count / 100 <= 0.4);
                             var accelerometer = vectorToArray(api_sensor_data.accelerometer, "float");
@@ -364,7 +379,7 @@
                                 chart.store.data.removeAt(0);
                             }
                             last = Date.now();
-                        }
+                        }*/
                         
                         // head
                         motors.head.angle.set(api_motor_data[0].position);
@@ -408,64 +423,220 @@
                         //console.log(Date.now()-((api_message.utc_timestamp.lsw - (60 * 30)) * 1000));
                         var image = api_message.vision.image;
                         
-                        var a = new Uint8Array(image.data.length);
-                
-                        for (var i = 0; i < image.data.length; i++) {
-                            a[i] = image.data[i];
-                        }
-                        
-                        var b = new Blob([a], {type: 'image/jpeg'});
-                        var u = URL.createObjectURL(b);
-                        var img = document.getElementById('image_display');
-                        //img.src = u;
-                        
-                        var api_ball = api_message.vision.field_object[0];
-                        var api_goal_yellow_left = api_message.vision.field_object[1];
-                        
-                        var field_objects = api_message.vision.field_object;
-                        for (var i = 0; i < field_objects.length; i++) {
-                            if (field_objects[i].visible) {
-                                //console.log(field_objects[i].name);
+                        if (image !== undefined) {
+                            var a = new Uint8Array(image.data.length);
+                    
+                            for (var i = 0; i < image.data.length; i++) {
+                                a[i] = image.data[i];
                             }
+                            
+                            var b = new Blob([a], {type: 'image/jpeg'});
+                            var u = URL.createObjectURL(b);
+                            var img = document.getElementById('image_display');
+                            //img.src = u;
+                        
+                            var api_ball = api_message.vision.field_object[0];
+                            var api_goals = [];
+                            var api_obstacles = [];
+                            
+                            var field_objects = api_message.vision.field_object;
+                            for (var i = 0; i < field_objects.length; i++) {
+                                var obj = field_objects[i];
+                                if (obj.visible) {
+                                    if (obj.name == "Unknown Yellow Post"
+                                        ||
+                                        obj.name == "Left Yellow Post"
+                                        ||
+                                        obj.name == "Right Yellow Post"
+                                    ) {
+                                        api_goals.push(obj); // TODO: mark type
+                                    } else if (obj.name == "Unknown Obstacle") {
+                                        api_obstacles.push(obj);
+                                    }
+                                }
+                            }
+                            
+                            var c = document.getElementById("the_canvas");
+                            //c.width = 320;
+                            //c.height = 240;
+                            var con = c.getContext('2d');
+                            
+                            var imageObj = new Image();
+                            imageObj.onload = function() {
+                                con.drawImage(this, 0, 0, c.width, c.height);
+                                
+                                if (api_ball.visible) {
+                                    con.beginPath();
+                                    
+                                    
+                                    con.shadowColor = 'black';
+                                    con.shadowBlur = 5;
+                                    con.shadowOffsetX = 0;
+                                    con.shadowOffsetY = 0;
+                                    
+                                    con.arc(api_ball.screen_x, api_ball.screen_y, api_ball.radius, 0, Math.PI*2, true);
+                                    con.closePath();
+                                    //con.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
+                                    //con.fill();
+                                    con.strokeStyle = "rgba(255, 255, 255, 1)";
+                                    con.lineWidth = 2;
+                                    con.lineWidth = 2;
+                                    
+                                    con.stroke();
+                                };
+                                
+                                jQuery.each(api_goals, function (i, goal) {
+                                    
+                                    var topLeftX = goal.screen_x - (goal.width / 2);
+                                    var topLeftY = goal.screen_y - goal.height;
+                                    
+                                    con.beginPath();
+                                    
+                                    con.moveTo(topLeftX, topLeftY);
+                                    con.lineTo(topLeftX + goal.width, topLeftY);
+                                    con.lineTo(topLeftX + goal.width, topLeftY + goal.height);
+                                    con.lineTo(topLeftX, topLeftY + goal.height);
+                                    con.lineTo(topLeftX, topLeftY);
+                                    
+                                    con.shadowColor = 'black';
+                                    con.shadowBlur = 5;
+                                    con.shadowOffsetX = 0;
+                                    con.shadowOffsetY = 0;
+                                    
+                                    con.fillStyle = "rgba(255, 242, 0, 0.2)";
+                                    con.fill();
+                                    
+                                    con.strokeStyle = "rgba(255, 242, 0, 1)";
+                                    con.lineWidth = 2;
+                                    con.lineWidth = 2;
+                                    
+                                    con.stroke();
+                                    
+                                });
+                                
+                                jQuery.each(api_obstacles, function (i, obstacle) {
+                                    
+                                    var topLeftX = obstacle.screen_x - (obstacle.width / 2);
+                                    var topLeftY = 0;//obstacle.screen_y - obstacle.height; // TODO: waiting for shannon to fix height on obstacles
+                                    
+                                    con.beginPath();
+                                    
+                                    con.moveTo(topLeftX, topLeftY);
+                                    con.lineTo(topLeftX + obstacle.width, topLeftY);
+                                    con.lineTo(topLeftX + obstacle.width, obstacle.screen_y);
+                                    con.lineTo(topLeftX, obstacle.screen_y);
+                                    con.lineTo(topLeftX, topLeftY);
+                                    
+                                    con.shadowColor = 'black';
+                                    con.shadowBlur = 5;
+                                    con.shadowOffsetX = 0;
+                                    con.shadowOffsetY = 0;
+                                    
+                                    con.fillStyle = "rgba(255, 255, 255, 0.2)";
+                                    con.fill();
+                                    
+                                    con.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                                    con.lineWidth = 2;
+                                    con.lineWidth = 2;
+                                    
+                                    con.stroke();
+                                    
+                                });
+                                
+                                /*
+                                glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2); //TOP LEFT
+                                glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2); //TOP RIGHT
+                                glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM RIGHT
+                                glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM LEFT*/
+                                //con.clearRect(0, 0, 320, 240);
+                            }
+                            imageObj.src = u;
+                            
                         }
                         
-                        var c = document.getElementById("the_canvas");
-                        //c.width = 320;
-                        //c.height = 240;
-                        var con = c.getContext('2d');
+                        var c2 = document.getElementById("the_classified_canvas");
+                        var con2 = c2.getContext('2d');
+                        //con2.webkitImageSmoothingEnabled = false;
+                        con2.translate(0.5, 0.5); // antialiasing hack
                         
-                        var imageObj = new Image();
-                        imageObj.onload = function() {
-                            con.drawImage(this, 0, 0, c.width, c.height);
+                        //con2.clearRect(0, 0, con2.width, con2.height);
+                        con2.fillStyle="black";
+                        con2.fillRect(0, 0, 320, 240);
+                        
+                        var api_classified_image = api_message.vision.classified_image;
+                        var api_segments  = api_classified_image.segment;
+                        for (var i = 0; i < api_segments.length; i++) {
+                            var segment = api_segments[i];
+                            var colour;
+                            con2.beginPath();
                             
-                            if (api_ball.visible) {
-                                con.beginPath();
-                                
-                                
-                                con.shadowColor = 'black';
-                                con.shadowBlur = 5;
-                                con.shadowOffsetX = 0;
-                                con.shadowOffsetY = 0;
-                                
-                                con.arc(api_ball.screen_x, api_ball.screen_y, api_ball.radius, 0, Math.PI*2, true);
-                                con.closePath();
-                                //con.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
-                                //con.fill();
-                                con.strokeStyle = "rgba(255, 255, 255, 1)";
-                                con.lineWidth = 2;
-                                con.lineWidth = 2;
-                                
-                                con.stroke();
-                            };
+                            con2.moveTo(segment.start_x, segment.start_y);
+                            con2.lineTo(segment.end_x, segment.end_y);
+                            
+                            // TODO: make this less horrific
+                            switch (segment.colour)
+                            {
+                            case 0:
+                                colour = "rgba(0,0,0,1)";
+                                break;
+                            case 1:
+                                colour = "rgba(255,255,255,1)";
+                                break;
+                            case 2:
+                                colour = "rgba(0,255,0,1)";
+                                break;
+                            case 3:
+                                colour = "rgba(168,168,168,1)";
+                                break;
+                            case 4:
+                                colour = "rgba(255,20,127,1)";
+                                break;
+                            case 5:
+                                colour = "rgba(255,128,128,1)";
+                                break;
+                            case 6:
+                                colour = "rgba(255,165,0,1)";
+                                break;
+                            case 7:
+                                colour = "rgba(238,219,83,1)";
+                                break;
+                            case 8:
+                                colour = "rgba(255,255,0,1)";
+                                break;
+                            case 9:
+                                colour = "rgba(0,0,255,1)";
+                                break;
+                            case 10:
+                                colour = "rgba(25,25,112,1)";
+                                break;
+                            default:
+                                colour = "rgba(0,0,0,1)";
+                            }
+                            con2.lineWidth = 1;
+                            con2.strokeStyle = colour;
+                            //con2.strokeStyle = "rgba(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", 0.5)";
+                            con2.stroke();
                             
                             /*
-                            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2); //TOP LEFT
-                            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2); //TOP RIGHT
-                            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM RIGHT
-                            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM LEFT*/
-                            //con.clearRect(0, 0, 320, 240);
+                            
+                            colours:
+                             
+                            case unclassified:  RGB(0,0,0);
+                            case white:         RGB(255,255,255);
+                            case green:         RGB(0,255,0);
+                            case shadow_object: RGB(168,168,168);
+                            case pink:          RGB(255,20,127);
+                            case pink_orange:   RGB(255,128,128);
+                            case orange:        RGB(255,165,0);
+                            case yellow_orange: RGB(238,219,83);
+                            case yellow:        RGB(255,255,0);
+                            case blue:          RGB(0,0,255);
+                            case shadow_blue:   RGB(25,25,112);
+                            default:            RGB(0,0,0);
+                            
+                            */
                         }
-                        imageObj.src = u;
+                        con2.translate(-0.5, -0.5); // antialiasing hack
                         
                         break;
                     case API.Message.Type.LOCALISATION:
@@ -537,6 +708,12 @@
         });
         
     }
+    
+    NUbugger.prototype.onMessage = function (robotIP, api_message) {
+        
+        //self.emit(api_message.type, robotIP, api_message);
+        
+    };
     
     window.NUbugger = NUbugger;
     

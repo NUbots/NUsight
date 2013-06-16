@@ -8,7 +8,7 @@
 	var Ball, RADIUS, COLOR;
 
 	//The radius and Color constants
-	RADIUS = 0.0335;
+	RADIUS = 0.0335 * 100;
 	COLOR = 0xFFA500;
 
 	/**
@@ -23,10 +23,10 @@
 		THREE.Object3D.call(this);
 
 		//Create a sphere
-		sphere = new THREE.SphereGeometry(RADIUS, 24, 24);
+		sphere = new THREE.SphereGeometry(RADIUS, 42, 42);
 
 		//Create the mesh
-		mesh = new THREE.Mesh(sphere, new THREE.MeshPhongMaterial({
+		mesh = new THREE.Mesh(sphere, new THREE.MeshLambertMaterial({
 			color: COLOR
 		}));
 

@@ -3,7 +3,7 @@ Ext.Loader.setConfig({
   disableCaching : true, // For debug only
   paths : {
     // 'Chart' : HOME + '/highcharts_extjs4'     // For website
-    'Chart' : 'javascripts/Highcharts_Sencha/Chart'
+    'Chart' : 'javascripts/lib/Highcharts_Sencha/Chart'
   }
 });
 

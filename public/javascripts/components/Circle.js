@@ -25,14 +25,14 @@
         var material = new THREE.MeshBasicMaterial({color: this.color, opacity: 0.5, transparent: true})
         var circle = new THREE.Mesh(geometry, material);
         circle.position.set(0, 0.001, 0);
-        circle.rotation.set(-Math.PI/2, 0, 0);
+        circle.rotation.set(-Math.PI / 2, 0, 0);
         this.add(circle);
         
-        material = new THREE.LineBasicMaterial({linewidth: 5, color: 0x0, opacity: 0.5, transparent: true})
+        material = new THREE.LineBasicMaterial({color: 0x0, opacity: 0.5, transparent: true})
         geometry = new THREE.ShapeGeometry(shape);
         var line = new THREE.Line(geometry, material);
         line.position.set(0, 0.001, 0);
-        line.rotation.set(-Math.PI/2, 0, 0);
+        line.rotation.set(-Math.PI / 2, 0, 0);
         this.add(line);
         
     };
@@ -46,6 +46,7 @@
             var y = Math.sin(theta);
             shape.lineTo(x, y);
         }
+        //shape.closePath();
         return shape;
     };
     
