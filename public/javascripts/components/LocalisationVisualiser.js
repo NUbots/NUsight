@@ -32,7 +32,7 @@
     };
     
     // static
-    LocalisationVisualiser.localise = function (object, parameters) {
+    LocalisationVisualiser.visualise = function (object, parameters) {
         
         var newObject = new THREE.Object3D();
         var visualiser = new LocalisationVisualiser(parameters);
@@ -40,7 +40,7 @@
         newObject.visualiser = visualiser;
         newObject.add(visualiser);
         
-        newObject.object = object;
+        newObject.object = object.object || object;
         newObject.add(object);
         
         return newObject;

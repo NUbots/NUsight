@@ -222,10 +222,18 @@
 		});
 
 		//Bind to the orientation angle
-		dataModel.sensors.orientation.onUpdate(function (event) {
+		dataModel.sensors.orientation[0].onUpdate(function (event) {
 			//self.setRotation(new THREE.Vector3(event.detail.newValue[0], undefined, event.detail.newValue[1]));
-			self.rotation.x = event.detail.newValue[0];
-			self.rotation.z = event.detail.newValue[1];
+			self.rotation.x = event.detail.newValue;
+
+		//TODO calculate his vertical position and set the y position so that he is always touching the ground
+		//Should be some simple trig, he will rotate around body.baseOffset off the ground (until it goes upside down and he will be underground)
+		});
+		
+		//Bind to the orientation angle
+		dataModel.sensors.orientation[1].onUpdate(function (event) {
+			//self.setRotation(new THREE.Vector3(event.detail.newValue[0], undefined, event.detail.newValue[1]));
+			self.rotation.z = event.detail.newValue;
 
 		//TODO calculate his vertical position and set the y position so that he is always touching the ground
 		//Should be some simple trig, he will rotate around body.baseOffset off the ground (until it goes upside down and he will be underground)

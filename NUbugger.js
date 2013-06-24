@@ -1,4 +1,5 @@
 var Robot = require('./Robot');
+var Client = require('./Client');
 var fs = require('fs');
 var util = require('util');
 var events = require('events');
@@ -11,18 +12,20 @@ function NUbugger (io) {
 	self.robots = [];
 	self.robotIPs = [];
 	self.addRobots([
-		'10.0.1.51',
-		'10.0.1.52',
-		'10.0.1.53',
-		'10.0.1.54',
-		'10.0.1.55',
-		'10.0.1.56'
+		'145.144.174.186',
+		'10.0.1.42',
+		'10.0.1.43',
+		'10.0.1.44',
+		'10.0.1.45',
+		'10.0.1.46'
 	]);
 	self.clients = [];
 	
 	self.io.sockets.on('connection', function (socket) {
-	
-		self.clients.push(socket);
+		
+		var client = new Client(socket);
+		
+		self.clients.push(client);
 		
 		socket.emit('robot_ips', self.robotIPs);
 		
@@ -30,7 +33,7 @@ function NUbugger (io) {
 		
 		socket.on('disconnect', function () {
 			
-			self.clients.splice(self.clients.indexOf(socket), 1);
+			self.clients.splice(self.clients.indexOf(client), 1);
 			
 			console.log('lost client', self.clients.length);
 			
@@ -83,7 +86,7 @@ NUbugger.prototype.onMessage = function (robotIP, message)
 	
 	//console.log(robotIP, message.length);
 	//var timestamp = Date.now();
-	var filename = "data.log";
+	var filename = "c:/Users/Brendan/Documents/data.log";
 	
 	//fs.appendFile(filename, message.toString('base64') + "\n");
 	
@@ -91,7 +94,7 @@ NUbugger.prototype.onMessage = function (robotIP, message)
 	
 		//console.log(client);
 		
-		client.emit('message', robotIP, message.toString('base64'));
+		client.socket.emit('message', robotIP, message.toString('base64'));
 	
 	});
 	

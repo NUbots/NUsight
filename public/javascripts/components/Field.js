@@ -119,8 +119,11 @@
 		context.strokeRect(BORDER_STRIP_WIDTH + ((FIELD_WIDTH - GOAL_AREA_WIDTH) / 2), BORDER_STRIP_WIDTH + FIELD_LENGTH - GOAL_AREA_LENGTH, GOAL_AREA_WIDTH, GOAL_AREA_LENGTH);
 
 		//Draw the two goal boxes
+		context.strokeStyle = '#0000FF';
 		context.strokeRect(BORDER_STRIP_WIDTH + ((FIELD_WIDTH - GOAL_WIDTH)/2), BORDER_STRIP_WIDTH - GOAL_DEPTH, GOAL_WIDTH, GOAL_DEPTH);
+		context.strokeStyle = '#FFFF00';
 		context.strokeRect(BORDER_STRIP_WIDTH + ((FIELD_WIDTH - GOAL_WIDTH)/2), BORDER_STRIP_WIDTH + FIELD_LENGTH, GOAL_WIDTH, GOAL_DEPTH);
+		context.strokeStyle = '#FFF';
 
 		//Draw the three crosses
 		context.beginPath();

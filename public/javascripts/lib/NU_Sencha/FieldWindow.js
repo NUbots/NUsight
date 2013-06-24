@@ -3,8 +3,8 @@ Ext.define('Ext.ux.NU.FieldWindow', {
 	alias : ['widget.nu.field_window'],
 	title: 'Localisation Display',
 	autoShow: true,
-	width: 1400,//800,
-	height: 800,
+	width: 800,//800,
+	height: 400,
     layout: 'fit',
 	mainScene: null,
 	robots: [],
@@ -47,7 +47,7 @@ Ext.define('Ext.ux.NU.FieldWindow', {
 	constructor: function () {
 		
 		NU.Network.on('robot_ips', Ext.bind(this.onRobotIPs, this));
-		NU.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
+		//NU.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
 		NU.Network.on('localisation', Ext.bind(this.onLocalisation, this));
 		
 		this.callParent(arguments);
@@ -85,19 +85,20 @@ Ext.define('Ext.ux.NU.FieldWindow', {
 			
 			//robot.darwinModel.traverse( function ( object ) { object.visible = false; } );
 			this.mainScene.scene.add(robot.darwinModel);
-			robot.darwinModel.position.x = Math.random() * 800 - 400;
-			robot.darwinModel.position.z = Math.random() * 400 - 200;
-			robot.darwinModel.visualiser.scale.x = Math.random() * 50;
-			robot.darwinModel.visualiser.scale.y = Math.random() * 50;
-			robot.darwinModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
-			robot.darwinModel.object.dataModel.localisation.angle.set(Math.random() * 2 * Math.PI);
+			//robot.darwinModel.position.x = Math.random() * 800 - 400;
+			//robot.darwinModel.position.z = Math.random() * 400 - 200;
+			//robot.darwinModel.visualiser.scale.x = Math.random() * 50;
+			//robot.darwinModel.visualiser.scale.y = Math.random() * 50;
+			//robot.darwinModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
+			//robot.darwinModel.object.dataModel.localisation.angle.set(Math.random() * 2 * Math.PI);
+			//robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
 			//robot.ballModel.traverse( function ( object ) { object.visible = false; } );
 			this.mainScene.scene.add(robot.ballModel);
-			robot.ballModel.position.x = Math.random() * 800 - 400;
-			robot.ballModel.position.z = Math.random() * 400 - 200;
-			robot.ballModel.visualiser.scale.x = Math.random() * 10;
-			robot.ballModel.visualiser.scale.y = Math.random() * 10;
-			robot.ballModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
+			//robot.ballModel.position.x = Math.random() * 800 - 400;
+			//robot.ballModel.position.z = Math.random() * 400 - 200;
+			//robot.ballModel.visualiser.scale.x = Math.random() * 10;
+			//robot.ballModel.visualiser.scale.y = Math.random() * 10;
+			//robot.ballModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
 			this.robots.push(robot);
 			
 		}, this);

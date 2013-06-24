@@ -127,6 +127,12 @@ API.VisionFieldObject = PROTO.Message("API.VisionFieldObject",{
 		multiplicity: PROTO.repeated,
 		type: function(){return PROTO.uint32;},
 		id: 11
+	},
+	measured_relative_position: {
+		options: {},
+		multiplicity: PROTO.repeated,
+		type: function(){return PROTO.Float;},
+		id: 12
 	}});
 API.VisionClassifiedSegment = PROTO.Message("API.VisionClassifiedSegment",{
 	start_x: {

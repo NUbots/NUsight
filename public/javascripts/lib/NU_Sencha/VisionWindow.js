@@ -3,7 +3,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 	alias : ['widget.nu.vision_window'],
 	autoShow: true,
 	title: 'Vision Display',
-	width: 330,
+	width: 410,
 	height: 295,
 	canvas: null,
 	context: null,
@@ -13,8 +13,12 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 		preserveRatio: true
 	},
 	lastDraw: 0,
-	items: {
+	layout: 'border',
+	items: [{
 		xtype: 'component',
+		region: 'center',
+		width: 320,
+		height: 240,
 		autoEl: {
 			tag: 'canvas',
 			width: 320,
@@ -22,7 +26,12 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 		},
 		itemId: 'canvas',
 		layout: 'fit'
-	},
+	}, {
+		xtype: 'panel',
+		region: 'east',
+		width: 80,
+		itemId: 'varDisplay'
+	}],
 	constructor: function () {
 		
 		NU.Network.on('vision', Ext.bind(this.onVision, this));
@@ -33,6 +42,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 	listeners: {
 		afterRender: function () {
 			
+			this.varDisplay = this.down('#varDisplay');
 			this.canvas = this.down('#canvas');
 			this.context = this.canvas.el.dom.getContext('2d');
 			//this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
@@ -51,7 +61,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			return;
 		}
 		
-		if (Date.now() <= this.lastDraw + 200)
+		if (Date.now() <= this.lastDraw + 3000)
 		{
 			return;
 		}
@@ -157,6 +167,9 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			this.context.lineWidth = 2;
 			this.context.lineWidth = 2;
 			this.context.stroke();
+			
+			var position = api_ball.measured_relative_position;
+			this.varDisplay.update(position[0] + "<br>" + position[1] + "<br>" + position[2]);
 		};
 		
 		Ext.each(api_goals, function (goal) {

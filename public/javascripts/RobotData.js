@@ -13,11 +13,11 @@ DarwinDataModel = {
 			angle: 0,
 			temperature: 0
 		},
-		leftSholder: {
+		leftShoulder: {
 			angle: 0,
 			temperature: 0
 		},
-		rightSholder: {
+		rightShoulder: {
 			angle: 0,
 			temperature: 0
 		},

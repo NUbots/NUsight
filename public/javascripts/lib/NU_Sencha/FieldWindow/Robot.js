@@ -14,11 +14,12 @@ Ext.define('NU.FieldWindow.Robot', {
 		darwin = new DarwinOP();
 		var DarwinModel = Modeler.model(DarwinDataModel);
         darwin.bindToData(DarwinModel);
-        darwin = LocalisationVisualiser.localise(darwin);
+        darwin = LocalisationVisualiser.visualise(darwin);
+        darwin = BehaviourVisualiser.visualise(darwin);
         
         field = new Field();
         ball = new Ball();
-        ball = LocalisationVisualiser.localise(ball, {color: 0x0000ff});
+        ball = LocalisationVisualiser.visualise(ball, {color: 0x0000ff});
         ball.position.x = 20;
 		
 		this.darwinModel = darwin;
@@ -29,11 +30,14 @@ Ext.define('NU.FieldWindow.Robot', {
 	},
 	onSensorData: function (api_sensor_data) {
 		
-		var motors = Data.robot.motors;
+		var darwin = this.darwinModel;
+		var dataModel = darwin.object.dataModel;
+		var motors = dataModel.motors;
 		var api_motor_data = api_sensor_data.motor;
 		
 		var orientation = this.vectorToArray(api_sensor_data.orientation, "float");
-		Data.robot.sensors.orientation.set([orientation[0], -orientation[1]]);
+		dataModel.sensors.orientation[0].set(orientation[0]);
+		dataModel.sensors.orientation[1].set(-orientation[1]);
 		
 		/*var chart = window.chart = Ext.getCmp('main_chart');
 		if (chart && Date.now() - last > 250 && count % 200 <= 80) {
@@ -92,6 +96,7 @@ Ext.define('NU.FieldWindow.Robot', {
 		
 		var ball = this.ballModel;
 		var darwin = this.darwinModel;
+		var dataModel = darwin.object.dataModel;
 		var api_self = api_localisation.field_object[0];
 		var api_ball = api_localisation.field_object[1];
 		
@@ -99,7 +104,7 @@ Ext.define('NU.FieldWindow.Robot', {
 		darwin.position.x = api_self.wm_x;
 		darwin.position.z = -api_self.wm_y;
 		
-		Data.robot.localisation.angle.set(api_self.heading);
+		dataModel.localisation.angle.set(api_self.heading);
 		
 		//darwin.visualiser.rotation.x = -data.sensors.orientation[0];
 		darwin.visualiser.rotation.y = Math.PI / 2;
@@ -119,9 +124,6 @@ Ext.define('NU.FieldWindow.Robot', {
 		ball.visualiser.scale.x = result.x;
 		ball.visualiser.scale.z = result.y;
 		ball.visualiser.rotation.y = result.angle;
-		
-		darwin.traverse( function ( object ) { object.visible = true; } );
-		ball.traverse( function ( object ) { object.visible = true; } );
 		
 	},
 	vectorToArray: function (vector, type) {

@@ -47,37 +47,37 @@ Ext.define('NUbugger.view.Viewport', {
                 Ext.getCmp('main_display').add([
                     new Ext.ux.NU.VisionWindow({
                         x: 5,
-                        y: 810,
+                        y: 1124,//810,
                         robotIP: '10.0.1.51',
                         renderTo: renderTo
                     }),
                     new Ext.ux.NU.VisionWindow({
                         x: 340,
-                        y: 810,
+                        y: 1124,////810,
                         robotIP: '10.0.1.52',
                         renderTo: renderTo
                     }),
                     new Ext.ux.NU.VisionWindow({
                         x: 675,
-                        y: 810,
+                        y: 1124,//810,
                         robotIP: '10.0.1.53',
                         renderTo: renderTo
                     }),
                     new Ext.ux.NU.VisionWindow({
                         x: 1010,
-                        y: 810,
+                        y: 1124,//810,
                         robotIP: '10.0.1.54',
                         renderTo: renderTo
                     }),
                     new Ext.ux.NU.VisionWindow({
                         x: 1345,
-                        y: 810,
+                        y: 1124,//810,
                         robotIP: '10.0.1.55',
                         renderTo: renderTo
                     }),
                     new Ext.ux.NU.VisionWindow({
                         x: 1680,
-                        y: 810,
+                        y: 1124,//810,
                         robotIP: '10.0.1.56',
                         renderTo: renderTo
                     }),
