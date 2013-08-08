@@ -79,7 +79,7 @@
     NoClipControls.prototype.getObject = function () {
         
         return this.yawObject;
-          
+        
     };
     
     NoClipControls.prototype.pointerLockChange = function () {

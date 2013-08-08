@@ -105,6 +105,11 @@ Ext.define('NUbugger.view.Viewport', {
             x: 5,
             y: 5,
             robotIP: '10.0.1.55'
+        }, {
+            xtype: 'nu.chart_window',
+            x: 5,
+            y: 5,
+            robotIP: '10.0.1.55'
         }]
     }]
 });

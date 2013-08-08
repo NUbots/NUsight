@@ -44,6 +44,8 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			
 			this.varDisplay = this.down('#varDisplay');
 			this.canvas = this.down('#canvas');
+			//WebGL2D.enable(this.canvas.el.dom);
+			//this.context = this.canvas.el.dom.getContext('webgl-2d');
 			this.context = this.canvas.el.dom.getContext('2d');
 			//this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
 			
@@ -61,7 +63,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			return;
 		}
 		
-		if (Date.now() <= this.lastDraw + 3000)
+		if (Date.now() <= this.lastDraw + 100)
 		{
 			return;
 		}

@@ -47,7 +47,7 @@ Ext.define('Ext.ux.NU.FieldWindow', {
 	constructor: function () {
 		
 		NU.Network.on('robot_ips', Ext.bind(this.onRobotIPs, this));
-		//NU.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
+		NU.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
 		NU.Network.on('localisation', Ext.bind(this.onLocalisation, this));
 		
 		this.callParent(arguments);
@@ -91,7 +91,7 @@ Ext.define('Ext.ux.NU.FieldWindow', {
 			//robot.darwinModel.visualiser.scale.y = Math.random() * 50;
 			//robot.darwinModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
 			//robot.darwinModel.object.dataModel.localisation.angle.set(Math.random() * 2 * Math.PI);
-			//robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
+			robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
 			//robot.ballModel.traverse( function ( object ) { object.visible = false; } );
 			this.mainScene.scene.add(robot.ballModel);
 			//robot.ballModel.position.x = Math.random() * 800 - 400;

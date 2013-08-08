@@ -711,7 +711,7 @@
     
     NUbugger.prototype.onMessage = function (robotIP, api_message) {
         
-        //self.emit(api_message.type, robotIP, api_message);
+        self.emit(api_message.type, robotIP, api_message);
         
     };
     

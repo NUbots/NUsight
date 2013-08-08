@@ -11,7 +11,7 @@
 		this.relativeHeading = Math.random() * 0.4;
         this.color = 0x000000;
 		
-		this.render();
+		//this.render();
         
     };
     
