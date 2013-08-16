@@ -33,7 +33,7 @@ Ext.define('Ext.ux.NU.DisplayWindow', {
 				//{robotIP: '10.0.1.52'},
 				//{robotIP: '10.0.1.53'},
 				//{robotIP: '10.0.1.54'},
-				{robotIP: '10.0.1.55'},
+				{robotIP: '10.0.1.41'},
 				//{robotIP: '10.0.1.56'}
 			]
 		}),

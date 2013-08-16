@@ -43,22 +43,23 @@ Ext.define('Ext.ux.NU.ChartWindow', {
 			this.canvas = this.down('#canvas');
 			//this.context = this.canvas.el.dom.getContext('2d');
 			//this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue:Math.PI,minValue:-Math.PI});
-			this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue: 1500, minValue: -1500});
+			//this.smoothie = new SmoothieChart({interpolation: 'linear'});
+			this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue: 15, minValue: -15});
 			this.smoothie.streamTo(this.canvas.el.dom, 0);
 			
 			this.tx = new TimeSeries();
 			this.ty = new TimeSeries();
 			this.tz = new TimeSeries();
 			
-			this.smoothie.addTimeSeries(this.tx, {strokeStyle: 'rgb(255, 0, 0)', lineWidth: 3});
-			this.smoothie.addTimeSeries(this.ty, {strokeStyle: 'rgb(0, 255, 0)', lineWidth: 3});
-			this.smoothie.addTimeSeries(this.tz, {strokeStyle: 'rgb(0, 0, 255)', lineWidth: 3});
+			this.smoothie.addTimeSeries(this.tx, {strokeStyle: 'rgb(255, 0, 0)', lineWidth: 2});
+			this.smoothie.addTimeSeries(this.ty, {strokeStyle: 'rgb(0, 255, 0)', lineWidth: 2});
+			this.smoothie.addTimeSeries(this.tz, {strokeStyle: 'rgb(0, 0, 255)', lineWidth: 2});
 			
 		},
 		resize: function (obj, width, height) {
 			
-			//this.canvas.setWidth(obj.body.getWidth());
-			//this.canvas.setHeight(obj.body.getHeight());
+			this.canvas.el.dom.width = obj.body.getWidth();
+			this.canvas.el.dom.height = obj.body.getHeight();
 			
 		}
 	},
@@ -68,9 +69,12 @@ Ext.define('Ext.ux.NU.ChartWindow', {
 		//var x2 = api_message.sensor_data.orientation.float_value[0];
 		//var y2 = api_message.sensor_data.orientation.float_value[1];
 		//var z2 = api_message.sensor_data.orientation.float_value[2];
-		var z2 = api_message.sensor_data.accelerometer.float_value[0];
-		var z2 = api_message.sensor_data.accelerometer.float_value[1];
+		var x2 = api_message.sensor_data.accelerometer.float_value[0];
+		var y2 = api_message.sensor_data.accelerometer.float_value[1];
 		var z2 = api_message.sensor_data.accelerometer.float_value[2];
+		//var x2 = api_message.sensor_data.gyro.float_value[0];
+		//var y2 = api_message.sensor_data.gyro.float_value[1];
+		//var z2 = api_message.sensor_data.gyro.float_value[2];
 		
 		this.tx.append(Date.now(), x2);
 		this.ty.append(Date.now(), y2);
