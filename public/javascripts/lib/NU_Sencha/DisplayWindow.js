@@ -1,7 +1,7 @@
 Ext.define('Ext.ux.NU.DisplayWindow', {
 	extend : 'Ext.Window',
-	alias : ['widget.nu.network_window'],
-	itemId: "network_window",
+	alias : ['widget.nu.display_window'],
+	itemId: "display_window",
 	constrain: true,
 	robotIP: null,
 	tbar: [{
@@ -33,21 +33,22 @@ Ext.define('Ext.ux.NU.DisplayWindow', {
 				//{robotIP: '10.0.1.52'},
 				//{robotIP: '10.0.1.53'},
 				//{robotIP: '10.0.1.54'},
-				{robotIP: '10.0.1.41'},
+				{robotIP: '10.0.1.52'},
+                //{robotIP: '10.0.1.56'},
 				//{robotIP: '10.0.1.56'}
 			]
 		}),
 		listeners: {
 			afterRender: function () {
 				
-				this.setValue(this.up("#network_window").robotIP);
+				this.setValue(this.up("#display_window").robotIP);
 				
 			},
 			select: function (combo, records, eOpts) {
 				
 				var robotIP = records[0].data.robotIP;
 				
-				var window = this.up("#network_window").robotIP = robotIP;
+				var window = this.up("#display_window").robotIP = robotIP;
 				
 			}
 		}

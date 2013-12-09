@@ -1,3 +1,8 @@
-.desktop { background-image: url('../images/background5.png'); background-position: bottom right; background-repeat: no-repeat; background-color: #161616 !important; }
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
 
-.icon-cog { background-image: url('../images/icons/cog.png'); }
+a {
+  color: #00B7FF;
+}
