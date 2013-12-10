@@ -18,12 +18,12 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 	items: [{
 		xtype: 'component',
 		region: 'center',
-		width: 640,
-		height: 480,
+		width: 800,
+		height: 600,
 		autoEl: {
 			tag: 'canvas',
-			width: 640,
-			height: 480
+			width: 800,
+			height: 600
 		},
 		itemId: 'canvas',
 		layout: 'fit'
