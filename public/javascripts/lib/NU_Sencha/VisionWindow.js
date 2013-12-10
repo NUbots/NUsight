@@ -7,6 +7,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 	height: 295,
 	canvas: null,
 	context: null,
+    displayImage: true,
 	displayClassifiedImage: true,
 	displayFieldObjects: true,
 	resizable: {
@@ -17,12 +18,12 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 	items: [{
 		xtype: 'component',
 		region: 'center',
-		width: 320,
-		height: 240,
+		width: 640,
+		height: 480,
 		autoEl: {
 			tag: 'canvas',
-			width: 320,
-			height: 240
+			width: 640,
+			height: 480
 		},
 		itemId: 'canvas',
 		layout: 'fit'
@@ -63,21 +64,41 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			return;
 		}
 		
-		if (Date.now() <= this.lastDraw + 100)
+		if (Date.now() <= this.lastDraw + 10)
 		{
 			return;
 		}
 		this.lastDraw = Date.now();
-		
-		if (this.displayClassifiedImage) {
-			this.drawClassifiedImage(api_message.vision.classified_image);
+        var vision = api_message.vision;
+
+        if (this.displayImage && vision.image) {
+            this.drawImage(vision.image);
+        }
+
+		/*if (this.displayClassifiedImage && vision.classified_image) {
+			this.drawClassifiedImage(vision.classified_image);
 		}
 		
-		if (this.displayFieldObjects) {
-			this.drawFieldObjects(api_message.vision.field_object);
-		}
-	
+		if (this.displayFieldObjects && vision.field_object) {
+			this.drawFieldObjects(vision.field_object);
+		}*/
 	},
+    drawImage: function (image) {
+        var imageData = new Uint8Array(image.data.length);
+
+        for (var i = 0; i < image.data.length; i++) {
+            imageData[i] = image.data[i];
+        }
+
+        var blob = new Blob([imageData], {type: 'image/jpeg'});
+        var url = URL.createObjectURL(blob);
+        var imageObj = new Image();
+        var ctx = this.context;
+        imageObj.src = url;
+        imageObj.onload = function () {
+            ctx.drawImage(imageObj, 0, 0, image.width, image.height);
+        };
+    },
 	drawClassifiedImage: function (api_classified_image) {
 		
 		var api_segments  = api_classified_image.segment;

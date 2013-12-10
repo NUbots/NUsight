@@ -6,7 +6,8 @@ API.Message = PROTO.Message("API.Message",{
 	Type: PROTO.Enum("API.Message.Type",{
 		SENSOR_DATA :1,
 		VISION :2,
-		LOCALISATION :3	}),
+		LOCALISATION :3,
+		DATA_POINT :4	}),
 	type: {
 		options: {},
 		multiplicity: PROTO.required,
@@ -36,6 +37,25 @@ API.Message = PROTO.Message("API.Message",{
 		multiplicity: PROTO.optional,
 		type: function(){return API.Localisation;},
 		id: 5
+	},
+	dataPoint: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return API.DataPoint;},
+		id: 6
+	}});
+API.DataPoint = PROTO.Message("API.DataPoint",{
+	label: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.string;},
+		id: 1
+	},
+	value: {
+		options: {},
+		multiplicity: PROTO.repeated,
+		type: function(){return PROTO.Float;},
+		id: 2
 	}});
 API.Image = PROTO.Message("API.Image",{
 	width: {

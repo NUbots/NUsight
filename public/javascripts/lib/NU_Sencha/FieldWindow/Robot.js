@@ -54,42 +54,44 @@ Ext.define('NU.FieldWindow.Robot', {
 			}
 			last = Date.now();
 		}*/
+
+        var PI2 = Math.PI/2;
 		
 		// head
-		motors.head.angle.set(api_motor_data[0].position);
-		motors.neck.angle.set(api_motor_data[1].position);
+		motors.head.angle.set(api_motor_data[19].position);
+		motors.neck.angle.set(api_motor_data[18].position);
 		
 		// right arm
 		// offset by pi/2 since 0 is arms straight out but model has 0 as arms straight down
-		motors.rightShoulder.angle.set(api_motor_data[6].position - Math.PI/2);
-		motors.rightUpperArm.angle.set(api_motor_data[5].position);
-		motors.rightLowerArm.angle.set(api_motor_data[7].position);
-		
+		motors.rightShoulder.angle.set(api_motor_data[0].position - PI2);
+		motors.rightUpperArm.angle.set(api_motor_data[2].position);
+		motors.rightLowerArm.angle.set(api_motor_data[4].position);
+
 		// left arm
 		// offset by pi/2 since 0 is arms straight out but model has 0 as arms straight down
-		motors.leftShoulder.angle.set(api_motor_data[3].position - Math.PI/2);
-		motors.leftUpperArm.angle.set(api_motor_data[2].position);
-		motors.leftLowerArm.angle.set(api_motor_data[4].position);
-		
+		motors.leftShoulder.angle.set(api_motor_data[1].position - PI2);
+		motors.leftUpperArm.angle.set(api_motor_data[3].position);
+		motors.leftLowerArm.angle.set(api_motor_data[5].position);
+
 		// right pelvis
-		motors.rightPelvis.angle.set(api_motor_data[14].position);
-		motors.rightPelvisY.angle.set(api_motor_data[16].position);
-		
+		motors.rightPelvis.angle.set(api_motor_data[8].position);
+		motors.rightPelvisY.angle.set(api_motor_data[6].position);
+
 		// left pelvis
-		motors.leftPelvis.angle.set(api_motor_data[8].position);
-		motors.leftPelvisY.angle.set(api_motor_data[10].position);
-		
+		motors.leftPelvis.angle.set(api_motor_data[9].position);
+		motors.leftPelvisY.angle.set(api_motor_data[7].position);
+
 		// right leg
-		motors.rightUpperLeg.angle.set(api_motor_data[15].position);
-		motors.rightLowerLeg.angle.set(api_motor_data[17].position);
-		motors.rightAnkle.angle.set(api_motor_data[19].position);
-		motors.rightFoot.angle.set(api_motor_data[18].position);
-		
+		motors.rightUpperLeg.angle.set(api_motor_data[10].position);
+		motors.rightLowerLeg.angle.set(api_motor_data[12].position);
+		motors.rightAnkle.angle.set(api_motor_data[14].position);
+		motors.rightFoot.angle.set(api_motor_data[16].position);
+
 		// left leg
-		motors.leftUpperLeg.angle.set(api_motor_data[9].position);
-		motors.leftLowerLeg.angle.set(api_motor_data[11].position);
-		motors.leftAnkle.angle.set(api_motor_data[13].position);
-		motors.leftFoot.angle.set(api_motor_data[12].position);
+		motors.leftUpperLeg.angle.set(api_motor_data[11].position);
+		motors.leftLowerLeg.angle.set(api_motor_data[13].position);
+		motors.leftAnkle.angle.set(api_motor_data[15].position);
+		motors.leftFoot.angle.set(api_motor_data[17].position);
 		
 	},
 	onLocalisation: function (api_localisation) {
