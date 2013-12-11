@@ -95,38 +95,44 @@ Ext.define('NU.FieldWindow.Robot', {
 		
 	},
 	onLocalisation: function (api_localisation) {
-		
-		var ball = this.ballModel;
-		var darwin = this.darwinModel;
-		var dataModel = darwin.object.dataModel;
-		var api_self = api_localisation.field_object[0];
-		var api_ball = api_localisation.field_object[1];
-		
-		// local Z is robots negative Y
-		darwin.position.x = api_self.wm_x;
-		darwin.position.z = -api_self.wm_y;
-		
-		dataModel.localisation.angle.set(api_self.heading);
-		
-		//darwin.visualiser.rotation.x = -data.sensors.orientation[0];
-		darwin.visualiser.rotation.y = Math.PI / 2;
-		//darwin.visualiser.rotation.z = data.sensors.orientation[1];
-		darwin.visualiser.setWidth(api_self.sd_x);
-		darwin.visualiser.setHeight(api_self.sd_y);
-		
-		// local Z is robots negative Y
-		ball.position.x = api_ball.wm_x;
-		ball.position.z = -api_ball.wm_y;
-		
-		var result = this.calculateErrorElipse(api_ball.sr_xx, api_ball.sr_xy, api_ball.sr_yy);
-		//console.log(result.x, result.y, result.angle);
-		//ball.visualiser.setWidth(result.x);
-		//ball.visualiser.setHeight(result.y);
-		// local Z is robots negative Y
-		ball.visualiser.scale.x = result.x;
-		ball.visualiser.scale.z = result.y;
-		ball.visualiser.rotation.y = result.angle;
-		
+		for (var i = 0; i < api_localisation.field_object.length; i++) {
+			var fieldObject = api_localisation.field_object[i];
+
+			var model;
+			if(fieldObject.name == 'ball') {
+				model = this.ballModel;
+
+				// local Z is robots negative Y
+				model.position.x = fieldObject.wm_x;
+				model.position.z = -fieldObject.wm_y;
+				
+				var result = this.calculateErrorElipse(fieldObject.sr_xx, fieldObject.sr_xy, fieldObject.sr_yy);
+				//console.log(result.x, result.y, result.angle);
+				//model.visualiser.setWidth(result.x);
+				//model.visualiser.setHeight(result.y);
+
+				// local Z is robots negative Y
+				model.visualiser.scale.x = result.x;
+				model.visualiser.scale.z = result.y;
+				model.visualiser.rotation.y = result.angle;
+			} else if(fieldObject.name == 'self') {
+				model = this.darwinModel;
+
+				// local Z is robots negative Y
+				model.position.x = fieldObject.wm_x;
+				model.position.z = -fieldObject.wm_y;
+
+				model.object.dataModel.localisation.angle.set(fieldObject.heading);
+
+				//model.visualiser.rotation.x = -data.sensors.orientation[0];
+				model.visualiser.rotation.y = Math.PI / 2;
+				//model.visualiser.rotation.z = data.sensors.orientation[1];
+				model.visualiser.setWidth(fieldObject.sd_x);
+				model.visualiser.setHeight(fieldObject.sd_y);
+			} else {
+				return;
+			}
+		};
 	},
 	vectorToArray: function (vector, type) {
 		var arr = [];
