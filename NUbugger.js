@@ -1,4 +1,4 @@
-var Robot = require('./Robot');
+var Robot = require('./robot');
 var Client = require('./Client');
 var fs = require('fs');
 var util = require('util');
