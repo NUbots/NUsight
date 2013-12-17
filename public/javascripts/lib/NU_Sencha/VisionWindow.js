@@ -7,9 +7,9 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 	height: 295,
 	canvas: null,
 	context: null,
-    displayImage: true,
-	displayClassifiedImage: true,
-	displayFieldObjects: true,
+    displayImage: false,
+	displayClassifiedImage: false,
+	displayFieldObjects: false,
 	resizable: {
 		preserveRatio: true
 	},
@@ -29,10 +29,42 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 		layout: 'fit'
 	}, {
 		xtype: 'panel',
-		region: 'east',
+		region: 'west',
 		width: 80,
 		itemId: 'varDisplay'
-	}],
+	}, {
+        region: 'east',
+        width: 150,
+        items: [{
+            anchor: '100%',
+            xtype: 'multiselect',
+            width: 148,
+            store: [['raw', 'Raw Image'], ['classified', 'Classified Image'], ['objects', 'Field Objects']],
+            blankText: 'No items available',
+            itemId: 'displaypicker',
+            listeners: {
+                change: function (obj, newValue, oldValue, e) {
+                    var self = this.up('#display_window');
+                    self.displayImage = false;
+                    self.displayClassifiedImage = false;
+                    self.displayFieldObjects = false;
+                    Ext.each(newValue, function (value) {
+                        switch (value) {
+                            case 'raw':
+                                this.displayImage = true;
+                                break;
+                            case 'classified':
+                                this.displayClassifiedImage = true;
+                                break;
+                            case 'raw':
+                                this.displayFieldObjects = true;
+                                break;
+                        }
+                    }, self);
+                }
+            }
+        }]
+    }],
 	constructor: function () {
 		
 		NU.Network.on('vision', Ext.bind(this.onVision, this));
@@ -64,7 +96,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			return;
 		}
 		
-		if (Date.now() <= this.lastDraw + 10)
+		if (Date.now() <= this.lastDraw + 500)
 		{
 			return;
 		}
@@ -75,11 +107,11 @@ Ext.define('Ext.ux.NU.VisionWindow', {
             this.drawImage(vision.image);
         }
 
-		/*if (this.displayClassifiedImage && vision.classified_image) {
+		if (this.displayClassifiedImage && vision.classified_image) {
 			this.drawClassifiedImage(vision.classified_image);
 		}
-		
-		if (this.displayFieldObjects && vision.field_object) {
+
+		/*if (this.displayFieldObjects && vision.field_object) {
 			this.drawFieldObjects(vision.field_object);
 		}*/
 	},
@@ -100,12 +132,15 @@ Ext.define('Ext.ux.NU.VisionWindow', {
         };
     },
 	drawClassifiedImage: function (api_classified_image) {
+
+        var height = 800;
+        var width = 600;
 		
 		var api_segments  = api_classified_image.segment;
-		var imageData = this.context.createImageData(320, 240);
+		var imageData = this.context.createImageData(height, width);
 		var pixels = imageData.data;
 		
-		for (var i = 0; i < 320 * 240; i++)
+		for (var i = 0; i < height * width; i++)
 		{
 			pixels[4 * i + 0] = 0;
 			pixels[4 * i + 1] = 0;
@@ -122,10 +157,10 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 				// vertical lines
 				for (var y = segment.start_y; y <= segment.end_y; y++)
 				{
-					pixels[(4 * 320 * y) + (4 * segment.start_x + 0)] = colour[0];
-					pixels[(4 * 320 * y) + (4 * segment.start_x + 1)] = colour[1];
-					pixels[(4 * 320 * y) + (4 * segment.start_x + 2)] = colour[2];
-					pixels[(4 * 320 * y) + (4 * segment.start_x + 3)] = colour[3];
+					pixels[(4 * height * y) + (4 * segment.start_x + 0)] = colour[0];
+					pixels[(4 * height * y) + (4 * segment.start_x + 1)] = colour[1];
+					pixels[(4 * height * y) + (4 * segment.start_x + 2)] = colour[2];
+					pixels[(4 * height * y) + (4 * segment.start_x + 3)] = colour[3];
 				}
 				
 			} else if (segment.start_y == segment.end_y) {
@@ -133,10 +168,10 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 				// horizontal lines
 				for (var x = segment.start_x; x <= segment.end_x; x++)
 				{
-					pixels[(4 * 320 * segment.start_y) + (4 * x + 0)] = colour[0];
-					pixels[(4 * 320 * segment.start_y) + (4 * x + 1)] = colour[1];
-					pixels[(4 * 320 * segment.start_y) + (4 * x + 2)] = colour[2];
-					pixels[(4 * 320 * segment.start_y) + (4 * x + 3)] = colour[3];
+					pixels[(4 * height * segment.start_y) + (4 * x + 0)] = colour[0];
+					pixels[(4 * height * segment.start_y) + (4 * x + 1)] = colour[1];
+					pixels[(4 * height * segment.start_y) + (4 * x + 2)] = colour[2];
+					pixels[(4 * height * segment.start_y) + (4 * x + 3)] = colour[3];
 				}
 			}
 			else {
