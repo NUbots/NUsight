@@ -39,6 +39,20 @@ Ext.define('Ext.ux.NU.NUClearWindow', {
         }],
         rootVisible: false,
         itemId: 'display'
+    }, {
+        xtype: 'grid',
+        title: 'Logs',
+        region: 'south',
+        height: 200,
+        columns: [{
+            text: 'Reactor',
+            dataIndex: 'reactor'
+        }, {
+            text: 'Message',
+            width: 800,
+            dataIndex: 'message'
+        }],
+        itemId: 'logs'
     }],
     constructor: function () {
 
@@ -50,6 +64,7 @@ Ext.define('Ext.ux.NU.NUClearWindow', {
         afterRender: function () {
 
             this.display = this.down('#display');
+            this.logs = this.down('#logs');
 
             window.t = this;
         },
@@ -114,6 +129,18 @@ Ext.define('Ext.ux.NU.NUClearWindow', {
                 causeReactionId: reactionStatistics.causeReactionId.toNumber(),
                 causeTaskId: reactionStatistics.causeTaskId.toNumber()
             });
+
+            Ext.each(reactionStatistics.log, function (log) {
+                var store = this.logs.getStore();
+                var row = store.add({})[0];
+                row.set({
+                    reactor: Ext.util.Format.htmlEncode(this.getShortName(reactionStatistics.name)),
+                    message: log
+                });
+                if (store.count() > 5) {
+                    store.removeAt(0);
+                }
+            }, this);
 
             this.lastUpdated = now;
         }
