@@ -10,6 +10,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
     displayImage: false,
 	displayClassifiedImage: false,
 	displayFieldObjects: false,
+    displayTransitions: false,
 	resizable: {
 		preserveRatio: true
 	},
@@ -18,12 +19,12 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 	items: [{
 		xtype: 'component',
 		region: 'center',
-		width: 800,
-		height: 600,
+		width: 320,
+		height: 240,
 		autoEl: {
 			tag: 'canvas',
-			width: 800,
-			height: 600
+			width: 320,
+			height: 240
 		},
 		itemId: 'canvas',
 		layout: 'fit'
@@ -115,34 +116,28 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			this.drawClassifiedImage(vision.classified_image);
 		}
 
-/*		if (this.displayTransitions && vision.classified_image) {
+		if (this.displayTransitions && vision.classified_image) {
 			this.drawTransitions(vision.classified_image);
 		}
-*/
 		/*if (this.displayFieldObjects && vision.field_object) {
 			this.drawFieldObjects(vision.field_object);
 		}*/
 	},
     drawImage: function (image) {
-        var imageData = new Uint8Array(image.data.length);
-
-        for (var i = 0; i < image.data.length; i++) {
-            imageData[i] = image.data[i];
-        }
-
-        var blob = new Blob([imageData], {type: 'image/jpeg'});
+        var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
         var url = URL.createObjectURL(blob);
         var imageObj = new Image();
         var ctx = this.context;
         imageObj.src = url;
         imageObj.onload = function () {
             ctx.drawImage(imageObj, 0, 0, image.width, image.height);
+            URL.revokeObjectURL(url);
         };
     },
 	drawClassifiedImage: function (api_classified_image) {
 
-        var height = 800;
-        var width = 600;
+        var height = 320;
+        var width = 240;
 		
 		var api_segments  = api_classified_image.segment;
 		var imageData = this.context.createImageData(height, width);
@@ -193,15 +188,15 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 		this.context.putImageData(imageData, 0, 0);
 		
 	},
-/*	drawTranstions: function (api_classified_image) {
+	drawTransitions: function (api_classified_image) {
 
         var height = 800;
         var width = 600;
-		
+
 		var api_segments  = api_classified_image.transition_segment;
 		var imageData = this.context.createImageData(height, width);
 		var pixels = imageData.data;
-		
+
 		for (var i = 0; i < height * width; i++)
 		{
 			pixels[4 * i + 0] = 0;
@@ -209,13 +204,13 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			pixels[4 * i + 2] = 0;
 			pixels[4 * i + 3] = 255;
 		}
-		
+
 		for (var i = 0; i < api_segments.length; i++) {
 			var segment = api_segments[i];
 			var colour = this.segmentColourToRGB2(segment.colour);
-			
+
 			if (segment.start_x == segment.end_x) {
-				
+
 				// vertical lines
 				for (var y = segment.start_y; y <= segment.end_y; y++)
 				{
@@ -224,9 +219,9 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 					pixels[(4 * height * y) + (4 * segment.start_x + 2)] = colour[2];
 					pixels[(4 * height * y) + (4 * segment.start_x + 3)] = colour[3];
 				}
-				
+
 			} else if (segment.start_y == segment.end_y) {
-				
+
 				// horizontal lines
 				for (var x = segment.start_x; x <= segment.end_x; x++)
 				{
@@ -242,12 +237,12 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			//segment.start_x, segment.start_y
 			//segment.end_x, segment.end_y
 		}
-		
+
 		imageData.data = pixels;
 		this.context.putImageData(imageData, 0, 0);
-		
-	},
-*/	drawFieldObjects: function (field_objects) {
+
+    },
+	drawFieldObjects: function (field_objects) {
 		
 		
 		var api_ball = field_objects[0];

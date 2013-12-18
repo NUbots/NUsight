@@ -2,22 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a395f8f8-9c2f-4829-88e8-fd41b016595b" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/NUClearWindow.js" />
       <change type="DELETED" beforePath="C:\Users\Brendan\Dropbox\education\University\Courses\nubots\NUbugger\public\javascripts\proto\NUAPI.proto.js" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/ChartWindow.js" afterPath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/ChartWindow.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/DisplayWindow.js" afterPath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/DisplayWindow.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/FieldWindow.js" afterPath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/FieldWindow.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/NUbugger.js" afterPath="$PROJECT_DIR$/NUbugger.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/Network.js" afterPath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/Network.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/FieldWindow/Robot.js" afterPath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/FieldWindow/Robot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/app/view/Viewport.js" afterPath="$PROJECT_DIR$/public/app/view/Viewport.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/proto/messages/support/NUbugger/proto/Message.proto" afterPath="$PROJECT_DIR$/public/javascripts/proto/messages/support/NUbugger/proto/Message.proto" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/VisionWindow.js" afterPath="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/VisionWindow.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/index.html" afterPath="$PROJECT_DIR$/public/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/lib/protobuf.js" afterPath="$PROJECT_DIR$/public/javascripts/lib/protobuf.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/stylesheets/style.css" afterPath="$PROJECT_DIR$/public/stylesheets/style.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="NUbugger.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -84,7 +71,7 @@
       <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="45" selection-start="1692" selection-end="1692" vertical-scroll-proportion="-12.230769" vertical-offset="73" max-vertical-offset="1156">
+            <state line="23" column="45" selection-start="1692" selection-end="1692" vertical-scroll-proportion="0.0" vertical-offset="73" max-vertical-offset="1156">
               <folding />
             </state>
           </provider>
@@ -93,16 +80,16 @@
       <file leaf-file-name="NUClearWindow.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/NUClearWindow.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="65" column="18" selection-start="1634" selection-end="1634" vertical-scroll-proportion="0.0" vertical-offset="979" max-vertical-offset="2380">
+            <state line="65" column="18" selection-start="1634" selection-end="1634" vertical-scroll-proportion="0.0" vertical-offset="1105" max-vertical-offset="2380">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="style.css" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="style.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/stylesheets/style.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="112" selection-start="241" selection-end="241" vertical-scroll-proportion="0.12283237" vertical-offset="0" max-vertical-offset="1384">
+            <state line="10" column="112" selection-start="241" selection-end="241" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="306">
               <folding />
             </state>
           </provider>
@@ -120,7 +107,7 @@
       <file leaf-file-name="Network.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/Network.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="19" selection-start="105" selection-end="105" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1275">
+            <state line="5" column="19" selection-start="105" selection-end="105" vertical-scroll-proportion="0.0" vertical-offset="85" max-vertical-offset="1275">
               <folding />
             </state>
           </provider>
@@ -147,7 +134,7 @@
       <file leaf-file-name="DisplayWindow.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/DisplayWindow.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="12" selection-start="688" selection-end="688" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1071">
+            <state line="26" column="12" selection-start="688" selection-end="688" vertical-scroll-proportion="0.0" vertical-offset="442" max-vertical-offset="1071">
               <folding />
             </state>
           </provider>
@@ -162,10 +149,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="VisionWindow.js" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="VisionWindow.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/VisionWindow.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="130" column="18" selection-start="3680" selection-end="3680" vertical-scroll-proportion="0.0" vertical-offset="1122" max-vertical-offset="9180">
+            <state line="138" column="24" selection-start="4073" selection-end="4073" vertical-scroll-proportion="0.32224333" vertical-offset="2007" max-vertical-offset="10217">
               <folding />
             </state>
           </provider>
@@ -202,16 +189,16 @@
         <option value="$PROJECT_DIR$/public/app/view/Viewport.js" />
         <option value="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/DisplayWindow.js" />
         <option value="$PROJECT_DIR$/NUbugger.js" />
-        <option value="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/VisionWindow.js" />
         <option value="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/NUClearWindow.js" />
         <option value="$PROJECT_DIR$/public/stylesheets/style.css" />
+        <option value="$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/VisionWindow.js" />
       </list>
     </option>
   </component>
   <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="2" />
-    <option name="width" value="1278" />
+    <option name="x" value="1280" />
+    <option name="width" value="1280" />
     <option name="height" value="1560" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -270,7 +257,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -511,6 +497,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
       <pane id="PackagesPane" />
     </panes>
   </component>
@@ -699,9 +686,6 @@
       <option name="USE_PATTERN" value="false" />
       <method />
     </configuration>
-    <configuration default="true" type="PhpUnitRemoteRunConfigurationType" factoryName="PHPUnit on Server">
-      <method />
-    </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <module name="" />
@@ -721,6 +705,9 @@
       </option>
       <envs />
       <patterns />
+      <method />
+    </configuration>
+    <configuration default="true" type="PhpUnitRemoteRunConfigurationType" factoryName="PHPUnit on Server">
       <method />
     </configuration>
     <configuration default="true" type="FlashRunConfigurationType" factoryName="Flash App">
@@ -758,10 +745,6 @@
       <option name="usbDebugPort" value="7936" />
       <method />
     </configuration>
-    <configuration default="true" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
-      <TestRunner />
-      <method />
-    </configuration>
     <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Tests">
       <module name="" />
       <option name="TESTING_TYPE" value="0" />
@@ -780,6 +763,10 @@
       <option name="NETWORK_LATENCY" value="none" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
+      <TestRunner />
       <method />
     </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
@@ -949,6 +936,7 @@
       <workItem from="1386848756731" duration="40445000" />
       <workItem from="1387295735954" duration="62000" />
       <workItem from="1387295812967" duration="13626000" />
+      <workItem from="1387356293736" duration="2047000" />
     </task>
     <task id="LOCAL-00001" summary="updated motor IDs">
       <created>1385970910274</created>
@@ -958,10 +946,10 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="83894000" />
+    <option name="totallyTimeSpent" value="85941000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="2" y="0" width="1278" height="1560" extended-state="0" />
+    <frame x="1280" y="0" width="1280" height="1560" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -982,8 +970,8 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24016394" sideWeight="0.6664291" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22431865" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23977087" sideWeight="0.6664291" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22400558" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="CDI" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -1188,12 +1176,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Client.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="65" max-vertical-offset="1190">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="65" max-vertical-offset="1190" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/robot.js">
+    <entry file="file://$PROJECT_DIR$/Robot.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2040">
           <folding />
@@ -1207,44 +1193,34 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../NUClearPort/cmake/Scripts/generate.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="10" selection-start="30" selection-end="30" vertical-scroll-proportion="0.0" vertical-offset="34" max-vertical-offset="1207">
-          <folding />
-        </state>
+        <state line="2" column="10" selection-start="30" selection-end="30" vertical-scroll-proportion="0.0" vertical-offset="34" max-vertical-offset="1207" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/javascripts/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1063">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1063" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/javascripts/lib/ThreeJS_Sencha/ThreeJSWindow.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1162">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1162" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="36" selection-start="131" selection-end="131" vertical-scroll-proportion="0.09272727" vertical-offset="0" max-vertical-offset="1100">
-          <folding />
-        </state>
+        <state line="6" column="36" selection-start="131" selection-end="131" vertical-scroll-proportion="0.09272727" vertical-offset="0" max-vertical-offset="1100" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="45" selection-start="1692" selection-end="1692" vertical-scroll-proportion="-12.230769" vertical-offset="73" max-vertical-offset="1156">
+        <state line="23" column="45" selection-start="1692" selection-end="1692" vertical-scroll-proportion="0.0" vertical-offset="73" max-vertical-offset="1156">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/javascripts/lib/base64-binary.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="4" selection-start="1689" selection-end="1689" vertical-scroll-proportion="0.20387454" vertical-offset="0" max-vertical-offset="1224">
-          <folding />
-        </state>
+        <state line="35" column="4" selection-start="1689" selection-end="1689" vertical-scroll-proportion="0.20387454" vertical-offset="0" max-vertical-offset="1224" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/FieldWindow/Robot.js">
@@ -1282,13 +1258,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/VisionWindow.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="130" column="18" selection-start="3680" selection-end="3680" vertical-scroll-proportion="0.0" vertical-offset="1122" max-vertical-offset="9180">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/DisplayWindow.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="26" column="12" selection-start="688" selection-end="688" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1071">
@@ -1305,7 +1274,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/public/stylesheets/style.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="112" selection-start="241" selection-end="241" vertical-scroll-proportion="0.12283237" vertical-offset="0" max-vertical-offset="1384">
+        <state line="10" column="112" selection-start="241" selection-end="241" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="306">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/javascripts/lib/NU_Sencha/VisionWindow.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="138" column="24" selection-start="4073" selection-end="4073" vertical-scroll-proportion="0.32224333" vertical-offset="2007" max-vertical-offset="10217">
           <folding />
         </state>
       </provider>
