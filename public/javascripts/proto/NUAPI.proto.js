@@ -185,6 +185,43 @@ API.VisionClassifiedSegment = PROTO.Message("API.VisionClassifiedSegment",{
 		type: function(){return PROTO.uint32;},
 		id: 5
 	}});
+API.VisionTransitionSegment = PROTO.Message("API.VisionTransitionSegment",{
+	start_x: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 1
+	},
+	start_y: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 2
+	},
+	end_x: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 3
+	},
+	end_y: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 4
+	},
+	colour: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 5
+	}
+	colour_class: {
+		options: {},
+		multiplicity: PROTO.optional,
+		type: function(){return PROTO.uint32;},
+		id: 6
+	}});
 API.VisionClassifiedImage = PROTO.Message("API.VisionClassifiedImage",{
 	num_segments: {
 		options: {},
@@ -197,6 +234,12 @@ API.VisionClassifiedImage = PROTO.Message("API.VisionClassifiedImage",{
 		multiplicity: PROTO.repeated,
 		type: function(){return API.VisionClassifiedSegment;},
 		id: 2
+	}
+	transition_segment: {
+		options: {},
+		multiplicity: PROTO.repeated,
+		type: function(){return API.VisionTransitionSegment;},
+		id: 3
 	}});
 API.Vision = PROTO.Message("API.Vision",{
 	image: {

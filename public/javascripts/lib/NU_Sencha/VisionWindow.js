@@ -39,7 +39,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
             anchor: '100%',
             xtype: 'multiselect',
             width: 148,
-            store: [['raw', 'Raw Image'], ['classified', 'Classified Image'], ['objects', 'Field Objects']],
+            store: [['raw', 'Raw Image'], ['classified', 'Classified Image'], ['objects', 'Field Objects'], ['transitions', 'Transitions']],
             blankText: 'No items available',
             itemId: 'displaypicker',
             listeners: {
@@ -48,6 +48,7 @@ Ext.define('Ext.ux.NU.VisionWindow', {
                     self.displayImage = false;
                     self.displayClassifiedImage = false;
                     self.displayFieldObjects = false;
+                    self.displayTransitions = false;
                     Ext.each(newValue, function (value) {
                         switch (value) {
                             case 'raw':
@@ -56,7 +57,10 @@ Ext.define('Ext.ux.NU.VisionWindow', {
                             case 'classified':
                                 this.displayClassifiedImage = true;
                                 break;
-                            case 'raw':
+                            case 'transitions':
+                                this.displayTransitions = true;
+                                break;
+                            case 'objects':
                                 this.displayFieldObjects = true;
                                 break;
                         }
@@ -111,6 +115,10 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			this.drawClassifiedImage(vision.classified_image);
 		}
 
+/*		if (this.displayTransitions && vision.classified_image) {
+			this.drawTransitions(vision.classified_image);
+		}
+*/
 		/*if (this.displayFieldObjects && vision.field_object) {
 			this.drawFieldObjects(vision.field_object);
 		}*/
@@ -185,7 +193,61 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 		this.context.putImageData(imageData, 0, 0);
 		
 	},
-	drawFieldObjects: function (field_objects) {
+/*	drawTranstions: function (api_classified_image) {
+
+        var height = 800;
+        var width = 600;
+		
+		var api_segments  = api_classified_image.transition_segment;
+		var imageData = this.context.createImageData(height, width);
+		var pixels = imageData.data;
+		
+		for (var i = 0; i < height * width; i++)
+		{
+			pixels[4 * i + 0] = 0;
+			pixels[4 * i + 1] = 0;
+			pixels[4 * i + 2] = 0;
+			pixels[4 * i + 3] = 255;
+		}
+		
+		for (var i = 0; i < api_segments.length; i++) {
+			var segment = api_segments[i];
+			var colour = this.segmentColourToRGB2(segment.colour);
+			
+			if (segment.start_x == segment.end_x) {
+				
+				// vertical lines
+				for (var y = segment.start_y; y <= segment.end_y; y++)
+				{
+					pixels[(4 * height * y) + (4 * segment.start_x + 0)] = colour[0];
+					pixels[(4 * height * y) + (4 * segment.start_x + 1)] = colour[1];
+					pixels[(4 * height * y) + (4 * segment.start_x + 2)] = colour[2];
+					pixels[(4 * height * y) + (4 * segment.start_x + 3)] = colour[3];
+				}
+				
+			} else if (segment.start_y == segment.end_y) {
+				
+				// horizontal lines
+				for (var x = segment.start_x; x <= segment.end_x; x++)
+				{
+					pixels[(4 * height * segment.start_y) + (4 * x + 0)] = colour[0];
+					pixels[(4 * height * segment.start_y) + (4 * x + 1)] = colour[1];
+					pixels[(4 * height * segment.start_y) + (4 * x + 2)] = colour[2];
+					pixels[(4 * height * segment.start_y) + (4 * x + 3)] = colour[3];
+				}
+			}
+			else {
+				console.log('unsupported diagonal classified image segment');
+			}
+			//segment.start_x, segment.start_y
+			//segment.end_x, segment.end_y
+		}
+		
+		imageData.data = pixels;
+		this.context.putImageData(imageData, 0, 0);
+		
+	},
+*/	drawFieldObjects: function (field_objects) {
 		
 		
 		var api_ball = field_objects[0];
