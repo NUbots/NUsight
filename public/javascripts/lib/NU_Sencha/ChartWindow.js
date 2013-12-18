@@ -128,6 +128,12 @@ Ext.define('Ext.ux.NU.ChartWindow', {
 
 	},
     onDataPoint: function (robotIP, api_message) {
+
+        // TODO: remove
+        if (robotIP !== this.robotIP) {
+            return;
+        }
+
         //console.log(api_message);
         var dataPoint = api_message.dataPoint;
         var label = dataPoint.label;

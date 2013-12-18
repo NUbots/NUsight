@@ -19,7 +19,7 @@ function NUbugger (io) {
 		//'145.144.172.185',
 		//'145.144.172.186',
 		//'10.0.1.41',
-		//'10.0.1.42',
+		'10.0.1.42',
 		//'10.0.1.43',
 		//'10.0.1.44',
 		//'10.0.1.45',
@@ -28,7 +28,7 @@ function NUbugger (io) {
 		//'10.0.1.52',
 		//'10.0.1.53',
 		//'10.0.1.54',
-		'10.0.1.52',
+		//'10.0.1.56',
         //'10.0.1.56',
 		//'10.0.1.56'
 	]);
@@ -149,11 +149,11 @@ NUbugger.prototype.onMessage = function (robotIP, message)
 	var filename = "c:/Users/Brendan/Documents/data.log";
 	
 	//fs.appendFile(filename, message.toString('base64') + "\n");
-	
+
+    //console.log(robotIP, message);
+
 	self.clients.forEach(function (client) {
-	
-		//console.log(message);
-		
+
 		client.socket.emit('message', robotIP, message.toString('base64'));
 		//client.socket.emit('message', robotIP, message);
 	

@@ -19,8 +19,15 @@ Ext.define('NU.Network', {
 		
 		self.setupSocket();
 		
-		self.callParent(arguments);
-		
+		self.callParent(arguments)
+
+        self.builder = dcodeIO.ProtoBuf.loadProtoFile({
+            root: "javascripts/proto",
+            file: "messages/support/NUbugger/proto/Message.proto"
+        });
+
+        window.API = self.builder.build("messages.support.NUbugger.proto");
+
 		return self;
 		
 	},
@@ -45,22 +52,19 @@ Ext.define('NU.Network', {
 			
 			var api_message, array, stream, eventName;
 			
-			api_message = new API.Message;
-			array = Base64Binary.decodeArrayBuffer(message);
-			stream = new PROTO.ArrayBufferStream(array, array.byteLength);
-			api_message.ParseFromStream(stream);
+            api_message = API.Message.decode64(message);
+
+            Ext.iterate(API.Message.Type, function (key, type) {
+                if (type === api_message.type) {
+                    eventName = key.toLowerCase();
+                    return false;
+                }
+            });
 			
-			eventName = API.Message.Type[api_message.type].toLowerCase();
-			
-			//console.log(eventName);
+			//console.log(robotIP, eventName);
 			
 			self.fireEvent(eventName, robotIP, api_message);
 		});
 		
-	},
-	listeners: {
-		vision: function () {
-			//console.log('yes')
-		}
 	}
 });

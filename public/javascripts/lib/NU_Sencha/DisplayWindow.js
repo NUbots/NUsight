@@ -24,7 +24,7 @@ Ext.define('Ext.ux.NU.DisplayWindow', {
 				//{robotIP: '145.144.172.185'},
 				//{robotIP: '145.144.172.186'},
 				//{robotIP: '10.0.1.41'},
-				//{robotIP: '10.0.1.42'},
+				{robotIP: '10.0.1.42'},
 				//{robotIP: '10.0.1.43'},
 				//{robotIP: '10.0.1.44'},
 				//{robotIP: '10.0.1.45'},
@@ -33,7 +33,7 @@ Ext.define('Ext.ux.NU.DisplayWindow', {
 				//{robotIP: '10.0.1.52'},
 				//{robotIP: '10.0.1.53'},
 				//{robotIP: '10.0.1.54'},
-				{robotIP: '10.0.1.52'},
+                //{robotIP: '10.0.1.56'},
                 //{robotIP: '10.0.1.56'},
 				//{robotIP: '10.0.1.56'}
 			]
@@ -45,11 +45,13 @@ Ext.define('Ext.ux.NU.DisplayWindow', {
 				
 			},
 			select: function (combo, records, eOpts) {
-				
+
+                var self = this.up("#display_window");
 				var robotIP = records[0].data.robotIP;
 				
-				var window = this.up("#display_window").robotIP = robotIP;
-				
+				self.robotIP = robotIP;
+                self.fireEvent("robotIP", robotIP);
+
 			}
 		}
 	}]
