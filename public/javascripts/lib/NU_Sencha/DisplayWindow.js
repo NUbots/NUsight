@@ -14,34 +14,29 @@ Ext.define('Ext.ux.NU.DisplayWindow', {
 		editable: false,
 		displayField: 'robotIP',
 		valueField: 'robotIP',
+        emptyText: 'No Robot Selected',
 		store: new Ext.data.JsonStore({
 			fields: ['robotIP'],
-			data: [
-				//{robotIP: '192.168.137.42'},
-				//{robotIP: '145.144.172.182'},
-				//{robotIP: '145.144.172.183'},
-				//{robotIP: '145.144.172.184'},
-				//{robotIP: '145.144.172.185'},
-				//{robotIP: '145.144.172.186'},
-				//{robotIP: '10.0.1.41'},
-				{robotIP: '10.0.1.42'},
-				//{robotIP: '10.0.1.43'},
-				//{robotIP: '10.0.1.44'},
-				//{robotIP: '10.0.1.45'},
-				//{robotIP: '10.0.1.46'},
-				//{robotIP: '10.0.1.51'},
-				//{robotIP: '10.0.1.52'},
-				//{robotIP: '10.0.1.53'},
-				//{robotIP: '10.0.1.54'},
-                //{robotIP: '10.0.1.56'},
-                //{robotIP: '10.0.1.56'},
-				//{robotIP: '10.0.1.56'}
-			]
+			data: []
 		}),
 		listeners: {
 			afterRender: function () {
-				
-				this.setValue(this.up("#display_window").robotIP);
+
+                var self = this;
+
+                Ext.each(NU.Network.getRobotIPs(), function (robotIP) {
+
+                    self.addRobotIP(robotIP);
+
+                });
+
+                NU.Network.on('robot_ip', function (robotIP) {
+
+                    self.addRobotIP(robotIP);
+
+                });
+
+				self.setValue(self.up("#display_window").robotIP);
 				
 			},
 			select: function (combo, records, eOpts) {
@@ -53,6 +48,21 @@ Ext.define('Ext.ux.NU.DisplayWindow', {
                 self.fireEvent("robotIP", robotIP);
 
 			}
-		}
+		},
+        addRobotIP: function (robotIP) {
+
+            var self = this;
+
+            var store = self.getStore();
+
+            if (store.find('robotIP', robotIP) === -1) {
+
+                store.add({
+                    robotIP: robotIP
+                });
+
+            }
+
+        }
 	}]
 });

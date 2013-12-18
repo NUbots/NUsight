@@ -1,3 +1,4 @@
+var RobotFinder = require('./RobotFinder');
 var Robot = require('./Robot');
 var Client = require('./Client');
 var fs = require('fs');
@@ -11,44 +12,32 @@ function NUbugger (io) {
 	self.io = io;
 	self.robots = [];
 	self.robotIPs = [];
-	self.addRobots([
-		//'192.168.137.42',
-		//'145.144.172.182',
-		//'145.144.172.183',
-		//'145.144.172.184',
-		//'145.144.172.185',
-		//'145.144.172.186',
-		//'10.0.1.41',
-		'10.0.1.42',
-		//'10.0.1.43',
-		//'10.0.1.44',
-		//'10.0.1.45',
-		//'10.0.1.46',
-		//'10.0.1.51',
-		//'10.0.1.52',
-		//'10.0.1.53',
-		//'10.0.1.54',
-		//'10.0.1.56',
-        //'10.0.1.56',
-		//'10.0.1.56'
-	]);
 	self.clients = [];
+    self.robotFinder = new RobotFinder('238.158.129.230', 7447);
+    self.robotFinder.listen();
+    self.robotFinder.on('robotIP', function (robotIP) {
+        self.addRobot(robotIP);
+    });
 	
 	self.io.sockets.on('connection', function (socket) {
 		
 		var client = new Client(socket);
 		
 		self.clients.push(client);
-		
-		socket.emit('robot_ips', self.robotIPs);
-		
-		console.log('new client', self.clients.length);
+
+        self.robotIPs.forEach(function (robotIP) {
+
+            socket.emit('robot_ip', robotIP);
+
+        })
+
+		console.log('New web client', self.clients.length);
 		
 		socket.on('disconnect', function () {
 			
 			self.clients.splice(self.clients.indexOf(client), 1);
 			
-			console.log('lost client', self.clients.length);
+			console.log('Lost web client', self.clients.length);
 			
 		});
 	
@@ -111,6 +100,27 @@ function NUbugger (io) {
 
 util.inherits(NUbugger, events.EventEmitter);
 
+NUbugger.prototype.addRobot = function (robotIP) {
+
+    var self = this;
+
+    var robot = new Robot(robotIP);
+    robot.connect();
+    robot.on('message', function (message) {
+
+        self.emit('message', robotIP, message);
+
+    });
+
+    self.clients.forEach(function (client) {
+        client.socket.emit('robot_ip', robotIP);
+    });
+
+    self.robots.push(robot);
+    self.robotIPs.push(robotIP);
+
+};
+
 NUbugger.prototype.addRobots = function (robotIPs)
 {
 	var self;
@@ -124,16 +134,7 @@ NUbugger.prototype.addRobots = function (robotIPs)
 	
 	robotIPs.forEach(function (robotIP) {
 	
-		var robot = new Robot(robotIP);
-		robot.connect();
-		robot.on('message', function (message) {
-			
-			self.emit('message', robotIP, message);
-			
-		});
-		
-		self.robots.push(robot);
-		self.robotIPs.push(robotIP);
+        self.addRobot(robotIP);
 		
 	});
 };

@@ -108,7 +108,7 @@ Ext.define('Ext.ux.NU.FieldWindow', {
 		
 		var robot = this.getRobot(robotIP);
 		if (robot == null) {
-			console.log('error', robotIP);
+			// TODO: console.log('error', robotIP);
 			return;
 		}
 		var api_sensor_data = api_message.sensor_data;

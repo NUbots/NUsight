@@ -11,7 +11,7 @@ Ext.define('NU.Network', {
 		self = this;
 		
 		this.addEvents(
-			'robot_ips',
+			'robot_ip',
 			'sensor_data',
 			'vision',
 			'localisation'
@@ -19,7 +19,7 @@ Ext.define('NU.Network', {
 		
 		self.setupSocket();
 		
-		self.callParent(arguments)
+		self.callParent(arguments);
 
         self.builder = dcodeIO.ProtoBuf.loadProtoFile({
             root: "javascripts/proto",
@@ -39,12 +39,14 @@ Ext.define('NU.Network', {
 		
 		socket = io.connect(document.location.origin);
 		
-		socket.on('robot_ips', function (robotIPs) {
-			
-			self.setRobotIPs(robotIPs);
-			setTimeout(function () {	
-				self.fireEvent('robot_ips', self.robotIPs);
-			}, 1000); // hack since display isn't rendered yet :(
+		socket.on('robot_ip', function (robotIP) {
+
+            if (self.robotIPs.indexOf(robotIP) === -1) {
+
+                self.robotIPs.push(robotIP);
+                self.fireEvent('robot_ip', robotIP);
+
+            }
 			
 		});
 		
