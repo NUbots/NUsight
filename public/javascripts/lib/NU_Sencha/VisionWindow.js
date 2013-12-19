@@ -139,7 +139,9 @@ Ext.define('Ext.ux.NU.VisionWindow', {
         var height = 320;
         var width = 240;
 		
-		var api_segments  = api_classified_image.segment;
+		var api_segments = api_classified_image.segment;
+		var api_green_horizon = api_classified_image.green_horizon;
+		var imageData = this.context.createImageData(height, width);
 		var imageData = this.context.createImageData(height, width);
 		var pixels = imageData.data;
 		
