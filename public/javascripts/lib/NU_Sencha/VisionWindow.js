@@ -183,9 +183,19 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 			//segment.start_x, segment.start_y
 			//segment.end_x, segment.end_y
 		}
+		//Draw circles for green horizon points
+		var api_green_horizon_points = api_classified_image.green_horizon_point;
+		for (var i = 0; i < api_green_horizon_points.length; i++){
+			pixels[(4 * height * api_green_horizon_points[i].y) + (4 * api_green_horizon_points[i].x + 0)] = 0;
+			pixels[(4 * height * api_green_horizon_points[i].y) + (4 * api_green_horizon_points[i].x + 1)] = 255; //Green
+			pixels[(4 * height * api_green_horizon_points[i].y) + (4 * api_green_horizon_points[i].x + 2)] = 0;
+			pixels[(4 * height * api_green_horizon_points[i].y) + (4 * api_green_horizon_points[i].x + 3)] = 255;
+		}
 		
 		imageData.data = pixels;
 		this.context.putImageData(imageData, 0, 0);
+
+		
 		
 	},
 	drawTransitions: function (api_classified_image) {
