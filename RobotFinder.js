@@ -62,6 +62,8 @@ RobotFinder.prototype.listen = function () {
 
     socket.on('message', function (message, rinfo) {
 
+        console.log('message!');
+
         var robotIP = rinfo.address;
         if (self.robotIPs.indexOf(robotIP) === -1) {
             console.log("Found Robot: " + robotIP);

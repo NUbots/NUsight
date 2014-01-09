@@ -1,0 +1,69 @@
+ver 2.3.1
+Highcharts extension
+- Fixed compatability issue with Sencha Touch 2.1
+
+ver 2.3.0
+Highcharts extension
+- Incorportated changes submitted by jacrasmussen to break down single Highchart.js into smaller series class files. This enable users to deploy their solution by selecting which series their applications support
+- Massive rewrite and redo on all the documentations, including features that have never been documented before. Now the tutorial and API documents are done in Sencha documentation style - JsDuck.
+
+Demos
+- Updated both desktop and mobile demos with the classes file hierarchy
+ 
+ver 2.2.3
+Highcharts extension
+- Re-implemented the old style of converting series type into class paths using ExtJs 4 feature. This has removed incompatiblity with the latest ExtJS release and also slightly optimised.
+
+ver 2.2.2
+Highcharts extension
+- Fixed removeAllSeries method need to also cleanup categories data in chartConfig from previous load
+- Fixed when store reload with more data, it appends the data in the correct category (string labels) order
+- Fixed when store reload with less data, it correctly remove the data point with the correct index
+- Extended the colorField properties to other series
+- Added 'auto' keyword support for colorField to automatically assign point color to Highcharts colors
+
+Desktop Demos
+- Added spline chart with no initial data demo (initAnimAfterLoad: false)
+- Added column drill down demo
+
+ver 2.2.1
+Highcharts extension
+- Fixed store reload on pie chart
+- Fixed default series type value
+- Allow series definition without dataIndex or yField as long as getData method is defined
+
+Desktop Demos
+- Changed one of series definitions with overriding getData method only in 'No Animation' demo
+- Added 'allowPointSelect' in plotOptions for pie demo
+
+ver 2.2.0
+Highcharts extension
+- Extension works for both ExtJs 4 and Touch 2
+ 
+Demos
+- Added demos for Sencha Touch 2
+
+ver 2.1.1
+Demos
+- Fixed dial color in gauge chart demo
+- Corrected thickness in splitter bar
+- Typo in page title
+
+ver 2.1
+Highcharts extension 
+- Fixed shift animation on category data
+- Fixed stop loading data from the server after few load calls
+
+Demos
+- Added Add Series example
+- Added Null data example
+- Fixed reset sample data on spline demos
+
+ver 2.0
+- Added support to Highcharts 2.3 gauge chart
+- Added support to Highcharts 2.3 range type charts: minDataIndex, maxDataIndex and dataIndex array mode
+- [ Optimisation ] reduce redundant call on refresh, draw method only call refresh if the store is not loading, i.e isLoading
+- [ Optimisation ] added refreshOnChange config - avoid redundant call on refresh.
+- [ Optimisation ] added pointObject as default false to create data as array instead of point object
+- Added initAnimAfterLoad to support initial animation
+- Added afterChartRendered callback

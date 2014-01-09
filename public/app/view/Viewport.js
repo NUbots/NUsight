@@ -31,8 +31,14 @@ var combo = new Ext.form.ComboBox({
     width:135
 });
 
-Ext.define('NUbugger.view.Viewport', {
+Ext.define('NU.view.Viewport', {
     extend: 'Ext.container.Viewport',
+    requires: [
+        'NU.FieldWindow',
+        'NU.ChartWindow',
+        'NU.NUClearWindow',
+        'NU.VisionWindow',
+    ],
     cls: 'desktop', 
     layout: 'border',
     items: [{
@@ -45,37 +51,37 @@ Ext.define('NUbugger.view.Viewport', {
                 var renderTo = Ext.getCmp('main_display').getEl();
                 
                 Ext.getCmp('main_display').add([
-                    new Ext.ux.NU.VisionWindow({
+                    new NU.VisionWindow({
                         x: 5,
                         y: 1124,//810,
                         robotIP: '10.0.1.51',
                         renderTo: renderTo
                     }),
-                    new Ext.ux.NU.VisionWindow({
+                    new NU.VisionWindow({
                         x: 340,
-                        y: 1124,////810,
+                        y: 1124,//810,
                         robotIP: '10.0.1.52',
                         renderTo: renderTo
                     }),
-                    new Ext.ux.NU.VisionWindow({
+                    new NU.VisionWindow({
                         x: 675,
                         y: 1124,//810,
                         robotIP: '10.0.1.53',
                         renderTo: renderTo
                     }),
-                    new Ext.ux.NU.VisionWindow({
+                    new NU.VisionWindow({
                         x: 1010,
                         y: 1124,//810,
                         robotIP: '10.0.1.54',
                         renderTo: renderTo
                     }),
-                    new Ext.ux.NU.VisionWindow({
+                    new NU.VisionWindow({
                         x: 1345,
                         y: 1124,//810,
                         robotIP: '10.0.1.55',
                         renderTo: renderTo
                     }),
-                    new Ext.ux.NU.VisionWindow({
+                    new NU.VisionWindow({
                         x: 1680,
                         y: 1124,//810,
                         robotIP: '10.0.1.56',
@@ -95,6 +101,28 @@ Ext.define('NUbugger.view.Viewport', {
                 });
                 
             }
+        }, '->', {
+            text: 'Robots',
+            iconCls: 'icon-cog',
+            handler: function () {
+
+                Ext.create('Ext.Window', {
+                    title: 'Robots',
+                    autoShow: true,
+                    modal: true,
+                    items: [{
+                        xtype: 'grid',
+                        columns: [{
+                            text: 'Name',
+                            dataIndex: 'robotName'
+                        }, {
+                            text: 'Robot IP',
+                            dataIndex: 'robotIP'
+                        }]
+                    }]
+                });
+
+            }
         }]
     }, {
         xtype: 'container',
@@ -103,18 +131,15 @@ Ext.define('NUbugger.view.Viewport', {
         items: [{
             xtype: 'nu.field_window',
             x: 5,
-            y: 5,
-            robotIP: '10.0.1.52'
+            y: 5
         }, {
             xtype: 'nu.chart_window',
             x: 900,
-            y: 5,
-            robotIP: '10.0.1.52'
+            y: 5
         }, {
             xtype: 'nu.nuclear_window',
             x: 5,
-            y: 500,
-            robotIP: '10.0.1.52'
+            y: 500
         }]
     }]
 });
