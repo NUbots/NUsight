@@ -34,12 +34,12 @@ var combo = new Ext.form.ComboBox({
 Ext.define('NU.view.Viewport', {
     extend: 'Ext.container.Viewport',
     requires: [
-        'NU.FieldWindow',
-        'NU.ChartWindow',
-        'NU.NUClearWindow',
-        'NU.VisionWindow',
+        'NU.view.window.Field',
+        'NU.view.window.Chart'
+        //'window.NUClearWindow',
+        //'window.VisionWindow',
     ],
-    cls: 'desktop', 
+    cls: 'desktop',
     layout: 'border',
     items: [{
         xtype: 'toolbar',
@@ -47,9 +47,9 @@ Ext.define('NU.view.Viewport', {
         items: [{
             text: 'Add All Vision Display',
             handler: function () {
-                
+
                 var renderTo = Ext.getCmp('main_display').getEl();
-                
+
                 Ext.getCmp('main_display').add([
                     new NU.VisionWindow({
                         x: 5,
@@ -88,18 +88,18 @@ Ext.define('NU.view.Viewport', {
                         renderTo: renderTo
                     }),
                 ]);
-                
+
             }
         }, {
             text: 'Add Vision Display',
             handler: function () {
-                
+
                 Ext.create('Ext.ux.NU.VisionWindow', {
                     x: 5,
                     y: 810,
                     renderTo: Ext.getCmp('main_display').getEl()
                 });
-                
+
             }
         }, '->', {
             text: 'Robots',
@@ -129,18 +129,18 @@ Ext.define('NU.view.Viewport', {
         region: 'center',
         id: 'main_display',
         items: [{
-            xtype: 'nu.field_window',
+            xtype: 'nu_field_window',
             x: 5,
             y: 5
         }, {
-            xtype: 'nu.chart_window',
+            xtype: 'nu_chart_window',
             x: 900,
             y: 5
-        }, {
+        }/*, {
             xtype: 'nu.nuclear_window',
             x: 5,
             y: 500
-        }]
+        }*/]
     }]
 });
 
