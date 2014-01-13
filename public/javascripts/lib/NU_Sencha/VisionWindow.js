@@ -124,14 +124,31 @@ Ext.define('Ext.ux.NU.VisionWindow', {
 		}*/
 	},
     drawImage: function (image) {
+        // 1st implementation - potentially slower
+        // this.drawImageURL(image);
+
+        // 2nd implementation - potentially faster
+        this.drawImageB64(image);
+    },
+    drawImageURL: function (image) {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
-        var url = URL.createObjectURL(blob);
+         var url = URL.createObjectURL(blob);
+         var imageObj = new Image();
+         var ctx = this.context;
+         imageObj.src = url;
+         imageObj.onload = function () {
+         ctx.drawImage(imageObj, 0, 0, image.width, image.height);
+         URL.revokeObjectURL(url);
+         };
+    },
+    drawImageB64: function (image) {
+        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
+        var uri = 'data:image/jpeg;base64,' + btoa(data);
         var imageObj = new Image();
         var ctx = this.context;
-        imageObj.src = url;
+        imageObj.src = uri;
         imageObj.onload = function () {
             ctx.drawImage(imageObj, 0, 0, image.width, image.height);
-            URL.revokeObjectURL(url);
         };
     },
 	drawClassifiedImage: function (api_classified_image) {

@@ -37,12 +37,11 @@ RobotFinder.prototype.listen = function () {
 
                 iface.forEach(function (i) {
                     if (i.family === 'IPv4' && i.internal !== true) {
-                        console.log('Adding multicast membership on interface: ' + ifacename);
                         try {
                             socket.addMembership(self.host, ifacename);
+                            console.log('Successfully listening to robots on interface \'' + ifacename + '\'');
                         } catch (err) {
-                            console.log('Error adding multicast membership on interface: ' + ifacename);
-                            console.log(err);
+                            console.log('Warning: Could not listen to robots on interface \'' + ifacename + '\'');
                         }
                     }
                 })
