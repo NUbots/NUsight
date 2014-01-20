@@ -27,11 +27,11 @@ Robot.prototype.connect = function () {
     
     self.socket = zmq.socket('sub');
     self.socket.connect('tcp://' + self.host + ':' + self.port);
-    console.log('tcp://' + self.host + ':' + self.port);
+    console.log('Connecting to robot on tcp://' + self.host + ':' + self.port);
     self.socket.subscribe("");
     
     self.socket.on('message', function () {
-        
+
         self.onMessage.apply(self, arguments);
         
     });
@@ -102,7 +102,7 @@ Robot.prototype.onMessage = function (data) {
     var self;
     
     self = this;
-    
+
     try {
         self.emit("message", data);
     } catch (err) {

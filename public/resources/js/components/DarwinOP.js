@@ -25,7 +25,7 @@
 
 		//Setup Body Container
 		this.body = new DarwinComponent({
-			url: "darwin/Body.json",
+			url: "resources/darwin/Body.json",
 			baseOffset: new THREE.Vector3(0, 0.3422, 0),
 			rotationAxis: "y"
 		});
@@ -34,31 +34,31 @@
 
 		//Setup Head Containers
 		this.neck = new DarwinComponent({
-			url: "darwin/Neck.json",
+			url: "resources/darwin/Neck.json",
 			baseOffset: new THREE.Vector3(0, 0.051, 0),
 			rotationAxis: "y"
 		});
 		this.body.add(this.neck);
 		this.head = new DarwinComponent({
-			url: "darwin/Head.json",
+			url: "resources/darwin/Head.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
 		this.neck.add(this.head);
 		this.eyeLED = new DarwinComponent({
-			url: "darwin/EyeLED.json",
+			url: "resources/darwin/EyeLED.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "none"
 		});
 		this.head.add(this.eyeLED);
 		this.headLED = new DarwinComponent({
-			url: "darwin/HeadLED.json",
+			url: "resources/darwin/HeadLED.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "none"
 		});
 		this.head.add(this.headLED);
 		this.camera = new DarwinComponent({
-			url: "darwin/Camera.json",
+			url: "resources/darwin/Camera.json",
 			baseOffset: new THREE.Vector3(0, 0.0329074, 0.0359816),
 			rotationAxis: "none"
 		});
@@ -66,37 +66,37 @@
 
 		//Setup Left Leg containers
 		this.leftPelvisY = new DarwinComponent({
-			url: "darwin/LeftPelvisY.json",
+			url: "resources/darwin/LeftPelvisY.json",
 			baseOffset: new THREE.Vector3(0.037, -0.1222, -0.005),
 			rotationAxis: "y"
 		});
 		this.body.add(this.leftPelvisY);
 		this.leftPelvis = new DarwinComponent({
-			url: "darwin/LeftPelvis.json",
+			url: "resources/darwin/LeftPelvis.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
 		this.leftPelvisY.add(this.leftPelvis);
 		this.leftUpperLeg = new DarwinComponent({
-			url: "darwin/LeftUpperLeg.json",
+			url: "resources/darwin/LeftUpperLeg.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
 		this.leftPelvis.add(this.leftUpperLeg);
 		this.leftLowerLeg = new DarwinComponent({
-			url: "darwin/LeftLowerLeg.json",
+			url: "resources/darwin/LeftLowerLeg.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
 		this.leftUpperLeg.add(this.leftLowerLeg);
 		this.leftAnkle = new DarwinComponent({
-			url: "darwin/LeftAnkle.json",
+			url: "resources/darwin/LeftAnkle.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
 		this.leftLowerLeg.add(this.leftAnkle);
 		this.leftFoot = new DarwinComponent({
-			url: "darwin/LeftFoot.json",
+			url: "resources/darwin/LeftFoot.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
@@ -104,37 +104,37 @@
 
 		//Setup Right Leg containers
 		this.rightPelvisY = new DarwinComponent({
-			url: "darwin/RightPelvisY.json",
+			url: "resources/darwin/RightPelvisY.json",
 			baseOffset: new THREE.Vector3(-0.037, -0.1222, -0.005),
 			rotationAxis: "y"
 		});
 		this.body.add(this.rightPelvisY);
 		this.rightPelvis = new DarwinComponent({
-			url: "darwin/RightPelvis.json",
+			url: "resources/darwin/RightPelvis.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
 		this.rightPelvisY.add(this.rightPelvis);
 		this.rightUpperLeg = new DarwinComponent({
-			url: "darwin/RightUpperLeg.json",
+			url: "resources/darwin/RightUpperLeg.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
 		this.rightPelvis.add(this.rightUpperLeg);
 		this.rightLowerLeg = new DarwinComponent({
-			url: "darwin/RightLowerLeg.json",
+			url: "resources/darwin/RightLowerLeg.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
 		this.rightUpperLeg.add(this.rightLowerLeg);
 		this.rightAnkle = new DarwinComponent({
-			url: "darwin/RightAnkle.json",
+			url: "resources/darwin/RightAnkle.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
 		this.rightLowerLeg.add(this.rightAnkle);
 		this.rightFoot = new DarwinComponent({
-			url: "darwin/RightFoot.json",
+			url: "resources/darwin/RightFoot.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
@@ -142,19 +142,19 @@
 
 		//Setup Left Arm Containers
 		this.leftShoulder = new DarwinComponent({
-			url: "darwin/LeftShoulder.json",
+			url: "resources/darwin/LeftShoulder.json",
 			baseOffset: new THREE.Vector3(0.082, 0, 0),
 			rotationAxis: "x"
 		});
 		this.body.add(this.leftShoulder);
 		this.leftUpperArm = new DarwinComponent({
-			url: "darwin/LeftUpperArm.json",
+			url: "resources/darwin/LeftUpperArm.json",
 			baseOffset: new THREE.Vector3(0, -0.016, 0),
 			rotationAxis: "z"
 		});
 		this.leftShoulder.add(this.leftUpperArm);
 		this.leftLowerArm = new DarwinComponent({
-			url: "darwin/LeftLowerArm.json",
+			url: "resources/darwin/LeftLowerArm.json",
 			baseOffset: new THREE.Vector3(0, -0.06, 0.016),
 			rotationAxis: "x"
 		});
@@ -162,19 +162,19 @@
 
 		//Setup Right Arm Containers
 		this.rightShoulder = new DarwinComponent({
-			url: "darwin/RightShoulder.json",
+			url: "resources/darwin/RightShoulder.json",
 			baseOffset: new THREE.Vector3(-0.082, 0, 0),
 			rotationAxis: "x"
 		});
 		this.body.add(this.rightShoulder);
 		this.rightUpperArm = new DarwinComponent({
-			url: "darwin/RightUpperArm.json",
+			url: "resources/darwin/RightUpperArm.json",
 			baseOffset: new THREE.Vector3(0, -0.016, 0),
 			rotationAxis: "z"
 		});
 		this.rightShoulder.add(this.rightUpperArm);
 		this.rightLowerArm = new DarwinComponent({
-			url: "darwin/RightLowerArm.json",
+			url: "resources/darwin/RightLowerArm.json",
 			baseOffset: new THREE.Vector3(0, -0.06, 0.016),
 			rotationAxis: "x"
 		});

@@ -1,5 +1,8 @@
 Ext.define('NU.view.window.Field', {
     extend : 'NU.view.window.Display',
+    requires: [
+        'NU.view.field.Robot'
+    ],
     alias : ['widget.nu_field_window'],
     title: 'Localisation Display',
     autoShow: true,
@@ -46,7 +49,7 @@ Ext.define('NU.view.window.Field', {
     }],
     constructor: function () {
 
-        NU.util.Network.on('robot_ips', Ext.bind(this.onRobotIPs, this));
+        NU.util.Network.on('robot_ip', Ext.bind(this.onRobotIP, this));
         NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
         NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
 
@@ -58,6 +61,12 @@ Ext.define('NU.view.window.Field', {
 
             this.init();
 
+            Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
+
+                this.onRobotIP(robotIP);
+
+            }, this);
+
         },
         resize: function (obj, width, height) {
 
@@ -65,43 +74,37 @@ Ext.define('NU.view.window.Field', {
 
         }
     },
-    onRobotIPs: function (robotIPs) {
+    onRobotIP: function (robotIP) {
 
-        var self = this;
+        var robot;
 
-        Ext.each(robotIPs, function (robotIP) {
+        robot = this.getRobot(robotIP);
 
-            var robot;
+        if (robot !== null) {
+            return; // already exists
+        }
 
-            robot = this.getRobot(robotIP);
+        robot = Ext.create('NU.view.field.Robot', {
+            robotIP: robotIP
+        });
 
-            if (robot !== null) {
-                return; // already exists
-            }
-
-            robot = new NU.FieldWindow.Robot({
-                robotIP: robotIP
-            });
-
-            //robot.darwinModel.traverse( function ( object ) { object.visible = false; } );
-            this.mainScene.scene.add(robot.darwinModel);
-            //robot.darwinModel.position.x = Math.random() * 800 - 400;
-            //robot.darwinModel.position.z = Math.random() * 400 - 200;
-            //robot.darwinModel.visualiser.scale.x = Math.random() * 50;
-            //robot.darwinModel.visualiser.scale.y = Math.random() * 50;
-            //robot.darwinModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
-            //robot.darwinModel.object.dataModel.localisation.angle.set(Math.random() * 2 * Math.PI);
-            robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
-            //robot.ballModel.traverse( function ( object ) { object.visible = false; } );
-            this.mainScene.scene.add(robot.ballModel);
-            //robot.ballModel.position.x = Math.random() * 800 - 400;
-            //robot.ballModel.position.z = Math.random() * 400 - 200;
-            //robot.ballModel.visualiser.scale.x = Math.random() * 10;
-            //robot.ballModel.visualiser.scale.y = Math.random() * 10;
-            //robot.ballModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
-            this.robots.push(robot);
-
-        }, this);
+        //robot.darwinModel.traverse( function ( object ) { object.visible = false; } );
+        this.mainScene.scene.add(robot.darwinModel);
+        //robot.darwinModel.position.x = Math.random() * 800 - 400;
+        //robot.darwinModel.position.z = Math.random() * 400 - 200;
+        //robot.darwinModel.visualiser.scale.x = Math.random() * 50;
+        //robot.darwinModel.visualiser.scale.y = Math.random() * 50;
+        //robot.darwinModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
+        //robot.darwinModel.object.dataModel.localisation.angle.set(Math.random() * 2 * Math.PI);
+        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
+        //robot.ballModel.traverse( function ( object ) { object.visible = false; } );
+        this.mainScene.scene.add(robot.ballModel);
+        //robot.ballModel.position.x = Math.random() * 800 - 400;
+        //robot.ballModel.position.z = Math.random() * 400 - 200;
+        //robot.ballModel.visualiser.scale.x = Math.random() * 10;
+        //robot.ballModel.visualiser.scale.y = Math.random() * 10;
+        //robot.ballModel.visualiser.rotation.y = Math.random() * 2 * Math.PI;
+        this.robots.push(robot);
 
     },
     onSensorData: function (robotIP, api_message) {
