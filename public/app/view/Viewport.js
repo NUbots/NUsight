@@ -35,8 +35,8 @@ Ext.define('NU.view.Viewport', {
     extend: 'Ext.container.Viewport',
     requires: [
         'NU.view.window.Field',
-        'NU.view.window.Chart'
-        //'window.NUClearWindow',
+        'NU.view.window.Chart',
+        'NU.view.window.NUClear',
         //'window.VisionWindow',
     ],
     cls: 'desktop',
@@ -136,11 +136,11 @@ Ext.define('NU.view.Viewport', {
             xtype: 'nu_chart_window',
             x: 900,
             y: 5
-        }/*, {
-            xtype: 'nu.nuclear_window',
+        }, {
+            xtype: 'nu_nuclear_window',
             x: 5,
             y: 500
-        }*/]
+        }]
     }]
 });
 
