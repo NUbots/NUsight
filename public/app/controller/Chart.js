@@ -1,5 +1,5 @@
 Ext.define('NU.controller.Chart', {
-    extend: 'Ext.app.Controller',
+    extend: 'NU.controller.Display',
     views: ['window.Chart'],
     smoothie: null,
     canvas: null,
@@ -13,6 +13,9 @@ Ext.define('NU.controller.Chart', {
     refs: [{
         selector: 'nu_chart_window #canvas',
         ref: 'canvas'
+    }, {
+        selector: 'nu_chart_window #streampicker',
+        ref: 'streampicker'
     }],
     init: function () {
         this.control({
@@ -20,17 +23,28 @@ Ext.define('NU.controller.Chart', {
                 resize: this.onResize
             },
             'nu_chart_window #streampicker': {
-                change: this.onRobotSelect
+                change: this.onStreamSelect
             }
         });
 
-        NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
         NU.util.Network.on('data_point', Ext.bind(this.onDataPoint, this));
+
+        this.callParent(arguments);
     },
-    onRobotSelect: function (obj, newValue, oldValue, e) {
-        debugger;
-        /*var self = this.up('#display_window');
-        Ext.each(self.streams, function (stream) {
+    onLaunch: function () {
+
+        this.canvas = this.getCanvas();
+        this.streampicker = this.getStreampicker();
+//        this.context = this.canvas.el.dom.getContext('2d');
+//        this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue:Math.PI,minValue:-Math.PI});
+//        this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue: 15, minValue: -15});
+
+        this.smoothie = new SmoothieChart({interpolation: 'linear'});
+        this.smoothie.streamTo(this.getCanvas().el.dom, 0);
+
+    },
+    onStreamSelect: function (obj, newValue, oldValue, e) {
+        Ext.each(this.streams, function (stream) {
             var found = false;
             Ext.each(newValue, function (value) {
                 if (value == stream.label) {
@@ -51,52 +65,15 @@ Ext.define('NU.controller.Chart', {
                 }
             }, this);
             stream.enabled = found;
-        }, self);*/
-        console.log('changed');
-    },
-    onLaunch: function () {
-
-//        this.varDisplay = this.down('#varDisplay');
-//        this.canvas = this.getCanvas();
-//        this.streampicker = this.down('#streampicker');
-//        //this.context = this.canvas.el.dom.getContext('2d');
-//        //this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue:Math.PI,minValue:-Math.PI});
-//        this.smoothie = new SmoothieChart({interpolation: 'linear'});
-//        //this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue: 15, minValue: -15});
-//        this.smoothie.streamTo(this.canvas.el.dom, 0);
-
-//			this.tx = new TimeSeries();
-//			this.ty = new TimeSeries();
-//			this.tz = new TimeSeries();
-//
-//			this.smoothie.addTimeSeries(this.tx, {strokeStyle: 'rgb(255, 0, 0)', lineWidth: 2});
-//			this.smoothie.addTimeSeries(this.ty, {strokeStyle: 'rgb(0, 255, 0)', lineWidth: 2});
-//			this.smoothie.addTimeSeries(this.tz, {strokeStyle: 'rgb(0, 0, 255)', lineWidth: 2});
-
+        }, this);
     },
     onResize: function (obj, width, height) {
 
-        var canvas = this.getCanvas();
-        canvas.el.dom.width = canvas.el.getWidth();
-        canvas.el.dom.height = canvas.el.getHeight();
-
-    },
-    onSensorData: function (robotIP, api_message) {
-
-        // do stuff
-        //var x2 = api_message.sensor_data.orientation.float_value[0];
-        //var y2 = api_message.sensor_data.orientation.float_value[1];
-        //var z2 = api_message.sensor_data.orientation.float_value[2];
-//		var x2 = api_message.sensor_data.accelerometer.float_value[0];
-//		var y2 = api_message.sensor_data.accelerometer.float_value[1];
-//		var z2 = api_message.sensor_data.accelerometer.float_value[2];
-        //var x2 = api_message.sensor_data.gyro.float_value[0];
-        //var y2 = api_message.sensor_data.gyro.float_value[1];
-        //var z2 = api_message.sensor_data.gyro.float_value[2];
-
-//		this.tx.append(Date.now(), x2);
-//		this.ty.append(Date.now(), y2);
-//		this.tz.append(Date.now(), z2);
+        // TODO: fix onload size
+        if (this.canvas !== null) {
+            this.canvas.el.dom.width = this.canvas.el.getWidth();
+            this.canvas.el.dom.height = this.canvas.el.getHeight();
+        }
 
     },
     onDataPoint: function (robotIP, api_message) {
@@ -142,7 +119,7 @@ Ext.define('NU.controller.Chart', {
             enabled: false
         };
         this.streams.push(value);
-        this.streampicker.getStore().add({field1: label, field2: label});
+        this.streampicker.getStore().add(value);
         return value;
     }
 });

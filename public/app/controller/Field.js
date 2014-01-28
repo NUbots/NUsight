@@ -27,4 +27,4 @@ Ext.define('NU.controller.Field', {
     onLocalisation: function (robotIP, api_message) {
 
     }
-})
+});

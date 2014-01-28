@@ -35,7 +35,10 @@
         controllers: [
             'Field',
             'Chart'
-        ]
+        ],
+        launch: function () {
+            window._NU = this;
+        }
     });
 
 }());

@@ -26,11 +26,10 @@ Ext.define('NU.view.window.Chart', {
         region: 'east',
         width: 150,
         items: [{
-            anchor: '100%',
             xtype: 'multiselect',
             width: 148,
             store: 'Streams',
-            blankText: 'No items available',
+            displayField: 'label',
             itemId: 'streampicker'
         }]
     }]
