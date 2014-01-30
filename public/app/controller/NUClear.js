@@ -1,40 +1,37 @@
 Ext.define('NU.controller.NUClear', {
     extend: 'NU.controller.Display',
-    refs: [{
-        selector: '#display',
-        ref: 'display'
-    }, {
-        selector: '#logs',
-        ref: 'logs'
-    }],
+    inject: 'reactionStatisticsTreeStore',
+    control: {
+        'display': true,
+        'logs': true,
+        'view': {
+            robotIP: function () {
+                this.getDisplay().getRootNode().removeAll();
+            }
+        }
+    },
+    config: {
+        logs: null,
+        display: null,
+        reactionStatisticsTreeStore: null,
+        lastUpdated: 0
+    },
     init: function () {
 
         NU.util.Network.on('reaction_statistics', Ext.bind(this.onReactionStatistics, this));
 
-        this.on({
-            robotIP: function () {
-
-                this.display.getRootNode().removeAll();
-
-            }
-        });
-
         this.callParent(arguments);
 
-    },
-    onLaunch: function () {
-        this.display = this.getDisplay();
-        this.logs = this.getLogs();
     },
     onReactionStatistics: function (robotIP, api_message) {
 
         // TODO: remove
-//        if (robotIP !== this.robotIP) {
-//            return;
-//        }
+        if (robotIP !== this.robotIP) {
+            return;
+        }
 
         var reactionStatistics = api_message.reactionStatistics;
-        var root = this.display.getRootNode();
+        var root = this.getReactionStatisticsTreeStore().getRootNode();
 
         var now = Date.now();
         if (now - this.lastUpdated > 0) {

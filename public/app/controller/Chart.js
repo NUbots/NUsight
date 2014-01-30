@@ -1,6 +1,5 @@
 Ext.define('NU.controller.Chart', {
     extend: 'NU.controller.Display',
-    views: ['window.Chart'],
     smoothie: null,
     canvas: null,
     context: null,
@@ -10,38 +9,26 @@ Ext.define('NU.controller.Chart', {
     tz: null,
     lastDraw: 0,
     streams: [],
-    refs: [{
-        selector: 'nu_chart_window #canvas',
-        ref: 'canvas'
-    }, {
-        selector: 'nu_chart_window #streampicker',
-        ref: 'streampicker'
-    }],
+    control: {
+        'view': {
+            resize: 'onResize'
+        },
+        'streampicker': {
+            change: 'onStreamSelect'
+        },
+        'canvas': true
+    },
     init: function () {
-        this.control({
-            'nu_chart_window': {
-                resize: this.onResize
-            },
-            'nu_chart_window #streampicker': {
-                change: this.onStreamSelect
-            }
-        });
+
+        this.canvas = this.getCanvas();
+        this.streampicker = this.getStreampicker();
+        this.context = this.canvas.el.dom.getContext('2d');
+        this.smoothie = new SmoothieChart({interpolation: 'linear'});
+        this.smoothie.streamTo(this.getCanvas().el.dom, 0);
 
         NU.util.Network.on('data_point', Ext.bind(this.onDataPoint, this));
 
         this.callParent(arguments);
-    },
-    onLaunch: function () {
-
-        this.canvas = this.getCanvas();
-        this.streampicker = this.getStreampicker();
-//        this.context = this.canvas.el.dom.getContext('2d');
-//        this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue:Math.PI,minValue:-Math.PI});
-//        this.smoothie = new SmoothieChart({interpolation: 'linear', maxValue: 15, minValue: -15});
-
-        this.smoothie = new SmoothieChart({interpolation: 'linear'});
-        this.smoothie.streamTo(this.getCanvas().el.dom, 0);
-
     },
     onStreamSelect: function (obj, newValue, oldValue, e) {
         Ext.each(this.streams, function (stream) {
@@ -79,7 +66,7 @@ Ext.define('NU.controller.Chart', {
     onDataPoint: function (robotIP, api_message) {
 
         // TODO: remove
-        if (robotIP !== this.robotIP) {
+        if (robotIP !== this.getRobotIP()) {
             return;
         }
 
