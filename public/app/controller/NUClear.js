@@ -3,20 +3,30 @@ Ext.define('NU.controller.NUClear', {
     inject: 'reactionStatisticsTreeStore',
     control: {
         'display': true,
-        'logs': true,
-        'view': {
+        'robot_selector': {
             robotIP: function () {
                 this.getDisplay().getRootNode().removeAll();
+            }
+        },
+        'updatespeed': {
+            change: function (field, newValue, oldValue, eOpts) {
+                this.setUpdateSpeed(newValue);
             }
         }
     },
     config: {
-        logs: null,
-        display: null,
         reactionStatisticsTreeStore: null,
-        lastUpdated: 0
+        lastUpdated: null,
+        lastDraw: 0,
+        updateSpeed: 1000
     },
     init: function () {
+
+        // init object
+        this.lastUpdated = {};
+
+        // update default
+        this.getUpdatespeed().setRawValue(this.getUpdateSpeed());
 
         NU.util.Network.on('reaction_statistics', Ext.bind(this.onReactionStatistics, this));
 
@@ -31,12 +41,13 @@ Ext.define('NU.controller.NUClear', {
         }
 
         var reactionStatistics = api_message.reactionStatistics;
-        var root = this.getReactionStatisticsTreeStore().getRootNode();
+        var reactionId = reactionStatistics.reactionId.toNumber();
 
         var now = Date.now();
-        if (now - this.lastUpdated > 0) {
-//            root.removeAll();
-            var reactionId = reactionStatistics.reactionId.toNumber();
+
+        if (now - this.getLastUpdated(reactionId) > this.getUpdateSpeed()) {
+            var root = this.getReactionStatisticsTreeStore().getRootNode();
+
             var causeReactionId = reactionStatistics.causeReactionId.toNumber();
             var reactionNode = root.findChildBy(function (node) {
                 return (node.get('reactionId') === reactionId && node.get('causeReactionId') === causeReactionId);
@@ -60,7 +71,7 @@ Ext.define('NU.controller.NUClear', {
                 reactionNode.set({
                     // WHYYYYYYYYYYYYYYYYYYYYYYYY
                     name: Ext.util.Format.htmlEncode(this.getShortName(reactionStatistics.name)),
-                    qtip: Ext.util.Format.htmlEncode(Ext.util.Format.htmlEncode(reactionStatistics.name)),
+                    qtip: Ext.util.Format.htmlEncode(reactionStatistics.name),
                     reactionId: reactionStatistics.reactionId.toNumber()
                 })
             } else if (causeReactionId > 0 && reactionNode.parentNode === root) {
@@ -75,35 +86,25 @@ Ext.define('NU.controller.NUClear', {
             reactionNode.set({
                 duration: diff / 1000 + 'ms',
                 taskId: reactionStatistics.taskId.toNumber(),
-                causeReactionId: reactionStatistics.causeReactionId.toNumber(),
+                //causeReactionId: reactionStatistics.causeReactionId.toNumber(),
                 causeTaskId: reactionStatistics.causeTaskId.toNumber()
             });
 
-            Ext.each(reactionStatistics.log, function (log) {
-                var store = this.logs.getStore();
-                var row = store.add({})[0];
-                row.set({
-                    reactor: Ext.util.Format.htmlEncode(this.getShortName(reactionStatistics.name)),
-                    message: log
-                });
-                if (store.count() > 5) {
-                    store.removeAt(0);
-                }
-            }, this);
-
-            this.lastUpdated = now;
+            this.setLastUpdated(reactionId, now);
         }
     },
+    getLastUpdated: function (reactionId) {
+        var lastUpdated = this.lastUpdated[reactionId];
+        if (lastUpdated === undefined) {
+            lastUpdated = 0;
+        }
+        this.lastUpdated[reactionId] = lastUpdated;
+        return lastUpdated;
+    },
+    setLastUpdated: function (reactionId, value) {
+        this.lastUpdated[reactionId] = value;
+    },
     getShortName: function (name) {
-        if (name.indexOf('lambda') === -1) {
-            // TODO: support non-lambdas
-            return name;
-        }
-        var reactor = name.match(/:([^:]+)\(/)[1];
-        var dataType = name.match(/lambda\(([^)]+)\)/)[1];
-        if (dataType.indexOf('time_point') !== -1) {
-            dataType = 'time_t';
-        }
-        return reactor + "(" + dataType + ")";
+        return name.replace(/^std::tuple<(.*)>$/, "$1").replace(/NUClear::dsl::/g, '').replace(/std::chrono::/g, '');
     }
-})
+});

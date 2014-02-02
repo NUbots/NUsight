@@ -33,19 +33,17 @@ Ext.define('NU.controller.Field', {
     },
     init: function () {
 
-        NU.util.Network.on('robot_ip', Ext.bind(this.onRobotIP, this));
         NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
         NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
+        this.on('robot_ip', Ext.bind(this.onRobotIP, this));
 
-        var self = this;
-
-        self.mainScene = self.createMainScene();
-        self.getMainscene()
-            .setComponents(self.mainScene.scene, self.mainScene.renderer, self.mainScene.camera)
+        this.mainScene = this.createMainScene();
+        this.getMainscene()
+            .setComponents(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera)
             .enableControls({
                 movementSpeed: 200
             });
-        var controls =self.getMainscene().controls;
+        var controls = this.getMainscene().controls;
         controls.yawObject.position.set(0, 3.5 * 100, 0);
         controls.yawObject.rotation.set(0, 0, 0);
         controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
@@ -184,8 +182,7 @@ Ext.define('NU.controller.Field', {
         }
 
         renderer = new THREE.WebGLRenderer({antialias: true});
-        renderer.setClearColorHex(0x0);
-        //renderer.setClearColorHex(0xFFFFFF);
+        renderer.setClearColor("#000");
         renderer.setSize(window.innerWidth, window.innerHeight);
 
         return {

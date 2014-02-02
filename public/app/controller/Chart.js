@@ -1,14 +1,25 @@
 Ext.define('NU.controller.Chart', {
     extend: 'NU.controller.Display',
-    smoothie: null,
-    canvas: null,
-    context: null,
-    streampicker: null,
-    tx: null,
-    ty: null,
-    tz: null,
-    lastDraw: 0,
-    streams: [],
+    config: {
+        colours: [
+            // 8 distinct colours from http://colorbrewer2.org/
+            '#e41a1c',
+            '#4daf4a',
+            '#377eb8',
+            '#984ea3',
+            '#ff7f00',
+            '#ffff33',
+            '#a65628',
+            '#f781bf'
+        ],
+        smoothie: null,
+        context: null,
+        tx: null,
+        ty: null,
+        tz: null,
+        lastDraw: 0,
+        streams: null
+    },
     control: {
         'view': {
             resize: 'onResize'
@@ -20,18 +31,31 @@ Ext.define('NU.controller.Chart', {
     },
     init: function () {
 
-        this.canvas = this.getCanvas();
-        this.streampicker = this.getStreampicker();
-        this.context = this.canvas.el.dom.getContext('2d');
-        this.smoothie = new SmoothieChart({interpolation: 'linear'});
-        this.smoothie.streamTo(this.getCanvas().el.dom, 0);
+        // init array
+        this.setStreams([]);
 
+        // setup canvas
+        var canvas = this.getCanvas();
+        var canvasDom = canvas.getEl().dom;
+        this.setContext(canvasDom.getContext('2d'));
+
+        // setup smoothie
+        var smoothie = new SmoothieChart({interpolation: 'linear'});
+        this.setSmoothie(smoothie);
+        smoothie.streamTo(canvasDom, 0);
+
+        // setup network hook
         NU.util.Network.on('data_point', Ext.bind(this.onDataPoint, this));
 
         this.callParent(arguments);
+
+        this.onResize();
+
     },
     onStreamSelect: function (obj, newValue, oldValue, e) {
-        Ext.each(this.streams, function (stream) {
+        var colours = this.getColours();
+        var numColours = colours.length;
+        Ext.each(this.getStreams(), function (stream) {
             var found = false;
             Ext.each(newValue, function (value) {
                 if (value == stream.label) {
@@ -39,13 +63,19 @@ Ext.define('NU.controller.Chart', {
                     return false;
                 }
             }, this);
-            Ext.each(stream.series, function (ts) {
+            Ext.each(stream.series, function (ts, i) {
                 if (found) {
                     if (!stream.enabled) {
-                        var r = Math.round(Math.random() * 255);
-                        var g = Math.round(Math.random() * 255);
-                        var b = Math.round(Math.random() * 255);
-                        this.smoothie.addTimeSeries(ts, {strokeStyle: 'rgb(' + r + ', ' + g + ', ' + b + ')', lineWidth: 2});
+                        var colour;
+                        if (i < numColours) {
+                            colour = colours[i];
+                        } else {
+                            var r = Math.round(Math.random() * 255);
+                            var g = Math.round(Math.random() * 255);
+                            var b = Math.round(Math.random() * 255);
+                            colour = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+                        }
+                        this.smoothie.addTimeSeries(ts, {strokeStyle: colour, lineWidth: 2});
                     }
                 } else {
                     this.smoothie.removeTimeSeries(ts);
@@ -57,9 +87,13 @@ Ext.define('NU.controller.Chart', {
     onResize: function (obj, width, height) {
 
         // TODO: fix onload size
-        if (this.canvas !== null) {
-            this.canvas.el.dom.width = this.canvas.el.getWidth();
-            this.canvas.el.dom.height = this.canvas.el.getHeight();
+        var canvas = this.getCanvas();
+        var canvasEl = canvas.getEl();
+        var canvasDom = canvasEl.dom;
+
+        if (canvas !== null) {
+            canvasDom.width = canvasEl.getWidth();
+            canvasDom.height = canvasEl.getHeight();
         }
 
     },
@@ -83,7 +117,7 @@ Ext.define('NU.controller.Chart', {
     },
     getStream: function(label, values) {
         var value = null;
-        Ext.each(this.streams, function (stream) {
+        Ext.each(this.getStreams(), function (stream) {
             if (stream.label == label) {
                 value = stream;
                 return false;
@@ -96,7 +130,6 @@ Ext.define('NU.controller.Chart', {
         var series = [];
         for (var i = 0; i < size; i++) {
             var ts = new TimeSeries();
-            //this.smoothie.addTimeSeries(ts, {strokeStyle: 'rgb(' + Math.round(Math.random() * 255) + ', ' + Math.round(Math.random() * 255) + ', ' + Math.round(Math.random() * 255) + ')', lineWidth: 2});
             series.push(ts);
         }
         value = {
@@ -105,8 +138,8 @@ Ext.define('NU.controller.Chart', {
             series: series,
             enabled: false
         };
-        this.streams.push(value);
-        this.streampicker.getStore().add(value);
+        this.getStreams().push(value);
+        this.getStreampicker().getStore().add(value);
         return value;
     }
 });

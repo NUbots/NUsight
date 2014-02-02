@@ -1,17 +1,12 @@
 Ext.define('NU.view.window.Chart', {
     extend : 'NU.view.window.Display',
     alias: 'widget.nu_chart_window',
+    requires: 'Ext.ux.form.MultiSelect',
     controller: 'NU.controller.Chart',
-    inject: [
-        'streamsStore'
-    ],
+    inject: 'streamsStore',
     config: {
         streamsStore: null
     },
-    requires: [
-        'Ext.ux.form.MultiSelect',
-        'NU.view.robot.Selector'
-    ],
     initComponent: function () {
         Ext.applyIf(this, {
             title: 'Chart Display',
@@ -41,7 +36,7 @@ Ext.define('NU.view.window.Chart', {
                     width: 148,
                     displayField: 'label',
                     itemId: 'streampicker',
-                    store: this.getStreamsStore()
+                    store: this.getStreamsStore() //Ext.create('NU.store.Streams')
                 }]
             }]
         });

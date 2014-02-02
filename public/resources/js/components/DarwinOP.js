@@ -20,7 +20,7 @@
 		
 		this.dataModel = null;
 		
-		this.eulerOrder = "YZX"; // rotation doesn't work correctly otherwise, since the the robot uses yaw pitch roll
+		this.rotation.order= "YZX"; // rotation doesn't work correctly otherwise, since the the robot uses yaw pitch roll
 		this.scale.set(100,100,100);
 
 		//Setup Body Container

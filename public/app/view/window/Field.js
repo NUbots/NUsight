@@ -2,14 +2,17 @@ Ext.define('NU.view.window.Field', {
     extend : 'NU.view.window.Display',
     alias : ['widget.nu_field_window'],
     requires: [
-        'NU.view.field.Robot'
+        'NU.view.field.Robot',
+        'NU.view.robot.Selector'
     ],
     controller: 'NU.controller.Field',
     title: 'Localisation Display',
     width: 800,
     height: 400,
     layout: 'fit',
-    tbar: [{
+    tbar: [/* TODO: code to integrate with 3d field {
+        xtype: 'robot_selector'
+    }, */{
         text: 'HawkEye',
         itemId: 'hawkeye'
     }, {
@@ -21,7 +24,6 @@ Ext.define('NU.view.window.Field', {
     }],
     items: [{
         xtype: 'threejs',
-        itemId: 'mainscene',
-        id: 'mainscene'
-    }],
+        itemId: 'mainscene'
+    }]
 });

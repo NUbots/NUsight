@@ -7,12 +7,6 @@ Ext.define('NU.util.Network', {
         robotIPs: []
     },
     singleton: true,
-    /*robots: Ext.create('Ext.data.Store', {
-     model: 'robot',
-     proxy: {
-
-     }
-     }),*/
     constructor: function () {
 
         var self;
@@ -76,6 +70,9 @@ Ext.define('NU.util.Network', {
 
             self.fireEvent(eventName, robotIP, api_message);
         });
+
+    },
+    onRobotIP: function (callback) {
 
     }
 });

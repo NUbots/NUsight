@@ -10,9 +10,6 @@
         }
     });
 
-    Ext.require('NU.util.Network');
-    Ext.require('NU.store.Robots');
-    Ext.require('NU.store.Streams');
     Ext.syncRequire([
         'NU.Application'
     ]);

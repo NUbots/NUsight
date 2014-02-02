@@ -12,53 +12,50 @@ Ext.define('NU.view.window.NUClear', {
     resizable: {
         preserveRatio: false
     },
-    lastDraw: 0,
     layout: 'border',
-    lastUpdated: 0,
+    tbar: [{
+        xtype: 'robot_selector'
+    }, {
+        xtype: 'numberfield',
+        itemId: 'updatespeed',
+        fieldLabel: 'Update Speed (ms)',
+        labelStyle: 'white-space: nowrap',
+        labelWidth: 120
+    }],
     initComponent: function () {
         Ext.applyIf(this, {
             items: [{
                 xtype: 'treepanel',
                 region: 'center',
                 store: this.getReactionStatisticsTreeStore(),
+                viewConfig: {
+                    markDirty: false
+                },
                 columns: [{
+                    text: 'Id',
+                    dataIndex: 'reactionId',
+                    type: 'number',
+                    width: 40
+                }, {
                     xtype: 'treecolumn',
                     text: 'Reaction',
                     width: 800,
-                    dataIndex: 'name'
+                    dataIndex: 'name',
+                    type: 'string'
                 }, {
                     text: 'Duration',
                     dataIndex: 'duration'
                 }, {
-                    text: 'ReactionId',
-                    dataIndex: 'reactionId',
+                    text: 'TaskId',
+                    dataIndex: 'taskId',
                     type: 'number'
                 }, {
-                    text: 'TaskId',
-                    dataIndex: 'taskId'
-                }, {
-                    text: 'CauseReactionId',
-                    dataIndex: 'causeReactionId'
-                }, {
                     text: 'CauseTaskId',
-                    dataIndex: 'causeTaskId'
+                    dataIndex: 'causeTaskId',
+                    type: 'number'
                 }],
                 rootVisible: false,
                 itemId: 'display'
-            }, {
-                xtype: 'grid',
-                title: 'Logs',
-                region: 'south',
-                height: 200,
-                columns: [{
-                    text: 'Reactor',
-                    dataIndex: 'reactor'
-                }, {
-                    text: 'Message',
-                    width: 800,
-                    dataIndex: 'message'
-                }],
-                itemId: 'logs'
             }]
         });
 

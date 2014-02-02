@@ -1,8 +1,11 @@
 Ext.define('NU.view.window.Display', {
     extend: 'Ext.Window',
-    requires: 'NU.util.Network',
+    requires: [
+        'NU.util.Network',
+        'NU.view.robot.Selector'
+    ],
     autoShow: true,
-    contrain: true,
+    constrain: true,
     tbar: [{
         xtype: 'robot_selector'
     }]
