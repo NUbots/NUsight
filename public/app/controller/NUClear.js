@@ -69,7 +69,6 @@ Ext.define('NU.controller.NUClear', {
                 });
 
                 reactionNode.set({
-                    // WHYYYYYYYYYYYYYYYYYYYYYYYY
                     name: Ext.util.Format.htmlEncode(this.getShortName(reactionStatistics.name)),
                     qtip: Ext.util.Format.htmlEncode(reactionStatistics.name),
                     reactionId: reactionStatistics.reactionId.toNumber()
@@ -105,6 +104,31 @@ Ext.define('NU.controller.NUClear', {
         this.lastUpdated[reactionId] = value;
     },
     getShortName: function (name) {
-        return name.replace(/^std::tuple<(.*)>$/, "$1").replace(/NUClear::dsl::/g, '').replace(/std::chrono::/g, '');
+        return name
+            .replace(/^std::tuple<(.*)>$/, "$1")
+            .replace(/NUClear::dsl::/g, '')
+            .replace(/std::chrono::/g, '')
+            .replace(/duration<long long, std::ratio<(\d+)ll, (\d+)ll> > ?/g, function (o, num, den) {
+                num = parseInt(num, 10);
+                den = parseInt(den, 10);
+
+                // implemented a reasonable subset of http://en.cppreference.com/w/cpp/numeric/ratio/ratio
+                if (num == 3600 && den == 1) {
+                    return 'hours';
+                } else if (num == 60 && den == 1) {
+                    return 'minutes';
+                } else if (num == 1) {
+                    if (den == 1) {
+                        return 'seconds';
+                    } else if (den == 1E3) {
+                        return 'milliseconds'
+                    } else if (den == 1E6) {
+                        return 'microseconds'
+                    } else if (den == 1E9) {
+                        return 'nanoseconds'
+                    }
+                }
+                return o;
+            });
     }
 });
