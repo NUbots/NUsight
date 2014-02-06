@@ -36,10 +36,8 @@ Ext.define('NU.view.field.Robot', {
 		var motors = dataModel.motors;
 		var api_motor_data = api_sensor_data.servo;
 
-        // TODO: when orientation is available
-		/*var orientation = this.vectorToArray(api_sensor_data.orientation, "float");
-		dataModel.sensors.orientation[0].set(orientation[0]);
-		dataModel.sensors.orientation[1].set(-orientation[1]);*/
+		dataModel.sensors.orientation[0].set(Math.PI/2 - Math.atan2(api_sensor_data.orientation.z, api_sensor_data.orientation.y));
+		dataModel.sensors.orientation[1].set(-Math.PI/2 + Math.atan2(api_sensor_data.orientation.z, api_sensor_data.orientation.x));
 		
 		/*var chart = window.chart = Ext.getCmp('main_chart');
 		if (chart && Date.now() - last > 250 && count % 200 <= 80) {
