@@ -108,27 +108,36 @@ Ext.define('NU.controller.NUClear', {
             .replace(/^std::tuple<(.*)>$/, "$1")
             .replace(/NUClear::dsl::/g, '')
             .replace(/std::chrono::/g, '')
-            .replace(/duration<long long, std::ratio<(\d+)ll, (\d+)ll> > ?/g, function (o, num, den) {
+            .replace(/(Every<(\d+), (Per<)?)duration<long long, std::ratio<(\d+)ll, (\d+)ll> > ((?:> )?>)/g, function (o, prefix, every, per, num, den, suffix) {
                 num = parseInt(num, 10);
                 den = parseInt(den, 10);
+                every = parseInt(every, 10);
 
                 // implemented a reasonable subset of http://en.cppreference.com/w/cpp/numeric/ratio/ratio
+                var units = null;
                 if (num == 3600 && den == 1) {
-                    return 'hours';
+                    units = 'hour';
                 } else if (num == 60 && den == 1) {
-                    return 'minutes';
+                    units = 'minute';
                 } else if (num == 1) {
                     if (den == 1) {
-                        return 'seconds';
+                        units = 'second';
                     } else if (den == 1E3) {
-                        return 'milliseconds'
+                        units = 'millisecond'
                     } else if (den == 1E6) {
-                        return 'microseconds'
+                        units = 'microsecond'
                     } else if (den == 1E9) {
-                        return 'nanoseconds'
+                        units = 'nanosecond'
                     }
                 }
-                return o;
+                if (units === null) {
+                    return o;
+                } else {
+                    if (per === undefined && every > 1) {
+                        units += "s";
+                    }
+                    return prefix + units + suffix;
+                }
             });
     }
 });

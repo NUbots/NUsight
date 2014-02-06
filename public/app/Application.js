@@ -24,6 +24,10 @@ Ext.define('NU.Application', {
 
         Ext.QuickTips.init();
 
+        Ext.apply(Ext.QuickTips.getQuickTip(), {
+            dismissDelay: 0
+        });
+
         Ext.create('NU.view.Viewport');
     }
 });
