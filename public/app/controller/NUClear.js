@@ -108,7 +108,7 @@ Ext.define('NU.controller.NUClear', {
             .replace(/^std::tuple<(.*)>$/, "$1")
             .replace(/NUClear::dsl::/g, '')
             .replace(/std::chrono::/g, '')
-            .replace(/(Every<(\d+), (Per<)?)duration<long long, std::ratio<(\d+)ll, (\d+)ll> > ((?:> )?>)/g, function (o, prefix, every, per, num, den, suffix) {
+            .replace(/(Every<(\d+), (Per<)?)?duration<long long, std::ratio<(\d+)ll, (\d+)ll> > ((?:> )?>)/g, function (o, prefix, every, per, num, den, suffix) {
                 num = parseInt(num, 10);
                 den = parseInt(den, 10);
                 every = parseInt(every, 10);
