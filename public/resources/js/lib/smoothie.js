@@ -449,7 +449,7 @@
     // Round time down to pixel granularity, so motion appears smoother.
     time -= time % this.options.millisPerPixel;
 
-    var context = canvas.getContext('2d'),
+    var context = canvas.getContext('webgl-2d'),
         chartOptions = this.options,
         dimensions = { top: 0, left: 0, width: canvas.clientWidth, height: canvas.clientHeight },
         // Calculate the threshold time for the oldest data points.

@@ -37,10 +37,13 @@ Ext.define('NU.controller.Chart', {
         // setup canvas
         var canvas = this.getCanvas();
         var canvasDom = canvas.getEl().dom;
-        this.setContext(canvasDom.getContext('2d'));
+        WebGL2D.enable(canvasDom);
+        this.setContext(canvasDom.getContext('webgl-2d'));
 
         // setup smoothie
-        var smoothie = new SmoothieChart({interpolation: 'linear'});
+        var smoothie = new SmoothieChart({
+            interpolation: 'linear'
+        });
         this.setSmoothie(smoothie);
         smoothie.streamTo(canvasDom, 0);
 
