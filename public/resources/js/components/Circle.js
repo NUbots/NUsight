@@ -8,7 +8,7 @@
         
         this.resolution = 128;
         //this.scale.set(50, 1, 50);
-        this.scale.set(.5*100, 1*100, .5*100);
+        this.scale.set(0.5, 1, 0.5);
         
         this.color = (parameters && parameters.color) || 0xff00ff;
         

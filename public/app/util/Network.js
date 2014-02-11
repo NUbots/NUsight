@@ -30,6 +30,8 @@ Ext.define('NU.util.Network', {
         });
 
         window.API = self.builder.build("messages.support.NUbugger.proto");
+        // cry :'(
+        window.API.Sensors = self.builder.build("messages.input.proto.Sensors");
 
         return self;
 

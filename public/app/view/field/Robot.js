@@ -13,15 +13,17 @@ Ext.define('NU.view.field.Robot', {
 		this.callParent(arguments);
 		
 		darwin = new DarwinOP();
-		var DarwinModel = Modeler.model(DarwinDataModel);
-        darwin.bindToData(DarwinModel);
+//		var DarwinModel = Modeler.model(DarwinDataModel);
+//        darwin.bindToData(DarwinModel);
+//        var model = Ext.create('NU.model.DarwinOP');
+//        darwin.setModel(model);
         darwin = LocalisationVisualiser.visualise(darwin);
         darwin = BehaviourVisualiser.visualise(darwin);
         
         field = new Field();
         ball = new Ball();
         ball = LocalisationVisualiser.visualise(ball, {color: 0x0000ff});
-        ball.position.x = 20;
+        ball.position.x = 0.2;
 		
 		this.darwinModel = darwin;
 		this.ballModel = ball;
@@ -32,67 +34,42 @@ Ext.define('NU.view.field.Robot', {
 	onSensorData: function (api_sensor_data) {
 		
 		var darwin = this.darwinModel;
-		var dataModel = darwin.object.dataModel;
-		var motors = dataModel.motors;
 		var api_motor_data = api_sensor_data.servo;
 
-		dataModel.sensors.orientation[0].set(Math.PI/2 - Math.atan2(api_sensor_data.orientation.z, api_sensor_data.orientation.y));
-		dataModel.sensors.orientation[1].set(-Math.PI/2 + Math.atan2(api_sensor_data.orientation.z, api_sensor_data.orientation.x));
-		
-		/*var chart = window.chart = Ext.getCmp('main_chart');
-		if (chart && Date.now() - last > 250 && count % 200 <= 80) {
-			//console.log(count, count / 100, count / 100 <= 0.4);
-			var accelerometer = this.vectorToArray(api_sensor_data.accelerometer, "float");
-			var x = accelerometer[0];
-			var y = accelerometer[1];
-			var z = accelerometer[2];
-			chart.store.add(Ext.create('Vector', {time: Date.now(), x: x, y: y, z: z}));
-			//chart.store.add(Ext.create('Vector', {time: Date.now(), x: Math.random()*1000, y: Math.random()*1000, z: Math.random()*1000}));
-			//console.log(chart.store.data.items.length);
-			while (chart.store.data.items.length >= 10) {
-				chart.store.data.removeAt(0);
-			}
-			last = Date.now();
-		}*/
-
         var PI2 = Math.PI/2;
-		
-		// head
-		motors.head.angle.set(api_motor_data[19].present_position);
-		motors.neck.angle.set(api_motor_data[18].present_position);
-		
-		// right arm
-		// offset by pi/2 since 0 is arms straight out but model has 0 as arms straight down
-		motors.rightShoulder.angle.set(api_motor_data[0].present_position - PI2);
-		motors.rightUpperArm.angle.set(api_motor_data[2].present_position);
-		motors.rightLowerArm.angle.set(api_motor_data[4].present_position);
 
-		// left arm
-		// offset by pi/2 since 0 is arms straight out but model has 0 as arms straight down
-		motors.leftShoulder.angle.set(api_motor_data[1].present_position - PI2);
-		motors.leftUpperArm.angle.set(api_motor_data[3].present_position);
-		motors.leftLowerArm.angle.set(api_motor_data[5].present_position);
+        var ServoID = API.Sensors.ServoID;
+        var model = darwin.object;
 
-		// right pelvis
-		motors.rightPelvis.angle.set(api_motor_data[8].present_position);
-		motors.rightPelvisY.angle.set(api_motor_data[6].present_position);
+        model.rightShoulder.setAngle(api_motor_data[ServoID.R_SHOULDER_PITCH].present_position - PI2);
+        model.leftShoulder.setAngle(api_motor_data[ServoID.L_SHOULDER_PITCH].present_position - PI2);
+        model.rightUpperArm.setAngle(api_motor_data[ServoID.R_SHOULDER_ROLL].present_position);
+        model.leftUpperArm.setAngle(api_motor_data[ServoID.L_SHOULDER_ROLL].present_position);
+        model.rightLowerArm.setAngle(api_motor_data[ServoID.R_ELBOW].present_position);
+        model.leftLowerArm.setAngle(api_motor_data[ServoID.L_ELBOW].present_position);
+        model.rightPelvisY.setAngle(api_motor_data[ServoID.R_HIP_YAW].present_position);
+        model.leftPelvisY.setAngle(api_motor_data[ServoID.L_HIP_YAW].present_position);
+        model.rightPelvis.setAngle(api_motor_data[ServoID.R_HIP_ROLL].present_position);
+        model.leftPelvis.setAngle(api_motor_data[ServoID.L_HIP_ROLL].present_position);
+        model.rightUpperLeg.setAngle(api_motor_data[ServoID.R_HIP_PITCH].present_position);
+        model.leftUpperLeg.setAngle(api_motor_data[ServoID.L_HIP_PITCH].present_position);
+        model.rightLowerLeg.setAngle(api_motor_data[ServoID.R_KNEE].present_position);
+        model.leftLowerLeg.setAngle(api_motor_data[ServoID.L_KNEE].present_position);
+        model.rightAnkle.setAngle(api_motor_data[ServoID.R_ANKLE_PITCH].present_position);
+        model.leftAnkle.setAngle(api_motor_data[ServoID.L_ANKLE_PITCH].present_position);
+        model.rightFoot.setAngle(api_motor_data[ServoID.R_ANKLE_ROLL].present_position);
+        model.leftFoot.setAngle(api_motor_data[ServoID.L_ANKLE_ROLL].present_position);
+        model.neck.setAngle(api_motor_data[ServoID.HEAD_PAN].present_position);
+        model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].present_position);
 
-		// left pelvis
-		motors.leftPelvis.angle.set(api_motor_data[9].present_position);
-		motors.leftPelvisY.angle.set(api_motor_data[7].present_position);
-
-		// right leg
-		motors.rightUpperLeg.angle.set(api_motor_data[10].present_position);
-		motors.rightLowerLeg.angle.set(api_motor_data[12].present_position);
-		motors.rightAnkle.angle.set(api_motor_data[14].present_position);
-		motors.rightFoot.angle.set(api_motor_data[16].present_position);
-
-		// left leg
-		motors.leftUpperLeg.angle.set(api_motor_data[11].present_position);
-		motors.leftLowerLeg.angle.set(api_motor_data[13].present_position);
-		motors.leftAnkle.angle.set(api_motor_data[15].present_position);
-		motors.leftFoot.angle.set(api_motor_data[17].present_position);
-		
+        // swap axis because ThreeJS axis are different from the Robot (Y/Z swapped)
+        var rotation = new THREE.Matrix4(
+            api_sensor_data.orientation.yy, api_sensor_data.orientation.yz, api_sensor_data.orientation.yx, 0,
+            api_sensor_data.orientation.zy, api_sensor_data.orientation.zz, api_sensor_data.orientation.zx, 0,
+            api_sensor_data.orientation.xy, api_sensor_data.orientation.xz, api_sensor_data.orientation.xx, 0,
+            0, 0, 0, 1
+        );
+        darwin.object.quaternion.setFromRotationMatrix(rotation);
 	},
 	onLocalisation: function (api_localisation) {
 		for (var i = 0; i < api_localisation.field_object.length; i++) {

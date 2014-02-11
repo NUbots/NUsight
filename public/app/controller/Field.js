@@ -9,7 +9,7 @@ Ext.define('NU.controller.Field', {
         'hawkeye': {
             click: function () {
                 var controls = this.getMainscene().controls;
-                controls.yawObject.position.set(0, 3.5 * 100, 0);
+                controls.yawObject.position.set(0, 3.5, 0);
                 controls.yawObject.rotation.set(0, 0, 0);
                 controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
             }
@@ -17,7 +17,7 @@ Ext.define('NU.controller.Field', {
         'perspective': {
             click: function () {
                 var controls = this.getMainscene().controls;
-                controls.yawObject.position.set(-3 * 100, 1.6 * 100, 3 * 100);
+                controls.yawObject.position.set(-3, 1.6, 3);
                 controls.yawObject.rotation.set(0, -6.9, 0);
                 controls.pitchObject.rotation.set(-0.5, 0, 0);
             }
@@ -25,9 +25,25 @@ Ext.define('NU.controller.Field', {
         'side': {
             click: function () {
                 var controls = this.getMainscene().controls;
-                controls.yawObject.position.set(0, 1.9 * 100, -4.5 * 100);
+                controls.yawObject.position.set(0, 1.9, -4.5);
                 controls.yawObject.rotation.set(0, Math.PI, 0);
                 controls.pitchObject.rotation.set(-0.6, 0, 0);
+            }
+        },
+        'close_front': {
+            click: function () {
+                var controls = this.getMainscene().controls;
+                controls.yawObject.position.set(0.4, 0.4, 0);
+                controls.yawObject.rotation.set(0, Math.PI/2, 0);
+                controls.pitchObject.rotation.set(-0.4, 0, 0);
+            }
+        },
+        'close_side': {
+            click: function () {
+                var controls = this.getMainscene().controls;
+                controls.yawObject.position.set(0, 0.4, -0.4);
+                controls.yawObject.rotation.set(0, Math.PI, 0);
+                controls.pitchObject.rotation.set(-0.4, 0, 0);
             }
         }
     },
@@ -41,10 +57,10 @@ Ext.define('NU.controller.Field', {
         this.getMainscene()
             .setComponents(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera)
             .enableControls({
-                movementSpeed: 200
+                movementSpeed: 2
             });
         var controls = this.getMainscene().controls;
-        controls.yawObject.position.set(0, 3.5 * 100, 0);
+        controls.yawObject.position.set(0, 3.5, 0);
         controls.yawObject.rotation.set(0, 0, 0);
         controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 
@@ -66,7 +82,7 @@ Ext.define('NU.controller.Field', {
         });
 
         this.mainScene.scene.add(robot.darwinModel);
-        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
+//        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
         this.mainScene.scene.add(robot.ballModel);
         this.robots.push(robot);
 
@@ -112,7 +128,7 @@ Ext.define('NU.controller.Field', {
         var darwin, field, ball, camera, scene, renderer;
 
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 20);
 
         camera.lookAt(scene.position);
 
@@ -143,7 +159,7 @@ Ext.define('NU.controller.Field', {
         // green = y
         // blue = z
         //Axis array[x,y,z]
-        var axisLength = 4 * 100;
+        /*var axisLength = 4;
 
         var info = [[-axisLength, 0, 0, axisLength, 0, 0, 0xff0000], [0, -axisLength ,0 , 0, axisLength, 0, 0x00ff00], [0, 0, -axisLength, 0, 0, axisLength, 0x0000ff]];
 
@@ -179,7 +195,7 @@ Ext.define('NU.controller.Field', {
             //Create the line between points
             var line = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: info[i][6], opacity: 0.8, linewidth: 1}));
             scene.add(line);
-        }
+        }*/
 
         renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setClearColor("#000");

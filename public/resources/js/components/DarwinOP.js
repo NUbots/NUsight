@@ -21,7 +21,6 @@
 		this.dataModel = null;
 		
 		this.rotation.order= "YZX"; // rotation doesn't work correctly otherwise, since the the robot uses yaw pitch roll
-		this.scale.set(100,100,100);
 
 		//Setup Body Container
 		this.body = new DarwinComponent({
@@ -183,6 +182,14 @@
 
 	//We inherit from Object3D
 	DarwinOP.prototype = Object.create(THREE.Object3D.prototype);
+
+
+//    DarwinOP.prototype.setModel = function (dataModel) {
+//
+//        // add triggers
+//
+//        this.dataModel = dataModel;
+//    }
 
 	/**
      * This method binds the robot's position and movement to the data model so

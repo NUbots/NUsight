@@ -21,6 +21,12 @@ Ext.define('NU.view.window.Field', {
     }, {
         text: 'Side',
         itemId: 'side'
+    }, {
+        text: 'Close Front',
+        itemId: 'close_front'
+    }, {
+        text: 'Close Side',
+        itemId: 'close_side'
     }],
     items: [{
         xtype: 'threejs',

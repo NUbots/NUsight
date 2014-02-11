@@ -8,7 +8,7 @@
 	var Ball, RADIUS, COLOR;
 
 	//The radius and Color constants
-	RADIUS = 0.0335 * 100;
+	RADIUS = 0.0335;
 	COLOR = 0xFFA500;
 
 	/**
