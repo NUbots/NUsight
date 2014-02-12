@@ -8,9 +8,9 @@
 	var DarwinOP, DarwinComponent;
 
 	/**
-     * Creates a new Darwin-OP model. Creates the hierachy of objects so that
+     * Creates a new Darwin-OP model. Creates the hierarchy of objects so that
      * they move as expected. To get the root element (to add to a scene) after
-     *  this has been consructed call getRootElement().
+     *  this has been constructed call getRootElement().
      *
      * @constructor
      */
@@ -19,9 +19,11 @@
 		THREE.Object3D.call(this);
 		
 		this.dataModel = null;
-		
-		this.rotation.order= "YZX"; // rotation doesn't work correctly otherwise, since the the robot uses yaw pitch roll
-        this.rotation.x = Math.PI/2;
+
+        // This corrects the fact that the model is made for computer graphics axis
+        this.orientationCorrection = new THREE.Object3D();
+        this.orientationCorrection.rotation.x = Math.PI/2;
+        this.add(this.orientationCorrection);
 
 		//Setup Body Container
 		this.body = new DarwinComponent({
@@ -30,7 +32,7 @@
 			rotationAxis: "y"
 		});
 		this.body.rotation.y = Math.PI/2;
-		this.add(this.body);
+		this.orientationCorrection.add(this.body);
 
 		//Setup Head Containers
 		this.neck = new DarwinComponent({

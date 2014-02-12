@@ -62,14 +62,14 @@ Ext.define('NU.view.field.Robot', {
         model.neck.setAngle(api_motor_data[ServoID.HEAD_PAN].present_position);
         model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].present_position);
 
-        // swap axis because ThreeJS axis are different from the Robot (Y/Z swapped)
         var rotation = new THREE.Matrix4(
-            api_sensor_data.orientation.yy, api_sensor_data.orientation.yz, api_sensor_data.orientation.yx, 0,
-            api_sensor_data.orientation.zy, api_sensor_data.orientation.zz, api_sensor_data.orientation.zx, 0,
-            api_sensor_data.orientation.xy, api_sensor_data.orientation.xz, api_sensor_data.orientation.xx, 0,
+            api_sensor_data.orientation.xx, api_sensor_data.orientation.xy, api_sensor_data.orientation.xz, 0,
+            api_sensor_data.orientation.yx, api_sensor_data.orientation.yy, api_sensor_data.orientation.yz, 0,
+            api_sensor_data.orientation.zx, api_sensor_data.orientation.zy, api_sensor_data.orientation.zz, 0,
             0, 0, 0, 1
         );
-        darwin.object.quaternion.setFromRotationMatrix(rotation);
+
+        darwin.object.quaternion.setFromRotationMatrix(rotation.transpose());
 	},
 	onLocalisation: function (api_localisation) {
 		for (var i = 0; i < api_localisation.field_object.length; i++) {
