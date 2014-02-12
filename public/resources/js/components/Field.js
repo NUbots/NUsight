@@ -28,7 +28,7 @@
 		
 		this.field = new THREE.Object3D();
 		this.field.rotation.y = Math.PI / 2;
-		//this.field.rotation.x = Math.PI / 2;
+		this.field.rotation.x = Math.PI / 2;
 		
 		//Create the field
 		this.map = new FieldMap();

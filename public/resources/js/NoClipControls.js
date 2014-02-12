@@ -26,14 +26,18 @@
         this.domElement = domElement;
         
         this.pitchObject = new THREE.Object3D();
-	this.pitchObject.add(this.camera);
+        this.pitchObject.add(this.camera);
 
-	this.yawObject = new THREE.Object3D();
-	this.yawObject.add(this.pitchObject);
+        this.yawObject = new THREE.Object3D();
+        this.yawObject.add(this.pitchObject);
         
         this.light = new THREE.PointLight( 0xffffff );
         //this.light.position.set(0, 0, 1);
         this.yawObject.add(this.light);
+
+        this.orientationCorrection = new THREE.Object3D();
+        this.orientationCorrection.add(this.yawObject);
+        this.orientationCorrection.rotation.x = Math.PI/2;
         
         function addEventListener(element, event, listener) {
             
@@ -78,7 +82,7 @@
     
     NoClipControls.prototype.getObject = function () {
         
-        return this.yawObject;
+        return this.orientationCorrection;
         
     };
     

@@ -8,6 +8,7 @@ Ext.define('NU.controller.Field', {
         'mainscene': true,
         'hawkeye': {
             click: function () {
+                // These controls use Threejs coordinates not field coordinates
                 var controls = this.getMainscene().controls;
                 controls.yawObject.position.set(0, 3.5, 0);
                 controls.yawObject.rotation.set(0, 0, 0);
@@ -16,6 +17,7 @@ Ext.define('NU.controller.Field', {
         },
         'perspective': {
             click: function () {
+                // These controls use Threejs coordinates not field coordinates
                 var controls = this.getMainscene().controls;
                 controls.yawObject.position.set(-3, 1.6, 3);
                 controls.yawObject.rotation.set(0, -6.9, 0);
@@ -24,6 +26,7 @@ Ext.define('NU.controller.Field', {
         },
         'side': {
             click: function () {
+                // These controls use Threejs coordinates not field coordinates
                 var controls = this.getMainscene().controls;
                 controls.yawObject.position.set(0, 1.9, -4.5);
                 controls.yawObject.rotation.set(0, Math.PI, 0);
@@ -32,6 +35,7 @@ Ext.define('NU.controller.Field', {
         },
         'close_front': {
             click: function () {
+                // These controls use Threejs coordinates not field coordinates
                 var controls = this.getMainscene().controls;
                 controls.yawObject.position.set(0.4, 0.4, 0);
                 controls.yawObject.rotation.set(0, Math.PI/2, 0);
@@ -40,6 +44,7 @@ Ext.define('NU.controller.Field', {
         },
         'close_side': {
             click: function () {
+                // These controls use Threejs coordinates not field coordinates
                 var controls = this.getMainscene().controls;
                 controls.yawObject.position.set(0, 0.4, -0.4);
                 controls.yawObject.rotation.set(0, Math.PI, 0);

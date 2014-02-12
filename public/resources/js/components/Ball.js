@@ -31,7 +31,7 @@
 		}));
 
 		//Move the mesh so it's origin is on the ground
-		mesh.position.y = RADIUS;
+		mesh.position.z = RADIUS;
 
 		//Add this mesh to the object
 		this.add(mesh);

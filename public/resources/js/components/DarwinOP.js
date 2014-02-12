@@ -21,6 +21,7 @@
 		this.dataModel = null;
 		
 		this.rotation.order= "YZX"; // rotation doesn't work correctly otherwise, since the the robot uses yaw pitch roll
+        this.rotation.x = Math.PI/2;
 
 		//Setup Body Container
 		this.body = new DarwinComponent({
