@@ -18,8 +18,8 @@ function NUbugger (io) {
     self.robotFinder.on('robotIP', function (robotIP) {
         self.addRobot(robotIP);
     });
-    // self.addRobot('192.168.56.77');
-    self.addRobot('10.0.1.42');
+    self.addRobot('127.0.0.1');
+    //self.addRobot('10.0.1.42');
 
 	self.io.sockets.on('connection', function (socket) {
 		
