@@ -45,14 +45,6 @@ Ext.define('NU.view.window.NUClear', {
                 }, {
                     text: 'Duration',
                     dataIndex: 'duration'
-                }, {
-                    text: 'TaskId',
-                    dataIndex: 'taskId',
-                    type: 'number'
-                }, {
-                    text: 'CauseTaskId',
-                    dataIndex: 'causeTaskId',
-                    type: 'number'
                 }],
                 rootVisible: false,
                 itemId: 'display'

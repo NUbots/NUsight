@@ -69,24 +69,35 @@ Ext.define('NU.controller.NUClear', {
                 });
 
                 reactionNode.set({
-                    name: Ext.util.Format.htmlEncode(this.getShortName(reactionStatistics.name)),
-                    qtip: Ext.util.Format.htmlEncode(reactionStatistics.name),
-                    reactionId: reactionStatistics.reactionId.toNumber()
-                })
-            } else if (causeReactionId > 0 && reactionNode.parentNode === root) {
-                // check if it needs moving
-                var potentialParent = root.findChild('reactionId', causeReactionId, true);
-                if (potentialParent !== null) {
-                    // move it
-                    potentialParent.appendChild(reactionNode);
+                    name: Ext.util.Format.htmlEncode(this.getShortName(reactionStatistics)),
+                    qtip: Ext.util.Format.htmlEncode(reactionStatistics.triggerName),
+                    reactionId: reactionStatistics.reactionId.toNumber(),
+                    sumTime: diff,
+                    numTime: 1
+                });
+            } else {
+                if (causeReactionId > 0 && reactionNode.parentNode === root) {
+                    // check if it needs moving
+                    var potentialParent = root.findChild('reactionId', causeReactionId, true);
+                    if (potentialParent !== null) {
+                        // move it
+                        potentialParent.appendChild(reactionNode);
+                    }
                 }
+
+                // inc average
+                reactionNode.set({
+                    sumTime: reactionNode.get('sumTime') + diff,
+                    numTime: reactionNode.get('numTime') + 1
+                });
             }
 
             reactionNode.set({
-                duration: diff / 1000 + 'ms',
+                duration: (diff / 1000).toFixed(4) + 'ms',
                 taskId: reactionStatistics.taskId.toNumber(),
                 //causeReactionId: reactionStatistics.causeReactionId.toNumber(),
-                causeTaskId: reactionStatistics.causeTaskId.toNumber()
+                causeTaskId: reactionStatistics.causeTaskId.toNumber(),
+                durationAverage: ((reactionNode.get('sumTime') / reactionNode.get('numTime')) / 1000).toFixed(4) + 'ms'
             });
 
             this.setLastUpdated(reactionId, now);
@@ -103,8 +114,16 @@ Ext.define('NU.controller.NUClear', {
     setLastUpdated: function (reactionId, value) {
         this.lastUpdated[reactionId] = value;
     },
-    getShortName: function (name) {
-        return name
+    getShortName: function (reactionStatistics) {
+        var name = reactionStatistics.name;
+        var triggerName = reactionStatistics.triggerName;
+        var functionName = reactionStatistics.functionName;
+        if (name !== "") {
+            return name;
+        }
+        // TODO: support non-lambdas
+        var className = functionName.match(/modules::([^(]+)::([^(]+)\(/)[1];
+        return className + " - " + triggerName
             .replace(/^std::tuple<(.*)>$/, "$1")
             .replace(/NUClear::dsl::/g, '')
             .replace(/std::chrono::/g, '')
