@@ -27,6 +27,18 @@ Ext.define('NU.controller.Chart', {
         'streampicker': {
             change: 'onStreamSelect'
         },
+        'min': {
+            change: function (field, newValue, oldValue, eOpts) {
+                var smoothie = this.getSmoothie()
+                smoothie.options.minValue = newValue;
+            }
+        },
+        'max': {
+            change: function (field, newValue, oldValue, eOpts) {
+                var smoothie = this.getSmoothie()
+                smoothie.options.maxValue = newValue;
+            }
+        },
         'canvas': true
     },
     init: function () {
@@ -55,6 +67,7 @@ Ext.define('NU.controller.Chart', {
     onStreamSelect: function (obj, newValue, oldValue, e) {
         var colours = this.getColours();
         var numColours = colours.length;
+        var colourIndex = 0;
         Ext.each(this.getStreams(), function (stream) {
             var found = false;
             Ext.each(newValue, function (value) {
@@ -63,12 +76,13 @@ Ext.define('NU.controller.Chart', {
                     return false;
                 }
             }, this);
-            Ext.each(stream.series, function (ts, i) {
+            Ext.each(stream.series, function (ts) {
                 if (found) {
                     if (!stream.enabled) {
                         var colour;
-                        if (i < numColours) {
-                            colour = colours[i];
+                        if (colourIndex < numColours) {
+                            colour = colours[colourIndex];
+                            colourIndex++;
                         } else {
                             var r = Math.round(Math.random() * 255);
                             var g = Math.round(Math.random() * 255);

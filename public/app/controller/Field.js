@@ -2,7 +2,9 @@ Ext.define('NU.controller.Field', {
     extend: 'NU.controller.Display',
     config: {
         mainScene: null,
-        robots: []
+        robots: [],
+        closeDistance: 0.4,
+        closeHeight: 0.1
     },
     control: {
         'mainscene': true,
@@ -37,18 +39,28 @@ Ext.define('NU.controller.Field', {
             click: function () {
                 // These controls use Threejs coordinates not field coordinates
                 var controls = this.getMainscene().controls;
-                controls.yawObject.position.set(0.4, 0.4, 0);
+                controls.yawObject.position.set(this.getCloseDistance(), this.getCloseHeight(), 0);
                 controls.yawObject.rotation.set(0, Math.PI/2, 0);
-                controls.pitchObject.rotation.set(-0.4, 0, 0);
+                controls.pitchObject.rotation.set(-0.2, 0, 0);
+            }
+        },
+        'close_angle': {
+            click: function () {
+                // These controls use Threejs coordinates not field coordinates
+                var controls = this.getMainscene().controls;
+                var dist = this.getCloseDistance() / Math.sqrt(2);
+                controls.yawObject.position.set(dist, this.getCloseHeight(), -dist);
+                controls.yawObject.rotation.set(0, 3 * Math.PI / 4, 0);
+                controls.pitchObject.rotation.set(-0.2, 0, 0);
             }
         },
         'close_side': {
             click: function () {
                 // These controls use Threejs coordinates not field coordinates
                 var controls = this.getMainscene().controls;
-                controls.yawObject.position.set(0, 0.4, -0.4);
+                controls.yawObject.position.set(0, this.getCloseHeight(), -this.getCloseDistance());
                 controls.yawObject.rotation.set(0, Math.PI, 0);
-                controls.pitchObject.rotation.set(-0.4, 0, 0);
+                controls.pitchObject.rotation.set(-0.2, 0, 0);
             }
         }
     },

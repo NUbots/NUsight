@@ -8,7 +8,7 @@ Ext.define('NU.view.window.Chart', {
         streamsStore: null
     },
     initComponent: function () {
-        Ext.applyIf(this, {
+        Ext.apply(this, {
             title: 'Chart Display',
             width: 320,
             height: 240,
@@ -16,6 +16,23 @@ Ext.define('NU.view.window.Chart', {
                 preserveRatio: false
             },
             layout: 'border',
+            tbar: [{
+                xtype: 'robot_selector'
+            }, {
+                xtype: 'numberfield',
+                itemId: 'min',
+                fieldLabel: 'Min',
+                labelStyle: 'white-space: nowrap',
+                labelWidth: 30,
+                width: 120
+            }, {
+                xtype: 'numberfield',
+                itemId: 'max',
+                fieldLabel: 'Max',
+                labelStyle: 'white-space: nowrap',
+                labelWidth: 30,
+                width: 120
+            }],
             items: [{
                 xtype: 'component',
                 region: 'center',
