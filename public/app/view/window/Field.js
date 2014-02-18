@@ -25,6 +25,9 @@ Ext.define('NU.view.window.Field', {
         text: 'Close Front',
         itemId: 'close_front'
     }, {
+        text: 'Close Angle',
+        itemId: 'close_angle'
+    }, {
         text: 'Close Side',
         itemId: 'close_side'
     }],
