@@ -8,6 +8,8 @@ Ext.define('NU.model.ReactionStatistic', {
         'causeTaskId',
         'emitted',
         'started',
-        'finished'
+        'finished',
+        'sumTime',
+        'numTime'
     ]
 });
