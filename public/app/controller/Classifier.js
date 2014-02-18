@@ -19,8 +19,10 @@ Ext.define('NU.controller.Classifier', {
         NU.util.Network.on('vision', Ext.bind(this.onVision, this));
         this.callParent(arguments);
 
-        var rawCanvas = this.getRawImage().getEl().dom;
+        var elCanvas = this.getRawImage().getEl();
+        var rawCanvas = elCanvas.dom;
         this.setRawContext(rawCanvas.getContext('2d'));
+        this.mon(elCanvas, 'click', this.onRawImageClick, this);
 
         var classifiedCanvas = this.getRawImage().getEl().dom;
         this.setClassifiedContext(classifiedCanvas.getContext('2d'));
@@ -40,6 +42,12 @@ Ext.define('NU.controller.Classifier', {
             this.drawImage(image);
         }
 
+    },
+    onRawImageClick: function (e, rawCanvas) {
+        var el = Ext.get(rawCanvas);
+        var x = e.getX() - el.getLeft();
+        var y = e.getY() - el.getTop();
+        console.log(x, y);
     },
     drawImage: function (image) {
         this.drawImageB64(image);
