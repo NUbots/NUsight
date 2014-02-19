@@ -29,13 +29,13 @@ Ext.define('NU.controller.Chart', {
         },
         'min': {
             change: function (field, newValue, oldValue, eOpts) {
-                var smoothie = this.getSmoothie()
+                var smoothie = this.getSmoothie();
                 smoothie.options.minValue = newValue;
             }
         },
         'max': {
             change: function (field, newValue, oldValue, eOpts) {
-                var smoothie = this.getSmoothie()
+                var smoothie = this.getSmoothie();
                 smoothie.options.maxValue = newValue;
             }
         },

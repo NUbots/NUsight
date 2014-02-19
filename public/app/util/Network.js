@@ -1,17 +1,16 @@
 Ext.define('NU.util.Network', {
     extend: 'Ext.util.Observable',
-    requires: [
-        'NU.model.Robot'
-    ],
     config: {
-        robotIPs: []
+        socket: null,
+        robotsStore: null
     },
+    inject: [
+        'robotsStore'
+    ],
     singleton: true,
     constructor: function () {
 
-        var self;
-
-        self = this;
+        this.initConfig();
 
         this.addEvents(
             'robot_ip',
@@ -20,61 +19,71 @@ Ext.define('NU.util.Network', {
             'localisation'
         );
 
-        self.setupSocket();
+        this.setupSocket();
 
-        self.callParent(arguments);
-
-        self.builder = dcodeIO.ProtoBuf.loadProtoFile({
+        this.builder = dcodeIO.ProtoBuf.loadProtoFile({
             root: "resources/js/proto",
             file: "messages/support/NUbugger/proto/Message.proto"
         });
 
-        window.API = self.builder.build("messages.support.NUbugger.proto");
+        window.API = this.builder.build("messages.support.NUbugger.proto");
         // cry :'(
-        window.API.Sensors = self.builder.build("messages.input.proto.Sensors");
+        window.API.Sensors = this.builder.build("messages.input.proto.Sensors");
 
-        return self;
+        this.mon(this.getRobotsStore(), 'add', this.onAddRobot, this);
+        this.mon(this.getRobotsStore(), 'update', this.onUpdateRobot, this);
+        this.mon(this.getRobotsStore(), 'remove', this.onRemoveRobot, this);
+
+        return this.callParent(arguments);
 
     },
     setupSocket: function () {
 
-        var self, socket;
-
-        self = this;
-
-        socket = io.connect(document.location.origin);
-
-        socket.on('robot_ip', function (robotIP) {
-
-            if (self.robotIPs.indexOf(robotIP) === -1) {
-
-                self.robotIPs.push(robotIP);
-                self.fireEvent('robot_ip', robotIP);
-
-            }
-
-        });
-
-        socket.on('message', function (robotIP, message) {
-
-            var api_message, array, stream, eventName;
-
-            api_message = API.Message.decode64(message);
-
-            Ext.iterate(API.Message.Type, function (key, type) {
-                if (type === api_message.type) {
-                    eventName = key.toLowerCase();
-                    return false;
-                }
-            });
-
-            //console.log(robotIP, eventName);
-
-            self.fireEvent(eventName, robotIP, api_message);
-        });
-
+        var socket = io.connect(document.location.origin);
+        socket.on('robotIP', Ext.bind(this.onRobotIP, this));
+        socket.on('message', Ext.bind(this.onMessage, this));
+        this.setSocket(socket);
     },
-    onRobotIP: function (callback) {
+    onAddRobot: function (store, records, index, eOpts) {
+        Ext.each(records, function (record) {
+            this.getSocket().emit('addRobot', record.get('ipAddress'), record.get('name'));
+        }, this);
+    },
+    onUpdateRobot: function (store, record, operation, eOpts) {
+        if (eOpts.indexOf("ipAddress") !== -1) {
+            // ipAddress modified
+            this.getSocket().emit('addRobot', record.get('ipAddress'));
+        }
+    },
+    onRemoveRobot: function (store, records, indexes, isMove, eOpts) {
+        Ext.each(records, function (record) {
+            this.getSocket().emit('removeRobot', record.get('ipAddress'));
+        }, this);
+    },
+    onRobotIP: function (robotIP, robotName) {
+        var store = this.getRobotsStore();
+        var robotIndex = store.find("ipAddress", robotIP);
+        if (robotIndex === -1) {
+            store.add({
+                ipAddress: robotIP,
+                name: robotName !== undefined ? robotName : robotIP
+            });
+        }
+    },
+    onMessage: function (robotIP, message) {
+        var api_message, eventName;
 
+        api_message = API.Message.decode64(message);
+
+        Ext.iterate(API.Message.Type, function (key, type) {
+            if (type === api_message.type) {
+                eventName = key.toLowerCase();
+                return false;
+            }
+        }, this);
+
+        //console.log(robotIP, eventName);
+
+        this.fireEvent(eventName, robotIP, api_message);
     }
 });

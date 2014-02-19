@@ -1,5 +1,6 @@
 Ext.define('NU.controller.Toolbar', {
     extend: 'Deft.mvc.ViewController',
+    requires: 'NU.view.robot.List',
 //    config: {
 //        renderTo: null
 //    },
@@ -35,18 +36,13 @@ Ext.define('NU.controller.Toolbar', {
         'list_robots': {
             click: function () {
                 Ext.create('Ext.Window', {
-                    title: 'Robots',
                     autoShow: true,
                     modal: true,
+                    title: 'Robot List',
+                    width: 400,
+                    height: 400,
                     items: [{
-                        xtype: 'grid',
-                        columns: [{
-                            text: 'Name',
-                            dataIndex: 'robotName'
-                        }, {
-                            text: 'Robot IP',
-                            dataIndex: 'robotIP'
-                        }]
+                        xtype: 'robotlist'
                     }]
                 });
             }
