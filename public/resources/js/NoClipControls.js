@@ -38,6 +38,9 @@
         this.orientationCorrection = new THREE.Object3D();
         this.orientationCorrection.add(this.yawObject);
         this.orientationCorrection.rotation.x = Math.PI/2;
+
+        this.lastX = 0;
+        this.lastY = 0;
         
         function addEventListener(element, event, listener) {
             
@@ -87,17 +90,18 @@
     };
     
     NoClipControls.prototype.pointerLockChange = function () {
+
+        var me = this;
         
         if (document.pointerLockElement === this.domElement || document.mozPointerLockElement === this.domElement || document.webkitPointerLockElement === this.domElement) {
-            
-            this.enabled = true;
-            
+            setTimeout(function () {
+                me.enabled = true;
+                console.log(me.enabled);
+            }, 10);
         } else {
-            
-            this.enabled = false;
-            
+            me.enabled = false;
+            console.log(me.enabled);
         }
-        
     };
     
     NoClipControls.prototype.pointerLockError = function () {
@@ -111,11 +115,18 @@
         if (this.enabled) {
             var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+            if (Math.abs(this.lastX - movementX) > 100 || Math.abs(this.lastY - movementY) > 100) {
+                return;
+            }
             
             this.yawObject.rotation.y -= movementX * 0.002;
             this.pitchObject.rotation.x -= movementY * 0.002;
             
             this.pitchObject.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pitchObject.rotation.x));
+
+            this.lastX = movementX;
+            this.lastY = movementY;
         }
         
     };

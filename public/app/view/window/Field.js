@@ -30,6 +30,10 @@ Ext.define('NU.view.window.Field', {
     }, {
         text: 'Close Side',
         itemId: 'close_side'
+    }, '->', {
+        xtype: 'checkbox',
+        itemId: 'anaglyph',
+        qtip: 'Anaglyph'
     }],
     items: [{
         xtype: 'threejs',

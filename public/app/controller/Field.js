@@ -62,13 +62,18 @@ Ext.define('NU.controller.Field', {
                 controls.yawObject.rotation.set(0, Math.PI, 0);
                 controls.pitchObject.rotation.set(0.05, 0, 0);
             }
+        },
+        'anaglyph': {
+            change: function (obj, newValue, oldValue, eOpts) {
+                this.getMainscene().setRenderEffect(newValue);
+            }
         }
     },
     init: function () {
 
         this.mainScene = this.createMainScene();
         this.getMainscene()
-            .setComponents(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera)
+            .setComponents(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera, this.mainScene.effect)
             .enableControls({
                 movementSpeed: 2
             });
@@ -244,10 +249,14 @@ Ext.define('NU.controller.Field', {
         renderer.setClearColor("#000");
         renderer.setSize(window.innerWidth, window.innerHeight);
 
+        var effect = new THREE.AnaglyphEffect(renderer);
+        effect.setSize(window.innerWidth, window.innerHeight);
+
         return {
             scene: scene,
             camera: camera,
-            renderer: renderer
+            renderer: renderer,
+            effect: effect
         };
     }
 });

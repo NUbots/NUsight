@@ -3,7 +3,7 @@ Ext.define('NU.controller.NUClear', {
     inject: 'reactionStatisticsTreeStore',
     control: {
         'display': true,
-        'robot_selector': {
+        'robotSelector': {
             robotIP: function () {
                 this.getDisplay().getRootNode().removeAll();
             }
