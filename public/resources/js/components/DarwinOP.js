@@ -14,7 +14,7 @@
      *
      * @constructor
      */
-	DarwinOP = function () {
+	DarwinOP = function (callback, scope) {
 		//Call super constructor
 		THREE.Object3D.call(this);
 		
@@ -25,8 +25,22 @@
         this.orientationCorrection.rotation.x = Math.PI/2;
         this.add(this.orientationCorrection);
 
+        this.loading = 0;
+
+        // wrap
+        var me = this;
+        var addComponent = function (params) {
+            return me.addComponent(params, callback, scope);
+        }
+
+        this.body = addComponent({
+            url: "resources/darwin/Body.json",
+            baseOffset: new THREE.Vector3(0, 0.3422, 0),
+            rotationAxis: "y"
+        });
+
 		//Setup Body Container
-		this.body = new DarwinComponent({
+		this.body = addComponent({
 			url: "resources/darwin/Body.json",
 			baseOffset: new THREE.Vector3(0, 0.3422, 0),
 			rotationAxis: "y"
@@ -35,31 +49,31 @@
 		this.orientationCorrection.add(this.body);
 
 		//Setup Head Containers
-		this.neck = new DarwinComponent({
+		this.neck = addComponent({
 			url: "resources/darwin/Neck.json",
 			baseOffset: new THREE.Vector3(0, 0.051, 0),
 			rotationAxis: "y"
 		});
 		this.body.add(this.neck);
-		this.head = new DarwinComponent({
+		this.head = addComponent({
 			url: "resources/darwin/Head.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
 		this.neck.add(this.head);
-		this.eyeLED = new DarwinComponent({
+		this.eyeLED = addComponent({
 			url: "resources/darwin/EyeLED.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "none"
 		});
 		this.head.add(this.eyeLED);
-		this.headLED = new DarwinComponent({
+		this.headLED = addComponent({
 			url: "resources/darwin/HeadLED.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "none"
 		});
 		this.head.add(this.headLED);
-		this.camera = new DarwinComponent({
+		this.camera = addComponent({
 			url: "resources/darwin/Camera.json",
 			baseOffset: new THREE.Vector3(0, 0.0329074, 0.0359816),
 			rotationAxis: "none"
@@ -67,37 +81,37 @@
 		this.head.add(this.camera);
 
 		//Setup Left Leg containers
-		this.leftPelvisY = new DarwinComponent({
+		this.leftPelvisY = addComponent({
 			url: "resources/darwin/LeftPelvisY.json",
 			baseOffset: new THREE.Vector3(0.037, -0.1222, -0.005),
 			rotationAxis: "y"
 		});
 		this.body.add(this.leftPelvisY);
-		this.leftPelvis = new DarwinComponent({
+		this.leftPelvis = addComponent({
 			url: "resources/darwin/LeftPelvis.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
 		this.leftPelvisY.add(this.leftPelvis);
-		this.leftUpperLeg = new DarwinComponent({
+		this.leftUpperLeg = addComponent({
 			url: "resources/darwin/LeftUpperLeg.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
 		this.leftPelvis.add(this.leftUpperLeg);
-		this.leftLowerLeg = new DarwinComponent({
+		this.leftLowerLeg = addComponent({
 			url: "resources/darwin/LeftLowerLeg.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
 		this.leftUpperLeg.add(this.leftLowerLeg);
-		this.leftAnkle = new DarwinComponent({
+		this.leftAnkle = addComponent({
 			url: "resources/darwin/LeftAnkle.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
 		this.leftLowerLeg.add(this.leftAnkle);
-		this.leftFoot = new DarwinComponent({
+		this.leftFoot = addComponent({
 			url: "resources/darwin/LeftFoot.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
@@ -105,37 +119,37 @@
 		this.leftAnkle.add(this.leftFoot);
 
 		//Setup Right Leg containers
-		this.rightPelvisY = new DarwinComponent({
+		this.rightPelvisY = addComponent({
 			url: "resources/darwin/RightPelvisY.json",
 			baseOffset: new THREE.Vector3(-0.037, -0.1222, -0.005),
 			rotationAxis: "y"
 		});
 		this.body.add(this.rightPelvisY);
-		this.rightPelvis = new DarwinComponent({
+		this.rightPelvis = addComponent({
 			url: "resources/darwin/RightPelvis.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
 		});
 		this.rightPelvisY.add(this.rightPelvis);
-		this.rightUpperLeg = new DarwinComponent({
+		this.rightUpperLeg = addComponent({
 			url: "resources/darwin/RightUpperLeg.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "x"
 		});
 		this.rightPelvis.add(this.rightUpperLeg);
-		this.rightLowerLeg = new DarwinComponent({
+		this.rightLowerLeg = addComponent({
 			url: "resources/darwin/RightLowerLeg.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
 		this.rightUpperLeg.add(this.rightLowerLeg);
-		this.rightAnkle = new DarwinComponent({
+		this.rightAnkle = addComponent({
 			url: "resources/darwin/RightAnkle.json",
 			baseOffset: new THREE.Vector3(-0, -0.093, 0),
 			rotationAxis: "x"
 		});
 		this.rightLowerLeg.add(this.rightAnkle);
-		this.rightFoot = new DarwinComponent({
+		this.rightFoot = addComponent({
 			url: "resources/darwin/RightFoot.json",
 			baseOffset: new THREE.Vector3(),
 			rotationAxis: "z"
@@ -143,19 +157,19 @@
 		this.rightAnkle.add(this.rightFoot);
 
 		//Setup Left Arm Containers
-		this.leftShoulder = new DarwinComponent({
+		this.leftShoulder = addComponent({
 			url: "resources/darwin/LeftShoulder.json",
 			baseOffset: new THREE.Vector3(0.082, 0, 0),
 			rotationAxis: "x"
 		});
 		this.body.add(this.leftShoulder);
-		this.leftUpperArm = new DarwinComponent({
+		this.leftUpperArm = addComponent({
 			url: "resources/darwin/LeftUpperArm.json",
 			baseOffset: new THREE.Vector3(0, -0.016, 0),
 			rotationAxis: "z"
 		});
 		this.leftShoulder.add(this.leftUpperArm);
-		this.leftLowerArm = new DarwinComponent({
+		this.leftLowerArm = addComponent({
 			url: "resources/darwin/LeftLowerArm.json",
 			baseOffset: new THREE.Vector3(0, -0.06, 0.016),
 			rotationAxis: "x"
@@ -163,36 +177,41 @@
 		this.leftUpperArm.add(this.leftLowerArm);
 
 		//Setup Right Arm Containers
-		this.rightShoulder = new DarwinComponent({
+		this.rightShoulder = addComponent({
 			url: "resources/darwin/RightShoulder.json",
 			baseOffset: new THREE.Vector3(-0.082, 0, 0),
 			rotationAxis: "x"
 		});
 		this.body.add(this.rightShoulder);
-		this.rightUpperArm = new DarwinComponent({
+		this.rightUpperArm = addComponent({
 			url: "resources/darwin/RightUpperArm.json",
 			baseOffset: new THREE.Vector3(0, -0.016, 0),
 			rotationAxis: "z"
 		});
 		this.rightShoulder.add(this.rightUpperArm);
-		this.rightLowerArm = new DarwinComponent({
+		this.rightLowerArm = addComponent({
 			url: "resources/darwin/RightLowerArm.json",
 			baseOffset: new THREE.Vector3(0, -0.06, 0.016),
 			rotationAxis: "x"
 		});
 		this.rightUpperArm.add(this.rightLowerArm);
+
 	};
 
 	//We inherit from Object3D
 	DarwinOP.prototype = Object.create(THREE.Object3D.prototype);
 
 
-//    DarwinOP.prototype.setModel = function (dataModel) {
-//
-//        // add triggers
-//
-//        this.dataModel = dataModel;
-//    }
+    DarwinOP.prototype.addComponent = function (params, callback, scope) {
+        this.loading++;
+        var component = new DarwinComponent(params, function () {
+            this.loading--;
+            if (this.loading === 0) {
+                callback.call(scope || this);
+            }
+        }, this);
+        return component;
+    }
 
 	/**
      * This method binds the robot's position and movement to the data model so
@@ -263,7 +282,7 @@
 	 *
 	 * @constructor
 	 */
-	DarwinComponent = function (params) {
+	DarwinComponent = function (params, callback, scope){
 		//Setup our variables
 		THREE.Object3D.call(this);
 
@@ -285,6 +304,8 @@
 
 			//Add it to the appropriate container
 			self.add(mesh);
+
+            callback.call(scope || this);
 		});
 
 		//Try to get our base offsets

@@ -89,17 +89,13 @@ Ext.define('NU.controller.Field', {
 
     },
     onSelectRobotIP: function (robotIP) {
-        console.log('select', robotIP);
         this.robots.forEach(function (robot) {
-            console.log(robotIP, robot.robotIP);
             if (robot.robotIP !== robotIP) {
-                robot.darwinModel.traverse(function (object) {
-                    object.visible = false;
-                });
+                robot.darwinModel.traverse(function (object) { object.visible = false; });
+                robot.ballModel.traverse(function (object) { object.visible = false; });
             } else {
-                robot.darwinModel.traverse(function (object) {
-                    object.visible = true;
-                });
+                robot.darwinModel.traverse(function (object) { object.visible = true; });
+                robot.ballModel.traverse(function (object) { object.visible = true; });
             }
         })
     },
@@ -117,13 +113,17 @@ Ext.define('NU.controller.Field', {
             robotIP: robotIP
         });
 
-        robot.darwinModel.traverse(function (object) {
-            object.visible = false;
-        });
+        robot.on('loaded', function () {
+            console.log(robotIP, this.getRobotIP());
+            if (robotIP !== this.getRobotIP()) {
+                robot.darwinModel.traverse(function (object) { object.visible = false; });
+                robot.ballModel.traverse(function (object) { object.visible = false; });
+            }
+            this.mainScene.scene.add(robot.darwinModel);
+            this.mainScene.scene.add(robot.ballModel);
+        }, this);
 
-        this.mainScene.scene.add(robot.darwinModel);
 //        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
-        this.mainScene.scene.add(robot.ballModel);
 
         window.a = this;
 
