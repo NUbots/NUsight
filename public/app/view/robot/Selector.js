@@ -6,7 +6,7 @@ Ext.define('NU.view.robot.Selector', {
     config: {
         robotsStore: null
     },
-    itemId: 'robot_selector',
+    itemId: 'robotSelector',
     initComponent: function () {
         Ext.apply(this, {
             fieldLabel: 'Robot',
@@ -14,7 +14,7 @@ Ext.define('NU.view.robot.Selector', {
             queryMode: 'local',
             forceSelection: true,
             editable: false,
-            displayField: 'ipAddress',
+            displayField: 'name',
             valueField: 'ipAddress',
             emptyText: 'No Robot Selected',
             store: this.getRobotsStore()
