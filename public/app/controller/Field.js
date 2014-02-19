@@ -4,7 +4,7 @@ Ext.define('NU.controller.Field', {
         mainScene: null,
         robots: [],
         closeDistance: 0.4,
-        closeHeight: 0.1
+        closeHeight: 0.2
     },
     control: {
         'mainscene': true,
@@ -41,7 +41,7 @@ Ext.define('NU.controller.Field', {
                 var controls = this.getMainscene().controls;
                 controls.yawObject.position.set(this.getCloseDistance(), this.getCloseHeight(), 0);
                 controls.yawObject.rotation.set(0, Math.PI/2, 0);
-                controls.pitchObject.rotation.set(-0.2, 0, 0);
+                controls.pitchObject.rotation.set(0.05, 0, 0);
             }
         },
         'close_angle': {
@@ -51,7 +51,7 @@ Ext.define('NU.controller.Field', {
                 var dist = this.getCloseDistance() / Math.sqrt(2);
                 controls.yawObject.position.set(dist, this.getCloseHeight(), -dist);
                 controls.yawObject.rotation.set(0, 3 * Math.PI / 4, 0);
-                controls.pitchObject.rotation.set(-0.2, 0, 0);
+                controls.pitchObject.rotation.set(0.05, 0, 0);
             }
         },
         'close_side': {
@@ -60,15 +60,11 @@ Ext.define('NU.controller.Field', {
                 var controls = this.getMainscene().controls;
                 controls.yawObject.position.set(0, this.getCloseHeight(), -this.getCloseDistance());
                 controls.yawObject.rotation.set(0, Math.PI, 0);
-                controls.pitchObject.rotation.set(-0.2, 0, 0);
+                controls.pitchObject.rotation.set(0.05, 0, 0);
             }
         }
     },
     init: function () {
-
-        NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
-        NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
-        this.on('robot_ip', Ext.bind(this.onRobotIP, this));
 
         this.mainScene = this.createMainScene();
         this.getMainscene()
@@ -81,10 +77,33 @@ Ext.define('NU.controller.Field', {
         controls.yawObject.rotation.set(0, 0, 0);
         controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 
+        NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
+        NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
+        NU.util.Network.on('addRobot', Ext.bind(this.onAddRobot, this));
+        Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
+            this.onAddRobot(robotIP);
+        }, this);
+        this.on('selectRobotIP', Ext.bind(this.onSelectRobotIP, this));
+
         this.callParent(arguments);
 
     },
-    onRobotIP: function (robotIP) {
+    onSelectRobotIP: function (robotIP) {
+        console.log('select', robotIP);
+        this.robots.forEach(function (robot) {
+            console.log(robotIP, robot.robotIP);
+            if (robot.robotIP !== robotIP) {
+                robot.darwinModel.traverse(function (object) {
+                    object.visible = false;
+                });
+            } else {
+                robot.darwinModel.traverse(function (object) {
+                    object.visible = true;
+                });
+            }
+        })
+    },
+    onAddRobot: function (robotIP) {
 
         var robot;
 
@@ -98,9 +117,16 @@ Ext.define('NU.controller.Field', {
             robotIP: robotIP
         });
 
+        robot.darwinModel.traverse(function (object) {
+            object.visible = false;
+        });
+
         this.mainScene.scene.add(robot.darwinModel);
 //        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
         this.mainScene.scene.add(robot.ballModel);
+
+        window.a = this;
+
         this.robots.push(robot);
 
     },

@@ -11,8 +11,9 @@ Ext.define('NU.controller.Display', {
         'robotSelector': {
             live: true,
             listeners: {
-                robotIP: function (robotIP) {
+                selectRobotIP: function (robotIP) {
                     this.setRobotIP(robotIP);
+                    this.fireEvent('selectRobotIP', robotIP);
                 }
             }
         }
@@ -29,6 +30,12 @@ Ext.define('NU.controller.Display', {
     },
     init: function () {
         // TODO: a bit too tightly coupled
-        this.setRobotIP(this.getRobotSelector().getController().getRobotIP());
+        if (this.getRobotSelector() !== null) {
+            var robotIP = this.getRobotSelector().getController().getRobotIP();
+            this.setRobotIP(robotIP);
+            this.fireEvent('selectRobotIP', robotIP);
+        }
+
+        return this.callParent(arguments);
     }
 });

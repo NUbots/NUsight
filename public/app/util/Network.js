@@ -46,18 +46,25 @@ Ext.define('NU.util.Network', {
     },
     onAddRobot: function (store, records, index, eOpts) {
         Ext.each(records, function (record) {
-            this.getSocket().emit('addRobot', record.get('ipAddress'), record.get('name'));
+            if (record.get('ipAddress') !== "") {
+                this.getSocket().emit('addRobot', record.get('ipAddress'), record.get('name'));
+                this.fireEvent('addRobot', record.get('ipAddress'));
+            }
         }, this);
     },
     onUpdateRobot: function (store, record, operation, eOpts) {
         if (eOpts.indexOf("ipAddress") !== -1) {
             // ipAddress modified
-            this.getSocket().emit('addRobot', record.get('ipAddress'));
+            if (record.get('ipAddress') !== "") {
+                this.getSocket().emit('addRobot', record.get('ipAddress'));
+                this.fireEvent('addRobot', record.get('ipAddress'));
+            }
         }
     },
     onRemoveRobot: function (store, records, indexes, isMove, eOpts) {
         Ext.each(records, function (record) {
             this.getSocket().emit('removeRobot', record.get('ipAddress'));
+            this.fireEvent('removeRobot', record.get('ipAddress'));
         }, this);
     },
     onRobotIP: function (robotIP, robotName) {
@@ -85,5 +92,12 @@ Ext.define('NU.util.Network', {
         //console.log(robotIP, eventName);
 
         this.fireEvent(eventName, robotIP, api_message);
+    },
+    getRobotIPs: function () {
+        var result = [];
+        this.getRobotsStore().each(function (record) {
+            result.push(record.get('ipAddress'));
+        });
+        return result;
     }
 });

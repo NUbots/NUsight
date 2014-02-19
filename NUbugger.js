@@ -43,6 +43,8 @@ function NUbugger (io) {
         socket.on('removeRobot', function (robotIP) {
             if (self.robotIPs.indexOf(robotIP) !== -1) {
                 console.log("TODO: Removing robot:", robotIP);
+                // hacky fix
+                self.robotIPs.splice(self.robotIPs.indexOf(robotIP), 1);
             }
         });
 
@@ -118,7 +120,11 @@ NUbugger.prototype.addRobot = function (robotIP, robotName) {
     var self = this;
 
     var robot = new Robot(robotIP);
-    robot.connect();
+    try {
+        robot.connect();
+    } catch(e) {
+        console.log('Error connecting to:', robotIP);
+    }
     robot.on('message', function (message) {
 
         self.emit('message', robotIP, message);

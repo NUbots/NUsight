@@ -11,7 +11,7 @@ Ext.define('NU.controller.robot.Selector', {
             select: function (combo, records, eOpts) {
                 var robotIP = records[0].data.ipAddress;
                 this.setRobotIP(robotIP);
-                combo.fireEvent('robotIP', robotIP);
+                combo.fireEvent('selectRobotIP', robotIP);
             }
         }
     },
