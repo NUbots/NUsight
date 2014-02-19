@@ -94,13 +94,9 @@
         var me = this;
         
         if (document.pointerLockElement === this.domElement || document.mozPointerLockElement === this.domElement || document.webkitPointerLockElement === this.domElement) {
-            setTimeout(function () {
-                me.enabled = true;
-                console.log(me.enabled);
-            }, 10);
+            me.enabled = true;
         } else {
             me.enabled = false;
-            console.log(me.enabled);
         }
     };
     

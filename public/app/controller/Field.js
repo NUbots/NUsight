@@ -119,7 +119,6 @@ Ext.define('NU.controller.Field', {
         });
 
         robot.on('loaded', function () {
-            console.log(robotIP, this.getRobotIP());
             if (robotIP !== this.getRobotIP()) {
                 robot.darwinModel.traverse(function (object) { object.visible = false; });
                 robot.ballModel.traverse(function (object) { object.visible = false; });
