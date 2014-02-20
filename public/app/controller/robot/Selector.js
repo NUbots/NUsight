@@ -19,8 +19,10 @@ Ext.define('NU.controller.robot.Selector', {
         // select first value by default
         var combo = this.getView();
         var recordSelected = combo.getStore().getAt(0);
-        combo.select(recordSelected, true);
-        combo.fireEvent('select', combo, [recordSelected]);
+        if (recordSelected) {
+            combo.select(recordSelected, true);
+            combo.fireEvent('select', combo, [recordSelected]);
+        }
     }
 });
 
