@@ -10,9 +10,9 @@ Ext.define('NU.view.window.Field', {
     width: 800,
     height: 400,
     layout: 'fit',
-    tbar: [/* TODO: code to integrate with 3d field {
+    tbar: [{
         xtype: 'robot_selector'
-    }, */{
+    }, {
         text: 'HawkEye',
         itemId: 'hawkeye'
     }, {
@@ -30,6 +30,10 @@ Ext.define('NU.view.window.Field', {
     }, {
         text: 'Close Side',
         itemId: 'close_side'
+    }, '->', {
+        xtype: 'checkbox',
+        itemId: 'anaglyph',
+        qtip: 'Anaglyph'
     }],
     items: [{
         xtype: 'threejs',

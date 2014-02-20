@@ -11,8 +11,12 @@ Ext.define('NU.view.field.Robot', {
 		var darwin, ball;
 		
 		this.callParent(arguments);
+
+        this.addEvents(['loaded']);
 		
-		darwin = new DarwinOP();
+		darwin = new DarwinOP(function () {
+            this.fireEvent('loaded');
+        }, this);
 //		var DarwinModel = Modeler.model(DarwinDataModel);
 //        darwin.bindToData(DarwinModel);
 //        var model = Ext.create('NU.model.DarwinOP');

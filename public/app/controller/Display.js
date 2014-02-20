@@ -8,11 +8,12 @@ Ext.define('NU.controller.Display', {
         'robotIP': null
     },
     control: {
-        'robot_selector': {
+        'robotSelector': {
             live: true,
             listeners: {
-                robotIP: function (robotIP) {
+                selectRobotIP: function (robotIP) {
                     this.setRobotIP(robotIP);
+                    this.fireEvent('selectRobotIP', robotIP);
                 }
             }
         }
@@ -23,31 +24,18 @@ Ext.define('NU.controller.Display', {
         Ext.merge(this.control, this.superclass.control);
 
         this.mixins.observable.constructor.call(this);
-        this.addEvents('robot_ip');
 
         this.callParent(arguments);
 
     },
     init: function () {
-
-        Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
-
-            this.addRobotIP(robotIP);
-
-        }, this);
-
-        NU.util.Network.on('robot_ip', function (robotIP) {
-
-            this.addRobotIP(robotIP);
-
-        }, this);
+        // TODO: a bit too tightly coupled
+        if (this.getRobotSelector() !== null) {
+            var robotIP = this.getRobotSelector().getController().getRobotIP();
+            this.setRobotIP(robotIP);
+            this.fireEvent('selectRobotIP', robotIP);
+        }
 
         return this.callParent(arguments);
-
-    },
-    addRobotIP: function (robotIP) {
-
-        this.fireEvent('robot_ip', robotIP);
-
     }
 });

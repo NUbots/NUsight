@@ -6,7 +6,7 @@ events = require('events');
 zmq = require('zmq');
 fs = require('fs');
 
-function Robot (host, port) {
+function Robot (host, port, robotName) {
     
     if (port === undefined) {
         port = 12000;
@@ -14,6 +14,7 @@ function Robot (host, port) {
     
     this.host = host;
     this.port = port;
+    this.name = robotName;
     this.socket = null;
 }
 
@@ -37,6 +38,20 @@ Robot.prototype.connect = function () {
     });
     
 };
+
+Robot.prototype.disconnect = function () {
+
+    var self;
+
+    self = this;
+
+    console.log('Disconnected from robot on tcp://' + self.host + ':' + self.port);
+
+    self.socket.removeAllListeners();
+    self.socket.disconnect('tcp://' + self.host + ':' + self.port);
+    self.socket.close();
+
+}
 
 Robot.prototype.connect2 = function () {
     

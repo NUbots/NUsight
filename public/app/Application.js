@@ -2,7 +2,6 @@ Ext.define('NU.Application', {
     extend: 'Deft.mvc.Application',
     requires: [
         'NU.view.Viewport',
-        'NU.util.Network',
         'NU.store.Robots',
         'NU.store.Streams',
         'NU.store.ReactionStatisticsTree',
@@ -15,11 +14,8 @@ Ext.define('NU.Application', {
                 className: 'NU.store.Streams',
                 singleton: false
             },
-            robotsStore: {
-                className: 'NU.store.Robots',
-                singleton: true
-            },
-            reactionStatisticsTreeStore: 'NU.store.ReactionStatisticsTree',
+            robotsStore: 'NU.store.Robots',
+            reactionStatisticsTreeStore: 'NU.store.ReactionStatisticsTree'
             classifierTargetStore: 'NU.store.classifier.Target'
         });
 
@@ -28,6 +24,8 @@ Ext.define('NU.Application', {
         Ext.apply(Ext.QuickTips.getQuickTip(), {
             dismissDelay: 0
         });
+
+        Ext.syncRequire('NU.util.Network');
 
         Ext.create('NU.view.Viewport');
     }

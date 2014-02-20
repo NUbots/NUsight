@@ -11,15 +11,13 @@ function NUbugger (io) {
 	
 	self.io = io;
 	self.robots = [];
-	self.robotIPs = [];
 	self.clients = [];
     self.robotFinder = new RobotFinder('238.158.129.230', 7447);
     self.robotFinder.listen();
     self.robotFinder.on('robotIP', function (robotIP) {
         self.addRobot(robotIP);
     });
-    self.addRobot('127.0.0.1');
-    //self.addRobot('10.0.1.42');
+    self.addRobot('127.0.0.1', 'Virtual Machine');
 
 	self.io.sockets.on('connection', function (socket) {
 		
@@ -27,14 +25,27 @@ function NUbugger (io) {
 		
 		self.clients.push(client);
 
-        self.robotIPs.forEach(function (robotIP) {
+        self.robots.forEach(function (robot) {
 
-            socket.emit('robot_ip', robotIP);
+            socket.emit('robotIP', robot.host, robot.name);
 
-        })
+        });
 
 		console.log('New web client', self.clients.length);
-		
+
+        socket.on('addRobot', function (robotIP, robotName) {
+            if (self.getRobot(robotIP) === null) {
+                console.log("Added robot:", robotIP);
+                self.addRobot(robotIP, robotName);
+            }
+        });
+        socket.on('removeRobot', function (robotIP) {
+            if (self.getRobot(robotIP) !== null) {
+                console.log("Removing robot:", robotIP);
+                self.removeRobot(robotIP);
+            }
+        });
+
 		socket.on('disconnect', function () {
 			
 			self.clients.splice(self.clients.indexOf(client), 1);
@@ -102,12 +113,43 @@ function NUbugger (io) {
 
 util.inherits(NUbugger, events.EventEmitter);
 
-NUbugger.prototype.addRobot = function (robotIP) {
+NUbugger.prototype.getRobot = function (robotIP) {
+    var self = this;
+    var result = null;
+    self.robots.forEach(function (robot) {
+        if (robot.host === robotIP) {
+            result = robot;
+            return false;
+        }
+    });
+    return result;
+};
+
+NUbugger.prototype.removeRobot = function (robotIP) {
+    var self = this;
+    self.robots.forEach(function (robot, index) {
+        if (robot.host === robotIP) {
+            try {
+                robot.disconnect();
+            } catch (e) {
+                console.log('Error disconnecting to:', robotIP);
+            }
+            self.robots.splice(index, 1);
+            return false;
+        }
+    });
+}
+
+NUbugger.prototype.addRobot = function (robotIP, robotName) {
 
     var self = this;
 
-    var robot = new Robot(robotIP);
-    robot.connect();
+    var robot = new Robot(robotIP, undefined, robotName);
+    try {
+        robot.connect();
+    } catch(e) {
+        console.log('Error connecting to:', robotIP);
+    }
     robot.on('message', function (message) {
 
         self.emit('message', robotIP, message);
@@ -115,11 +157,10 @@ NUbugger.prototype.addRobot = function (robotIP) {
     });
 
     self.clients.forEach(function (client) {
-        client.socket.emit('robot_ip', robotIP);
+        client.socket.emit('robotIP', robotIP, robotName);
     });
 
     self.robots.push(robot);
-    self.robotIPs.push(robotIP);
 
 };
 

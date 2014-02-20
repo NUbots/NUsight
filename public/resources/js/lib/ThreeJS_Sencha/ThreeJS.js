@@ -2,6 +2,7 @@ Ext.define("Ext.ux.ThreeJS", {
 	extend : 'Ext.Container',
 	alias : ['widget.threejs'],
 	renderer: null,
+    effect: null,
 	camera: null,
 	scene: null,
 	controls: null,
@@ -10,11 +11,15 @@ Ext.define("Ext.ux.ThreeJS", {
 		xtype: 'component',
 		itemId: 'domElementContainer'
 	}],
-	setComponents: function (scene, renderer, camera) {
+    config: {
+        renderEffect: false
+    },
+	setComponents: function (scene, renderer, camera, effect) {
 		
 		this.scene = scene;
 		this.renderer = renderer;
 		this.camera = camera;
+        this.effect = effect;
 		this.clock = new THREE.Clock();
 		
 		this.domElementContainer = this.getComponent('domElementContainer').getEl().dom;
@@ -24,8 +29,8 @@ Ext.define("Ext.ux.ThreeJS", {
 		this.startAnimation();
 		
 		this.addEvents({
-			"animate" : true,
-			"threejsready" : true
+			"animate": true,
+			"threejsready": true
 		});
 		
 		return this;
@@ -55,8 +60,11 @@ Ext.define("Ext.ux.ThreeJS", {
 				self.controls.update(delta);
 			}
 			self.fireEvent("animate", delta);
-            self.renderer.render(self.scene, self.camera);
-            
+            if (self.renderEffect) {
+                self.effect.render(self.scene, self.camera);
+            } else {
+                self.renderer.render(self.scene, self.camera);
+            }
         }
         
 		self.fireEvent("threejsready");

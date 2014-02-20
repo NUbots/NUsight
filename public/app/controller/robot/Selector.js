@@ -9,43 +9,20 @@ Ext.define('NU.controller.robot.Selector', {
     control: {
         'view': {
             select: function (combo, records, eOpts) {
-
                 var robotIP = records[0].data.ipAddress;
                 this.setRobotIP(robotIP);
-                combo.fireEvent('robotIP', robotIP);
-
+                combo.fireEvent('selectRobotIP', robotIP);
             }
         }
     },
     init: function () {
-
-        Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
-
-            this.addRobotIP(robotIP);
-
-        }, this);
-
-        NU.util.Network.on('robot_ip', function (robotIP) {
-
-            this.addRobotIP(robotIP);
-
-        }, this);
-
-        this.callParent(arguments);
-
-    },
-    addRobotIP: function (robotIP) {
-
-        var store = this.getRobotsStore();
-
-        if (store.find("ipAddress", robotIP) === -1) {
-            store.add({
-                ipAddress: robotIP,
-                name: robotIP, // TODO: get a name
-                enabled: true
-            });
+        // select first value by default
+        var combo = this.getView();
+        var recordSelected = combo.getStore().getAt(0);
+        if (recordSelected) {
+            combo.select(recordSelected, true);
+            combo.fireEvent('select', combo, [recordSelected]);
         }
-
     }
 });
 
