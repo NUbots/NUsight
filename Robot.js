@@ -49,6 +49,7 @@ Robot.prototype.disconnect = function () {
 
     self.socket.removeAllListeners();
     self.socket.disconnect('tcp://' + self.host + ':' + self.port);
+    self.socket.close();
 
 }
 
