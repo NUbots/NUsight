@@ -10,30 +10,44 @@ Ext.define('NU.view.window.Field', {
     width: 800,
     height: 400,
     layout: 'fit',
-    tbar: [{
+    tbar:  [{
         xtype: 'robot_selector'
     }, {
-        text: 'HawkEye',
-        itemId: 'hawkeye'
+        itemId: 'hawkeye',
+        text: 'HawkEye'
+    },/*, {
+        itemId: 'perspective',
+        text: 'Perspective'
     }, {
-        text: 'Perspective',
-        itemId: 'perspective'
+        itemId: 'side',
+        text: 'Side'
+    },*/ {
+        itemId: 'close_front',
+        text: 'Close Front'
     }, {
-        text: 'Side',
-        itemId: 'side'
+        itemId: 'close_angle',
+        text: 'Close Angle'
     }, {
-        text: 'Close Front',
-        itemId: 'close_front'
-    }, {
-        text: 'Close Angle',
-        itemId: 'close_angle'
-    }, {
-        text: 'Close Side',
-        itemId: 'close_side'
+        itemId: 'close_side',
+        text: 'Close Side'
     }, '->', {
-        xtype: 'checkbox',
-        itemId: 'anaglyph',
-        qtip: 'Anaglyph'
+        text: 'Extra',
+        menu: {
+            items: [{
+                itemId: 'orientation',
+                xtype: 'checkbox',
+                fieldLabel: 'Orientation',
+                checked: true
+            }, {
+                itemId: 'resetOrientation',
+                text: 'Reset Orientation',
+                ui: 'default-toolbar'
+            }, {
+                itemId: 'anaglyph',
+                xtype: 'checkbox',
+                fieldLabel: 'Anaglyph'
+            }]
+        }
     }],
     items: [{
         xtype: 'threejs',

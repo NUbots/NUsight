@@ -58,6 +58,7 @@ Ext.define('NU.controller.Chart', {
 
         // setup network hook
         NU.util.Network.on('data_point', Ext.bind(this.onDataPoint, this));
+        NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
 
         this.callParent(arguments);
 
@@ -110,6 +111,31 @@ Ext.define('NU.controller.Chart', {
             canvasDom.height = canvasEl.getHeight();
         }
 
+    },
+    onSensorData: function (api_sensor_data) {
+
+        var api_motor_data = api_sensor_data.servo;
+        // TODO
+        /*api_motor_data[ServoID.R_SHOULDER_PITCH].present_position
+        api_motor_data[ServoID.L_SHOULDER_PITCH].present_position
+        api_motor_data[ServoID.R_SHOULDER_ROLL].present_position
+        api_motor_data[ServoID.L_SHOULDER_ROLL].present_position
+        api_motor_data[ServoID.R_ELBOW].present_position
+        api_motor_data[ServoID.L_ELBOW].present_position
+        api_motor_data[ServoID.R_HIP_YAW].present_position
+        api_motor_data[ServoID.L_HIP_YAW].present_position
+        api_motor_data[ServoID.R_HIP_ROLL].present_position
+        api_motor_data[ServoID.L_HIP_ROLL].present_position
+        api_motor_data[ServoID.R_HIP_PITCH].present_position
+        api_motor_data[ServoID.L_HIP_PITCH].present_position
+        api_motor_data[ServoID.R_KNEE].present_position
+        api_motor_data[ServoID.L_KNEE].present_position
+        api_motor_data[ServoID.R_ANKLE_PITCH].present_position
+        api_motor_data[ServoID.L_ANKLE_PITCH].present_position
+        api_motor_data[ServoID.R_ANKLE_ROLL].present_position
+        api_motor_data[ServoID.L_ANKLE_ROLL].present_position
+        api_motor_data[ServoID.HEAD_PAN].present_position
+        api_motor_data[ServoID.HEAD_TILT].present_position*/
     },
     onDataPoint: function (robotIP, api_message) {
 
