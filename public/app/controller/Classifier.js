@@ -25,7 +25,7 @@ Ext.define('NU.controller.Classifier', {
         this.setRawContext(rawCanvas.getContext('2d'));
         this.mon(elCanvas, 'click', this.onRawImageClick, this);
 
-        var classifiedCanvas = this.getRawImage().getEl().dom;
+        var classifiedCanvas = this.getClassifiedImage().getEl().dom;
         this.setClassifiedContext(classifiedCanvas.getContext('2d'));
 
     },
@@ -54,13 +54,29 @@ Ext.define('NU.controller.Classifier', {
         var rgba = idata.data;
 
         var ycbcr = [0,0,0];
-        ycbcr[0] = 16  + 0.25678906250 * rgba[0] + 0.50412890625 * rgba[1] + 0.09790625000 * rgba[2];
-        ycbcr[1] = 128 - 0.14822265625 * rgba[0] - 0.29099218750 * rgba[1] + 0.43921484375 * rgba[2];
-        ycbcr[2] = 128 + 0.43921484375 * rgba[0] - 0.36778906250 * rgba[1] - 0.07142578125 * rgba[2];
+
+        //the digital RGB->YCC equations (RESTRICTION: luma is always >= 16)
+        //ycbcr[0] = 16  + 0.25678906250 * rgba[0] + 0.50412890625 * rgba[1] + 0.09790625000 * rgba[2];
+        //ycbcr[1] = 128 - 0.14822265625 * rgba[0] - 0.9099218750 * rgba[1] + 0.43921484375 * rgba[2];
+        //ycbcr[2] = 128 + 0.43921484375 * rgba[0] - 0.36778906250 * rgba[1] - 0.07142578125 * rgba[2];
+
+        //replaced with these RGB->YCC(jpg) equations
+        ycbcr[0] =       0.299    * rgba[0] + 0.587    * rgba[1] + 0.114    * rgba[2];
+        ycbcr[1] = 128 - 0.168736 * rgba[0] - 0.331264 * rgba[1] + 0.5      * rgba[2];
+        ycbcr[2] = 128 + 0.5      * rgba[0] - 0.418688 * rgba[1] + 0.081312 * rgba[2];
+
+        ycbcr[0] = Math.floor(ycbcr[0]);
+        ycbcr[1] = Math.floor(ycbcr[1]);
+        ycbcr[2] = Math.floor(ycbcr[2]);
 
         console.log(x, y);
         console.log(idata.data, this.getTarget().getValue());
         console.log(ycbcr);
+
+        var clctx = this.getClassifiedContext();
+        clctx.fillStyle = "rgb("+rgba[0]+", "+rgba[1]+", "+rgba[2]+")";
+
+        clctx.fillRect(x,y,1,1);
     },
     drawImage: function (image) {
         this.drawImageB64(image);
