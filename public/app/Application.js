@@ -15,7 +15,7 @@ Ext.define('NU.Application', {
                 singleton: false
             },
             robotsStore: 'NU.store.Robots',
-            reactionStatisticsTreeStore: 'NU.store.ReactionStatisticsTree'
+            reactionStatisticsTreeStore: 'NU.store.ReactionStatisticsTree',
             classifierTargetStore: 'NU.store.classifier.Target'
         });
 
