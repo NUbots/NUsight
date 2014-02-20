@@ -119,7 +119,6 @@ NUbugger.prototype.getRobot = function (robotIP) {
     var self = this;
     var result = null;
     self.robots.forEach(function (robot) {
-        console.log(robot.host, robotIP, robot.host === robotIP);
         if (robot.host === robotIP) {
             result = robot;
             return false;
