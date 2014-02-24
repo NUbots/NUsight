@@ -17,7 +17,7 @@ Ext.define('NU.controller.Field', {
                 controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
             }
         },
-        'perspective': {
+        /*'perspective': {
             click: function () {
                 // These controls use Threejs coordinates not field coordinates
                 var controls = this.getMainscene().controls;
@@ -34,7 +34,7 @@ Ext.define('NU.controller.Field', {
                 controls.yawObject.rotation.set(0, Math.PI, 0);
                 controls.pitchObject.rotation.set(-0.6, 0, 0);
             }
-        },
+        },*/
         'close_front': {
             click: function () {
                 // These controls use Threejs coordinates not field coordinates
@@ -66,6 +66,20 @@ Ext.define('NU.controller.Field', {
         'anaglyph': {
             change: function (obj, newValue, oldValue, eOpts) {
                 this.getMainscene().setRenderEffect(newValue);
+            }
+        },
+        'orientation': {
+            change: function (obj, newValue, oldValue, eOpts) {
+                this.robots.forEach(function (robot) {
+                    robot.setShowOrientation(newValue);
+                });
+            }
+        },
+        'resetOrientation': {
+            click: function () {
+                this.robots.forEach(function (robot) {
+                    robot.darwinModel.object.rotation.set(0, 0, 0);
+                });
             }
         }
     },

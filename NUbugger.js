@@ -35,13 +35,11 @@ function NUbugger (io) {
 
         socket.on('addRobot', function (robotIP, robotName) {
             if (self.getRobot(robotIP) === null) {
-                console.log("Added robot:", robotIP);
                 self.addRobot(robotIP, robotName);
             }
         });
         socket.on('removeRobot', function (robotIP) {
             if (self.getRobot(robotIP) !== null) {
-                console.log("Removing robot:", robotIP);
                 self.removeRobot(robotIP);
             }
         });
