@@ -49,9 +49,9 @@ Ext.define('NU.view.window.Classifier', {
                     fieldLabel: 'Freeze',
                     labelWidth: 50
                 }, {
-                    itemId: 'override',
+                    itemId: 'overwrite',
                     xtype: 'checkbox',
-                    fieldLabel: 'Override',
+                    fieldLabel: 'Overwrite',
                     labelWidth: 50,
                     checked: false
                 }, {

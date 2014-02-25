@@ -6,7 +6,7 @@ Ext.define('NU.controller.Classifier', {
         frozen: false,
         lookup: null,
         previewLookup: null,
-        override: false,
+        overwrite: false,
         selectionTool: 'point',
         polygonPoints: null,
         rawImageData: null,
@@ -37,9 +37,9 @@ Ext.define('NU.controller.Classifier', {
                 this.setFrozen(newValue);
             }
         },
-        'override': {
+        'overwrite': {
             change: function (checkbox, newValue, oldValue, eOpts) {
-                this.setOverride(newValue);
+                this.setOverwrite(newValue);
             }
         },
         'selectionToolSelector': {
@@ -184,17 +184,14 @@ Ext.define('NU.controller.Classifier', {
     classifyPolygon: function() {
         var points = this.getPolygonPoints();
         // complete polygon
+        if (points.length === 0) {
+            return;
+        }
         points[points.length] = points[0];
         var boundingBox = this.findBoundingBox(points);
         var start = boundingBox[0];
         var end = boundingBox[1];
 
-        /* start test */
-//        var ctx = this.getClassifiedContext();
-//        ctx.strokeStyle = '#f00';
-//        ctx.strokeRect(start[0], start[1], end[0] - start[0], end[1] - start[1]);
-        /* end test */
-        var ctx = this.getClassifiedContext();
         for (var x = start[0]; x < end[0]; x++) {
             for (var y = start[1]; y < end[1]; y++) {
                 if (this.isPointInPolygon(x, y, points, boundingBox)) {
@@ -295,7 +292,7 @@ Ext.define('NU.controller.Classifier', {
                     ];
                     var hash = this.hash(nearYcbcr);
                     var typeId = this.self.Target[type];
-                    if (this.getOverride() || lookup[hash] === undefined) {
+                    if (this.getOverwrite() || lookup[hash] === undefined) {
                         if (typeId === this.self.Target.Unclassified) {
                             delete lookup[hash];
                         } else {
