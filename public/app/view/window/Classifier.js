@@ -2,9 +2,13 @@ Ext.define('NU.view.window.Classifier', {
     extend : 'NU.view.window.Display',
     alias : ['widget.nu_classifier_window'],
     controller: 'NU.controller.Classifier',
-    inject: ['classifierTargetStore'],
+    inject: [
+        'classifierTargetStore',
+        'classifierSelectionToolStore'
+    ],
     config: {
-        classifierTargetStore: null
+        classifierTargetStore: null,
+        classifierSelectionToolStore: null
     },
     title: 'Classifier',
     width: 800,
@@ -12,6 +16,16 @@ Ext.define('NU.view.window.Classifier', {
     layout: 'hbox',
     initComponent: function () {
         Ext.apply(this, {
+            tbar: [{
+                xtype: 'robot_selector'
+            }, {
+                xtype: 'combo',
+                itemId: 'selectionToolSelector',
+                store: this.getClassifierSelectionToolStore(),
+                displayField: 'name',
+                valueField: 'id',
+                value: 'point'
+            }],
             items: [{
                 items: [{
                     itemId: 'rawImage',
@@ -26,14 +40,20 @@ Ext.define('NU.view.window.Classifier', {
                         backgroundColor: '#000',
                         backgroundImage: "url('resources/images/camera.png')",
                         backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'center'
+                        backgroundPosition: 'center',
+                        cursor: 'crosshair'
                     }
                 }, {
                     itemId: 'snapshot',
                     xtype: 'checkbox',
-                    text: 'snapshot',
                     fieldLabel: 'Freeze',
                     labelWidth: 50
+                }, {
+                    itemId: 'override',
+                    xtype: 'checkbox',
+                    fieldLabel: 'Override',
+                    labelWidth: 50,
+                    checked: false
                 }, {
                     itemId: 'target',
                     xtype: 'combo',
@@ -55,9 +75,7 @@ Ext.define('NU.view.window.Classifier', {
                     },
                     style: {
                         backgroundColor: '#000',
-                        backgroundImage: "url('resources/images/camera.png')",
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'center'
+                        cursor: 'crosshair'
                     }
                 }
             ]
