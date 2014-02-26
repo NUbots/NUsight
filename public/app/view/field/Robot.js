@@ -97,7 +97,7 @@ Ext.define('NU.view.field.Robot', {
 				var result = this.calculateErrorElipse(fieldObject.sr_xx, fieldObject.sr_xy, fieldObject.sr_yy);
 				model.visualiser.scale.x = result.x;
 				model.visualiser.scale.z = result.y;
-				model.visualizer.rotation.z = result.angle;
+				model.visualiser.rotation.z = result.angle;
 			} else if(fieldObject.name == 'self') {
 				model = this.darwinModel;
 
@@ -108,7 +108,7 @@ Ext.define('NU.view.field.Robot', {
 				var result = this.calculateErrorElipse(fieldObject.sr_xx, fieldObject.sr_xy, fieldObject.sr_yy);
 				model.visualiser.scale.x = result.x;
 				model.visualiser.scale.z = result.y;
-				model.visualizer.rotation.z = result.angle;
+				model.visualiser.rotation.z = result.angle;
 			} else {
 				return;
 			}
