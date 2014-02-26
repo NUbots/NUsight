@@ -90,33 +90,25 @@ Ext.define('NU.view.field.Robot', {
 			if(fieldObject.name == 'ball') {
 				model = this.ballModel;
 
-				// local Z is robots negative Y
 				model.position.x = fieldObject.wm_x;
-				model.position.z = -fieldObject.wm_y;
+				model.position.y = fieldObject.wm_y;
+				model.rotation.z = fieldObject.heading;
 				
 				var result = this.calculateErrorElipse(fieldObject.sr_xx, fieldObject.sr_xy, fieldObject.sr_yy);
-				//console.log(result.x, result.y, result.angle);
-				//model.visualiser.setWidth(result.x);
-				//model.visualiser.setHeight(result.y);
-
-				// local Z is robots negative Y
 				model.visualiser.scale.x = result.x;
 				model.visualiser.scale.z = result.y;
-				model.visualiser.rotation.y = result.angle;
+				model.visualizer.rotation.z = result.angle;
 			} else if(fieldObject.name == 'self') {
 				model = this.darwinModel;
 
-				// local Z is robots negative Y
 				model.position.x = fieldObject.wm_x;
-				model.position.z = -fieldObject.wm_y;
+				model.position.y = fieldObject.wm_y;
+				model.rotation.z = fieldObject.heading;
 
-				model.object.dataModel.localisation.angle.set(fieldObject.heading);
-
-				//model.visualiser.rotation.x = -data.sensors.orientation[0];
-				model.visualiser.rotation.y = Math.PI / 2;
-				//model.visualiser.rotation.z = data.sensors.orientation[1];
-				model.visualiser.setWidth(fieldObject.sd_x);
-				model.visualiser.setHeight(fieldObject.sd_y);
+				var result = this.calculateErrorElipse(fieldObject.sr_xx, fieldObject.sr_xy, fieldObject.sr_yy);
+				model.visualiser.scale.x = result.x;
+				model.visualiser.scale.z = result.y;
+				model.visualizer.rotation.z = result.angle;
 			} else {
 				return;
 			}
