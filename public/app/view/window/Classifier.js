@@ -12,7 +12,7 @@ Ext.define('NU.view.window.Classifier', {
     },
     title: 'Classifier',
     width: 800,
-    height: 400,
+    height: 600,
     layout: 'hbox',
     initComponent: function () {
         Ext.apply(this, {
@@ -44,27 +44,43 @@ Ext.define('NU.view.window.Classifier', {
                         cursor: 'crosshair'
                     }
                 }, {
+                    itemId: 'rawValue',
+                    width: 200
+                }, {
                     itemId: 'snapshot',
                     xtype: 'checkbox',
                     fieldLabel: 'Freeze',
-                    labelWidth: 50
+                    labelWidth: 70
                 }, {
                     itemId: 'overwrite',
                     xtype: 'checkbox',
                     fieldLabel: 'Overwrite',
-                    labelWidth: 50,
+                    labelWidth: 70,
                     checked: false
+                }, {
+                    itemId: 'zoom',
+                    xtype: 'checkbox',
+                    fieldLabel: 'Zoom',
+                    labelWidth: 70,
+                    checked: true
+                }, {
+                    itemId: 'toleranceValue',
+                    xtype: 'numberfield',
+                    fieldLabel: 'Tolerance',
+                    value: 5,
+                    step: 1
                 }, {
                     itemId: 'target',
                     xtype: 'combo',
                     value: 'Field',
                     displayField: 'name',
                     store: this.getClassifierTargetStore(),
-                    fieldLabel: 'target',
-                    labelWidth: 50
+                    fieldLabel: 'Target',
+                    labelWidth: 70
                }
                 ]
             }, {
+                items: [{
                     itemId: 'classifiedImage',
                     width: 320,
                     height: 240,
@@ -75,10 +91,23 @@ Ext.define('NU.view.window.Classifier', {
                     },
                     style: {
                         backgroundColor: '#000',
-                        cursor: 'crosshair'
+                        cursor: 'crosshair',
+                        margin: '10px'
                     }
-                }
-            ]
+                }, {
+                    itemId: 'classifiedValue',
+                    width: 200
+                }, {
+                    itemId: 'rawOverlay',
+                    xtype: 'checkbox',
+                    checked: true,
+                    fieldLabel: 'Overlay'
+                }, {
+                    itemId: 'rawOverlayOpacity',
+                    xtype: 'numberfield',
+                    fieldLabel: 'Overlay Opacity'
+                }]
+            }]
         });
 
         return this.callParent(arguments);

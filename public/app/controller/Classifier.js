@@ -5,14 +5,23 @@ Ext.define('NU.controller.Classifier', {
         classifiedContext: null,
         frozen: false,
         lookup: null,
+        lookupHistory: null,
         previewLookup: null,
         overwrite: false,
         selectionTool: 'point',
         polygonPoints: null,
         rawImageData: null,
         classifiedImageData: null,
-        selectorX: 0,
-        selectorY: 0
+        mouseX: 0,
+        mouseY: 0,
+        imageWidth: 320,
+        imageHeight: 240,
+        leftMouseDown: false,
+        range: 10,
+        tolerance: 5,
+        renderZoom: true,
+        renderRawOverlay: true,
+        magicWandPoints: null
     },
     statics: {
         Target: {
@@ -42,18 +51,37 @@ Ext.define('NU.controller.Classifier', {
                 this.setOverwrite(newValue);
             }
         },
+        'zoom': {
+            change: function (checkbox, newValue, oldValue, eOpts) {
+                this.setRenderZoom(newValue);
+                this.renderImages();
+            }
+        },
+        'toleranceValue': {
+            change: function (checkbox, newValue, oldValue, eOpts) {
+                this.setTolerance(newValue);
+            }
+        },
         'selectionToolSelector': {
             change: function (checkbox, newValue, oldValue, eOpts) {
                 this.setSelectionTool(newValue);
             }
-        }
+        },
+        'rawOverlay': {
+            change: function (checkbox, newValue, oldValue, eOpts) {
+                this.setRenderRawOverlay(newValue);
+                this.renderClassifiedImage();
+            }
+        },
+        'rawValue': true,
+        'classifiedValue': true
     },
     init: function () {
         // these must initialized here so there is an object per-controller
         this.setLookup({});
         this.setPreviewLookup({});
         this.setPolygonPoints([]);
-        this.selectionTool = this.self.Tool.Point;
+        this.setMagicWandPoints([]);
 
         NU.util.Network.on('vision', Ext.bind(this.onVision, this));
         this.callParent(arguments);
@@ -61,21 +89,48 @@ Ext.define('NU.controller.Classifier', {
         var rawElCanvas = this.getRawImage().getEl();
         var rawCanvas = rawElCanvas.dom;
         this.setRawContext(rawCanvas.getContext('2d'));
-        this.mon(rawElCanvas, 'mousedown', function (e) { e.preventDefault(); }, this);
-        this.mon(rawElCanvas, 'click', this.onRawImageClick, this);
-        this.mon(rawElCanvas, 'dblclick', this.onRawImageDblClick, this);
-        this.mon(rawElCanvas, 'dblclick', this.onRawImageDblClick, this);
-        this.mon(rawElCanvas, 'mousemove', this.onRawImageMove, this);
 
         var classifiedElCanvas = this.getClassifiedImage().getEl();
         var classifiedCanvas = classifiedElCanvas.dom;
         var ctx = classifiedCanvas.getContext('2d');
         this.setClassifiedContext(ctx);
         this.setClassifiedImageData(ctx.getImageData(0, 0, 320, 240));
-        this.mon(classifiedElCanvas, 'mousedown', function (e) { e.preventDefault(); }, this);
-        this.mon(classifiedElCanvas, 'click', this.onClassifiedImageClick, this);
-        this.mon(classifiedElCanvas, 'dblclick', this.onClassifiedImageDblClick, this);
-        this.mon(classifiedElCanvas, 'mousemove', this.onClassifiedImageMove, this);
+
+        function clickBind(callback, preventDefault) {
+            return function (e, element) {
+                if (preventDefault === undefined || preventDefault) {
+                    e.preventDefault();
+                }
+
+                var el = Ext.get(element);
+                var x = e.getX() - el.getLeft();
+                var y = e.getY() - el.getTop();
+
+                callback.call(this, x, y, e);
+            };
+        }
+
+        [rawElCanvas, classifiedElCanvas].forEach(function (element) {
+            this.mon(element, {
+                click: clickBind(this.onImageClick),
+                dblclick: clickBind(this.onImageDblClick),
+                contextmenu: clickBind(this.onImageRightClick),
+                mousemove: clickBind(this.onImageMouseMove),
+                mousedown: function (e) {
+                    e.preventDefault();
+                    if (e.button === 0) {
+                        this.setLeftMouseDown(true);
+                    }
+                },
+                mouseup: function (e) {
+                    e.preventDefault();
+                    if (e.button === 0) {
+                        this.setLeftMouseDown(false);
+                    }
+                },
+                scope: this
+            });
+        }, this);
 
         this.testDrawImage();
     },
@@ -94,69 +149,36 @@ Ext.define('NU.controller.Classifier', {
         }
 
     },
-    onRawImageClick: function (e, rawCanvas) {
-        e.preventDefault();
-
-        var el = Ext.get(rawCanvas);
-        var x = e.getX() - el.getLeft();
-        var y = e.getY() - el.getTop();
-
-        this.onImageClick(x, y);
-    },
-    onClassifiedImageClick: function (e, classifiedCanvas) {
-        e.preventDefault();
-
-        var el = Ext.get(classifiedCanvas);
-        var x = e.getX() - el.getLeft();
-        var y = e.getY() - el.getTop();
-
-        this.onImageClick(x, y);
-    },
-    onRawImageDblClick: function (e, rawCanvas) {
-        e.preventDefault();
-
-        var el = Ext.get(rawCanvas);
-        var x = e.getX() - el.getLeft();
-        var y = e.getY() - el.getTop();
-
-        this.onImageDblClick(x, y);
-    },
-    onClassifiedImageDblClick: function (e, classifiedCanvas) {
-        e.preventDefault();
-
-        var el = Ext.get(classifiedCanvas);
-        var x = e.getX() - el.getLeft();
-        var y = e.getY() - el.getTop();
-
-        this.onImageDblClick(x, y);
-    },
-    onClassifiedImageMove: function (e, classifiedCanvas) {
-        var el = Ext.get(classifiedCanvas);
-        var x = e.getX() - el.getLeft();
-        var y = e.getY() - el.getTop();
-
-        this.onImageMove(x, y);
-    },
-    onRawImageMove: function (e, rawCanvas) {
-        var el = Ext.get(rawCanvas);
-        var x = e.getX() - el.getLeft();
-        var y = e.getY() - el.getTop();
-
-        this.onImageMove(x, y);
-    },
-    onImageMove: function (x, y) {
-        this.setSelectorX(x);
-        this.setSelectorY(y);
+    onImageMouseMove: function (x, y, e) {
+        this.setMouseX(x);
+        this.setMouseY(y);
         this.renderRawImage();
         this.renderClassifiedImage();
+
+        if (this.getLeftMouseDown()) {
+            switch (this.getSelectionTool()) {
+                case 'point':
+                    this.classifyPoint(x, y);
+                    break;
+            }
+        }
+
+        var rgba = this.getPointRGBA(x, y, this.getRawImageData().data);
+        this.getRawValue().update("(" + x + ", " + y + ") = rgb(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ")");
+
+        var rgba = this.getPointRGBA(x, y, this.getClassifiedImageData().data);
+        this.getClassifiedValue().update("(" + x + ", " + y + ") = rgb(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ")");
     },
     onImageClick: function (x, y) {
         switch (this.getSelectionTool()) {
             case 'point':
                 this.classifyPoint(x, y);
+//                this.getClassifiedImageData().data[4 * 320 * y + 4 * x] = 255;
+//                this.getClassifiedImageData().data[4 * 320 * y + 4 * x + 3] = 255;
+//                this.renderImages();
                 break;
             case 'magic_wand':
-                alert('Magic Wand Unsupported');
+                this.magicWandSelect(x, y);
                 break;
             case 'polygon':
                 this.polygonAddPoint(x, y);
@@ -166,13 +188,28 @@ Ext.define('NU.controller.Classifier', {
     onImageDblClick: function (x, y) {
         switch (this.getSelectionTool()) {
             case 'point':
-                this.onImageClick(x, y);
-                break;
             case 'magic_wand':
-                alert('Magic Wand Unsupported');
+                this.onImageClick(x, y);
                 break;
             case 'polygon':
                 this.classifyPolygon();
+                break;
+        }
+    },
+    onImageRightClick: function (x, y) {
+        switch (this.getSelectionTool()) {
+            case 'point':
+                // temporarily turn override on and restore after
+                var overwrite = this.getOverwrite();
+                this.setOverwrite(true);
+                this.classifyPoint(x, y, 'Unclassified');
+                this.setOverwrite(overwrite);
+                break;
+            case 'magic_wand':
+                this.magicWandClassify(x, y);
+                break;
+            case 'polygon':
+                this.polygonRemovePoint(x, y);
                 break;
         }
     },
@@ -181,7 +218,63 @@ Ext.define('NU.controller.Classifier', {
         points.push([x, y]);
         this.renderImages();
     },
-    classifyPolygon: function() {
+    polygonRemovePoint: function (x, y) {
+        var points = this.getPolygonPoints();
+        if (points.length > 0) {
+            points.pop();
+            this.renderImages();
+        }
+    },
+    magicWandSelect: function (x, y, tolerance) {
+        var points = [];
+        var queue = [];
+        var checked = {};
+        queue.push([x, y]);
+        if (tolerance === undefined) {
+            tolerance = this.getTolerance();
+        }
+        while (queue.length > 0) {
+            var point = queue.shift();
+            for (var dy = -1; dy <= 1; dy++) {
+                for (var dx = -1; dx <= 1; dx++) {
+                    var neighbourX = point[0] + dx;
+                    var neighbourY = point[1] + dy;
+
+                    if ((dy === 0 && dx === 0) || neighbourX < 0 || neighbourX > 320 || neighbourY < 0 || neighbourY > 240) {
+                        break;
+                    }
+                    var rgba = this.getPointRGBA(point[0], point[1]);
+                    var ycbcr = this.getYCBCRfromRGB(rgba[0], rgba[1], rgba[2]);
+                    var neighbourRgba = this.getPointRGBA(neighbourX, neighbourY);
+                    var neighbourYcbcr = this.getYCBCRfromRGB(neighbourRgba[0], neighbourRgba[1], neighbourRgba[2]);
+                    var abs = Math.sqrt(ycbcr[0] * ycbcr[0] + ycbcr[1] * ycbcr[1] + ycbcr[2] * ycbcr[2]);
+                    var neighbourAbs = Math.sqrt(neighbourYcbcr[0] * neighbourYcbcr[0] + neighbourYcbcr[1] * neighbourYcbcr[1] + neighbourYcbcr[2] * neighbourYcbcr[2]);
+                    var dist = Math.abs(abs - neighbourAbs);
+                    var newPoint = [neighbourX, neighbourY];
+                    var hash = this.hashPoint(newPoint);
+                    if (dist <= tolerance && checked[hash] === undefined) {
+                        queue.push(newPoint);
+                        points.push(newPoint);
+                    }
+                    checked[hash] = true;
+                }
+            }
+        }
+        this.setMagicWandPoints(points);
+    },
+    hashPoint: function (point) {
+        return point[0] + "," + point[1];
+    },
+    magicWandClassify: function (x, y) {
+        var points = this.getMagicWandPoints();
+        points.forEach(function (point) {
+            this.classifyPoint(point[0], point[1], undefined, false, 5);
+        }, this);
+        this.updateClassifiedData();
+        this.renderClassifiedImage();
+        this.setMagicWandPoints([]);
+    },
+    classifyPolygon: function () {
         var points = this.getPolygonPoints();
         // complete polygon
         if (points.length === 0) {
@@ -195,7 +288,7 @@ Ext.define('NU.controller.Classifier', {
         for (var x = start[0]; x < end[0]; x++) {
             for (var y = start[1]; y < end[1]; y++) {
                 if (this.isPointInPolygon(x, y, points, boundingBox)) {
-                    this.classifyPoint(x, y, false, 1);
+                    this.classifyPoint(x, y, undefined, false);
                 }
             }
         }
@@ -263,13 +356,12 @@ Ext.define('NU.controller.Classifier', {
             [maxX, maxY]
         ];
     },
-    classifyPoint: function (x, y, doRender, range) {
-        var offset = 4 * y * 320 + 4 * x;
-        rgba = this.getRawImageData().data.slice(offset, offset + 4);
-
+    classifyPoint: function (x, y, type, doRender, range) {
+        var rgba = this.getPointRGBA(x, y);
         var ycbcr = this.getYCBCRfromRGB(rgba[0], rgba[1], rgba[2]);
-
-        var type = this.getTarget().getValue();
+        if (type === undefined) {
+            type = this.getTarget().getValue();
+        }
         this.addLookupColour(ycbcr, type, range);
         if (doRender === undefined || doRender) {
             this.updateClassifiedData();
@@ -277,10 +369,17 @@ Ext.define('NU.controller.Classifier', {
             this.renderPolygonOverlays();
         }
     },
+    getPointRGBA: function (x, y, data) {
+        var offset = 4 * y * 320 + 4 * x;
+        if (data === undefined) {
+            data = this.getRawImageData().data;
+        }
+        return data.slice(offset, offset + 4);
+    },
     addLookupColour: function (ycbcr, type, range) {
         var lookup = this.getLookup();
         if (range === undefined) {
-            range = 10;
+            range = this.getRange();
         }
         for (var y = 0; y < range; y++) {
             for (var cb = 0; cb < range; cb++) {
@@ -324,11 +423,38 @@ Ext.define('NU.controller.Classifier', {
         var ctx = this.getRawContext();
         ctx.putImageData(this.getRawImageData(), 0, 0);
         this.renderPolygonOverlay(ctx);
+        this.renderMagicWandOverlay(ctx);
+        if (this.getRenderZoom()) {
+            this.renderZoomOverlay(ctx, this.getRawImageData());
+        }
     },
     renderClassifiedImage: function () {
         var ctx = this.getClassifiedContext();
         ctx.putImageData(this.getClassifiedImageData(), 0, 0);
+        if (this.getRenderRawOverlay()) {
+            this.renderImageOverlay(ctx, this.getRawImageData());
+        }
         this.renderPolygonOverlay(ctx);
+        this.renderMagicWandOverlay(ctx);
+        if (this.getRenderZoom()) {
+            this.renderZoomOverlay(ctx, this.getClassifiedImageData());
+        }
+    },
+    renderImageOverlay: function (ctx, rawImageData) {
+        var data = ctx.getImageData(0, 0, 320, 240);
+        var rawData = rawImageData.data;
+        var rawOpacity = 0.5;
+        var classifiedOpacity = 0.5;
+        for (var y = 0; y < 240; y++) {
+            for (var x = 0; x < 320; x++) {
+                var offset = 4 * 320 * y + 4 * x;
+                data.data[offset] = Math.round(data.data[offset] * classifiedOpacity + rawData[offset] * rawOpacity);
+                data.data[offset + 1] = Math.round(data.data[offset + 1] * classifiedOpacity + rawData[offset + 1] * rawOpacity);
+                data.data[offset + 2] = Math.round(data.data[offset + 2] * classifiedOpacity + rawData[offset + 2] * rawOpacity);
+                data.data[offset + 3] = 255;
+            }
+        }
+        ctx.putImageData(data, 0, 0);
     },
     renderPolygonOverlays: function () {
         this.renderPolygonOverlay(this.getClassifiedContext());
@@ -346,11 +472,103 @@ Ext.define('NU.controller.Classifier', {
             points.forEach(function (point) {
                 ctx.lineTo(point[0], point[1]);
             });
-            ctx.lineTo(this.getSelectorX(), this.getSelectorY());
+            ctx.lineTo(this.getMouseX(), this.getMouseY());
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
         }
+    },
+    renderMagicWandOverlay: function (ctx) {
+        var data = ctx.getImageData(0, 0, 320, 240);
+        var points = this.getMagicWandPoints();
+        points.forEach(function (point) {
+            var x = point[0];
+            var y = point[1];
+
+            var offset = 4 * 320 * y + 4 * x;
+            data.data[offset] = 255;
+            data.data[offset + 1] = 0;
+            data.data[offset + 2] = 0;
+            data.data[offset + 3] = 255;
+        }, this);
+        ctx.putImageData(data, 0, 0);
+    },
+    renderZoomOverlay: function (ctx, imageData) {
+        var data = ctx.getImageData(0, 0, 320, 240);
+        var originalData = imageData.data;
+        var mouseX = this.getMouseX();
+        var mouseY = this.getMouseY();
+        var zoom = 3; // must be an odd integer
+        var width = zoom * 43; // should be divisible by zoom and odd
+        var height = zoom * 21; // should be divisible by zoom and odd
+        var minX = 0;
+        var minY = 0;
+        var maxX = 320;
+        var maxY = 240;
+        var pxSize = 4;
+
+        var row = -Math.floor(height / 2 / zoom);
+        var col = -Math.floor(width / 2 / zoom);
+        var zoomDiff = Math.floor(zoom / 2);
+        // loop though pixels of zoomed image
+        for (var y = maxY - height + zoomDiff; y < maxY - zoomDiff; y += zoom) {
+            for (var x = maxX - width + zoomDiff; x < maxX - zoomDiff; x += zoom) {
+                // calculate the real coordinates
+                var realX = mouseX + col;
+                var realY = mouseY + row;
+                var realOffset = pxSize * maxX * realY + pxSize * realX;
+
+                for (var zy = -zoomDiff; zy <= zoomDiff; zy++) {
+                    for (var zx = -zoomDiff; zx <= zoomDiff; zx++) {
+                        var zoomX = x + zx;
+                        var zoomY = y + zy;
+                        var zoomOffset = pxSize * maxX * zoomY + pxSize * zoomX;
+                        if (realX < minX || realX > maxX || realY < minY || realY > maxY) {
+                            data.data[zoomOffset] = 0;
+                            data.data[zoomOffset + 1] = 0;
+                            data.data[zoomOffset + 2] = 0;
+                            data.data[zoomOffset + 3] = 255;
+                        } else {
+                            data.data[zoomOffset] = originalData[realOffset];
+                            data.data[zoomOffset + 1] = originalData[realOffset + 1];
+                            data.data[zoomOffset + 2] = originalData[realOffset + 2];
+                            data.data[zoomOffset + 3] = originalData[realOffset + 3];
+                        }
+                    }
+                }
+
+                col++;
+            }
+            row++;
+            col = -Math.floor(width / 2 / zoom);
+        }
+        // draw crosshair
+        var zoomCenterY = maxY - Math.floor(height / 2) - 1;
+        var zoomCenterX = maxX - Math.floor(width / 2) - 1;
+        for (var zy = -1; zy <= 1; zy++) {
+            for (var zx = -1; zx <= 1; zx++) {
+                if (zy !== 0 && zx !== 0) {
+                    continue;
+                }
+                var offset = 4 * maxX * (zoomCenterY + zy) + 4 * (zoomCenterX + zx);
+                data.data[offset] = 255;
+                data.data[offset + 1] = 255;
+                data.data[offset + 2] = 255;
+                data.data[offset + 3] = 255;
+            }
+        }
+        ctx.putImageData(data, 0, 0);
+//        var x = maxX - Math.round(Math.floor(width / 2));
+//        var y = maxY - Math.round(Math.floor(height / 2));
+//        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+//
+//        ctx.moveTo(x - 1, y);
+//        ctx.lineTo(x + 2, y);
+//        ctx.stroke();
+//
+//        ctx.moveTo(x, y - 1);
+//        ctx.lineTo(x, y + 2);
+//        ctx.stroke();
     },
     updateClassifiedData: function () {
         this.setClassifiedImageData(this.generateClassifiedData());
@@ -422,6 +640,7 @@ Ext.define('NU.controller.Classifier', {
         imageObj.onload = function () {
             ctx.drawImage(imageObj, 0, 0, 320, 240);
             me.setRawImageData(ctx.getImageData(0, 0, 320, 240));
+            me.renderImages();
         };
     }
 });
