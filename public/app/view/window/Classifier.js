@@ -28,17 +28,20 @@ Ext.define('NU.view.window.Classifier', {
                     itemId: 'toolPoint',
                     iconCls: 'icon-pencil',
                     toggleGroup: 'tool',
+                    allowDepress: false,
                     tooltip: 'Point Tool - Classify the point clicked on +/- the range (right click to unclassify the point)'
                 }, {
                     itemId: 'toolMagicWand',
                     iconCls: 'icon-wand',
                     toggleGroup: 'tool',
                     pressed: true,
+                    allowDepress: false,
                     tooltip: 'Magic Wand Tool - Select the point clicked and similar surrounding pixels using tolerance (right click to classify)'
                 }, {
                     itemId: 'toolPolygon',
                     iconCls: 'icon-toolbar-polygon',
                     toggleGroup: 'tool',
+                    allowDepress: false,
                     tooltip: 'Polygon Tool - Draw a polygon with a set of points, double click to apply (right click to remove last point)'
                 }, '-', {
                     itemId: 'toolZoom',
@@ -55,27 +58,32 @@ Ext.define('NU.view.window.Classifier', {
                     itemId: 'targetGreen',
                     iconCls: 'icon-toolbar-green',
                     toggleGroup: 'target',
+                    allowDepress: false,
                     tooltip: 'Field',
                     pressed: true
                 }, {
                     itemId: 'targetOrange',
                     iconCls: 'icon-toolbar-orange',
                     toggleGroup: 'target',
+                    allowDepress: false,
                     tooltip: 'Ball'
                 }, {
                     itemId: 'targetYellow',
                     iconCls: 'icon-toolbar-yellow',
                     toggleGroup: 'target',
+                    allowDepress: false,
                     tooltip: 'Goal'
                 }, {
                     itemId: 'targetWhite',
                     iconCls: 'icon-toolbar-white',
                     toggleGroup: 'target',
+                    allowDepress: false,
                     tooltip: 'Line'
                 }, {
                     itemId: 'targetBlack',
                     iconCls: 'icon-toolbar-black',
                     toggleGroup: 'target',
+                    allowDepress: false,
                     tooltip: 'Unclassified'
                 }]
             }],

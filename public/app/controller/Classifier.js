@@ -60,13 +60,23 @@
             }
         },
         'toolMagicWand': {
-            click: function () {
-                this.setSelectionTool('magic_wand');
+            toggle: function (btn, pressed) {
+                if (pressed) {
+                    this.setSelectionTool('magic_wand');
+                } else {
+                    this.setMagicWandPoints([]);
+                    this.renderImages();
+                }
             }
         },
         'toolPolygon': {
-            click: function () {
-                this.setSelectionTool('polygon');
+            toggle: function (btn, pressed) {
+                if (pressed) {
+                    this.setSelectionTool('polygon');
+                } else {
+                    this.setPolygonPoints([]);
+                    this.renderImages();
+                }
             }
         },
         'toolZoom': {
