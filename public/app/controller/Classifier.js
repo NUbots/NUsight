@@ -1,4 +1,4 @@
-Ext.define('NU.controller.Classifier', {
+ Ext.define('NU.controller.Classifier', {
     extend: 'NU.controller.Display',
     config: {
         rawContext: null,
@@ -8,7 +8,7 @@ Ext.define('NU.controller.Classifier', {
         lookupHistory: null,
         previewLookup: null,
         overwrite: false,
-        selectionTool: 'point',
+        selectionTool: 'magic_wand',
         polygonPoints: null,
         rawImageData: null,
         classifiedImageData: null,
@@ -20,8 +20,10 @@ Ext.define('NU.controller.Classifier', {
         range: 10,
         tolerance: 5,
         renderZoom: true,
-        renderRawOverlay: true,
-        magicWandPoints: null
+        renderRawUnderlay: true,
+        rawUnderlayOpacity: 0.5,
+        magicWandPoints: null,
+        target: 'Field'
     },
     statics: {
         Target: {
@@ -40,21 +42,77 @@ Ext.define('NU.controller.Classifier', {
     control: {
         'rawImage': true,
         'classifiedImage': true,
-        'target': true,
+        'toolPoint': {
+            click: function () {
+                this.setSelectionTool('point');
+            }
+        },
+        'toolMagicWand': {
+            click: function () {
+                this.setSelectionTool('magic_wand');
+            }
+        },
+        'toolPolygon': {
+            click: function () {
+                this.setSelectionTool('polygon');
+            }
+        },
+        'toolZoom': {
+            toggle: function (btn, pressed) {
+                this.setRenderZoom(pressed);
+                this.renderImages();
+            }
+        },
+        'targetGreen': {
+            toggle: function (btn, pressed) {
+                if (pressed) {
+                    this.setTarget('Field');
+                }
+            }
+        },
+        'targetYellow': {
+            toggle: function (btn, pressed) {
+                if (pressed) {
+                    this.setTarget('Goal');
+                }
+            }
+        },
+        'targetWhite': {
+            toggle: function (btn, pressed) {
+                if (pressed) {
+                    this.setTarget('Line');
+                }
+            }
+        },
+        'targetBlack': {
+            toggle: function (btn, pressed) {
+                if (pressed) {
+                    this.setTarget('Unclassified');
+                }
+            }
+        },
+        'targetOrange': {
+            toggle: function (btn, pressed) {
+                if (pressed) {
+                    this.setTarget('Ball');
+                }
+            }
+        },
+        'reset': {
+            click: function () {
+                this.setLookup({});
+                this.setClassifiedImageData(this.generateClassifiedData());
+                this.renderClassifiedImage();
+            }
+        },
         'snapshot': {
             change: function (checkbox, newValue, oldValue, eOpts) {
                 this.setFrozen(newValue);
             }
         },
-        'overwrite': {
-            change: function (checkbox, newValue, oldValue, eOpts) {
-                this.setOverwrite(newValue);
-            }
-        },
-        'zoom': {
-            change: function (checkbox, newValue, oldValue, eOpts) {
-                this.setRenderZoom(newValue);
-                this.renderImages();
+        'toolOverwrite': {
+            toggle: function (btn, pressed) {
+                this.setOverwrite(pressed);
             }
         },
         'toleranceValue': {
@@ -62,15 +120,18 @@ Ext.define('NU.controller.Classifier', {
                 this.setTolerance(newValue);
             }
         },
-        'selectionToolSelector': {
+        'rawUnderlay': {
             change: function (checkbox, newValue, oldValue, eOpts) {
-                this.setSelectionTool(newValue);
+                this.setRenderRawUnderlay(newValue);
+                this.renderClassifiedImage();
             }
         },
-        'rawOverlay': {
+        'rawUnderlayOpacity': {
             change: function (checkbox, newValue, oldValue, eOpts) {
-                this.setRenderRawOverlay(newValue);
-                this.renderClassifiedImage();
+                if (checkbox.isValid()) {
+                    this.setRawUnderlayOpacity(newValue);
+                    this.renderClassifiedImage();
+                }
             }
         },
         'rawValue': true,
@@ -300,29 +361,29 @@ Ext.define('NU.controller.Classifier', {
         if (boundingBox === undefined) {
             boundingBox = this.findBoundingBox(points);
         }
-        // point is not in bounding box, definitely not in polygon
         var start = boundingBox[0];
         var end = boundingBox[1];
         if (x < start[0] || x > end[0] || y < start[1] || y > end[1]) {
+            // point is not in the bounding box, definitely not in the polygon
             return false;
         }
 
+        // uses the ray casting method
         // ported from http://geomalgorithms.com/a03-_inclusion.html
-        var cn = 0; // the  crossing number counter
+        var cn = 0; // the crossing number counter
         // loop through all edges of the polygon
-        // edge from V[i]  to V[i+1]
         for (var i = 0; i < points.length - 1; i++) {
             // an upward crossing
             if (
                 ((points[i][1] <= y) && (points[i+1][1] > y))
                 || ((points[i][1] > y) && (points[i+1][1] <= y)) // a downward crossing
                 ) {
-                // compute  the actual edge-ray intersect x-coordinate
+                // compute the actual edge-ray intersect x-coordinate
                 var vt = (y  - points[i][1]) / (points[i+1][1] - points[i][1]);
                 // P.x < intersect
                 if (x <  points[i][0] + vt * (points[i+1][0] - points[i][0])) {
-                    // a valid crossing of y=P.y right of P.x
-                    ++cn;
+                    // a valid crossing of y = P.y right of P.x
+                    cn++;
                 }
             }
         }
@@ -356,13 +417,13 @@ Ext.define('NU.controller.Classifier', {
             [maxX, maxY]
         ];
     },
-    classifyPoint: function (x, y, type, doRender, range) {
+    classifyPoint: function (x, y, target, doRender, range) {
         var rgba = this.getPointRGBA(x, y);
         var ycbcr = this.getYCBCRfromRGB(rgba[0], rgba[1], rgba[2]);
-        if (type === undefined) {
-            type = this.getTarget().getValue();
+        if (target === undefined) {
+            target = this.getTarget();
         }
-        this.addLookupColour(ycbcr, type, range);
+        this.addLookupColour(ycbcr, target, range);
         if (doRender === undefined || doRender) {
             this.updateClassifiedData();
             this.renderClassifiedImage();
@@ -431,8 +492,8 @@ Ext.define('NU.controller.Classifier', {
     renderClassifiedImage: function () {
         var ctx = this.getClassifiedContext();
         ctx.putImageData(this.getClassifiedImageData(), 0, 0);
-        if (this.getRenderRawOverlay()) {
-            this.renderImageOverlay(ctx, this.getRawImageData());
+        if (this.getRenderRawUnderlay()) {
+            this.renderImageUnderlay(ctx, this.getRawImageData());
         }
         this.renderPolygonOverlay(ctx);
         this.renderMagicWandOverlay(ctx);
@@ -440,11 +501,11 @@ Ext.define('NU.controller.Classifier', {
             this.renderZoomOverlay(ctx, this.getClassifiedImageData());
         }
     },
-    renderImageOverlay: function (ctx, rawImageData) {
+    renderImageUnderlay: function (ctx, rawImageData) {
         var data = ctx.getImageData(0, 0, 320, 240);
         var rawData = rawImageData.data;
-        var rawOpacity = 0.5;
-        var classifiedOpacity = 0.5;
+        var rawOpacity = this.getRawUnderlayOpacity();
+        var classifiedOpacity = 1 - this.getRawUnderlayOpacity();
         for (var y = 0; y < 240; y++) {
             for (var x = 0; x < 320; x++) {
                 var offset = 4 * 320 * y + 4 * x;
@@ -523,7 +584,7 @@ Ext.define('NU.controller.Classifier', {
                         var zoomX = x + zx;
                         var zoomY = y + zy;
                         var zoomOffset = pxSize * maxX * zoomY + pxSize * zoomX;
-                        if (realX < minX || realX > maxX || realY < minY || realY > maxY) {
+                        if (realX < minX || realX >= maxX || realY < minY || realY >= maxY) {
                             data.data[zoomOffset] = 0;
                             data.data[zoomOffset + 1] = 0;
                             data.data[zoomOffset + 2] = 0;
