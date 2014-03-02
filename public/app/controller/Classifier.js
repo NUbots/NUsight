@@ -5,7 +5,9 @@
         classifiedContext: null,
         frozen: false,
         lookup: null,
-        lookupHistory: null,
+        lookupBackwardHistory: null,
+        lookupForwardHistory: null,
+        lookupHistoryLength: 10,
         previewLookup: null,
         overwrite: false,
         selectionTool: 'magic_wand',
@@ -42,6 +44,16 @@
     control: {
         'rawImage': true,
         'classifiedImage': true,
+        'undo': {
+            click: function () {
+                this.undoHistory();
+            }
+        },
+        'redo': {
+            click: function () {
+                this.redoHistory();
+            }
+        },
         'toolPoint': {
             click: function () {
                 this.setSelectionTool('point');
@@ -64,42 +76,33 @@
             }
         },
         'targetGreen': {
-            toggle: function (btn, pressed) {
-                if (pressed) {
-                    this.setTarget('Field');
-                }
+            click: function () {
+                this.setTarget('Field');
             }
         },
         'targetYellow': {
-            toggle: function (btn, pressed) {
-                if (pressed) {
-                    this.setTarget('Goal');
-                }
+            click: function () {
+                this.setTarget('Goal');
             }
         },
         'targetWhite': {
-            toggle: function (btn, pressed) {
-                if (pressed) {
-                    this.setTarget('Line');
-                }
+            click: function () {
+                this.setTarget('Line');
             }
         },
         'targetBlack': {
-            toggle: function (btn, pressed) {
-                if (pressed) {
-                    this.setTarget('Unclassified');
-                }
+            click: function () {
+                this.setTarget('Unclassified');
             }
         },
         'targetOrange': {
-            toggle: function (btn, pressed) {
-                if (pressed) {
-                    this.setTarget('Ball');
-                }
+            click: function () {
+                this.setTarget('Ball');
             }
         },
         'reset': {
             click: function () {
+                this.addHistory();
                 this.setLookup({});
                 this.setClassifiedImageData(this.generateClassifiedData());
                 this.renderClassifiedImage();
@@ -140,6 +143,8 @@
     init: function () {
         // these must initialized here so there is an object per-controller
         this.setLookup({});
+        this.setLookupForwardHistory([]);
+        this.setLookupBackwardHistory([]);
         this.setPreviewLookup({});
         this.setPolygonPoints([]);
         this.setMagicWandPoints([]);
@@ -181,6 +186,11 @@
                     e.preventDefault();
                     if (e.button === 0) {
                         this.setLeftMouseDown(true);
+                        switch (this.getSelectionTool()) {
+                            case 'point':
+                                this.addHistory();
+                                break;
+                        }
                     }
                 },
                 mouseup: function (e) {
@@ -194,6 +204,38 @@
         }, this);
 
         this.testDrawImage();
+    },
+    addHistory: function () {
+        var backwardHistory = this.getLookupBackwardHistory();
+        var lookup = Ext.clone(this.getLookup());
+        backwardHistory.push(lookup);
+        this.setLookupForwardHistory([]);
+    },
+    undoHistory: function () {
+        var backwardHistory = this.getLookupBackwardHistory();
+        var forwardHistory = this.getLookupForwardHistory();
+        if (backwardHistory.length > 0) {
+            forwardHistory.push(this.getLookup());
+            this.setLookup(backwardHistory.pop());
+            this.setClassifiedImageData(this.generateClassifiedData());
+            this.renderClassifiedImage();
+            if (forwardHistory.length > this.getLookupHistoryLength()) {
+                forwardHistory.shift();
+            }
+        }
+    },
+    redoHistory: function () {
+        var backwardHistory = this.getLookupBackwardHistory();
+        var forwardHistory = this.getLookupForwardHistory();
+        if (forwardHistory.length > 0) {
+            backwardHistory.push(this.getLookup());
+            this.setLookup(forwardHistory.pop());
+            this.setClassifiedImageData(this.generateClassifiedData());
+            this.renderClassifiedImage();
+            if (backwardHistory.length > this.getLookupHistoryLength()) {
+                backwardHistory.shift();
+            }
+        }
     },
     onVision: function (robotIP, api_message) {
 
@@ -233,10 +275,8 @@
     onImageClick: function (x, y) {
         switch (this.getSelectionTool()) {
             case 'point':
+                this.addHistory();
                 this.classifyPoint(x, y);
-//                this.getClassifiedImageData().data[4 * 320 * y + 4 * x] = 255;
-//                this.getClassifiedImageData().data[4 * 320 * y + 4 * x + 3] = 255;
-//                this.renderImages();
                 break;
             case 'magic_wand':
                 this.magicWandSelect(x, y);
@@ -253,6 +293,7 @@
                 this.onImageClick(x, y);
                 break;
             case 'polygon':
+                this.addHistory();
                 this.classifyPolygon();
                 break;
         }
@@ -263,10 +304,12 @@
                 // temporarily turn override on and restore after
                 var overwrite = this.getOverwrite();
                 this.setOverwrite(true);
+                this.addHistory();
                 this.classifyPoint(x, y, 'Unclassified');
                 this.setOverwrite(overwrite);
                 break;
             case 'magic_wand':
+                this.addHistory();
                 this.magicWandClassify(x, y);
                 break;
             case 'polygon':
@@ -602,6 +645,19 @@
             }
             row++;
             col = -Math.floor(width / 2 / zoom);
+        }
+        // draw border
+        var borderOpacity = 0.5;
+        for (var y = maxY - height - 1; y < maxY; y++) {
+            for (var x = maxX - width - 1; x < maxX; x++) {
+                if (y === maxY - height - 1 || x === maxX - width - 1) {
+                    var offset = pxSize * maxX * y + pxSize * x;
+                    data.data[offset] = Math.round(data.data[offset] * (1 - borderOpacity) + 255 * borderOpacity);
+                    data.data[offset + 1] = Math.round(data.data[offset + 1] * (1 - borderOpacity) + 255 * borderOpacity);
+                    data.data[offset + 2] = Math.round(data.data[offset + 2] * (1 - borderOpacity) + 255 * borderOpacity);
+                    data.data[offset + 3] = 255;
+                }
+            }
         }
         // draw crosshair
         var zoomCenterY = maxY - Math.floor(height / 2) - 1;

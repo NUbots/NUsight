@@ -11,6 +11,12 @@ Ext.define('NU.view.window.Classifier', {
             onEsc: Ext.emptyFn,
             tbar: [{
                 xtype: 'robot_selector'
+            }, '->', {
+                text: 'Undo',
+                itemId: 'undo'
+            }, {
+                text: 'Redo',
+                itemId: 'redo'
             }, {
                 text: 'Reset',
                 itemId: 'reset'
@@ -22,7 +28,7 @@ Ext.define('NU.view.window.Classifier', {
                     itemId: 'toolPoint',
                     iconCls: 'icon-pencil',
                     toggleGroup: 'tool',
-                    tooltip: 'Point Tool - Classify the point clicked on +/- the range (right click to unclassify)'
+                    tooltip: 'Point Tool - Classify the point clicked on +/- the range (right click to unclassify the point)'
                 }, {
                     itemId: 'toolMagicWand',
                     iconCls: 'icon-wand',
@@ -78,25 +84,35 @@ Ext.define('NU.view.window.Classifier', {
                     marginRight: '10px'
                 },
                 items: [{
-                    itemId: 'rawImage',
-                    width: 320,
-                    height: 240,
-                    autoEl: {
-                        tag: 'canvas',
-                        width: 320,
-                        height: 240
-                    },
                     style: {
-                        backgroundColor: '#000',
-                        backgroundImage: "url('resources/images/camera.png')",
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'center',
-                        border: '5px solid #000',
-                        cursor: 'crosshair'
+                        border: '5px solid #000'
+                    },
+                    items: {
+                        itemId: 'rawImage',
+                        width: 320,
+                        height: 240,
+                        autoEl: {
+                            tag: 'canvas',
+                            width: 320,
+                            height: 240
+                        },
+                        style: {
+                            backgroundColor: '#000',
+                            backgroundImage: "url('resources/images/camera.png')",
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center',
+                            cursor: 'crosshair',
+                            display: 'block'
+                        }
                     }
                 }, {
                     itemId: 'rawValue',
-                    width: 200
+                    width: 320,
+                    html: '(X, Y) = rgb(R, G, B)',
+                    style: {
+                        margin: '5px',
+                        textAlign: 'center'
+                    }
                 }, {
                     itemId: 'snapshot',
                     xtype: 'checkbox',
@@ -111,22 +127,32 @@ Ext.define('NU.view.window.Classifier', {
                 }]
             }, {
                 items: [{
-                    itemId: 'classifiedImage',
-                    width: 320,
-                    height: 240,
-                    autoEl: {
-                        tag: 'canvas',
-                        width: 320,
-                        height: 240
-                    },
                     style: {
-                        backgroundColor: '#000',
-                        cursor: 'crosshair',
                         border: '5px solid #000'
+                    },
+                    items: {
+                        itemId: 'classifiedImage',
+                        width: 320,
+                        height: 240,
+                        autoEl: {
+                            tag: 'canvas',
+                            width: 320,
+                            height: 240
+                        },
+                        style: {
+                            backgroundColor: '#000',
+                            cursor: 'crosshair',
+                            display: 'block'
+                        }
                     }
                 }, {
                     itemId: 'classifiedValue',
-                    width: 200
+                    width: 320,
+                    html: '(X, Y) = rgb(R, G, B)',
+                    style: {
+                        margin: '5px',
+                        textAlign: 'center'
+                    }
                 }, {
                     itemId: 'rawUnderlay',
                     xtype: 'checkbox',
