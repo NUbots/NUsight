@@ -1,40 +1,23 @@
 (function (THREE) {
 	"use strict";
 
-	var Field, FieldMap, FIELD_LENGTH, FIELD_WIDTH, GOAL_DEPTH, GOAL_WIDTH,
-	GOAL_HEIGHT, GOAL_AREA_LENGTH, GOAL_AREA_WIDTH, PENALTY_MARK_DISTANCE,
-	PENALTY_MARK_LENGTH, CENTRE_CIRCLE_RADIUS, BORDER_STRIP_WIDTH, LINE_WIDTH,
-	POLE_RADIUS;
+	var Field;
 
-	FIELD_LENGTH = 900;
-	FIELD_WIDTH = 600;
-	GOAL_DEPTH = 50;
-	GOAL_WIDTH = 225;
-	GOAL_HEIGHT = 110;
-	GOAL_AREA_LENGTH = 60;
-	GOAL_AREA_WIDTH = 345;
-	PENALTY_MARK_DISTANCE = 180;
-	PENALTY_MARK_LENGTH = 10;
-	CENTRE_CIRCLE_RADIUS = 75;
-	BORDER_STRIP_WIDTH = 70;
-	LINE_WIDTH = 5;
-	POLE_RADIUS = 5;
-
-	// Field dimensions
-	// var lineWidth = 0.05;
- //    var markWidth = 0.1;
- //    var fieldLength = 9.0;
- //    var fieldWidth = 6.0;
- //    var goalDepth = 0.5;
- //    var goalWidth = 2.25;
- //    var goalAreaLength = 0.6;
- //    var goalAreaWidth = 3.45;
- //    var goalCrossbarHeight = 1.10;
- //    var goalpostDiameter = 0.1;
- //    var goalNetHeight = 1.0;
- //    var penaltyMarkDistance = 1.80;
- //    var centerCircleDiameter = 1.50;
- //    var borderStripMinWidth = 0.7;
+//    // Field dimensions
+//	   var lineWidth = 0.05;
+//    var markWidth = 0.1;
+//    var fieldLength = 9.0;
+//    var fieldWidth = 6.0;
+//    var goalDepth = 0.5;
+//    var goalWidth = 2.25;
+//    var goalAreaLength = 0.6;
+//    var goalAreaWidth = 3.45;
+//    var goalCrossbarHeight = 1.10;
+//    var goalpostDiameter = 0.1;
+//    var goalNetHeight = 1.0;
+//    var penaltyMarkDistance = 1.80;
+//    var centerCircleDiameter = 1.50;
+//    var borderStripMinWidth = 0.7;
 
     var lineWidth = 0.05;
     var markWidth = 0.1;
@@ -193,34 +176,9 @@
 	}
 
 	Field = function () {
-		var tube, post, i;
-		
 		//Create a new container object
 		THREE.Object3D.call(this);
 		
-		// this.field = new THREE.Object3D();
-		// this.field.rotation.y = Math.PI / 2;
-		// this.field.rotation.x = Math.PI / 2;
-		
-		// //Create the field
-		// this.map = new FieldMap();
-		
-		// //Create a plane which is the size of the field (/100 because field is measured in centimeters while the 3d is in meters)
-		// this.plane = new THREE.PlaneGeometry(this.map.canvas.width/100, this.map.canvas.height/100);
-		// this.plane.overdraw = true;
-		
-		// //Create a new mesh which is made from this texture
-		// this.ground = new THREE.Mesh(this.plane, new THREE.MeshBasicMaterial({
-		// 	map: this.map.texture
-		// }));
-		// this.ground.rotation.x = (3/2) * Math.PI;
-		// //this.ground.position.x = this.map.canvas.width/200;
-		// //this.ground.position.z = this.map.canvas.height/200;
-		
-		// this.field.add(this.ground);
-		// this.add(this.field);
-		
-		// FIELD MESH TEST
 		this.fieldMesh = buildFieldMesh();
 		this.add(this.fieldMesh);
 
@@ -259,73 +217,6 @@
 	};
 	
 	Field.prototype = Object.create(THREE.Object3D.prototype);
-
-	FieldMap = function () {
-		this.canvas = document.createElement("canvas");
-		var context = this.canvas.getContext("2d");
-
-		this.canvas.width = FIELD_WIDTH + (2 * BORDER_STRIP_WIDTH);
-		this.canvas.height = FIELD_LENGTH + (2 * BORDER_STRIP_WIDTH);
-
-		//Draw the field (green)
-		context.fillStyle = '#009900';
-		context.strokeStyle = '#FFF';
-		context.lineWidth = LINE_WIDTH;
-
-		//Draw the field
-		context.fillRect(0,0,this.canvas.width, this.canvas.height);
-
-		//Draw the outer box
-		context.strokeRect(BORDER_STRIP_WIDTH, BORDER_STRIP_WIDTH, FIELD_WIDTH, FIELD_LENGTH);
-
-		//Draw the centre line
-		context.beginPath();
-		context.moveTo(BORDER_STRIP_WIDTH, BORDER_STRIP_WIDTH + (FIELD_LENGTH / 2));
-		context.lineTo(BORDER_STRIP_WIDTH + FIELD_WIDTH, BORDER_STRIP_WIDTH + (FIELD_LENGTH / 2));
-		context.stroke();
-		context.closePath();
-
-		//Draw the circle in the middle
-		context.beginPath();
-		context.arc(this.canvas.width/2, this.canvas.height/2, CENTRE_CIRCLE_RADIUS, 0, Math.PI*2, true);
-		context.stroke();
-		context.closePath();
-
-		//Draw the two goal areas
-		context.strokeRect(BORDER_STRIP_WIDTH + ((FIELD_WIDTH - GOAL_AREA_WIDTH) / 2), BORDER_STRIP_WIDTH, GOAL_AREA_WIDTH, GOAL_AREA_LENGTH);
-		context.strokeRect(BORDER_STRIP_WIDTH + ((FIELD_WIDTH - GOAL_AREA_WIDTH) / 2), BORDER_STRIP_WIDTH + FIELD_LENGTH - GOAL_AREA_LENGTH, GOAL_AREA_WIDTH, GOAL_AREA_LENGTH);
-
-		//Draw the two goal boxes
-		context.strokeStyle = '#0000FF';
-		context.strokeRect(BORDER_STRIP_WIDTH + ((FIELD_WIDTH - GOAL_WIDTH)/2), BORDER_STRIP_WIDTH - GOAL_DEPTH, GOAL_WIDTH, GOAL_DEPTH);
-		context.strokeStyle = '#FFFF00';
-		context.strokeRect(BORDER_STRIP_WIDTH + ((FIELD_WIDTH - GOAL_WIDTH)/2), BORDER_STRIP_WIDTH + FIELD_LENGTH, GOAL_WIDTH, GOAL_DEPTH);
-		context.strokeStyle = '#FFF';
-
-		//Draw the three crosses
-		context.beginPath();
-		//First One
-		context.moveTo((this.canvas.width/2) + PENALTY_MARK_LENGTH/2, BORDER_STRIP_WIDTH + PENALTY_MARK_DISTANCE);
-		context.lineTo((this.canvas.width/2) - PENALTY_MARK_LENGTH/2, BORDER_STRIP_WIDTH + PENALTY_MARK_DISTANCE);
-		context.moveTo((this.canvas.width/2), BORDER_STRIP_WIDTH + PENALTY_MARK_DISTANCE + PENALTY_MARK_LENGTH/2);
-		context.lineTo((this.canvas.width/2), BORDER_STRIP_WIDTH + PENALTY_MARK_DISTANCE - PENALTY_MARK_LENGTH/2);
-		//Center one
-		context.moveTo((this.canvas.width/2) + PENALTY_MARK_LENGTH/2, (this.canvas.height/2));
-		context.lineTo((this.canvas.width/2) - PENALTY_MARK_LENGTH/2, (this.canvas.height/2));
-		context.moveTo((this.canvas.width/2), (this.canvas.height/2) + PENALTY_MARK_LENGTH/2);
-		context.lineTo((this.canvas.width/2), (this.canvas.height/2) - PENALTY_MARK_LENGTH/2);
-		//Last One
-		context.moveTo((this.canvas.width/2) + PENALTY_MARK_LENGTH/2, BORDER_STRIP_WIDTH + FIELD_LENGTH - PENALTY_MARK_DISTANCE);
-		context.lineTo((this.canvas.width/2) - PENALTY_MARK_LENGTH/2, BORDER_STRIP_WIDTH + FIELD_LENGTH - PENALTY_MARK_DISTANCE);
-		context.moveTo((this.canvas.width/2), BORDER_STRIP_WIDTH + FIELD_LENGTH - PENALTY_MARK_DISTANCE + PENALTY_MARK_LENGTH/2);
-		context.lineTo((this.canvas.width/2), BORDER_STRIP_WIDTH + FIELD_LENGTH - PENALTY_MARK_DISTANCE - PENALTY_MARK_LENGTH/2);
-		context.stroke();
-		context.closePath();
-
-		//Create the texture for this object
-		this.texture = new THREE.Texture(this.canvas);
-		this.texture.needsUpdate = true;
-	};
 
 	window.Field = Field;
 
