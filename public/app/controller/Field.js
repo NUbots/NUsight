@@ -107,7 +107,6 @@ Ext.define('NU.controller.Field', {
         this.on('selectRobotIP', Ext.bind(this.onSelectRobotIP, this));
 
         this.callParent(arguments);
-
     },
     onSelectRobotIP: function (robotIP) {
         this.robots.forEach(function (robot) {
@@ -115,12 +114,16 @@ Ext.define('NU.controller.Field', {
                 robot.darwinModels.forEach(function (model) {
                     model.traverse(function (object) { object.visible = false; });
                 });
-                robot.ballModel.traverse(function (object) { object.visible = false; });
+                robot.ballModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = false; });
+                });
             } else {
                 robot.darwinModels.forEach(function (model) {
                     model.traverse(function (object) { object.visible = true; });
                 });
-                robot.ballModel.traverse(function (object) { object.visible = true; });
+                robot.ballModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = true; });
+                });
             }
         })
     },
@@ -143,35 +146,37 @@ Ext.define('NU.controller.Field', {
                 robot.darwinModels.forEach(function (model) {
                     model.traverse(function (object) { object.visible = false; });
                 });
-                robot.ballModel.traverse(function (object) { object.visible = false; });
+                robot.ballModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = false; });
+                });
             }
-
-            // window.mainScene = this.mainScene;
 
             robot.darwinModels.forEach(function (model) {
                 this.mainScene.scene.add(model);
             }, this);
-            this.mainScene.scene.add(robot.ballModel);
+            robot.ballModels.forEach(function (model) {
+                this.mainScene.scene.add(model);
+            }, this);
         }, this);
 
-        robot.on('model-list-resized', function (numModels) {
-            
-            for (var i = 0; i < numModels; i++) {
-                if (i >= robot.darwinModels.length)
-                    break;
-
+        robot.on('darwin-model-list-resized', function (numModels) {
+            for (var i = 0; i < robot.darwinModels.length; i++) {
                 if (i < numModels) {
                     robot.darwinModels[i].traverse(function (object) { object.visible = true; });
                 } else {
                     robot.darwinModels[i].traverse(function (object) { object.visible = false; });
                 }
             }
+        }, this);
 
-            // robotModels.forEach(function (model) {
-            //     model.traverse(function (object) { object.visible = false; });
-
-            //     this.mainScene.scene.remove(model);
-            // }, this);
+        robot.on('ball-model-list-resized', function (numModels) {
+            for (var i = 0; i < robot.ballModels.length; i++) {
+                if (i < numModels) {
+                    robot.ballModels[i].traverse(function (object) { object.visible = true; });
+                } else {
+                    robot.ballModels[i].traverse(function (object) { object.visible = false; });
+                }
+            }
         }, this);
 
 //        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
@@ -222,7 +227,7 @@ Ext.define('NU.controller.Field', {
         var darwin, field, ball, camera, scene, renderer;
 
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 20);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50);
 
         camera.lookAt(scene.position);
 

@@ -6,7 +6,7 @@ Ext.define('NU.view.field.Robot', {
         showOrientation: true
 	},
 	darwinModels: [],
-	ballModel: null,
+	ballModels: [],
 	createDarwinModel: function () {
 		var darwin = new DarwinOP(function () {
             this.fireEvent('loaded');
@@ -20,6 +20,14 @@ Ext.define('NU.view.field.Robot', {
 
 		return darwin;
 	},
+	createBallModel: function () {
+		var ball = new Ball();
+        
+        ball = LocalisationVisualiser.visualise(ball, {color: 0x0000ff});
+        ball.position.x = 0.2;
+
+		return ball;
+	},
 	constructor: function () {
 		var darwin, ball;
 		
@@ -30,12 +38,10 @@ Ext.define('NU.view.field.Robot', {
 		darwin = this.createDarwinModel();
         
         field = new Field();
-        ball = new Ball();
-        ball = LocalisationVisualiser.visualise(ball, {color: 0x0000ff});
-        ball.position.x = 0.2;
+        ball = this.createBallModel();
 		
 		this.darwinModels = [ darwin ];
-		this.ballModel = ball;
+		this.ballModel = [ ball ];
 		
 		return this;
 		
@@ -88,34 +94,42 @@ Ext.define('NU.view.field.Robot', {
         }, this);
 	},
 	onLocalisation: function (api_localisation) {
-		// for (var i = 0; i < api_localisation.field_object.length; i++) {
-			// var fieldObject = api_localisation.field_object[i];
 		
-		api_localisation.field_object.forEach(function (fieldObject) {
-			if(fieldObject.name == 'ball') {
-				ball = this.ballModel;
+		function updateModel(model, field_object) {
+			model.position.x = field_object.wm_x;
+			model.position.y = field_object.wm_y;
+			model.rotation.z = field_object.heading;
 
-				fieldObject.models.forEach(function (model) {
-					ball.position.x = model.wm_x;
-					ball.position.y = model.wm_y;
-					ball.rotation.z = model.heading;
+			var result = this.calculateErrorElipse(field_object.sr_xx,
+												   field_object.sr_xy,
+												   field_object.sr_yy);
 
-					var result = this.calculateErrorElipse(model.sr_xx, model.sr_xy, model.sr_yy);
-					ball.visualiser.scale.x = result.x;
-					ball.visualiser.scale.z = result.y;
-					ball.visualiser.rotation.z = result.angle;
+			model.visualiser.scale.x = result.x;
+			model.visualiser.scale.z = result.y;
+			model.visualiser.rotation.y = result.angle;
+		}
 
-            	}, this);
-			} else if(fieldObject.name == 'self') {
-
+		api_localisation.field_object.forEach(function (field_object) {
+			if(field_object.name == 'ball') {
 				// Remove the old models
-				this.fireEvent('model-list-resized', fieldObject.models.length);
+				this.fireEvent('ball-model-list-resized', field_object.models.length);
 
-				// var newModels = [];
+				for (var i = 0; i < field_object.models.length; i++) {
+					var ball;
+					if (i >= this.ballModels.length) {
+						ball = this.createBallModel();
+						this.ballModels.push(ball);
+					} else {
+						ball = this.ballModels[i];
+					}
 
-				// fieldObject.models.forEach(function (model) {
-				for (var i = 0; i < fieldObject.models.length; i++) {
-					var model = fieldObject.models[i];					
+					updateModel.call(this, ball, field_object.models[i]);
+				}
+			} else if(field_object.name == 'self') {
+				// Remove the old models
+				this.fireEvent('darwin-model-list-resized', field_object.models.length);
+
+				for (var i = 0; i < field_object.models.length; i++) {
 					var darwin;
 					if (i >= this.darwinModels.length) {
 						darwin = this.createDarwinModel();
@@ -124,22 +138,8 @@ Ext.define('NU.view.field.Robot', {
 						darwin = this.darwinModels[i];
 					}
 
-					darwin.position.x = model.wm_x;
-					darwin.position.y = model.wm_y;
-					darwin.rotation.z = model.heading;
-
-					var result = this.calculateErrorElipse(model.sr_xx, model.sr_xy, model.sr_yy);
-					darwin.visualiser.scale.x = result.x;
-					darwin.visualiser.scale.z = result.y;
-					darwin.visualiser.rotation.z = result.angle;
-
-					// newModels.push(darwin);
+					updateModel.call(this, darwin, field_object.models[i]);
 				}
-            	// }, this);
-
-				// this.darwinModels = newModels;
-			} else {
-				// return;
 			}
 		}, this);
 	},
