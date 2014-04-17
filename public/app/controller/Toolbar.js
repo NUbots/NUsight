@@ -33,6 +33,13 @@ Ext.define('NU.controller.Toolbar', {
                 });
             }
         },
+        'add_classifier_display': {
+            click: function() {
+                Ext.create('NU.view.window.Classifier', {
+                    renderTo: this.getRenderTo()
+                });
+            }
+        },
         'list_robots': {
             click: function () {
                 Ext.create('Ext.Window', {

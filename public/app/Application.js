@@ -15,7 +15,9 @@ Ext.define('NU.Application', {
                 singleton: false
             },
             robotsStore: 'NU.store.Robots',
-            reactionStatisticsTreeStore: 'NU.store.ReactionStatisticsTree'
+            reactionStatisticsTreeStore: 'NU.store.ReactionStatisticsTree',
+            classifierTargetStore: 'NU.store.classifier.Target',
+            classifierSelectionToolStore: 'NU.store.classifier.SelectionTool'
         });
 
         Ext.QuickTips.init();

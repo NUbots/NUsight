@@ -24,8 +24,7 @@ Ext.define('NU.view.window.Vision', {
             backgroundColor: '#000',
             backgroundImage: "url('resources/images/camera.png')",
             backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            '-webkit-transform': 'scaleY(-1)'
+            backgroundPosition: 'center'
         },
         itemId: 'canvas',
         layout: 'fit'

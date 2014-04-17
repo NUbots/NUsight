@@ -14,7 +14,10 @@ Ext.define('NU.view.Toolbar', {
     }, {
         text: 'Add NUClear Display',
         itemId: 'add_nuclear_display'
-    }, '->', {
+    }, {
+        text: 'Add Classifier Display',
+        itemId: 'add_classifier_display'
+    },'->', {
         text: 'Robots',
         itemId: 'list_robots',
         iconCls: 'icon-cog'

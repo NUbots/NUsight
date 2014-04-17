@@ -7,6 +7,14 @@ a {
   color: #00B7FF;
 }
 
-.icon-reaction {
-    background-image: url('../javascripts/lib/ext-4.1.1a/resources/themes/images/gray/tree/leaf.gif') !important;
-}
+.icon-toolbar-point { background-image: url('../images/toolbar/point.png'); }
+.icon-toolbar-magic-wand { background-image: url('../images/toolbar/magic_wand.png'); }
+.icon-toolbar-polygon { background-image: url('../images/toolbar/polygon2.png'); }
+.icon-toolbar-zoom { background-image: url('../images/toolbar/zoom.png'); }
+
+.icon-toolbar-green { background-image: url('../images/toolbar/green.png'); }
+.icon-toolbar-orange { background-image: url('../images/toolbar/orange.png'); }
+.icon-toolbar-white { background-image: url('../images/toolbar/white.png'); }
+.icon-toolbar-yellow { background-image: url('../images/toolbar/yellow.png'); }
+.icon-toolbar-black { background-image: url('../images/toolbar/black.png'); }
+

@@ -78,9 +78,9 @@ Ext.define('NU.controller.Vision', {
         if (this.displayTransitions && vision.classified_image) {
             this.drawTransitions(vision.classified_image);
         }
-        /*if (this.displayFieldObjects && vision.field_object) {
-         this.drawFieldObjects(vision.field_object);
-         }*/
+        // if (this.displayFieldObjects && vision.vision_object) {
+        //     this.drawFieldObjects(vision.vision_object);
+        // }
     },
     drawImage: function (image) {
         // 1st implementation - potentially slower
@@ -230,109 +230,104 @@ Ext.define('NU.controller.Vision', {
         this.context.putImageData(imageData, 0, 0);
 
     },
-    drawFieldObjects: function (field_objects) {
+    drawFieldObjects: function (vision_objects) {
 
 
-        var api_ball = field_objects[0];
-        var api_goals = [];
-        var api_obstacles = [];
-
-        for (var i = 0; i < field_objects.length; i++) {
-            var obj = field_objects[i];
-            if (obj.visible) {
-                //console.log(obj.name);
-                if (obj.name == "Unknown Yellow Post"
-                    ||
-                    obj.name == "Left Yellow Post"
-                    ||
-                    obj.name == "Right Yellow Post"
-                    ) {
-                    api_goals.push(obj); // TODO: mark type
-                } else if (obj.name == "Unknown Obstacle") {
-                    api_obstacles.push(obj);
-                }
-            }
-        }
-
+        // var api_ball = vision_objects[0];
+        // var api_goals = [];
+        // var api_obstacles = [];
         var context = this.getContext();
 
-        if (api_ball.visible) {
-            context.beginPath();
+        for (var i = 0; i < vision_objects.length; i++) {
+            var obj = vision_objects[i];    
+            switch (obj.shape_type){
+                case (1)://VisionFieldObject.ShapeType.CIRCLE):
+                    context.beginPath();
 
-            context.shadowColor = 'black';
-            context.shadowBlur = 5;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
+                    context.shadowColor = 'black';
+                    context.shadowBlur = 5;
+                    context.shadowOffsetX = 0;
+                    context.shadowOffsetY = 0;
 
-            context.arc(api_ball.screen_x, api_ball.screen_y, api_ball.radius, 0, Math.PI*2, true);
-            context.closePath();
-            //context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
-            //context.fill();
-            context.strokeStyle = "rgba(255, 255, 255, 1)";
-            context.lineWidth = 2;
-            context.lineWidth = 2;
-            context.stroke();
+                    context.arc(obj.screen_x, obj.screen_y, obj.radius, 0, Math.PI*2, true);
+                    context.closePath();
+                    //context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
+                    //context.fill();
+                    context.strokeStyle = "rgba(255, 255, 255, 1)";
+                    context.lineWidth = 2;
+                    context.lineWidth = 2;
+                    context.stroke();
 
-            var position = api_ball.measured_relative_position;
-        };
+                    var position = obj.measured_relative_position;
+                    break;
 
-        Ext.each(api_goals, function (goal) {
+                case (2)://VisionFieldObject.ShapeType.QUAD):
 
-            var topLeftX = goal.screen_x - (goal.width / 2);
-            var topLeftY = goal.screen_y - goal.height;
+                    // var topLeftX = obj.screen_x - (obj.width / 2);
+                    // var topLeftY = obj.screen_y - obj.height;
 
-            context.beginPath();
+                    context.beginPath();
 
-            context.moveTo(topLeftX, topLeftY);
-            context.lineTo(topLeftX + goal.width, topLeftY);
-            context.lineTo(topLeftX + goal.width, topLeftY + goal.height);
-            context.lineTo(topLeftX, topLeftY + goal.height);
-            context.closePath();
+                    // context.moveTo(topLeftX, topLeftY);
+                    // context.lineTo(topLeftX + obj.width, topLeftY);
+                    // context.lineTo(topLeftX + obj.width, topLeftY + obj.height);
+                    // context.lineTo(topLeftX, topLeftY + obj.height);
+                    // context.closePath();
 
-            context.shadowColor = 'black';
-            context.shadowBlur = 5;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
+                    context.moveTo(obj.points[0], obj.points[1]);
+                    for(var i = 1; i < points.length/2; i++){
+                        context.lineTo(obj.points[2*i], obj.points[2*i + 1]);
+                    }
+                    context.closePath();
 
-            context.fillStyle = "rgba(255, 242, 0, 0.2)";
-            context.fill();
+                    context.shadowColor = 'black';
+                    context.shadowBlur = 5;
+                    context.shadowOffsetX = 0;
+                    context.shadowOffsetY = 0;
 
-            context.strokeStyle = "rgba(255, 242, 0, 1)";
-            context.lineWidth = 2;
-            context.lineWidth = 2;
+                    context.fillStyle = "rgba(255, 242, 0, 0.2)";
+                    context.fill();
 
-            context.stroke();
+                    context.strokeStyle = "rgba(255, 242, 0, 1)";
+                    context.lineWidth = 2;
+                    context.lineWidth = 2;
 
-        }, this);
+                    context.stroke();
+                    break;
 
-        Ext.each(api_obstacles, function (obstacle) {
+                
 
-            var topLeftX = obstacle.screen_x - (obstacle.width / 2);
-            var topLeftY = 0;//obstacle.screen_y - obstacle.height; // TODO: waiting for shannon to fix height on obstacles
+                case (4)://VisionFieldObject.ShapeType.UNKNOWN):
 
-            this.context.beginPath();
+                    var topLeftX = obj.screen_x - (obj.width / 2);
+                    var topLeftY = obj.screen_y - obj.height; // TODO: waiting for shannon to fix height on obstacles
 
-            this.context.moveTo(topLeftX, topLeftY);
-            this.context.lineTo(topLeftX + obstacle.width, topLeftY);
-            this.context.lineTo(topLeftX + obstacle.width, obstacle.screen_y);
-            this.context.lineTo(topLeftX, obstacle.screen_y);
-            this.context.closePath();
+                    context.beginPath();
 
-            this.context.shadowColor = 'black';
-            this.context.shadowBlur = 5;
-            this.context.shadowOffsetX = 0;
-            this.context.shadowOffsetY = 0;
+                    context.moveTo(topLeftX, topLeftY);
+                    context.lineTo(topLeftX + obj.width, topLeftY);
+                    context.lineTo(topLeftX + obj.width, topLeftY + obj.height);
+                    context.lineTo(topLeftX, topLeftY + obj.height);
+                    context.closePath();
 
-            this.context.fillStyle = "rgba(255, 255, 255, 0.2)";
-            this.context.fill();
+                    context.shadowColor = 'black';
+                    context.shadowBlur = 5;
+                    context.shadowOffsetX = 0;
+                    context.shadowOffsetY = 0;
 
-            this.context.strokeStyle = "rgba(255, 255, 255, 0.5)";
-            this.context.lineWidth = 2;
-            this.context.lineWidth = 2;
+                    context.fillStyle = "rgba(255, 255, 255, 0.2)";
+                    context.fill();
 
-            this.context.stroke();
+                    context.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                    context.lineWidth = 2;
+                    context.lineWidth = 2;
 
-        }, this);
+                    context.stroke();
+                    break;
+                
+            }
+
+        }
 
     },
     segmentColourToRGB: function (colourType)
