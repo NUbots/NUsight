@@ -59,7 +59,6 @@ message Message {
 			UNKNOWN_GOAL = 3;
 		}
 
-
 		optional ShapeType shape_type = 1;
 		optional GoalType goal_type = 2;
 		optional string name = 3;
