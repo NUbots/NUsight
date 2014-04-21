@@ -206,6 +206,7 @@ Ext.define('NU.controller.Classifier', {
 		this.setMagicWandPoints([]);
 
 		NU.util.Network.on('vision', Ext.bind(this.onVision, this));
+		NU.util.Network.on('lookup_table', Ext.bind(this.onLookUpTable, this));
 		this.callParent(arguments);
 
 		var rawElCanvas = this.getRawImage().getEl();
@@ -326,6 +327,20 @@ Ext.define('NU.controller.Classifier', {
 				backwardHistory.shift();
 			}
 		}
+	},
+	onLookUpTable: function (robotIP, api_message) {
+
+		// TODO: remove
+		if (robotIP !== this.robotIP) {
+			return;
+		}
+
+		var table = api_message.getLookupTable().getTable();
+
+		// TODO: validate?
+		this.setLookup(new Uint8ClampedArray(table));
+		this.updateClassifiedData();
+
 	},
 	onVision: function (robotIP, api_message) {
 
