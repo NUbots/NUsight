@@ -162,7 +162,6 @@ Ext.define('NU.controller.Classifier', {
 			click: function () {
 				this.updateClassifiedData();
 				this.renderClassifiedImage();
-				this.refreshScatter();
 			}
 		},
 		'snapshot': {
