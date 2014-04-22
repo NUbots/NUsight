@@ -1,14 +1,14 @@
 Ext.define('NU.view.window.Classifier', {
 	extend : 'NU.view.window.Display',
+	requires: ['Ext.ux.plot.Scatter3D'],
 	alias : ['widget.nu_classifier_window'],
 	controller: 'NU.controller.Classifier',
 	title: 'Classifier',
 	width: 800,
-	height: 600,
+	height: 700,
 	layout: 'hbox',
 	initComponent: function () {
 		Ext.apply(this, {
-			onEsc: Ext.emptyFn,
 			tbar: [{
 				xtype: 'robot_selector'
 			}, '->', {
@@ -112,93 +112,116 @@ Ext.define('NU.view.window.Classifier', {
 				}]
 			}],
 			items: [{
-				style: {
-					marginRight: '10px'
+				layout: {
+					type: 'table',
+					columns: 2
 				},
 				items: [{
+					// raw image
 					style: {
-						border: '5px solid #000',
-						borderRadius: '5px'
+						marginBottom: '10px'
 					},
-					items: {
-						itemId: 'rawImage',
-						width: 320,
-						height: 240,
-						autoEl: {
-							tag: 'canvas',
-							width: 320,
-							height: 240
-						},
+					items: [{
 						style: {
-							backgroundColor: '#000',
-							backgroundImage: "url('resources/images/camera.png')",
-							backgroundRepeat: 'no-repeat',
-							backgroundPosition: 'center',
-							cursor: 'crosshair',
-							display: 'block'
+							border: '5px solid #000',
+							borderRadius: '5px'
+						},
+						items: {
+							itemId: 'rawImage',
+							width: 320,
+							height: 240,
+							autoEl: {
+								tag: 'canvas',
+								width: 320,
+								height: 240
+							},
+							style: {
+								backgroundColor: '#000',
+								backgroundImage: "url('resources/images/camera.png')",
+								backgroundRepeat: 'no-repeat',
+								backgroundPosition: 'center',
+								cursor: 'crosshair',
+								display: 'block'
+							}
 						}
-					}
+					}]
 				}, {
-					itemId: 'rawValue',
-					width: 320,
-					html: '(X, Y) = rgb(R, G, B)',
-					style: {
-						margin: '5px',
-						textAlign: 'center'
-					}
+					rowspan: 2,
+					xtype: 'scatter3d',
+					itemId: 'scatter3d'
 				}, {
-					itemId: 'snapshot',
-					xtype: 'checkbox',
-					fieldLabel: 'Freeze',
+					// classified image
+					items: [{
+						style: {
+							border: '5px solid #000',
+							borderRadius: '5px'
+						},
+						items: {
+							itemId: 'classifiedImage',
+							width: 320,
+							height: 240,
+							autoEl: {
+								tag: 'canvas',
+								width: 320,
+								height: 240
+							},
+							style: {
+								backgroundColor: '#000',
+								cursor: 'crosshair',
+								display: 'block'
+							}
+						}
+					}]
 				}, {
-					itemId: 'toleranceValue',
-					xtype: 'numberfield',
-					fieldLabel: 'Tolerance',
-					value: 5,
-					step: 1
-				}]
-			}, {
-				items: [{
-					style: {
-						border: '5px solid #000',
-						borderRadius: '5px'
+					colspan: 2,
+					layout: {
+						type: 'table',
+						columns: 2
 					},
-					items: {
-						itemId: 'classifiedImage',
-						width: 320,
-						height: 240,
-						autoEl: {
-							tag: 'canvas',
+					items: [{
+						items: [{
+							itemId: 'rawValue',
 							width: 320,
-							height: 240
-						},
-						style: {
-							backgroundColor: '#000',
-							cursor: 'crosshair',
-							display: 'block'
-						}
-					}
-				}, {
-					itemId: 'classifiedValue',
-					width: 320,
-					html: '(X, Y) = rgb(R, G, B)',
-					style: {
-						margin: '5px',
-						textAlign: 'center'
-					}
-				}, {
-					itemId: 'rawUnderlay',
-					xtype: 'checkbox',
-					checked: true,
-					fieldLabel: 'Underlay'
-				}, {
-					itemId: 'rawUnderlayOpacity',
-					xtype: 'numberfield',
-					fieldLabel: 'Opacity',
-					step: 0.1,
-					value: 0.5,
-					minValue: 0,
-					maxValue: 1
+							html: '(X, Y) = rgb(R, G, B)',
+							style: {
+								margin: '5px',
+								textAlign: 'center'
+							}
+						}, {
+							itemId: 'snapshot',
+							xtype: 'checkbox',
+							fieldLabel: 'Freeze',
+						}, {
+							itemId: 'toleranceValue',
+							xtype: 'numberfield',
+							fieldLabel: 'Tolerance',
+							value: 5,
+							step: 1
+						}]
+					}, {
+						items: [{
+							itemId: 'classifiedValue',
+							width: 320,
+							html: '(X, Y) = rgb(R, G, B)',
+							style: {
+								margin: '5px',
+								textAlign: 'center'
+							}
+						}, {
+							itemId: 'rawUnderlay',
+							xtype: 'checkbox',
+							checked: true,
+							fieldLabel: 'Underlay'
+						}, {
+							itemId: 'rawUnderlayOpacity',
+							xtype: 'numberfield',
+							fieldLabel: 'Opacity',
+							step: 0.1,
+							value: 0.5,
+							minValue: 0,
+							maxValue: 1
+						}]
+					}]
 				}]
 			}]
 		});

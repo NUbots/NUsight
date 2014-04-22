@@ -7,6 +7,7 @@ Ext.define('NU.view.window.Display', {
     autoShow: true,
     constrain: true,
     maximizable: true,
+	onEsc: Ext.emptyFn,
     tbar: [{
         xtype: 'robot_selector'
     }]

@@ -139,7 +139,7 @@ Ext.define('NU.controller.Classifier', {
 			click: function () {
 				this.addHistory();
 				this.resetLUT();
-				this.setClassifiedImageData(this.generateClassifiedData());
+				this.updateClassifiedData();
 				this.renderClassifiedImage();
 			}
 		},
@@ -162,6 +162,7 @@ Ext.define('NU.controller.Classifier', {
 			click: function () {
 				this.updateClassifiedData();
 				this.renderClassifiedImage();
+				this.refreshScatter();
 			}
 		},
 		'snapshot': {
@@ -194,7 +195,8 @@ Ext.define('NU.controller.Classifier', {
 			}
 		},
 		'rawValue': true,
-		'classifiedValue': true
+		'classifiedValue': true,
+		'scatter3d': true
 	},
 	init: function () {
 		// these must initialized here so there is an object per-controller
@@ -206,6 +208,7 @@ Ext.define('NU.controller.Classifier', {
 		this.setMagicWandPoints([]);
 
 		NU.util.Network.on('vision', Ext.bind(this.onVision, this));
+		NU.util.Network.on('lookup_table', Ext.bind(this.onLookUpTable, this));
 		this.callParent(arguments);
 
 		var rawElCanvas = this.getRawImage().getEl();
@@ -261,6 +264,65 @@ Ext.define('NU.controller.Classifier', {
 
 		this.testDrawImage();
 	},
+	refreshScatter: function () {
+
+		var data = [];
+		var lut = this.getLookup();
+
+		function getColour(typeId) {
+//			var rgb = this.getRGBfromType(typeId);
+//			return new THREE.Color(rgb[0], rgb[1], rgb[2]);
+			switch (typeId) {
+				case this.self.Target.Unclassified:
+//					return new THREE.Color("#000000");
+					return null;
+				case this.self.Target.Line:
+					return new THREE.Color("#ffffff");
+				case this.self.Target.Field:
+					return new THREE.Color("#00ff00");
+				case this.self.Target.Goal:
+					return new THREE.Color("#ffff00");
+				case this.self.Target.Ball:
+					return new THREE.Color("#ff9000");
+			}
+		}
+
+		function scale(value) {
+			// scale from [0, 255] to [-1, 1]
+			return (100 * value) / 255 - 50;
+		}
+
+		var index;
+		var min = 0;
+		var max = 255;
+		var numSteps = 128;
+		var step = (max - min) / numSteps;
+		for (var z = min; z <= max; z += step) {
+			for (var y = min; y <= max; y += step) {
+				for (var x = min; x <= max; x += step) {
+					/*
+//					console.log(x, y, z, new THREE.Color(Math.round(x), Math.round(y), Math.round(z)));
+					var colour = new THREE.Color();
+//					colour.setRGB(x/255, y/255, z/255);
+					var rgb = this.getRGBfromCYBRCR(x, y, z);
+					colour.setRGB(rgb[0]/255, rgb[1]/255, rgb[2]/255);
+					data[i] = [scale(z), scale(x), scale(y), colour];
+					i++;
+					continue;*/
+					index = this.getLUTIndex([x, y, z]);
+					var colour = getColour.call(this, lut[index]);
+					if (colour !== null) {
+						// swap y/z since axes change in threejs
+						data.push([scale(z), scale(x), scale(y), colour]);
+					}
+				}
+			}
+		}
+
+		this.getScatter3d().setData(data);
+		this.getScatter3d().updatePlot();
+
+	},
 	resetLUT: function () {
 		this.setLookup(new Uint8ClampedArray(Math.pow(2, 3 * this.self.LutBitsPerColor))); // TODO: make constant or something
 	},
@@ -289,7 +351,7 @@ Ext.define('NU.controller.Classifier', {
 
 		var bits = this.self.LutBitsPerColor;
 		var bitsRemoved = 8 - bits;
-		index += ((ycbcr[0] >> bitsRemoved) << 2 * bits);
+		index += ((ycbcr[0] >> bitsRemoved) << (2 * bits));
 		index += ((ycbcr[1] >> bitsRemoved) << bits);
 		index += (ycbcr[2] >> bitsRemoved);
 
@@ -326,6 +388,20 @@ Ext.define('NU.controller.Classifier', {
 				backwardHistory.shift();
 			}
 		}
+	},
+	onLookUpTable: function (robotIP, api_message) {
+
+		// TODO: remove
+		if (robotIP !== this.robotIP) {
+			return;
+		}
+
+		var table = api_message.getLookupTable().getTable();
+
+		// TODO: validate?
+		this.setLookup(new Uint8ClampedArray(table));
+		this.updateClassifiedData();
+
 	},
 	onVision: function (robotIP, api_message) {
 
@@ -659,14 +735,18 @@ Ext.define('NU.controller.Classifier', {
 		if (range === undefined) {
 			range = this.getRange();
 		}
-		for (var y = 0; y < range; y++) {
-			for (var cb = 0; cb < range; cb++) {
-				for (var cr = 0; cr < range; cr++) {
-					// TODO: bound
+		var minRange = Math.floor(range / 2);
+		for (var dy = -minRange; dy < minRange; dy++) {
+			for (var dcb = -minRange; dcb < minRange; dcb++) {
+				for (var dcr = -minRange; dcr < minRange; dcr++) {
+					// cap it
+					var y = Math.max(0, Math.min(255, ycbcr[0] + dy));
+					var cb = Math.max(0, Math.min(255, ycbcr[1] + dcb));
+					var cr = Math.max(0, Math.min(255, ycbcr[2] + dcr));
 					var nearYcbcr = [
-							ycbcr[0] + y,
-							ycbcr[1] + cb,
-							ycbcr[2] + cr,
+							y,
+							cb,
+							cr,
 					];
 					var index = this.getLUTIndex(nearYcbcr);
 					var typeId = this.self.Target[type];
@@ -697,6 +777,12 @@ Ext.define('NU.controller.Classifier', {
 //       ycc[2] = Math.floor(128 + (112 * r - 93.786 * g - 18.214 * b));
 //        return ycc;
 //    },
+	getRGBfromCYBRCR: function (y, cb, cr) {
+		var r = y + 1.402 * (cr - 128);
+		var g = y - 0.34414 * (cb - 128) - 0.71414 * (cr - 128)
+		var b = y + 1.772 * (cb - 128);
+		return [r, g, b]
+	},
 	hash: function (ycc) {
 		return ycc[0] + '.' + ycc[1] + '.' + ycc[2];
 	},
@@ -920,6 +1006,7 @@ Ext.define('NU.controller.Classifier', {
 	},
 	updateClassifiedData: function () {
 		this.setClassifiedImageData(this.generateClassifiedData());
+		this.refreshScatter();
 	},
 	generateClassifiedData: function () {
 		var rawData = this.getRawImageData();
