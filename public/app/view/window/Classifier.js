@@ -1,14 +1,14 @@
 Ext.define('NU.view.window.Classifier', {
 	extend : 'NU.view.window.Display',
+	requires: ['Ext.ux.plot.Scatter3D'],
 	alias : ['widget.nu_classifier_window'],
 	controller: 'NU.controller.Classifier',
 	title: 'Classifier',
-	width: 800,
+	width: 1200,
 	height: 600,
 	layout: 'hbox',
 	initComponent: function () {
 		Ext.apply(this, {
-			onEsc: Ext.emptyFn,
 			tbar: [{
 				xtype: 'robot_selector'
 			}, '->', {
@@ -199,6 +199,13 @@ Ext.define('NU.view.window.Classifier', {
 					value: 0.5,
 					minValue: 0,
 					maxValue: 1
+				}]
+			}, {
+				items: [{
+					xtype: 'scatter3d',
+					itemId: 'scatter3d'
+				}, {
+					html: 'Lookup Table 3D Graph'
 				}]
 			}]
 		});
