@@ -293,7 +293,6 @@ Ext.define('NU.controller.Classifier', {
 		}
 
 		var index;
-		var i = 0;
 		var min = 0;
 		var max = 255;
 		var numSteps = 128;
@@ -314,8 +313,7 @@ Ext.define('NU.controller.Classifier', {
 					var colour = getColour.call(this, lut[index]);
 					if (colour !== null) {
 						// swap y/z since axes change in threejs
-						data[i] = [scale(z), scale(x), scale(y), colour];
-						i++;
+						data.push([scale(z), scale(x), scale(y), colour]);
 					}
 				}
 			}
