@@ -210,7 +210,7 @@ Ext.define('NU.view.window.Classifier', {
 						}, {
 							itemId: 'rawUnderlay',
 							xtype: 'checkbox',
-							checked: true,
+							checked: false,
 							fieldLabel: 'Underlay'
 						}, {
 							itemId: 'rawUnderlayOpacity',
@@ -220,6 +220,11 @@ Ext.define('NU.view.window.Classifier', {
 							value: 0.5,
 							minValue: 0,
 							maxValue: 1
+						}, {
+							itemId: 'renderColourSpaceBox',
+							xtype: 'checkbox',
+							checked: false,
+							fieldLabel: 'Render YUV'
 						}]
 					}]
 				}]

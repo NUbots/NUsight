@@ -24,12 +24,13 @@ Ext.define('NU.controller.Classifier', {
 		range: 10,
 		tolerance: 5,
 		renderZoom: true,
-		renderRawUnderlay: true,
+		renderRawUnderlay: false,
 		rawUnderlayOpacity: 0.5,
 		magicWandPoints: null,
 		target: 'Field',
 		centerEllipse: false,
-		lastDraw: 0
+		lastDraw: 0,
+		renderColourSpace: false
 	},
 	statics: {
 		Target: {
@@ -193,6 +194,14 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		},
+		'renderColourSpaceBox': {
+			change: function (checkbox, newValue, oldValue, eOpts) {
+				if (checkbox.isValid()) {
+					this.setRenderColourSpace(newValue);
+					this.refreshScatter();
+				}
+			}
+		},
 		'rawValue': true,
 		'classifiedValue': true,
 		'scatter3d': true
@@ -294,25 +303,23 @@ Ext.define('NU.controller.Classifier', {
 		var index;
 		var min = 0;
 		var max = 255;
-		var numSteps = 128;
+		var numSteps = this.getRenderColourSpace() ? 80 : Math.pow(2, this.self.LutBitsPerColor);
 		var step = (max - min) / numSteps;
 		for (var z = min; z <= max; z += step) {
 			for (var y = min; y <= max; y += step) {
 				for (var x = min; x <= max; x += step) {
-					/*
-//					console.log(x, y, z, new THREE.Color(Math.round(x), Math.round(y), Math.round(z)));
-					var colour = new THREE.Color();
-//					colour.setRGB(x/255, y/255, z/255);
-					var rgb = this.getRGBfromCYBRCR(x, y, z);
-					colour.setRGB(rgb[0]/255, rgb[1]/255, rgb[2]/255);
-					data[i] = [scale(z), scale(x), scale(y), colour];
-					i++;
-					continue;*/
-					index = this.getLUTIndex([x, y, z]);
-					var colour = getColour.call(this, lut[index]);
-					if (colour !== null) {
-						// swap y/z since axes change in threejs
+					if (this.getRenderColourSpace()) {
+						var colour = new THREE.Color();
+						var rgb = this.getRGBfromCYBRCR(x, y, z);
+						colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
 						data.push([scale(z), scale(x), scale(y), colour]);
+					} else {
+						index = this.getLUTIndex([x, y, z]);
+						var colour = getColour.call(this, lut[index]);
+						if (colour !== null) {
+							// swap y/z since axes change in threejs
+							data.push([scale(z), scale(x), scale(y), colour]);
+						}
 					}
 				}
 			}
