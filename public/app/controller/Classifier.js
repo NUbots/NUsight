@@ -30,7 +30,8 @@ Ext.define('NU.controller.Classifier', {
 		target: 'Field',
 		centerEllipse: false,
 		lastDraw: 0,
-		renderColourSpace: false
+		renderYUV: false,
+		renderCube: false
 	},
 	statics: {
 		Target: {
@@ -194,10 +195,18 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		},
-		'renderColourSpaceBox': {
+		'renderYUVBox': {
 			change: function (checkbox, newValue, oldValue, eOpts) {
 				if (checkbox.isValid()) {
-					this.setRenderColourSpace(newValue);
+					this.setRenderYUV(newValue);
+					this.refreshScatter();
+				}
+			}
+		},
+		'renderCubeBox': {
+			change: function (checkbox, newValue, oldValue, eOpts) {
+				if (checkbox.isValid()) {
+					this.setRenderCube(newValue);
 					this.refreshScatter();
 				}
 			}
@@ -292,6 +301,8 @@ Ext.define('NU.controller.Classifier', {
 					return new THREE.Color("#ffff00");
 				case this.self.Target.Ball:
 					return new THREE.Color("#ff9000");
+				default:
+					throw new Error('Wat is ' + typeId);
 			}
 		}
 
@@ -303,20 +314,27 @@ Ext.define('NU.controller.Classifier', {
 		var index;
 		var min = 0;
 		var max = 255;
-		var numSteps = this.getRenderColourSpace() ? 80 : Math.pow(2, this.self.LutBitsPerColor);
+		var numSteps = this.getRenderCube() ? 80 : Math.pow(2, this.self.LutBitsPerColor);
 		var step = (max - min) / numSteps;
 		for (var z = min; z <= max; z += step) {
 			for (var y = min; y <= max; y += step) {
 				for (var x = min; x <= max; x += step) {
-					if (this.getRenderColourSpace()) {
+					if (this.getRenderCube()) {
 						var colour = new THREE.Color();
 						var rgb = this.getRGBfromCYBRCR(x, y, z);
 						colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
 						data.push([scale(z), scale(x), scale(y), colour]);
 					} else {
 						index = this.getLUTIndex([x, y, z]);
-						var colour = getColour.call(this, lut[index]);
-						if (colour !== null) {
+						if (lut[index] !== this.self.Target.Unclassified) {
+							var colour;
+							if (this.getRenderYUV()) {
+								colour = new THREE.Color();
+								var rgb = this.getRGBfromCYBRCR(x, y, z);
+								colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
+							} else {
+								colour = getColour.call(this, lut[index]);
+							}
 							// swap y/z since axes change in threejs
 							data.push([scale(z), scale(x), scale(y), colour]);
 						}
@@ -405,9 +423,10 @@ Ext.define('NU.controller.Classifier', {
 		var table = api_message.getLookupTable().getTable();
 
 		// TODO: validate?
-		this.setLookup(new Uint8ClampedArray(table));
+		var lut = new Uint8ClampedArray(table.toArrayBuffer());
+		this.setLookup(lut);
 		this.updateClassifiedData();
-
+		this.renderClassifiedImage();
 	},
 	onVision: function (robotIP, api_message) {
 

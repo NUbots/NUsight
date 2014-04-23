@@ -5,7 +5,7 @@ Ext.define('NU.view.window.Classifier', {
 	controller: 'NU.controller.Classifier',
 	title: 'Classifier',
 	width: 800,
-	height: 700,
+	height: 750,
 	layout: 'hbox',
 	initComponent: function () {
 		Ext.apply(this, {
@@ -221,10 +221,15 @@ Ext.define('NU.view.window.Classifier', {
 							minValue: 0,
 							maxValue: 1
 						}, {
-							itemId: 'renderColourSpaceBox',
+							itemId: 'renderYUVBox',
 							xtype: 'checkbox',
 							checked: false,
 							fieldLabel: 'Render YUV'
+						}, {
+							itemId: 'renderCubeBox',
+							xtype: 'checkbox',
+							checked: false,
+							fieldLabel: 'Render Cube'
 						}]
 					}]
 				}]

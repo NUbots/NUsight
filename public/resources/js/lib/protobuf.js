@@ -38,7 +38,7 @@
          * @const
          * @expose
          */
-        ProtoBuf.VERSION = "2.0.0";
+        ProtoBuf.VERSION = "2.0.5";
 
         /**
          * Wire types.
@@ -223,7 +223,7 @@
              * @const
              * @expose
              */
-            Util.IS_NODE = (typeof window == 'undefined' || !window.window) && typeof require == 'function' && typeof process !== 'undefined' && typeof process.nextTick === 'function';
+            Util.IS_NODE = (typeof window === 'undefined' || !window.window) && typeof require === 'function' && typeof process !== 'undefined' && typeof process["nextTick"] === 'function';
             
             /**
              * Constructs a XMLHttpRequest object.
@@ -746,7 +746,10 @@
                     token = this.tn.next();
                 }
                 if (!Lang.NAME.test(token)) {
-                    throw(new Error("Illegal option name in message "+parent.name+" at line "+this.tn.line+": "+token));
+                    // we can allow options of the form google.protobuf.* since they will just get ignored anyways
+                    if (!/google\.protobuf\./.test(token)) {
+                        throw(new Error("Illegal option name in message "+parent.name+" at line "+this.tn.line+": "+token));
+                    }
                 }
                 var name = token;
                 token = this.tn.next();
@@ -2300,7 +2303,7 @@
                 }
                 // Length-delimited bytes
                 if (this.type == ProtoBuf.TYPES["bytes"]) {
-                    if (typeof value == 'object' && value instanceof ByteBuffer) {
+                    if (value && value instanceof ByteBuffer) {
                         return value;
                     }
                     return ByteBuffer.wrap(value);
@@ -3239,7 +3242,7 @@
                                 this.ptr.addChild(obj);
                                 obj = null;
                             } else if (Builder.isValidExtend(def)) {
-                                obj = this.lookup(def["ref"]);
+                                obj = this.ptr.resolve(def["ref"]);
                                 if (obj) {
                                     for (i=0; i<def["fields"].length; i++) { // i=Fields
                                         if (obj.hasChild(def['fields'][i]['id'])) {
@@ -3351,7 +3354,13 @@
                                 this["import"]((new ProtoBuf.DotProto.Parser(contents+"")).parse(), importFilename); // May throw
                             }
                         } else { // Import structure
-                            this["import"](json['imports'][i], /* unique fake */ filename.replace(/^(.+)\.(\w+)$/, function($0, $1, $2) { return $1+"_import"+i+"."+$2; }));
+                            if (!filename) {
+                                this["import"](json['imports'][i]);
+                            } else if (/\.(\w+)$/.test(filename)) { // With extension: Append _importN to the name portion to make it unique
+                                this["import"](json['imports'][i], filename.replace(/^(.+)\.(\w+)$/, function($0, $1, $2) { return $1+"_import"+i+"."+$2; }));
+                            } else { // Without extension: Append _importN to make it unique
+                                this["import"](json['imports'][i], filename+"_import"+i);
+                            }
                         }
                     }
                     if (resetRoot) { // Reset import root override when all imports are done
