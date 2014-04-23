@@ -314,12 +314,12 @@ Ext.define('NU.controller.Classifier', {
 		var index;
 		var min = 0;
 		var max = 255;
-		var numSteps = this.getRenderCube() ? 80 : Math.pow(2, this.self.LutBitsPerColor);
+		var numSteps = this.getRenderCube() ? 128 : Math.pow(2, this.self.LutBitsPerColor);
 		var step = (max - min) / numSteps;
 		for (var z = min; z <= max; z += step) {
 			for (var y = min; y <= max; y += step) {
 				for (var x = min; x <= max; x += step) {
-					if (this.getRenderCube()) {
+					if (this.getRenderCube() && (z === 0 || z === 255 || y === 0 || y === 255 || x === 0 || x === 255)) {
 						var colour = new THREE.Color();
 						var rgb = this.getRGBfromCYBRCR(x, y, z);
 						colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
