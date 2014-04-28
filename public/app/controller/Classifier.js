@@ -1064,6 +1064,9 @@ Ext.define('NU.controller.Classifier', {
 	getYCBCR: function (x, y) {
 		var components = this.getRawImageComponents();
 
+		x = 320 - x - 1;
+		y = 240 - y - 1;
+
 		var l = components[0].lines[y][x];
 		// divide cb and cr by 2 as it's using YUV422 so there is half the cb/cr
 		var cb = components[1].lines[y][Math.floor(x / 2)];
@@ -1113,6 +1116,12 @@ Ext.define('NU.controller.Classifier', {
 		var ctx = me.getRawContext();
 		var data = ctx.getImageData(0, 0, 320, 240);
 		imageObj.copyToImageData(data);
+		ctx.putImageData(data, 0, 0);
+		ctx.save();
+		ctx.scale(-1, -1);
+		ctx.drawImage(ctx.canvas, -320, -240, 320, 240);
+		ctx.restore();
+		data = ctx.getImageData(0, 0, 320, 240);
 		me.setRawImageData(data);
 		me.setRawImageComponents(imageObj.components);
 		me.renderImages();
@@ -1134,6 +1143,12 @@ Ext.define('NU.controller.Classifier', {
 			var ctx = me.getRawContext();
 			var data = ctx.getImageData(0, 0, 320, 240);
 			imageObj.copyToImageData(data);
+			ctx.putImageData(data, 0, 0);
+			ctx.save();
+			ctx.scale(-1, -1);
+			ctx.drawImage(ctx.canvas, -320, -240, 320, 240);
+			ctx.restore();
+			data = ctx.getImageData(0, 0, 320, 240);
 			me.setRawImageData(data);
 			me.setRawImageComponents(imageObj.components);
 			me.renderImages();
