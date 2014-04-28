@@ -2,7 +2,8 @@ Ext.define('NU.util.Network', {
 	extend: 'Ext.util.Observable',
 	config: {
 		socket: null,
-		robotsStore: null
+		robotsStore: null,
+		packet: null
 	},
 	inject: [
 		'robotsStore'
@@ -34,8 +35,44 @@ Ext.define('NU.util.Network', {
 		this.mon(this.getRobotsStore(), 'update', this.onUpdateRobot, this);
 		this.mon(this.getRobotsStore(), 'remove', this.onRemoveRobot, this);
 
+		var me = this;
+		requestAnimationFrame(function () {
+			me.onAnimationFrame();
+		});
+
 		return this.callParent(arguments);
 
+	},
+	onAnimationFrame: function () {
+		var packet = this.getPacket();
+		var me = this;
+		if (packet === null) {
+			requestAnimationFrame(function () {
+				me.onAnimationFrame();
+			});
+			return;
+		}
+
+		var api_message, eventName, robotIP;
+		robotIP = packet.robotIP;
+		api_message = API.Message.decode64(packet.message);
+		eventName = "unknown";
+
+		Ext.iterate(API.Message.Type, function (key, type) {
+			if (type === api_message.type) {
+				eventName = key.toLowerCase();
+				return false;
+			}
+		}, this);
+
+		//console.log(robotIP, eventName);
+
+		this.fireEvent(eventName, robotIP, api_message);
+		this.setPacket(null);
+
+		requestAnimationFrame(function () {
+			me.onAnimationFrame();
+		});
 	},
 	setupSocket: function () {
 
@@ -78,20 +115,10 @@ Ext.define('NU.util.Network', {
 		}
 	},
 	onMessage: function (robotIP, message) {
-		var api_message, eventName;
-
-		api_message = API.Message.decode64(message);
-
-		Ext.iterate(API.Message.Type, function (key, type) {
-			if (type === api_message.type) {
-				eventName = key.toLowerCase();
-				return false;
-			}
-		}, this);
-
-		//console.log(robotIP, eventName);
-
-		this.fireEvent(eventName, robotIP, api_message);
+		this.setPacket({
+			robotIP: robotIP,
+			message: message
+		});
 	},
 	send: function (robotIP, message) {
 		this.getSocket().emit('message', robotIP, message.encode64());
