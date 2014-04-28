@@ -569,7 +569,7 @@ Ext.define('NU.controller.Classifier', {
 					var neighbourX = point[0] + dx;
 					var neighbourY = point[1] + dy;
 
-					if ((dy === 0 && dx === 0) || neighbourX < 0 || neighbourX > 320 || neighbourY < 0 || neighbourY > 240) {
+					if ((dy === 0 && dx === 0) || neighbourX < 0 || neighbourX >= 320 || neighbourY < 0 || neighbourY >= 240) {
 						break;
 					}
 					var ycbcr = this.getYCBCR(point[0], point[1]);

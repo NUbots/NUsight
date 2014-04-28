@@ -53,22 +53,26 @@ Ext.define('NU.util.Network', {
 			return;
 		}
 
-		var api_message, eventName, robotIP;
-		robotIP = packet.robotIP;
-		api_message = API.Message.decode64(packet.message);
-		eventName = "unknown";
+		try {
+			var api_message, eventName, robotIP;
+			robotIP = packet.robotIP;
+			api_message = API.Message.decode64(packet.message);
+			eventName = "unknown";
 
-		Ext.iterate(API.Message.Type, function (key, type) {
-			if (type === api_message.type) {
-				eventName = key.toLowerCase();
-				return false;
-			}
-		}, this);
+			Ext.iterate(API.Message.Type, function (key, type) {
+				if (type === api_message.type) {
+					eventName = key.toLowerCase();
+					return false;
+				}
+			}, this);
 
-		//console.log(robotIP, eventName);
+			//console.log(robotIP, eventName);
 
-		this.fireEvent(eventName, robotIP, api_message);
-		this.setPacket(null);
+			this.fireEvent(eventName, robotIP, api_message);
+			this.setPacket(null);
+		} catch (e) {
+			console.log(e);
+		}
 
 		requestAnimationFrame(function () {
 			me.onAnimationFrame();
