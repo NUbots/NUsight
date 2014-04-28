@@ -3,7 +3,8 @@ Ext.define('NU.util.Network', {
 	config: {
 		socket: null,
 		robotsStore: null,
-		packet: null
+		packet: null,
+		filter: true
 	},
 	inject: [
 		'robotsStore'
@@ -46,37 +47,36 @@ Ext.define('NU.util.Network', {
 	onAnimationFrame: function () {
 		var packet = this.getPacket();
 		var me = this;
-		if (packet === null) {
-			requestAnimationFrame(function () {
-				me.onAnimationFrame();
-			});
-			return;
-		}
 
-		try {
-			var api_message, eventName, robotIP;
-			robotIP = packet.robotIP;
-			api_message = API.Message.decode64(packet.message);
-			eventName = "unknown";
-
-			Ext.iterate(API.Message.Type, function (key, type) {
-				if (type === api_message.type) {
-					eventName = key.toLowerCase();
-					return false;
-				}
-			}, this);
-
-			//console.log(robotIP, eventName);
-
-			this.fireEvent(eventName, robotIP, api_message);
-			this.setPacket(null);
-		} catch (e) {
-			console.log(e);
-		}
+		this.processPacket(packet);
 
 		requestAnimationFrame(function () {
 			me.onAnimationFrame();
 		});
+	},
+	processPacket: function (packet) {
+		if (packet !== null) {
+			try {
+				var api_message, eventName, robotIP;
+				robotIP = packet.robotIP;
+				api_message = API.Message.decode64(packet.message);
+				eventName = "unknown";
+
+				Ext.iterate(API.Message.Type, function (key, type) {
+					if (type === api_message.type) {
+						eventName = key.toLowerCase();
+						return false;
+					}
+				}, this);
+
+				//console.log(robotIP, eventName);
+
+				this.fireEvent(eventName, robotIP, api_message);
+			} catch (e) {
+				console.log(e);
+			}
+		}
+		this.setPacket(null);
 	},
 	setupSocket: function () {
 
@@ -119,10 +119,16 @@ Ext.define('NU.util.Network', {
 		}
 	},
 	onMessage: function (robotIP, message) {
-		this.setPacket({
+		var packet = {
 			robotIP: robotIP,
 			message: message
-		});
+		};
+
+		if (this.getFilter()) {
+			this.processPacket(packet);
+		} else {
+			this.setPacket(packet);
+		}
 	},
 	send: function (robotIP, message) {
 		this.getSocket().emit('message', robotIP, message.encode64());
