@@ -124,7 +124,7 @@ Ext.define('NU.util.Network', {
 			message: message
 		};
 
-		if (this.getFilter()) {
+		if (!this.getFilter()) {
 			this.processPacket(packet);
 		} else {
 			this.setPacket(packet);
