@@ -5,8 +5,7 @@ Ext.define('NU.controller.Vision', {
         displayImage: false,
         displayClassifiedImage: false,
         displayFieldObjects: false,
-        displayTransitions: false,
-        lastDraw: 0
+        displayTransitions: false
     },
     control: {
         'displaypicker': {
@@ -60,11 +59,6 @@ Ext.define('NU.controller.Vision', {
             return;
         }
 
-        if (Date.now() <= this.getLastDraw() + 500) {
-            return;
-        }
-
-        this.lastDraw = Date.now();
         var vision = api_message.vision;
 
         if (this.displayImage && vision.image) {
@@ -78,9 +72,9 @@ Ext.define('NU.controller.Vision', {
         if (this.displayTransitions && vision.classified_image) {
             this.drawTransitions(vision.classified_image);
         }
-        // if (this.displayFieldObjects && vision.vision_object) {
-        //     this.drawFieldObjects(vision.vision_object);
-        // }
+        if (this.displayFieldObjects && vision.vision_object) {
+             this.drawFieldObjects(vision.vision_object);
+        }
     },
     drawImage: function (image) {
         // 1st implementation - potentially slower
@@ -107,7 +101,11 @@ Ext.define('NU.controller.Vision', {
         var ctx = this.context;
         imageObj.src = uri;
         imageObj.onload = function () {
-            ctx.drawImage(imageObj, 0, 0, image.width, image.height);
+			// flip image vertically
+			ctx.save();
+			ctx.scale(-1, -1);
+			ctx.drawImage(imageObj, -image.width, -image.height, image.width, image.height);
+			ctx.restore();
         };
     },
     drawClassifiedImage: function (api_classified_image) {
@@ -117,7 +115,6 @@ Ext.define('NU.controller.Vision', {
 
         var api_segments = api_classified_image.segment;
         var api_green_horizon = api_classified_image.green_horizon;
-        var imageData = this.context.createImageData(height, width);
         var imageData = this.context.createImageData(height, width);
         var pixels = imageData.data;
 
@@ -172,8 +169,6 @@ Ext.define('NU.controller.Vision', {
 
         imageData.data = pixels;
         this.context.putImageData(imageData, 0, 0);
-
-
 
     },
     drawTransitions: function (api_classified_image) {
@@ -231,8 +226,6 @@ Ext.define('NU.controller.Vision', {
 
     },
     drawFieldObjects: function (vision_objects) {
-
-
         // var api_ball = vision_objects[0];
         // var api_goals = [];
         // var api_obstacles = [];
@@ -241,7 +234,7 @@ Ext.define('NU.controller.Vision', {
         for (var i = 0; i < vision_objects.length; i++) {
             var obj = vision_objects[i];    
             switch (obj.shape_type){
-                case (1)://VisionFieldObject.ShapeType.CIRCLE):
+                case 1://VisionFieldObject.ShapeType.CIRCLE):
                     context.beginPath();
 
                     context.shadowColor = 'black';
@@ -261,22 +254,16 @@ Ext.define('NU.controller.Vision', {
                     var position = obj.measured_relative_position;
                     break;
 
-                case (2)://VisionFieldObject.ShapeType.QUAD):
-
-                    // var topLeftX = obj.screen_x - (obj.width / 2);
-                    // var topLeftY = obj.screen_y - obj.height;
+                case 2://VisionFieldObject.ShapeType.QUAD):
 
                     context.beginPath();
 
-                    // context.moveTo(topLeftX, topLeftY);
-                    // context.lineTo(topLeftX + obj.width, topLeftY);
-                    // context.lineTo(topLeftX + obj.width, topLeftY + obj.height);
-                    // context.lineTo(topLeftX, topLeftY + obj.height);
-                    // context.closePath();
-
-                    context.moveTo(obj.points[0], obj.points[1]);
-                    for(var i = 1; i < points.length/2; i++){
-                        context.lineTo(obj.points[2*i], obj.points[2*i + 1]);
+					var points = obj.points;
+                    context.moveTo(points[0], points[1]);
+                    for (var i = 2; i < points.length; i += 2) {
+						var x = points[i];
+						var y = points[i + 1];
+                        context.lineTo(x, y);
                     }
                     context.closePath();
 
@@ -295,9 +282,7 @@ Ext.define('NU.controller.Vision', {
                     context.stroke();
                     break;
 
-                
-
-                case (4)://VisionFieldObject.ShapeType.UNKNOWN):
+                case 4://VisionFieldObject.ShapeType.UNKNOWN):
 
                     var topLeftX = obj.screen_x - (obj.width / 2);
                     var topLeftY = obj.screen_y - obj.height; // TODO: waiting for shannon to fix height on obstacles

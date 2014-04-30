@@ -24,12 +24,14 @@ Ext.define('NU.controller.Classifier', {
 		range: 10,
 		tolerance: 5,
 		renderZoom: true,
-		renderRawUnderlay: true,
+		renderRawUnderlay: false,
 		rawUnderlayOpacity: 0.5,
 		magicWandPoints: null,
 		target: 'Field',
 		centerEllipse: false,
-		lastDraw: 0
+		lastDraw: 0,
+		renderYUV: false,
+		renderCube: false
 	},
 	statics: {
 		Target: {
@@ -193,6 +195,22 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		},
+		'renderYUVBox': {
+			change: function (checkbox, newValue, oldValue, eOpts) {
+				if (checkbox.isValid()) {
+					this.setRenderYUV(newValue);
+					this.refreshScatter();
+				}
+			}
+		},
+		'renderCubeBox': {
+			change: function (checkbox, newValue, oldValue, eOpts) {
+				if (checkbox.isValid()) {
+					this.setRenderCube(newValue);
+					this.refreshScatter();
+				}
+			}
+		},
 		'rawValue': true,
 		'classifiedValue': true,
 		'scatter3d': true
@@ -283,6 +301,8 @@ Ext.define('NU.controller.Classifier', {
 					return new THREE.Color("#ffff00");
 				case this.self.Target.Ball:
 					return new THREE.Color("#ff9000");
+				default:
+					throw new Error('Wat is ' + typeId);
 			}
 		}
 
@@ -294,25 +314,30 @@ Ext.define('NU.controller.Classifier', {
 		var index;
 		var min = 0;
 		var max = 255;
-		var numSteps = 128;
+		var numSteps = this.getRenderCube() ? 128 : Math.pow(2, this.self.LutBitsPerColor);
 		var step = (max - min) / numSteps;
 		for (var z = min; z <= max; z += step) {
 			for (var y = min; y <= max; y += step) {
 				for (var x = min; x <= max; x += step) {
-					/*
-//					console.log(x, y, z, new THREE.Color(Math.round(x), Math.round(y), Math.round(z)));
-					var colour = new THREE.Color();
-//					colour.setRGB(x/255, y/255, z/255);
-					var rgb = this.getRGBfromCYBRCR(x, y, z);
-					colour.setRGB(rgb[0]/255, rgb[1]/255, rgb[2]/255);
-					data[i] = [scale(z), scale(x), scale(y), colour];
-					i++;
-					continue;*/
-					index = this.getLUTIndex([x, y, z]);
-					var colour = getColour.call(this, lut[index]);
-					if (colour !== null) {
-						// swap y/z since axes change in threejs
+					if (this.getRenderCube() && (z === 0 || z === 255 || y === 0 || y === 255 || x === 0 || x === 255)) {
+						var colour = new THREE.Color();
+						var rgb = this.getRGBfromCYBRCR(x, y, z);
+						colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
 						data.push([scale(z), scale(x), scale(y), colour]);
+					} else {
+						index = this.getLUTIndex([x, y, z]);
+						if (lut[index] !== this.self.Target.Unclassified) {
+							var colour;
+							if (this.getRenderYUV()) {
+								colour = new THREE.Color();
+								var rgb = this.getRGBfromCYBRCR(x, y, z);
+								colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
+							} else {
+								colour = getColour.call(this, lut[index]);
+							}
+							// swap y/z since axes change in threejs
+							data.push([scale(z), scale(x), scale(y), colour]);
+						}
 					}
 				}
 			}
@@ -398,9 +423,10 @@ Ext.define('NU.controller.Classifier', {
 		var table = api_message.getLookupTable().getTable();
 
 		// TODO: validate?
-		this.setLookup(new Uint8ClampedArray(table));
+		var lut = new Uint8ClampedArray(table.toArrayBuffer());
+		this.setLookup(lut);
 		this.updateClassifiedData();
-
+		this.renderClassifiedImage();
 	},
 	onVision: function (robotIP, api_message) {
 
@@ -543,7 +569,7 @@ Ext.define('NU.controller.Classifier', {
 					var neighbourX = point[0] + dx;
 					var neighbourY = point[1] + dy;
 
-					if ((dy === 0 && dx === 0) || neighbourX < 0 || neighbourX > 320 || neighbourY < 0 || neighbourY > 240) {
+					if ((dy === 0 && dx === 0) || neighbourX < 0 || neighbourX >= 320 || neighbourY < 0 || neighbourY >= 240) {
 						break;
 					}
 					var ycbcr = this.getYCBCR(point[0], point[1]);
@@ -1038,6 +1064,9 @@ Ext.define('NU.controller.Classifier', {
 	getYCBCR: function (x, y) {
 		var components = this.getRawImageComponents();
 
+		x = 320 - x - 1;
+		y = 240 - y - 1;
+
 		var l = components[0].lines[y][x];
 		// divide cb and cr by 2 as it's using YUV422 so there is half the cb/cr
 		var cb = components[1].lines[y][Math.floor(x / 2)];
@@ -1087,6 +1116,12 @@ Ext.define('NU.controller.Classifier', {
 		var ctx = me.getRawContext();
 		var data = ctx.getImageData(0, 0, 320, 240);
 		imageObj.copyToImageData(data);
+		ctx.putImageData(data, 0, 0);
+		ctx.save();
+		ctx.scale(-1, -1);
+		ctx.drawImage(ctx.canvas, -320, -240, 320, 240);
+		ctx.restore();
+		data = ctx.getImageData(0, 0, 320, 240);
 		me.setRawImageData(data);
 		me.setRawImageComponents(imageObj.components);
 		me.renderImages();
@@ -1108,6 +1143,12 @@ Ext.define('NU.controller.Classifier', {
 			var ctx = me.getRawContext();
 			var data = ctx.getImageData(0, 0, 320, 240);
 			imageObj.copyToImageData(data);
+			ctx.putImageData(data, 0, 0);
+			ctx.save();
+			ctx.scale(-1, -1);
+			ctx.drawImage(ctx.canvas, -320, -240, 320, 240);
+			ctx.restore();
+			data = ctx.getImageData(0, 0, 320, 240);
 			me.setRawImageData(data);
 			me.setRawImageComponents(imageObj.components);
 			me.renderImages();

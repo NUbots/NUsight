@@ -18,7 +18,7 @@ function NUbugger (io) {
 		self.addRobot(robotIP);
 	});
 	self.addRobot('127.0.0.1', 'Virtual Machine');
-	self.addRobot('10.0.1.42', 'Robot #2');
+	self.addRobot('10.0.1.52', 'Robot #2');
 
 	self.io.sockets.on('connection', function (socket) {
 
