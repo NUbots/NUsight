@@ -88,12 +88,14 @@ Ext.define('NU.controller.Field', {
 			}
 		},
 		'resetOrientation': {
-			click: function () {
-				this.robots.forEach(function (robot) {
-					robot.darwinModel.object.rotation.set(0, 0, 0);
-				});
-			}
-		}
+            click: function () {
+                this.robots.forEach(function (robot) {
+                    robot.darwinModels.forEach(function (model) {
+                        model.object.rotation.set(0, 0, 0);
+                    });
+                });
+            }
+        }
 	},
 	init: function () {
 
@@ -120,16 +122,24 @@ Ext.define('NU.controller.Field', {
 
 	},
 	onSelectRobotIP: function (robotIP) {
-		this.robots.forEach(function (robot) {
-			if (robot.robotIP !== robotIP) {
-				robot.darwinModel.traverse(function (object) { object.visible = false; });
-				robot.ballModel.traverse(function (object) { object.visible = false; });
-			} else {
-				robot.darwinModel.traverse(function (object) { object.visible = true; });
-				robot.ballModel.traverse(function (object) { object.visible = true; });
-			}
-		})
-	},
+        this.robots.forEach(function (robot) {
+            if (robot.robotIP !== robotIP) {
+                robot.darwinModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = false; });
+                });
+                robot.ballModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = false; });
+                });
+            } else {
+                robot.darwinModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = true; });
+                });
+                robot.ballModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = true; });
+                });
+            }
+        })
+    },
 	onAddRobot: function (robotIP) {
 
 		var robot;
@@ -146,13 +156,41 @@ Ext.define('NU.controller.Field', {
 
 		robot.on('loaded', function () {
 			if (robotIP !== this.getRobotIP()) {
-				robot.darwinModel.traverse(function (object) { object.visible = false; });
-				robot.ballModel.traverse(function (object) { object.visible = false; });
-			}
-			this.mainScene.scene.add(robot.darwinModel);
-			this.mainScene.scene.add(robot.ballModel);
+                robot.darwinModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = false; });
+                });
+                robot.ballModels.forEach(function (model) {
+                    model.traverse(function (object) { object.visible = false; });
+                });
+            }
+
+            robot.darwinModels.forEach(function (model) {
+                this.mainScene.scene.add(model);
+            }, this);
+            robot.ballModels.forEach(function (model) {
+                this.mainScene.scene.add(model);
+            }, this);
 		}, this);
 
+		robot.on('darwin-model-list-resized', function (numModels) {
+            for (var i = 0; i < robot.darwinModels.length; i++) {
+                if (i < numModels) {
+                    robot.darwinModels[i].traverse(function (object) { object.visible = true; });
+                } else {
+                    robot.darwinModels[i].traverse(function (object) { object.visible = false; });
+                }
+            }
+        }, this);
+
+        robot.on('ball-model-list-resized', function (numModels) {
+            for (var i = 0; i < robot.ballModels.length; i++) {
+                if (i < numModels) {
+                    robot.ballModels[i].traverse(function (object) { object.visible = true; });
+                } else {
+                    robot.ballModels[i].traverse(function (object) { object.visible = false; });
+                }
+            }
+        }, this);
 //        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
 
 		window.a = this;
@@ -200,8 +238,8 @@ Ext.define('NU.controller.Field', {
 
 		var darwin, field, ball, camera, scene, renderer;
 
-		scene = new THREE.Scene();
-		camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 20);
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50);
 
 		camera.lookAt(scene.position);
 
