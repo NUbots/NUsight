@@ -18,8 +18,14 @@ Ext.define('NU.view.Toolbar', {
         text: 'Add Classifier Display',
         itemId: 'add_classifier_display'
     },'->', {
-        text: 'Robots',
-        itemId: 'list_robots',
-        iconCls: 'icon-cog'
-    }]
+        text: 'Visualise',
+        itemId: 'visualise'
+    }, {
+		text: 'Close All',
+		itemId: 'close_all'
+	}, {
+		text: 'Robots',
+		itemId: 'list_robots',
+		iconCls: 'icon-cog'
+	}]
 });

@@ -7,11 +7,11 @@ Ext.define('NU.view.window.Chart', {
     config: {
         streamsStore: null
     },
+	width: 320,
+	height: 240,
     initComponent: function () {
         Ext.apply(this, {
             title: 'Chart Display',
-            width: 320,
-            height: 240,
             resizable: {
                 preserveRatio: false
             },
