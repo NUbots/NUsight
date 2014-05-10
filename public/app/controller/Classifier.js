@@ -21,8 +21,8 @@ Ext.define('NU.controller.Classifier', {
 		imageWidth: 320,
 		imageHeight: 240,
 		leftMouseDown: false,
-		range: 10,
-		tolerance: 5,
+		range: 2,
+		tolerance: 50,
 		renderZoom: true,
 		renderRawUnderlay: false,
 		rawUnderlayOpacity: 0.5,
@@ -314,7 +314,7 @@ Ext.define('NU.controller.Classifier', {
 		var index;
 		var min = 0;
 		var max = 255;
-		var numSteps = this.getRenderCube() ? 128 : Math.pow(2, this.self.LutBitsPerColor);
+		var numSteps = Math.pow(2, this.self.LutBitsPerColor);
 		var step = (max - min) / numSteps;
 		for (var z = min; z <= max; z += step) {
 			for (var y = min; y <= max; y += step) {
@@ -562,21 +562,19 @@ Ext.define('NU.controller.Classifier', {
 		if (tolerance === undefined) {
 			tolerance = this.getTolerance();
 		}
+		var ycbcr = this.getYCBCR(x, y);
 		while (queue.length > 0) {
 			var point = queue.shift();
 			for (var dy = -1; dy <= 1; dy++) {
 				for (var dx = -1; dx <= 1; dx++) {
 					var neighbourX = point[0] + dx;
 					var neighbourY = point[1] + dy;
-
 					if ((dy === 0 && dx === 0) || neighbourX < 0 || neighbourX >= 320 || neighbourY < 0 || neighbourY >= 240) {
 						break;
 					}
-					var ycbcr = this.getYCBCR(point[0], point[1]);
+					// ycbcr = this.getYCBCR(point[0], point[1]);
 					var neighbourYcbcr = this.getYCBCR(neighbourX, neighbourY);
-					var abs = Math.sqrt(ycbcr[0] * ycbcr[0] + ycbcr[1] * ycbcr[1] + ycbcr[2] * ycbcr[2]);
-					var neighbourAbs = Math.sqrt(neighbourYcbcr[0] * neighbourYcbcr[0] + neighbourYcbcr[1] * neighbourYcbcr[1] + neighbourYcbcr[2] * neighbourYcbcr[2]);
-					var dist = Math.abs(abs - neighbourAbs);
+					var dist = Math.sqrt(Math.pow(ycbcr[0] - neighbourYcbcr[0], 2) + Math.pow(ycbcr[1] - neighbourYcbcr[1], 2) + Math.pow(ycbcr[2] - neighbourYcbcr[2], 2));
 					var newPoint = [neighbourX, neighbourY];
 					var hash = this.hashPoint(newPoint);
 					if (dist <= tolerance && checked[hash] === undefined) {
@@ -595,7 +593,7 @@ Ext.define('NU.controller.Classifier', {
 	magicWandClassify: function (x, y) {
 		var points = this.getMagicWandPoints();
 		points.forEach(function (point) {
-			this.classifyPoint(point[0], point[1], undefined, false, 5);
+			this.classifyPoint(point[0], point[1], undefined, false);
 		}, this);
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
@@ -612,7 +610,7 @@ Ext.define('NU.controller.Classifier', {
 
 		for (var y = minY; y <= maxY; y++) {
 			for (var x = minX; x <= maxX; x++) {
-				this.classifyPoint(x, y, undefined, false, 5);
+				this.classifyPoint(x, y, undefined, false);
 			}
 		}
 
@@ -621,6 +619,9 @@ Ext.define('NU.controller.Classifier', {
 		this.setStartPoint(null);
 	},
 	classifyEllipse: function (x, y) {
+		// TODO: since an ellipse is convex, further optimization could be gained
+		// by first classifying the inner fitting rectangle, and then only testing
+		// points between this rectangle and the bounding box
 		var start = this.getStartPoint();
 		var end = [x, y];
 
@@ -645,7 +646,7 @@ Ext.define('NU.controller.Classifier', {
 		for (var y = k - ry; y <= k + ry; y++) {
 			for (var x = h - rx; x <= h + rx; x++) {
 				if (Math.pow(x - h, 2) / (rx * rx) + Math.pow(y - k, 2) / (ry * ry) <= 1) {
-					this.classifyPoint(x, y, undefined, false, 5);
+					this.classifyPoint(x, y, undefined, false);
 				}
 			}
 		}
@@ -668,7 +669,7 @@ Ext.define('NU.controller.Classifier', {
 		for (var x = start[0]; x < end[0]; x++) {
 			for (var y = start[1]; y < end[1]; y++) {
 				if (this.isPointInPolygon(x, y, points, boundingBox)) {
-					this.classifyPoint(x, y, undefined, false, 5);
+					this.classifyPoint(x, y, undefined, false);
 				}
 			}
 		}
@@ -761,13 +762,16 @@ Ext.define('NU.controller.Classifier', {
 			range = this.getRange();
 		}
 		var minRange = Math.floor(range / 2);
+//		var step = 1 << (8 - this.self.LutBitsPerColor - 1);
+		var min = 0;
+		var max = Math.pow(2, 8) - 1;
 		for (var dy = -minRange; dy < minRange; dy++) {
 			for (var dcb = -minRange; dcb < minRange; dcb++) {
 				for (var dcr = -minRange; dcr < minRange; dcr++) {
 					// cap it
-					var y = Math.max(0, Math.min(255, ycbcr[0] + dy));
-					var cb = Math.max(0, Math.min(255, ycbcr[1] + dcb));
-					var cr = Math.max(0, Math.min(255, ycbcr[2] + dcr));
+					var y = Math.max(min, Math.min(max, ycbcr[0] + dy));
+					var cb = Math.max(min, Math.min(max, ycbcr[1] + dcb));
+					var cr = Math.max(min, Math.min(max, ycbcr[2] + dcr));
 					var nearYcbcr = [
 							y,
 							cb,

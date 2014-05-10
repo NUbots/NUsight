@@ -43,7 +43,6 @@ Ext.define('NU.controller.Toolbar', {
 				var display = this.getDisplay();
 				var width = display.getWidth();
 				var height = display.getHeight();
-				var halfHeight = height / 2;
 				var x = display.getX();
 				var y = display.getY();
 				var magic = 1.3898; // vision window needs to be this ratio of width/height (this is a hack)
