@@ -945,10 +945,11 @@ Ext.define('NU.controller.Classifier', {
 					}
 					// ycbcr = this.getYCBCR(point[0], point[1]);
 					var neighbourYcbcr = this.getYCBCR(neighbourX, neighbourY);
-					var dist = Math.sqrt(Math.pow(ycbcr[0] - neighbourYcbcr[0], 2) + Math.pow(ycbcr[1] - neighbourYcbcr[1], 2) + Math.pow(ycbcr[2] - neighbourYcbcr[2], 2));
+					var dist = Math.pow(ycbcr[0] - neighbourYcbcr[0], 2) + Math.pow(ycbcr[1] - neighbourYcbcr[1], 2) + Math.pow(ycbcr[2] - neighbourYcbcr[2], 2);
 					var newPoint = [neighbourX, neighbourY];
 					var hash = this.hashPoint(newPoint);
-					if (dist <= tolerance && checked[hash] === undefined) {
+					// avoided using sqrt for speed
+					if (dist <= Math.pow(tolerance, 2) && checked[hash] === undefined) {
 						queue.push(newPoint);
 						points.push(newPoint);
 					}
