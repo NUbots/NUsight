@@ -179,6 +179,7 @@ Ext.define('NU.view.window.Classifier', {
 						columns: 2
 					},
 					items: [{
+						layout: 'vbox',
 						items: [{
 							itemId: 'rawValue',
 							width: 320,
@@ -195,8 +196,12 @@ Ext.define('NU.view.window.Classifier', {
 							itemId: 'toleranceValue',
 							xtype: 'numberfield',
 							fieldLabel: 'Tolerance',
-							value: 5,
+							value: 50,
 							step: 1
+						}, {
+							itemId: 'convexhull',
+							xtype: 'button',
+							text: 'Convex Hull'
 						}]
 					}, {
 						items: [{

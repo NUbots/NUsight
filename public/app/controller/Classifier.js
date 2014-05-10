@@ -211,9 +211,380 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		},
+		'convexhull': {
+			click: function (btn) {
+				alert('Coming Soon!');
+//				this.convexHull2();
+			}
+		},
 		'rawValue': true,
 		'classifiedValue': true,
 		'scatter3d': true
+	},
+	isPointInConvexHull: function (point, pointCloud) {
+		return !this.isLinearlySeparable(pointCloud, [point]);
+	},
+	isLinearlySeparable: function (A, B) {
+		// ported from: http://www.joyofdata.de/blog/testing-linear-separability-linear-programming-r-glpk/
+		var num = numeric;
+		var N1 = A.length;
+		var N2 = B.length;
+		if (N1 <= 0 || N2 <= 0) {
+			return undefined;
+		}
+		var DIM = A[0].length;
+		var P = num.clone(A).concat(num.clone(B));
+		P.forEach(function (row, i) {
+			row.push(i < N1 ? 1 : -1);
+		});
+		var b1 = num.rep([DIM], -1).concat([1]);
+		var b2 = num.rep([DIM], 1).concat([1]);
+		var M = num.rep([N1], b1).concat(num.rep([N2], b2));
+		var A = num.mul(P, M);
+		var obj = num.rep([DIM + 1], 0);
+		var b = num.rep([N1 + N2], -1);
+		var r = num.solveLP(obj, A, b);
+		if (r.message !== "") {
+			return false;
+		} else {
+			return true;
+		}
+	},
+	convexHull3: function () {
+		this.addHistory();
+		var size = Math.pow(2, this.self.LutBitsPerColor);
+		var pointCloud = [];
+		var lut = this.getLookup();
+		var target = this.getTarget();
+		var typeId = this.self.Target[target];
+		var bounds = {
+			y: {
+				min: Infinity,
+				max: -Infinity
+			},
+			cb: {
+				min: Infinity,
+				max: -Infinity
+			},
+			cr: {
+				min: Infinity,
+				max: -Infinity
+			}
+		};
+
+		var top_left_point = null;
+		for (var y = 0; y < size; y++) {
+			for (var cb = 0; cb < size; cb++) {
+				for (var cr = 0; cr < size; cr++) {
+					var index = (y << 14) + (cb << 7) + cr; // TODO: probably method this
+					if (lut[index] == typeId) {
+						var point = [y, cb, cr];
+						pointCloud.push(point);
+						if (top_left_point === null) {
+							top_left_point = point;
+						}
+						if (y > bounds.y.max) {
+							bounds.y.max = y;
+						}
+						if (y < bounds.y.min) {
+							bounds.y.min = y;
+						}
+						if (cb > bounds.cb.max) {
+							bounds.cb.max = cb;
+						}
+						if (cb < bounds.cb.min) {
+							bounds.cb.min = cb;
+						}
+						if (cr > bounds.cr.max) {
+							bounds.cr.max = cr;
+						}
+						if (cr < bounds.cr.min) {
+							bounds.cr.min = cr;
+						}
+					}
+				}
+			}
+		}
+
+		var left_point = top_left_point;
+		var right_point = null;
+		var left = true;
+		for (var y = bounds.y.min; y <= bounds.y.max; y++) {
+			for (var cb = bounds.cb.min; cb <= bounds.cb.max; cb++) {
+				var cr_min = bounds.cr.min;
+				var cr_max = bounds.cr.max;
+				// traversal!
+				if (left) {
+					// left
+					var inHull = this.isPointInConvexHull(left_point, pointCloud);
+					if (inHull) {
+						// left until out +1
+						do {
+							left_point[2]--;
+						} while (left_point[2] === cr_min || this.isPointInConvexHull(left_point, pointCloud))
+						if (left_point[2] !== cr_min) {
+							left_point[2]++;
+						}
+					} else {
+						// right until in
+					}
+				} else {
+					// right
+					var inHull = this.isPointInConvexHull(right_point, pointCloud);
+					if (inHull) {
+						// right until out -1
+					} else {
+						// left until in
+					}
+				}
+			}
+		}
+	},
+	convexHull2: function () {
+		this.addHistory();
+		var size = Math.pow(2, this.self.LutBitsPerColor);
+		var pointCloud = [];
+		var lut = this.getLookup();
+		var target = this.getTarget();
+		var typeId = this.self.Target[target];
+		var bounds = {
+			y: {
+				min: Infinity,
+				max: -Infinity
+			},
+			cb: {
+				min: Infinity,
+				max: -Infinity
+			},
+			cr: {
+				min: Infinity,
+				max: -Infinity
+			}
+		};
+
+		for (var y = 0; y < size; y++) {
+			for (var cb = 0; cb < size; cb++) {
+				for (var cr = 0; cr < size; cr++) {
+					var index = (y << 14) + (cb << 7) + cr; // TODO: probably method this
+					if (lut[index] == typeId) {
+						pointCloud.push([y, cb, cr]);
+						if (y > bounds.y.max) {
+							bounds.y.max = y;
+						}
+						if (y < bounds.y.min) {
+							bounds.y.min = y;
+						}
+						if (cb > bounds.cb.max) {
+							bounds.cb.max = cb;
+						}
+						if (cb < bounds.cb.min) {
+							bounds.cb.min = cb;
+						}
+						if (cr > bounds.cr.max) {
+							bounds.cr.max = cr;
+						}
+						if (cr < bounds.cr.min) {
+							bounds.cr.min = cr;
+						}
+					}
+				}
+			}
+		}
+
+		console.log(bounds);
+		for (var y = bounds.y.min; y <= bounds.y.max; y++) {
+			var found = false;
+			for (var cb = bounds.cb.min; cb <= bounds.cb.max; cb++) {
+				var cr_min = bounds.cr.min;
+				var cr_max = bounds.cr.max;
+				var width = cr_max - cr_min + 1; // +1 as end points inclusive
+				// grid search for starting point
+				var cr = null;
+				var cache = {};
+				for (var n = 1; n <= width; n++) {
+					var cr_values = numeric.round(numeric.linspace(cr_min, cr_max, n));
+					cr_values.forEach(function (cr_test) {
+						var point = [y, cb, cr_test];
+						if (cache[cr_test] !== false && this.isPointInConvexHull(point, pointCloud)) {
+							cr = cr_test;
+							return false;
+						} else {
+							cache[cr_test] = false;
+						}
+					}, this);
+					if (cr !== null) {
+						found = true;
+						break;
+					}
+				}
+				if (cr === null) {
+					// not found on this slice
+					continue;
+				}
+				var point = [y, cb, cr];
+
+//				console.log('found', point);
+
+				var cr_in_min = null;
+				var cr_in_max = null;
+
+				var cr_min = bounds.cr.min;
+				var cr_max = cr;
+
+//				debugger;
+				while (cr_max >= cr_min) {
+					var cr_mid = Math.round((cr_max + cr_min) / 2);
+					var point = [y, cb, cr_mid];
+					var inHull = this.isPointInConvexHull(point, pointCloud);
+					if (!inHull) {
+						var point2 = [y, cb, cr_mid + 1];
+						var inHull2 = this.isPointInConvexHull(point2, pointCloud);
+						if (inHull2) {
+							// boundary point
+//							console.log('left boundary point', point2);
+							cr_in_min = point2[2];
+							break;
+						} else {
+							// on the right
+							cr_min = cr_mid + 1;
+						}
+					} else if (cr_mid === 0 || cr_mid === bounds.cr.max) {
+//						console.log('left boundary point', point);
+						cr_in_min = point[2];
+						break;
+					} else {
+						// on the left
+						cr_max = cr_mid - 1;
+					}
+				}
+
+				var cr_min = cr;
+				var cr_max = bounds.cr.max;
+
+				while (cr_max >= cr_min) {
+					var cr_mid = Math.round((cr_max + cr_min) / 2);
+					var point = [y, cb, cr_mid];
+					var inHull = this.isPointInConvexHull(point, pointCloud);
+					if (!inHull) {
+						var point2 = [y, cb, cr_mid - 1];
+						var inHull2 = this.isPointInConvexHull(point2, pointCloud);
+						if (inHull2) {
+							// boundary point
+//							console.log('right boundary point', point);
+							cr_in_max = point[2];
+							break;
+						} else {
+							// on the left
+							cr_max = cr_mid - 1;
+						}
+					} else if (cr_mid === 0 || cr_mid === bounds.cr.max) {
+//						console.log('right boundary point', point);
+						cr_in_max = point[2];
+						break;
+					} else {
+						// on the right
+						cr_min = cr_mid + 1;
+					}
+				}
+
+				for (var cr = cr_in_min; cr <= cr_in_max; cr++) {
+					var point = [y, cb, cr];
+					var index = (y << 14) + (cb << 7) + cr; // TODO: probably method this
+					lut[index] = typeId;
+				}
+			}
+			if (!found) {
+				console.log('not found on plane, not possible!')
+			}
+		}
+		this.updateClassifiedData();
+
+	},
+	convexHull: function () {
+		// TODO: this is super really bad inefficient - needs a lot of research on optimization methods, or an entirely different approach
+		// see: http://mathoverflow.net/questions/165559/calculate-the-discrete-set-of-points-b-which-are-in-the-convex-hull-of-the-set-o
+		this.addHistory();
+		var size = Math.pow(2, this.self.LutBitsPerColor);
+		var pointCloud = [];
+		var lut = this.getLookup();
+		var target = this.getTarget();
+		var typeId = this.self.Target[target];
+		var bounds = {
+			y: {
+				min: Infinity,
+				max: -Infinity
+			},
+			cb: {
+				min: Infinity,
+				max: -Infinity
+			},
+			cr: {
+				min: Infinity,
+				max: -Infinity
+			}
+		};
+
+		for (var y = 0; y < size; y++) {
+			for (var cb = 0; cb < size; cb++) {
+				for (var cr = 0; cr < size; cr++) {
+					var index = (y << 14) + (cb << 7) + cr; // TODO: probably method this
+					if (lut[index] == typeId) {
+						pointCloud.push([y, cb, cr]);
+						if (y > bounds.y.max) {
+							bounds.y.max = y;
+						}
+						if (y < bounds.y.min) {
+							bounds.y.min = y;
+						}
+						if (cb > bounds.cb.max) {
+							bounds.cb.max = cb;
+						}
+						if (cb < bounds.cb.min) {
+							bounds.cb.min = cb;
+						}
+						if (cr > bounds.cr.max) {
+							bounds.cr.max = cr;
+						}
+						if (cr < bounds.cr.min) {
+							bounds.cr.min = cr;
+						}
+					}
+				}
+			}
+		}
+
+		console.log(bounds);
+		var count = 0;
+		var limit = 1000000;
+		var total = (bounds.y.max - bounds.y.min + 1) * (bounds.cb.max - bounds.cb.min + 1) * (bounds.cr.max - bounds.cr.min + 1); // +1 as endpoints are inclusive
+		for (var y = bounds.y.min; y <= bounds.y.max; y++) {
+			for (var cb = bounds.cb.min; cb <= bounds.cb.max; cb++) {
+				for (var cr = bounds.cr.min; cr <= bounds.cr.max; cr++) {
+					var point = [y, cb, cr];
+					if (this.isPointInConvexHull(point, pointCloud)) {
+						var index = (y << 14) + (cb << 7) + cr; // TODO: probably method this
+						lut[index] = typeId;
+					}
+					count++;
+					if (count % 500 == 0) {
+						console.log(count, total, (count / total * 100) + "%");
+						console.log(y, cb, cr);
+					}
+
+					if (count >= limit) {
+						break;
+					}
+				}
+				if (count >= limit) {
+					break;
+				}
+			}
+			if (count >= limit) {
+				break;
+			}
+		}
+
+		this.updateClassifiedData();
 	},
 	init: function () {
 		// these must initialized here so there is an object per-controller
