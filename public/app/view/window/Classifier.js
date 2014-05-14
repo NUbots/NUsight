@@ -199,6 +199,10 @@ Ext.define('NU.view.window.Classifier', {
 							value: 50,
 							step: 1
 						}, {
+							itemId: 'metaball',
+							xtype: 'button',
+							text: 'Metaball'
+						}, {
 							itemId: 'convexhull',
 							xtype: 'button',
 							text: 'Convex Hull'

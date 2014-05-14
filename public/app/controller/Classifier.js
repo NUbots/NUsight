@@ -211,15 +211,94 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		},
+		'metaball': {
+			click: function (btn) {
+				this.metaball();
+			}
+		},
 		'convexhull': {
 			click: function (btn) {
-				alert('Coming Soon!');
-//				this.convexHull2();
+				this.convexHull2();
 			}
 		},
 		'rawValue': true,
 		'classifiedValue': true,
 		'scatter3d': true
+	},
+	metaball: function () {
+		this.addHistory();
+		var size = Math.pow(2, this.self.LutBitsPerColor);
+		var pointCloud = [];
+		var lut = this.getLookup();
+		var target = this.getTarget();
+		var typeId = this.self.Target[target];
+		var bounds = {
+			y: {
+				min: Infinity,
+				max: -Infinity
+			},
+			cb: {
+				min: Infinity,
+				max: -Infinity
+			},
+			cr: {
+				min: Infinity,
+				max: -Infinity
+			}
+		};
+
+		for (var y = 0; y < size; y++) {
+			for (var cb = 0; cb < size; cb++) {
+				for (var cr = 0; cr < size; cr++) {
+					var index = (y << 14) + (cb << 7) + cr; // TODO: probably method this
+					if (lut[index] == typeId) {
+						var point = [y, cb, cr];
+						pointCloud.push(point);
+						if (y > bounds.y.max) {
+							bounds.y.max = y;
+						}
+						if (y < bounds.y.min) {
+							bounds.y.min = y;
+						}
+						if (cb > bounds.cb.max) {
+							bounds.cb.max = cb;
+						}
+						if (cb < bounds.cb.min) {
+							bounds.cb.min = cb;
+						}
+						if (cr > bounds.cr.max) {
+							bounds.cr.max = cr;
+						}
+						if (cr < bounds.cr.min) {
+							bounds.cr.min = cr;
+						}
+					}
+				}
+			}
+		}
+
+		var threshold = 2;
+		var a = 2;
+
+		for (var y = bounds.y.min; y <= bounds.y.max; y++) {
+			for (var cb = bounds.cb.min; cb <= bounds.cb.max; cb++) {
+				for (var cr = bounds.cr.min; cr <= bounds.cr.max; cr++) {
+					var point = [y, cb, cr];
+					var sum = 0;
+					for (var i = 0; i < pointCloud.length; i++) {
+						var targetPoint = pointCloud[i];
+						var dist = Math.sqrt(Math.pow(point[0] - targetPoint[0], 2) + Math.pow(point[1] - targetPoint[1], 2) + Math.pow(point[2] - targetPoint[2], 2));
+						sum += Math.exp(-a * (dist - 1));
+					}
+					if (sum >= threshold) {
+						var index = (y << 14) + (cb << 7) + cr; // TODO: probably method this
+						lut[index] = typeId;
+					}
+				}
+			}
+		}
+
+		this.updateClassifiedData();
 	},
 	isPointInConvexHull: function (point, pointCloud) {
 		return !this.isLinearlySeparable(pointCloud, [point]);
@@ -272,7 +351,7 @@ Ext.define('NU.controller.Classifier', {
 			}
 		};
 
-		var top_left_point = null;
+		var lower_left_point = null;
 		for (var y = 0; y < size; y++) {
 			for (var cb = 0; cb < size; cb++) {
 				for (var cr = 0; cr < size; cr++) {
@@ -280,8 +359,8 @@ Ext.define('NU.controller.Classifier', {
 					if (lut[index] == typeId) {
 						var point = [y, cb, cr];
 						pointCloud.push(point);
-						if (top_left_point === null) {
-							top_left_point = point;
+						if (lower_left_point === null) {
+							lower_left_point = point;
 						}
 						if (y > bounds.y.max) {
 							bounds.y.max = y;
@@ -306,38 +385,60 @@ Ext.define('NU.controller.Classifier', {
 			}
 		}
 
-		var left_point = top_left_point;
-		var right_point = null;
+		var left_point = lower_left_point;
+		var right_point = left_point;
 		var left = true;
+		var cr_min = bounds.cr.min;
+		var cr_max = bounds.cr.max;
+
+		console.log('lower_left', lower_left_point);
+		console.log('bounds', bounds.y, bounds.cb, bounds.cr);
 		for (var y = bounds.y.min; y <= bounds.y.max; y++) {
+			left_point[0] = y;
+			right_point[0] = y;
 			for (var cb = bounds.cb.min; cb <= bounds.cb.max; cb++) {
-				var cr_min = bounds.cr.min;
-				var cr_max = bounds.cr.max;
-				// traversal!
-				if (left) {
-					// left
-					var inHull = this.isPointInConvexHull(left_point, pointCloud);
-					if (inHull) {
-						// left until out +1
+				left_point[1] = cb;
+				right_point[1] = cb;
+				// left
+				var inHull = this.isPointInConvexHull(left_point, pointCloud);
+				if (inHull) {
+					// left until out +1
+					if (left_point[2] !== cr_min) {
 						do {
 							left_point[2]--;
-						} while (left_point[2] === cr_min || this.isPointInConvexHull(left_point, pointCloud))
+						} while (left_point[2] !== cr_min && this.isPointInConvexHull(left_point, pointCloud))
 						if (left_point[2] !== cr_min) {
 							left_point[2]++;
 						}
-					} else {
-						// right until in
 					}
 				} else {
-					// right
-					var inHull = this.isPointInConvexHull(right_point, pointCloud);
-					if (inHull) {
-						// right until out -1
-					} else {
-						// left until in
-					}
+					// right until in
+					do {
+						left_point[2]++;
+					} while (left_point[2] !== cr_max && !this.isPointInConvexHull(left_point, pointCloud))
 				}
+				// right
+				var inHull = this.isPointInConvexHull(right_point, pointCloud);
+				if (inHull) {
+					// right until out -1
+					if (right_point[2] !== cr_max) {
+						do {
+							right_point[2]++;
+						} while (right_point[2] !== cr_max && this.isPointInConvexHull(right_point, pointCloud))
+						if (right_point[2] !== cr_max) {
+							right_point[2]--;
+						}
+					}
+				} else {
+					// left until in
+					do {
+						right_point[2]--;
+					} while (right_point[2] !== cr_min && !this.isPointInConvexHull(right_point, pointCloud))
+				}
+
+				console.log(y, cb, 'left', left_point, 'right', right_point);
 			}
+			break;
 		}
 	},
 	convexHull2: function () {
