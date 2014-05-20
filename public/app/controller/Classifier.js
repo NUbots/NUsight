@@ -21,9 +21,9 @@ Ext.define('NU.controller.Classifier', {
 		imageWidth: 320,
 		imageHeight: 240,
 		leftMouseDown: false,
-		range: 2,
+		range: 10,
 		tolerance: 50,
-		renderZoom: true,
+		renderZoom: false,
 		renderRawUnderlay: false,
 		rawUnderlayOpacity: 0.5,
 		magicWandPoints: null,
@@ -174,6 +174,11 @@ Ext.define('NU.controller.Classifier', {
 		'toolOverwrite': {
 			toggle: function (btn, pressed) {
 				this.setOverwrite(pressed);
+			}
+		},
+		'rangeValue': {
+			change: function (checkbox, newValue, oldValue, eOpts) {
+				this.setRange(newValue);
 			}
 		},
 		'toleranceValue': {
@@ -1234,13 +1239,12 @@ Ext.define('NU.controller.Classifier', {
 		if (range === undefined) {
 			range = this.getRange();
 		}
-		var minRange = Math.floor(range / 2);
-//		var step = 1 << (8 - this.self.LutBitsPerColor - 1);
+		var step = 1 << (8 - this.self.LutBitsPerColor);
 		var min = 0;
 		var max = Math.pow(2, 8) - 1;
-		for (var dy = -minRange; dy < minRange; dy++) {
-			for (var dcb = -minRange; dcb < minRange; dcb++) {
-				for (var dcr = -minRange; dcr < minRange; dcr++) {
+		for (var dy = -range; dy <= range; dy += step) {
+			for (var dcb = -range; dcb <= range; dcb += step) {
+				for (var dcr = -range; dcr <= range; dcr += step) {
 					// cap it
 					var y = Math.max(min, Math.min(max, ycbcr[0] + dy));
 					var cb = Math.max(min, Math.min(max, ycbcr[1] + dcb));
@@ -1250,10 +1254,13 @@ Ext.define('NU.controller.Classifier', {
 							cb,
 							cr,
 					];
-					var index = this.getLUTIndex(nearYcbcr);
-					var typeId = this.self.Target[type];
-					if (this.getOverwrite() || lookup[index] === this.self.Target.Unclassified) {
-						lookup[index] = typeId;
+					var dist = Math.pow(ycbcr[0] - y, 2) + Math.pow(ycbcr[1] - cb, 2) + Math.pow(ycbcr[2] - cr, 2);
+					if (dist <= Math.pow(range, 2)) {
+						var index = this.getLUTIndex(nearYcbcr);
+						var typeId = this.self.Target[type];
+						if (this.getOverwrite() || lookup[index] === this.self.Target.Unclassified) {
+							lookup[index] = typeId;
+						}
 					}
 				}
 			}

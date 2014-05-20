@@ -71,7 +71,7 @@ Ext.define('NU.view.window.Classifier', {
 					itemId: 'toolZoom',
 					iconCls: 'icon-toolbar-zoom',
 					enableToggle: true,
-					pressed: true,
+					pressed: false,
 					tooltip: 'Enables a zoom overlay'
 				}, {
 					itemId: 'toolOverwrite',
@@ -192,6 +192,12 @@ Ext.define('NU.view.window.Classifier', {
 							itemId: 'snapshot',
 							xtype: 'checkbox',
 							fieldLabel: 'Freeze',
+						}, {
+							itemId: 'rangeValue',
+							xtype: 'numberfield',
+							fieldLabel: 'Range',
+							value: 10,
+							step: 1
 						}, {
 							itemId: 'toleranceValue',
 							xtype: 'numberfield',
