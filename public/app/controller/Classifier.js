@@ -847,16 +847,19 @@ Ext.define('NU.controller.Classifier', {
 		message.setLookupTable(lookupTable);
 		NU.util.Network.send(this.getRobotIP(), message);
 	},
-	getLUTIndex: function (ycbcr) {
+	getLUTIndex2: function (ycbcr) {
 		var index = 0;
 
 		var bits = this.self.LutBitsPerColor;
 		var bitsRemoved = 8 - bits;
-		index += ((ycbcr[0] >> bitsRemoved) << (2 * bits));
-		index += ((ycbcr[1] >> bitsRemoved) << bits);
-		index += (ycbcr[2] >> bitsRemoved);
+		index |= ((ycbcr[0] >> bitsRemoved) << (bits << 1));
+		index |= ((ycbcr[1] >> bitsRemoved) << bits);
+		index |= (ycbcr[2] >> bitsRemoved);
 
 		return index;
+	},
+	getLUTIndex: function (ycbcr) {
+		return ((ycbcr[0] >> 1) << 14) | ((ycbcr[1] >> 1) << 7) | (ycbcr[2] >> 1);
 	},
 	addHistory: function () {
 		var backwardHistory = this.getLookupBackwardHistory();
