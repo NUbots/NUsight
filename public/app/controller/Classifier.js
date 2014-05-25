@@ -27,6 +27,7 @@ Ext.define('NU.controller.Classifier', {
 		renderRawUnderlay: false,
 		rawUnderlayOpacity: 0.5,
 		magicWandPoints: null,
+		magicWandColours: null,
 		target: 'Field',
 		centerEllipse: false,
 		lastDraw: 0,
@@ -46,7 +47,7 @@ Ext.define('NU.controller.Classifier', {
 			'MagicWand': 1,
 			'Polygon': 2
 		},
-		LutBitsPerColor: 7
+		LutBitsPerColor: 5
 	},
 	control: {
 		'rawImage': true,
@@ -72,6 +73,7 @@ Ext.define('NU.controller.Classifier', {
 					this.setSelectionTool('magic_wand');
 				} else {
 					this.setMagicWandPoints([]);
+					this.setMagicWandColours([]);
 					this.renderImages();
 				}
 			}
@@ -700,6 +702,7 @@ Ext.define('NU.controller.Classifier', {
 		this.setPreviewLookup({});
 		this.setPolygonPoints([]);
 		this.setMagicWandPoints([]);
+		this.setMagicWandColours([]);
 
 		NU.util.Network.on('vision', Ext.bind(this.onVision, this));
 		NU.util.Network.on('lookup_table', Ext.bind(this.onLookUpTable, this));
@@ -847,7 +850,7 @@ Ext.define('NU.controller.Classifier', {
 		message.setLookupTable(lookupTable);
 		NU.util.Network.send(this.getRobotIP(), message);
 	},
-	getLUTIndex2: function (ycbcr) {
+	getLUTIndex: function (ycbcr) {
 		var index = 0;
 
 		var bits = this.self.LutBitsPerColor;
@@ -858,7 +861,7 @@ Ext.define('NU.controller.Classifier', {
 
 		return index;
 	},
-	getLUTIndex: function (ycbcr) {
+	getLUTIndex2: function (ycbcr) {
 		return ((ycbcr[0] >> 1) << 14) | ((ycbcr[1] >> 1) << 7) | (ycbcr[2] >> 1);
 	},
 	addHistory: function () {
@@ -1036,13 +1039,16 @@ Ext.define('NU.controller.Classifier', {
 	},
 	magicWandSelect: function (x, y, tolerance) {
 		var points = [];
+		var colours = [];
 		var queue = [];
 		var checked = {};
+		var map = {};
 		queue.push([x, y]);
 		if (tolerance === undefined) {
 			tolerance = this.getTolerance();
 		}
 		var ycbcr = this.getYCBCR(x, y);
+		colours.push(ycbcr);
 		while (queue.length > 0) {
 			var point = queue.shift();
 			for (var dy = -1; dy <= 1; dy++) {
@@ -1061,11 +1067,17 @@ Ext.define('NU.controller.Classifier', {
 					if (dist <= Math.pow(tolerance, 2) && checked[hash] === undefined) {
 						queue.push(newPoint);
 						points.push(newPoint);
+						var index = this.getLUTIndex(neighbourYcbcr);
+						if (map[index] === undefined) {
+							colours.push(neighbourYcbcr);
+							map[index] = true;
+						}
 					}
 					checked[hash] = true;
 				}
 			}
 		}
+		this.setMagicWandColours(colours);
 		this.setMagicWandPoints(points);
 	},
 	hashPoint: function (point) {
@@ -1078,7 +1090,12 @@ Ext.define('NU.controller.Classifier', {
 		}, this);
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
+//		console.time("classify");
+//		var colours = this.getMagicWandColours();
+//		this.classifyPoints(colours);
+//		console.timeEnd("classify");
 		this.setMagicWandPoints([]);
+		this.setMagicWandColours([]);
 	},
 	classifyRectangle: function (x, y) {
 		var start = this.getStartPoint();
@@ -1218,6 +1235,162 @@ Ext.define('NU.controller.Classifier', {
 			[maxX, maxY]
 		];
 	},
+	classifyPoints: function (points, target, doRender, range) {
+		if (target === undefined) {
+			target = this.getTarget();
+		}
+		if (range === undefined) {
+			range = this.getRange();
+		}
+
+		// create sphere 'lookup table'
+		console.profile("lookup");
+		var rangeSqr = range * range;
+		var pointDiffs = [];
+		for (var y = -range; y <= range; y+=2) {
+			for (var cb = -range; cb <= range; cb+=2) {
+				for (var cr = -range; cr <= range; cr+=2) {
+					var pointDiff = [y, cb, cr];
+					var dist = y * y + cb * cb + cr * cr;
+					if (dist <= rangeSqr) {
+						pointDiffs.push(pointDiff);
+					}
+				}
+			}
+		}
+		console.profileEnd("lookup");
+
+		var overwrite = this.getOverwrite();
+		var targetId = this.self.Target[target];
+		var lookup = this.getLookup();
+		var min = 0;
+		var max = Math.pow(2, 8) - 1;
+		var map = {};
+		var unclassified = this.self.Target.Unclassified;
+		console.time("classify");
+		for (var i = 0; i < points.length; i++) {
+			var point = points[i];
+			for (var x = 0; x < pointDiffs.length; x++) {
+				var pointDiff = pointDiffs[x];
+				var newPoint = [point[0] + pointDiff[0], point[1] + pointDiff[1], point[2] + pointDiff[2]];
+				if (newPoint[0] < min || newPoint[0] > max || newPoint[1] < min || newPoint[1] > max || newPoint[2] < min || newPoint[2] > max) {
+					continue;
+				}
+//				var index = this.getLUTIndex(newPoint);
+				var index = ((newPoint[0] >> 1) << 14) | ((newPoint[1] >> 1) << 7) | (newPoint[2] >> 1);
+				if (map[index] === undefined) {
+					if (overwrite || lookup[index] === unclassified) {
+						lookup[index] = targetId;
+					}
+					map[index] = true;
+				} else {
+					console.log('rehit');
+				}
+			}
+		}
+		console.timeEnd("classify");
+
+		console.profile("update");
+		if (doRender === undefined || doRender) {
+			this.updateClassifiedData();
+			this.renderClassifiedImage();
+		}
+		console.profileEnd("update");
+	},
+	classifyPoints2: function (coordPoints, target, doRender, range) {
+
+		if (target === undefined) {
+			target = this.getTarget();
+		}
+		if (range === undefined) {
+			range = this.getRange();
+		}
+		// iterate bounding box with a border margin of range
+		// check if point is within range of any point
+		// use quicktest to remove negatives, use better test to confirm positive
+		// if positive, move point to start of points array as nearby points are likely within range
+
+		var points = [];
+		var map = {};
+		var bounds = { y: { min: Infinity, max: -Infinity }, cb: { min: Infinity, max: -Infinity }, cr: { min: Infinity, max: -Infinity } };
+		for (var i = 0; i < coordPoints.length; i++) {
+			var coordPoint = coordPoints[i];
+			var ycbcr = this.getYCBCR(coordPoint[0], coordPoint[1]);
+			var y = ycbcr[0];
+			var cb = ycbcr[1];
+			var cr = ycbcr[2];
+
+			if ( y > bounds.y.max)  { bounds.y.max  = y;  }
+			if ( y < bounds.y.min)  { bounds.y.min  = y;  }
+			if (cb > bounds.cb.max) { bounds.cb.max = cb; }
+			if (cb < bounds.cb.min) { bounds.cb.min = cb; }
+			if (cr > bounds.cr.max) { bounds.cr.max = cr; }
+			if (cr < bounds.cr.min) { bounds.cr.min = cr; }
+
+			// cache points
+			// TODO: only add non-duplicates
+
+			var index = this.getLUTIndex(ycbcr);
+			if (map[index] === undefined) {
+				points.push(ycbcr);
+				map[index] = true;
+			}
+//			points.push(ycbcr);
+		}
+		var min = 0;
+		var max = Math.pow(2, 8) - 1;
+		// add margin border
+		bounds.y.max = Math.min(max, bounds.y.max + range);
+		bounds.y.min = Math.max(min, bounds.y.min - range);
+		bounds.cb.max = Math.min(max, bounds.cb.max + range);
+		bounds.cb.min = Math.max(min, bounds.cb.min - range);
+		bounds.cr.max = Math.min(max, bounds.cr.max + range);
+		bounds.cr.min = Math.max(min, bounds.cr.min - range);
+
+		var overwrite = this.getOverwrite();
+		var targetId = this.self.Target[target];
+		var lookup = this.getLookup();
+		var step = 1;//1 << (8 - this.self.LutBitsPerColor);
+		var rangeSqr = Math.pow(range, 2);
+		for (var y = bounds.y.min; y <= bounds.y.max; y += step) {
+			for (var cb = bounds.cb.min; cb <= bounds.cb.max; cb += step) {
+				for (var cr = bounds.cr.min; cr <= bounds.cr.max; cr += step) {
+					var testPoint = [y, cb, cr];
+					for (var i = 0; i < points.length; i++) {
+						var point = points[i];
+						// use rough test first
+//						var maxDist = Math.abs(testPoint[0] - point[0]) + Math.abs(testPoint[1] - point[1]) + Math.abs(testPoint[2] - point[2]);
+//						if (maxDist > range) {
+//							continue;
+//						} else {
+							// use proper test if testPoint passes rough test
+							var dist = Math.pow(testPoint[0] - point[0], 2) + Math.pow(testPoint[1] - point[1], 2) + Math.pow(testPoint[2] - point[2], 2);
+							if (dist <= rangeSqr) {
+								// definitely in the range!
+								var index = this.getLUTIndex(testPoint);
+								if (overwrite || lookup[index] === this.self.Target.Unclassified) {
+									lookup[index] = targetId;
+								}
+								if (i > 0) {
+									// move point to the top for next test!
+									for (var x = i; x >= 1; x--) {
+										points[x] = points[x - 1];
+									}
+									points[0] = point;
+								}
+								break;
+							}
+//						}
+					}
+				}
+			}
+		}
+
+		if (doRender === undefined || doRender) {
+			this.updateClassifiedData();
+			this.renderClassifiedImage();
+		}
+	},
 	classifyPoint: function (x, y, target, doRender, range) {
 		var ycbcr = this.getYCBCR(x, y);
 		if (target === undefined) {
@@ -1227,7 +1400,6 @@ Ext.define('NU.controller.Classifier', {
 		if (doRender === undefined || doRender) {
 			this.updateClassifiedData();
 			this.renderClassifiedImage();
-			this.renderPolygonOverlays();
 		}
 	},
 	getPointRGBA: function (x, y, data) {
@@ -1245,23 +1417,29 @@ Ext.define('NU.controller.Classifier', {
 		var step = 1 << (8 - this.self.LutBitsPerColor);
 		var min = 0;
 		var max = Math.pow(2, 8) - 1;
+		// checks all points in a bounding box around the point and classifies if it is within a sphere of radius 'range'
+		// Note: By design, a range of 0 still classifies the original point
+		var overwrite = this.getOverwrite();
 		for (var dy = -range; dy <= range; dy += step) {
 			for (var dcb = -range; dcb <= range; dcb += step) {
 				for (var dcr = -range; dcr <= range; dcr += step) {
 					// cap it
-					var y = Math.max(min, Math.min(max, ycbcr[0] + dy));
-					var cb = Math.max(min, Math.min(max, ycbcr[1] + dcb));
-					var cr = Math.max(min, Math.min(max, ycbcr[2] + dcr));
-					var nearYcbcr = [
+					var y = ycbcr[0] + dy;
+					var cb = ycbcr[1] + dcb;
+					var cr = ycbcr[2] + dcr;
+					if (y < min || y > max || cb < min || cb > max || cr < min || cr > max) {
+						continue;
+					}
+					var dist = Math.pow(ycbcr[0] - y, 2) + Math.pow(ycbcr[1] - cb, 2) + Math.pow(ycbcr[2] - cr, 2);
+					if (dist <= Math.pow(range, 2)) {
+						var nearYcbcr = [
 							y,
 							cb,
 							cr,
-					];
-					var dist = Math.pow(ycbcr[0] - y, 2) + Math.pow(ycbcr[1] - cb, 2) + Math.pow(ycbcr[2] - cr, 2);
-					if (dist <= Math.pow(range, 2)) {
+						];
 						var index = this.getLUTIndex(nearYcbcr);
 						var typeId = this.self.Target[type];
-						if (this.getOverwrite() || lookup[index] === this.self.Target.Unclassified) {
+						if (overwrite || lookup[index] === this.self.Target.Unclassified) {
 							lookup[index] = typeId;
 						}
 					}
