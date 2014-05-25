@@ -47,7 +47,10 @@ Ext.define('NU.controller.Classifier', {
 			'MagicWand': 1,
 			'Polygon': 2
 		},
-		LutBitsPerColor: 5
+		LutBitsPerColor: 5,
+		LutBitsPerColorY: 4,
+		LutBitsPerColorCb: 4,
+		LutBitsPerColorCr: 5
 	},
 	control: {
 		'rawImage': true,
@@ -794,7 +797,7 @@ Ext.define('NU.controller.Classifier', {
 		var index;
 		var min = 0;
 		var max = 255;
-		var numSteps = Math.pow(2, this.self.LutBitsPerColor);
+		var numSteps = Math.pow(2, Math.max(this.self.LutBitsPerColorY, this.self.LutBitsPerColorCb, this.self.LutBitsPerColorCr));
 		var step = (max - min) / numSteps;
 		for (var z = min; z <= max; z += step) {
 			for (var y = min; y <= max; y += step) {
@@ -828,7 +831,7 @@ Ext.define('NU.controller.Classifier', {
 
 	},
 	resetLUT: function () {
-		this.setLookup(new Uint8ClampedArray(Math.pow(2, 3 * this.self.LutBitsPerColor))); // TODO: make constant or something
+		this.setLookup(new Uint8ClampedArray(Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr))); // TODO: make constant or something
 	},
 	download: function () {
 		var message = new API.Message();
@@ -853,11 +856,15 @@ Ext.define('NU.controller.Classifier', {
 	getLUTIndex: function (ycbcr) {
 		var index = 0;
 
-		var bits = this.self.LutBitsPerColor;
-		var bitsRemoved = 8 - bits;
-		index |= ((ycbcr[0] >> bitsRemoved) << (bits << 1));
-		index |= ((ycbcr[1] >> bitsRemoved) << bits);
-		index |= (ycbcr[2] >> bitsRemoved);
+		var bitsY = this.self.LutBitsPerColorY;
+		var bitsCb = this.self.LutBitsPerColorCb;
+		var bitsCr = this.self.LutBitsPerColorCr;
+		var bitsRemovedY = 8 - bitsY;
+		var bitsRemovedCb = 8 - bitsCb;
+		var bitsRemovedCr = 8 - bitsCr;
+		index |= ((ycbcr[0] >> bitsRemovedY) << bitsCb << bitsCr);
+		index |= ((ycbcr[1] >> bitsRemovedCb) << bitsCr);
+		index |= (ycbcr[2] >> bitsRemovedCr);
 
 		return index;
 	},
