@@ -212,7 +212,7 @@ NUbugger.prototype.onMessage = function (robotIP, message)
 
 	self.clients.forEach(function (client) {
 
-		client.socket.emit('message', robotIP, message.toString('base64'));
+		client.socket.emit('message', robotIP, message);
 		//client.sub.emit('message', robotIP, message);
 
 	});

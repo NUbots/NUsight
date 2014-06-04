@@ -44,6 +44,5 @@ server.listen(app.get('port'), function () {
 });
 
 io = require('socket.io').listen(server);
-io.set('log level', 1);
 
 var nubugger = new NUbugger(io);
