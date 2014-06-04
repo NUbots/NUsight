@@ -44,7 +44,7 @@ function NUbugger (io) {
 			var robot = self.getRobot(robotIP);
 			if (robot !== null) {
 //				console.log('message to', robotIP, '-', message.length);
-				robot.send(new Buffer(message, 'base64'));
+				robot.send(message);
 			}
 		});
 
