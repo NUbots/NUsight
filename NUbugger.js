@@ -24,6 +24,7 @@ function NUbugger (io) {
 	self.addRobot('10.0.1.54', 'Robot #4');
 	self.addRobot('10.0.1.55', 'Robot #5');
 	self.addRobot('10.0.1.56', 'Robot #6');
+	self.addRobot('10.0.1.57', 'Robot #7');
 
 	self.io.sockets.on('connection', function (socket) {
 
