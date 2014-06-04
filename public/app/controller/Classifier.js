@@ -47,10 +47,9 @@ Ext.define('NU.controller.Classifier', {
 			'MagicWand': 1,
 			'Polygon': 2
 		},
-		LutBitsPerColor: 5,
 		LutBitsPerColorY: 4,
-		LutBitsPerColorCb: 4,
-		LutBitsPerColorCr: 5
+		LutBitsPerColorCb: 5,
+		LutBitsPerColorCr: 4
 	},
 	control: {
 		'rawImage': true,
@@ -849,22 +848,28 @@ Ext.define('NU.controller.Classifier', {
 		message.setType(API.Message.Type.LOOKUP_TABLE);
 		var lookupTable = new API.Message.LookupTable();
 		lookupTable.setTable(this.getLookup());
+		lookupTable.setBitsY(this.self.LutBitsPerColorY);
+		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
+		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
 		lookupTable.setSave(save);
 		message.setLookupTable(lookupTable);
 		NU.util.Network.send(this.getRobotIP(), message);
 	},
 	getLUTIndex: function (ycbcr) {
-		var index = 0;
-
 		var bitsY = this.self.LutBitsPerColorY;
 		var bitsCb = this.self.LutBitsPerColorCb;
 		var bitsCr = this.self.LutBitsPerColorCr;
 		var bitsRemovedY = 8 - bitsY;
 		var bitsRemovedCb = 8 - bitsCb;
 		var bitsRemovedCr = 8 - bitsCr;
-		index |= ((ycbcr[0] >> bitsRemovedY) << bitsCb << bitsCr);
-		index |= ((ycbcr[1] >> bitsRemovedCb) << bitsCr);
-		index |= (ycbcr[2] >> bitsRemovedCr);
+
+
+		var index = 0;
+		index |= ycbcr[0] >> bitsRemovedY;
+		index <<= bitsCb;
+		index |= ycbcr[1] >> bitsRemovedCb;
+		index <<= bitsCr;
+		index |= ycbcr[2] >> bitsRemovedCr;
 
 		return index;
 	},
@@ -1251,7 +1256,6 @@ Ext.define('NU.controller.Classifier', {
 		}
 
 		// create sphere 'lookup table'
-		console.profile("lookup");
 		var rangeSqr = range * range;
 		var pointDiffs = [];
 		for (var y = -range; y <= range; y+=2) {
@@ -1265,7 +1269,6 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		}
-		console.profileEnd("lookup");
 
 		var overwrite = this.getOverwrite();
 		var targetId = this.self.Target[target];
@@ -1274,7 +1277,6 @@ Ext.define('NU.controller.Classifier', {
 		var max = Math.pow(2, 8) - 1;
 		var map = {};
 		var unclassified = this.self.Target.Unclassified;
-		console.time("classify");
 		for (var i = 0; i < points.length; i++) {
 			var point = points[i];
 			for (var x = 0; x < pointDiffs.length; x++) {
@@ -1290,19 +1292,14 @@ Ext.define('NU.controller.Classifier', {
 						lookup[index] = targetId;
 					}
 					map[index] = true;
-				} else {
-					console.log('rehit');
 				}
 			}
 		}
-		console.timeEnd("classify");
 
-		console.profile("update");
 		if (doRender === undefined || doRender) {
 			this.updateClassifiedData();
 			this.renderClassifiedImage();
 		}
-		console.profileEnd("update");
 	},
 	classifyPoints2: function (coordPoints, target, doRender, range) {
 
@@ -1421,7 +1418,7 @@ Ext.define('NU.controller.Classifier', {
 		if (range === undefined) {
 			range = this.getRange();
 		}
-		var step = 1 << (8 - this.self.LutBitsPerColor);
+		var step = 1 << (8 - Math.max(this.self.LutBitsPerColorY, this.self.LutBitsPerColorCb, this.self.LutBitsPerColorCr));
 		var min = 0;
 		var max = Math.pow(2, 8) - 1;
 		// checks all points in a bounding box around the point and classifies if it is within a sphere of radius 'range'
