@@ -36,11 +36,13 @@ Ext.define('NU.controller.Classifier', {
 	},
 	statics: {
 		Target: {
-			'Unclassified': 0,
-			'Line': 1,
-			'Field': 2,
-			'Goal': 8,
-			'Ball': 6
+			'Unclassified': 'u'.charCodeAt(0),
+			'Line': 'w'.charCodeAt(0),
+			'Field': 'g'.charCodeAt(0),
+			'Goal': 'y'.charCodeAt(0),
+			'Ball': 'o'.charCodeAt(0),
+			'Cyan': 'c'.charCodeAt(0),
+			'Magenta': 'm'.charCodeAt(0)
 		},
 		Tool: {
 			'Point': 0,
@@ -830,7 +832,11 @@ Ext.define('NU.controller.Classifier', {
 
 	},
 	resetLUT: function () {
-		this.setLookup(new Uint8ClampedArray(Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr))); // TODO: make constant or something
+		var lut = new Uint8ClampedArray(Math.pow(2, 3 * this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr));
+		for (var i = 0; i < lut.length; i++) {
+			lut[i] = this.self.Target.Unclassified;
+		}
+		this.setLookup(lut); // TODO: make constant or something
 	},
 	download: function () {
 		var message = new API.Message();
