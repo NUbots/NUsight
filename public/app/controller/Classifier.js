@@ -128,6 +128,16 @@ Ext.define('NU.controller.Classifier', {
 				this.setTarget('Goal');
 			}
 		},
+		'targetCyan': {
+			click: function () {
+				this.setTarget('Cyan');
+			}
+		},
+		'targetMagenta': {
+			click: function () {
+				this.setTarget('Magenta');
+			}
+		},
 		'targetWhite': {
 			click: function () {
 				this.setTarget('Line');
@@ -785,8 +795,12 @@ Ext.define('NU.controller.Classifier', {
 					return new THREE.Color("#ffff00");
 				case this.self.Target.Ball:
 					return new THREE.Color("#ff9000");
+				case this.self.Target.Cyan:
+					return new THREE.Color("#00ffff");
+				case this.self.Target.Magenta:
+					return new THREE.Color("#ff00ff");
 				default:
-					throw new Error('Wat is ' + typeId);
+					throw new Error('Unknown classification: ' + typeId);
 			}
 		}
 
@@ -1789,6 +1803,10 @@ Ext.define('NU.controller.Classifier', {
 				return [0, 255, 0];
 			case Target.Goal:
 				return [255, 255, 0];
+			case Target.Cyan:
+				return [0, 255, 255];
+			case Target.Magenta:
+				return [255, 0, 255];
 			default:
 				return [0, 0, 0];
 		}
