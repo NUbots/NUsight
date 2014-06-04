@@ -220,7 +220,7 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		},
-		'metaball': {
+		/*'metaball': {
 			click: function (btn) {
 				this.metaball();
 			}
@@ -229,7 +229,7 @@ Ext.define('NU.controller.Classifier', {
 			click: function (btn) {
 				this.convexHull2();
 			}
-		},
+		},*/
 		'rawValue': true,
 		'classifiedValue': true,
 		'scatter3d': true
