@@ -124,6 +124,10 @@ Ext.define('NU.util.Network', {
 			message: message
 		};
 
+		/*if (this.getPacket() === null) {
+			console.log('dropped');
+		}*/
+
 		if (!this.getFilter()) {
 			this.processPacket(packet);
 		} else {
@@ -131,7 +135,7 @@ Ext.define('NU.util.Network', {
 		}
 	},
 	send: function (robotIP, message) {
-		this.getSocket().emit('message', robotIP, message);
+		this.getSocket().emit('message', robotIP, message.encode().toArrayBuffer());
 	},
 	getRobotIPs: function () {
 		var result = [];
