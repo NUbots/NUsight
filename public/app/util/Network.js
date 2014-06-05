@@ -59,7 +59,7 @@ Ext.define('NU.util.Network', {
 			try {
 				var api_message, eventName, robotIP;
 				robotIP = packet.robotIP;
-				api_message = API.Message.decode64(packet.message);
+				api_message = API.Message.decode(packet.message);
 				eventName = "unknown";
 
 				Ext.iterate(API.Message.Type, function (key, type) {
@@ -131,7 +131,7 @@ Ext.define('NU.util.Network', {
 		}
 	},
 	send: function (robotIP, message) {
-		this.getSocket().emit('message', robotIP, message.encode64());
+		this.getSocket().emit('message', robotIP, message);
 	},
 	getRobotIPs: function () {
 		var result = [];

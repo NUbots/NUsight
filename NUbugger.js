@@ -44,7 +44,7 @@ function NUbugger (io) {
 			var robot = self.getRobot(robotIP);
 			if (robot !== null) {
 //				console.log('message to', robotIP, '-', message.length);
-				robot.send(new Buffer(message, 'base64'));
+				robot.send(message);
 			}
 		});
 
@@ -212,7 +212,7 @@ NUbugger.prototype.onMessage = function (robotIP, message)
 
 	self.clients.forEach(function (client) {
 
-		client.socket.emit('message', robotIP, message.toString('base64'));
+		client.socket.emit('message', robotIP, message);
 		//client.sub.emit('message', robotIP, message);
 
 	});

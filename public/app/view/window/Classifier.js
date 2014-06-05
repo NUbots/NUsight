@@ -216,7 +216,7 @@ Ext.define('NU.view.window.Classifier', {
 							fieldLabel: 'Tolerance',
 							value: 50,
 							step: 1
-						}, {
+						}/*, {
 							itemId: 'metaball',
 							xtype: 'button',
 							text: 'Metaball'
@@ -224,7 +224,7 @@ Ext.define('NU.view.window.Classifier', {
 							itemId: 'convexhull',
 							xtype: 'button',
 							text: 'Convex Hull'
-						}]
+						}*/]
 					}, {
 						items: [{
 							itemId: 'classifiedValue',
