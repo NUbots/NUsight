@@ -145,7 +145,7 @@ Ext.define('NU.controller.Chart', {
         }
 
         //console.log(api_message);
-        var dataPoint = api_message.dataPoint;
+        var dataPoint = api_message.getDataPoint();
         var label = dataPoint.label;
         var values = dataPoint.value;
 

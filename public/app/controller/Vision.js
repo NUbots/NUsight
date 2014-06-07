@@ -50,7 +50,7 @@ Ext.define('NU.controller.Vision', {
         this.callParent(arguments);
 
     },
-    onImage: function (robotIP, image) {
+    onImage: function (robotIP, message) {
 
         if (robotIP != this.robotIP || !this.displayImage) {
             return;
@@ -60,7 +60,7 @@ Ext.define('NU.controller.Vision', {
         // this.drawImageURL(image);
 
         // 2nd implementation - potentially faster
-        this.drawImageB64(image);
+        this.drawImageB64(message.image);
     },
     drawImageURL: function (image) {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
@@ -87,7 +87,7 @@ Ext.define('NU.controller.Vision', {
 			ctx.restore();
         };
     },
-    onClassifiedImage: function (robotIP, classifiedImage) {
+    onClassifiedImage: function (robotIP, message) {
 
         if(robotIP != this.robotIP || !this.displayClassifiedImage) {
             return;
@@ -96,8 +96,8 @@ Ext.define('NU.controller.Vision', {
         var height = 320;
         var width = 240;
 
-        var segments = classifiedImage.segment;
-        var visualHorizon = classifiedImage.visualHorizon;
+        var segments = message.getClassifiedImage().segment;
+        var visualHorizon = message.getClassifiedImage().visualHorizon;
         var imageData = this.context.createImageData(height, width);
         var pixels = imageData.data;
 
@@ -109,9 +109,9 @@ Ext.define('NU.controller.Vision', {
             pixels[4 * i + 3] = 255;
         }
 
-        for (var i = 0; i < api_segments.length; i++) {
-            var segment = api_segments[i];
-            var colour = this.segmentColourToRGB2(segment.colour);
+        for (var i = 0; i < segments.length; i++) {
+            var segment = segments[i];
+            var colour = this.segmentColourToRGB(segment.colour);
 
             if (segment.start_x == segment.end_x) {
 
@@ -142,12 +142,11 @@ Ext.define('NU.controller.Vision', {
             //segment.end_x, segment.end_y
         }
         //Draw circles for green horizon points
-        var api_green_horizon_points = api_classified_image.green_horizon_point;
-        for (var i = 0; i < api_green_horizon_points.length; i++){
-            pixels[(4 * height * api_green_horizon_points[i].y) + (4 * api_green_horizon_points[i].x + 0)] = 0;
-            pixels[(4 * height * api_green_horizon_points[i].y) + (4 * api_green_horizon_points[i].x + 1)] = 255; //Green
-            pixels[(4 * height * api_green_horizon_points[i].y) + (4 * api_green_horizon_points[i].x + 2)] = 0;
-            pixels[(4 * height * api_green_horizon_points[i].y) + (4 * api_green_horizon_points[i].x + 3)] = 255;
+        for (var i = 0; i < visualHorizon.length; i++){
+            pixels[(4 * height * visualHorizonPoints[i].y) + (4 * visualHorizonPoints[i].x + 0)] = 0;
+            pixels[(4 * height * visualHorizonPoints[i].y) + (4 * visualHorizonPoints[i].x + 1)] = 255; //Green
+            pixels[(4 * height * visualHorizonPoints[i].y) + (4 * visualHorizonPoints[i].x + 2)] = 0;
+            pixels[(4 * height * visualHorizonPoints[i].y) + (4 * visualHorizonPoints[i].x + 3)] = 255;
         }
 
         imageData.data = pixels;
@@ -255,245 +254,30 @@ Ext.define('NU.controller.Vision', {
 
         switch (colourType)
         {
-            case 0:
-                colour = "rgba(0,0,0,1)";
-                break;
-            case 1:
-                colour = "rgba(255,255,255,1)";
-                break;
-            case 2:
-                colour = "rgba(0,255,0,1)";
-                break;
-            case 3:
-                colour = "rgba(168,168,168,1)";
-                break;
-            case 4:
-                colour = "rgba(255,20,127,1)";
-                break;
-            case 5:
-                colour = "rgba(255,128,128,1)";
-                break;
-            case 6:
-                colour = "rgba(255,165,0,1)";
-                break;
-            case 7:
-                colour = "rgba(238,219,83,1)";
-                break;
-            case 8:
-                colour = "rgba(255,255,0,1)";
-                break;
-            case 9:
-                colour = "rgba(0,0,255,1)";
-                break;
-            case 10:
-                colour = "rgba(25,25,112,1)";
-                break;
-            default:
-                colour = "rgba(0,0,0,1)";
-        }
-        return colour;
-    },
-    segmentColourToRGB2: function (colourType)
-    {
-        var colour;
-
-        switch (colourType)
-        {
-            case 0:
+            case 0: // Unknown/Unclassified
                 colour = [0,0,0,255];
                 break;
-            case 1:
-                colour = [255,255,255,255];
-                break;
-            case 2:
+            case 1: // Field
                 colour = [0,255,0,255];
                 break;
-            case 3:
-                colour = [168,168,168,255];
+            case 2: // Ball
+                colour = [255,102,0,255];
                 break;
-            case 4:
-                colour = [255,20,127,255];
-                break;
-            case 5:
-                colour = [255,128,128,255];
-                break;
-            case 6:
-                colour = [255,165,0,255];
-                break;
-            case 7:
-                colour = [238,219,83,255];
-                break;
-            case 8:
+            case 3: // Goals
                 colour = [255,255,0,255];
                 break;
-            case 9:
-                colour = [0,0,255,255];
+            case 4: // Line
+                colour = [255,255,255,255];
                 break;
-            case 10:
-                colour = [25,25,112,255];
+            case 5: // Cyan Team
+                colour = [0,255,255,255];
+                break;
+            case 6: // Magenta Team
+                colour = [255,0,255,255];
                 break;
             default:
                 colour = [0,0,0,255];
         }
         return colour;
-    },
-    code: function () {
-        this.context.fillStyle="black";
-        this.context.fillRect(0, 0, 320, 240);
-
-        var api_classified_image = api_message.vision.classified_image;
-        var api_segments  = api_classified_image.segment;
-        for (var i = 0; i < api_segments.length; i++) {
-            var segment = api_segments[i];
-            var colour;
-
-            // TODO: make this less horrific
-            switch (segment.colour)
-            {
-                case 0:
-                    colour = "rgba(0,0,0,1)";
-                    break;
-                case 1:
-                    colour = "rgba(255,255,255,1)";
-                    break;
-                case 2:
-                    colour = "rgba(0,255,0,1)";
-                    break;
-                case 3:
-                    colour = "rgba(168,168,168,1)";
-                    break;
-                case 4:
-                    colour = "rgba(255,20,127,1)";
-                    break;
-                case 5:
-                    colour = "rgba(255,128,128,1)";
-                    break;
-                case 6:
-                    colour = "rgba(255,165,0,1)";
-                    break;
-                case 7:
-                    colour = "rgba(238,219,83,1)";
-                    break;
-                case 8:
-                    colour = "rgba(255,255,0,1)";
-                    break;
-                case 9:
-                    colour = "rgba(0,0,255,1)";
-                    break;
-                case 10:
-                    colour = "rgba(25,25,112,1)";
-                    break;
-                default:
-                    colour = "rgba(0,0,0,1)";
-            }
-
-            //this.context.strokeStyle = "rgba(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", 0.5)";
-
-            this.context.beginPath();
-            this.context.moveTo(segment.start_x, segment.start_y);
-            this.context.lineTo(segment.end_x, segment.end_y);
-            this.context.lineWidth = 1;
-            this.context.strokeStyle = colour;
-            this.context.stroke();
-        }
-
-        var api_ball = api_message.vision.field_object[0];
-        var api_goals = [];
-        var api_obstacles = [];
-
-        var field_objects = api_message.vision.field_object;
-        for (var i = 0; i < field_objects.length; i++) {
-            var obj = field_objects[i];
-            if (obj.visible) {
-                //console.log(obj.name);
-                if (obj.name == "Unknown Yellow Post"
-                    ||
-                    obj.name == "Left Yellow Post"
-                    ||
-                    obj.name == "Right Yellow Post"
-                    ) {
-                    api_goals.push(obj); // TODO: mark type
-                } else if (obj.name == "Unknown Obstacle") {
-                    api_obstacles.push(obj);
-                }
-            }
-        }
-
-        if (api_ball.visible) {
-            this.context.beginPath();
-
-            this.context.shadowColor = 'black';
-            this.context.shadowBlur = 5;
-            this.context.shadowOffsetX = 0;
-            this.context.shadowOffsetY = 0;
-
-            this.context.arc(api_ball.screen_x, api_ball.screen_y, api_ball.radius, 0, Math.PI*2, true);
-            this.context.closePath();
-            //this.context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
-            //this.context.fill();
-            this.context.strokeStyle = "rgba(255, 255, 255, 1)";
-            this.context.lineWidth = 2;
-            this.context.lineWidth = 2;
-            this.context.stroke();
-        };
-
-        Ext.each(api_goals, function (goal) {
-
-            var topLeftX = goal.screen_x - (goal.width / 2);
-            var topLeftY = goal.screen_y - goal.height;
-
-            this.context.beginPath();
-
-            this.context.moveTo(topLeftX, topLeftY);
-            this.context.lineTo(topLeftX + goal.width, topLeftY);
-            this.context.lineTo(topLeftX + goal.width, topLeftY + goal.height);
-            this.context.lineTo(topLeftX, topLeftY + goal.height);
-            this.context.closePath();
-
-            this.context.shadowColor = 'black';
-            this.context.shadowBlur = 5;
-            this.context.shadowOffsetX = 0;
-            this.context.shadowOffsetY = 0;
-
-            this.context.fillStyle = "rgba(255, 242, 0, 0.2)";
-            this.context.fill();
-
-            this.context.strokeStyle = "rgba(255, 242, 0, 1)";
-            this.context.lineWidth = 2;
-            this.context.lineWidth = 2;
-
-            this.context.stroke();
-
-        }, this);
-
-        Ext.each(api_obstacles, function (obstacle) {
-
-            var topLeftX = obstacle.screen_x - (obstacle.width / 2);
-            var topLeftY = 0;//obstacle.screen_y - obstacle.height; // TODO: waiting for shannon to fix height on obstacles
-
-            this.context.beginPath();
-
-            this.context.moveTo(topLeftX, topLeftY);
-            this.context.lineTo(topLeftX + obstacle.width, topLeftY);
-            this.context.lineTo(topLeftX + obstacle.width, obstacle.screen_y);
-            this.context.lineTo(topLeftX, obstacle.screen_y);
-            this.context.closePath();
-
-            this.context.shadowColor = 'black';
-            this.context.shadowBlur = 5;
-            this.context.shadowOffsetX = 0;
-            this.context.shadowOffsetY = 0;
-
-            this.context.fillStyle = "rgba(255, 255, 255, 0.2)";
-            this.context.fill();
-
-            this.context.strokeStyle = "rgba(255, 255, 255, 0.5)";
-            this.context.lineWidth = 2;
-            this.context.lineWidth = 2;
-
-            this.context.stroke();
-
-        }, this);
-
     }
 });
