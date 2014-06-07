@@ -97,7 +97,7 @@ Ext.define('NU.controller.Vision', {
         var width = 240;
 
         var segments = message.getClassifiedImage().segment;
-        var visualHorizon = message.getClassifiedImage().visualHorizon;
+        var visualHorizon = message.getClassifiedImage().getVisualHorizon();
         var imageData = this.context.createImageData(height, width);
         var pixels = imageData.data;
 
@@ -113,26 +113,26 @@ Ext.define('NU.controller.Vision', {
             var segment = segments[i];
             var colour = this.segmentColourToRGB(segment.colour);
 
-            if (segment.start_x == segment.end_x) {
+            if (segment.start.x == segment.end.x) {
 
                 // vertical lines
-                for (var y = segment.start_y; y <= segment.end_y; y++)
+                for (var y = segment.start.y; y <= segment.end.y; y++)
                 {
-                    pixels[(4 * height * y) + (4 * segment.start_x + 0)] = colour[0];
-                    pixels[(4 * height * y) + (4 * segment.start_x + 1)] = colour[1];
-                    pixels[(4 * height * y) + (4 * segment.start_x + 2)] = colour[2];
-                    pixels[(4 * height * y) + (4 * segment.start_x + 3)] = colour[3];
+                    pixels[(4 * height * y) + (4 * segment.start.x + 0)] = colour[0];
+                    pixels[(4 * height * y) + (4 * segment.start.x + 1)] = colour[1];
+                    pixels[(4 * height * y) + (4 * segment.start.x + 2)] = colour[2];
+                    pixels[(4 * height * y) + (4 * segment.start.x + 3)] = colour[3];
                 }
 
-            } else if (segment.start_y == segment.end_y) {
+            } else if (segment.start.y == segment.end.y) {
 
                 // horizontal lines
-                for (var x = segment.start_x; x <= segment.end_x; x++)
+                for (var x = segment.start.x; x <= segment.end.x; x++)
                 {
-                    pixels[(4 * height * segment.start_y) + (4 * x + 0)] = colour[0];
-                    pixels[(4 * height * segment.start_y) + (4 * x + 1)] = colour[1];
-                    pixels[(4 * height * segment.start_y) + (4 * x + 2)] = colour[2];
-                    pixels[(4 * height * segment.start_y) + (4 * x + 3)] = colour[3];
+                    pixels[(4 * height * segment.start.y) + (4 * x + 0)] = colour[0];
+                    pixels[(4 * height * segment.start.y) + (4 * x + 1)] = colour[1];
+                    pixels[(4 * height * segment.start.y) + (4 * x + 2)] = colour[2];
+                    pixels[(4 * height * segment.start.y) + (4 * x + 3)] = colour[3];
                 }
             }
             else {
