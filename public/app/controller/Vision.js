@@ -4,8 +4,7 @@ Ext.define('NU.controller.Vision', {
         context: null,
         displayImage: false,
         displayClassifiedImage: false,
-        displayFieldObjects: false,
-        displayTransitions: false
+        displayFieldObjects: false
     },
     control: {
         'displaypicker': {
@@ -13,7 +12,6 @@ Ext.define('NU.controller.Vision', {
                 this.displayImage = false;
                 this.displayClassifiedImage = false;
                 this.displayFieldObjects = false;
-                this.displayTransitions = false;
                 Ext.each(newValue, function (value) {
                     switch (value) {
                         case 'raw':
@@ -21,9 +19,6 @@ Ext.define('NU.controller.Vision', {
                             break;
                         case 'classified':
                             this.displayClassifiedImage = true;
-                            break;
-                        case 'transitions':
-                            this.displayTransitions = true;
                             break;
                         case 'objects':
                             this.displayFieldObjects = true;
@@ -48,35 +43,19 @@ Ext.define('NU.controller.Vision', {
         this.setContext(this.getCanvas().el.dom.getContext('2d'));
         //this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
 
-        NU.util.Network.on('vision', Ext.bind(this.onVision, this));
+        NU.util.Network.on('image', Ext.bind(this.onImage, this));
+        NU.util.Network.on('classified_image', Ext.bind(this.onClassifiedImage, this));
+        NU.util.Network.on('vision_objects', Ext.bind(this.onVisionObjects, this));
 
         this.callParent(arguments);
 
     },
-    onVision: function (robotIP, api_message) {
+    onImage: function (robotIP, image) {
 
-        if (robotIP != this.robotIP) { // TODO: delete
+        if (robotIP != this.robotIP || !this.displayImage) {
             return;
         }
 
-        var vision = api_message.vision;
-
-        if (this.displayImage && vision.image) {
-            this.drawImage(vision.image);
-        }
-
-        if (this.displayClassifiedImage && vision.classified_image) {
-            this.drawClassifiedImage(vision.classified_image);
-        }
-
-        if (this.displayTransitions && vision.classified_image) {
-            this.drawTransitions(vision.classified_image);
-        }
-        if (this.displayFieldObjects && vision.vision_object) {
-             this.drawFieldObjects(vision.vision_object);
-        }
-    },
-    drawImage: function (image) {
         // 1st implementation - potentially slower
         // this.drawImageURL(image);
 
@@ -108,13 +87,17 @@ Ext.define('NU.controller.Vision', {
 			ctx.restore();
         };
     },
-    drawClassifiedImage: function (api_classified_image) {
+    onClassifiedImage: function (robotIP, classifiedImage) {
+
+        if(robotIP != this.robotIP || !this.displayClassifiedImage) {
+            return;
+        }
 
         var height = 320;
         var width = 240;
 
-        var api_segments = api_classified_image.segment;
-        var api_green_horizon = api_classified_image.green_horizon;
+        var segments = classifiedImage.segment;
+        var visualHorizon = classifiedImage.visualHorizon;
         var imageData = this.context.createImageData(height, width);
         var pixels = imageData.data;
 
@@ -171,61 +154,12 @@ Ext.define('NU.controller.Vision', {
         this.context.putImageData(imageData, 0, 0);
 
     },
-    drawTransitions: function (api_classified_image) {
+    onVisionObjects: function (robotIP, vision_objects) {
 
-        var height = 800;
-        var width = 600;
-
-        var api_segments  = api_classified_image.transition_segment;
-        var imageData = this.context.createImageData(height, width);
-        var pixels = imageData.data;
-
-        for (var i = 0; i < height * width; i++)
-        {
-            pixels[4 * i + 0] = 0;
-            pixels[4 * i + 1] = 0;
-            pixels[4 * i + 2] = 0;
-            pixels[4 * i + 3] = 255;
+        if(robotIP != this.robotIP || !this.displayFieldObjects) {
+            return;
         }
 
-        for (var i = 0; i < api_segments.length; i++) {
-            var segment = api_segments[i];
-            var colour = this.segmentColourToRGB2(segment.colour);
-
-            if (segment.start_x == segment.end_x) {
-
-                // vertical lines
-                for (var y = segment.start_y; y <= segment.end_y; y++)
-                {
-                    pixels[(4 * height * y) + (4 * segment.start_x + 0)] = colour[0];
-                    pixels[(4 * height * y) + (4 * segment.start_x + 1)] = colour[1];
-                    pixels[(4 * height * y) + (4 * segment.start_x + 2)] = colour[2];
-                    pixels[(4 * height * y) + (4 * segment.start_x + 3)] = colour[3];
-                }
-
-            } else if (segment.start_y == segment.end_y) {
-
-                // horizontal lines
-                for (var x = segment.start_x; x <= segment.end_x; x++)
-                {
-                    pixels[(4 * height * segment.start_y) + (4 * x + 0)] = colour[0];
-                    pixels[(4 * height * segment.start_y) + (4 * x + 1)] = colour[1];
-                    pixels[(4 * height * segment.start_y) + (4 * x + 2)] = colour[2];
-                    pixels[(4 * height * segment.start_y) + (4 * x + 3)] = colour[3];
-                }
-            }
-            else {
-                console.log('unsupported diagonal classified image segment');
-            }
-            //segment.start_x, segment.start_y
-            //segment.end_x, segment.end_y
-        }
-
-        imageData.data = pixels;
-        this.context.putImageData(imageData, 0, 0);
-
-    },
-    drawFieldObjects: function (vision_objects) {
         // var api_ball = vision_objects[0];
         // var api_goals = [];
         // var api_obstacles = [];
