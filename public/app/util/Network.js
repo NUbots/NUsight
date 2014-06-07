@@ -30,7 +30,8 @@ Ext.define('NU.util.Network', {
 
 		window.API = this.builder.build("messages.support.nubugger.proto");
 		// cry :'(
-		window.API.Sensors = this.builder.build("messages.input.proto.Sensors");
+        window.API.Sensors = this.builder.build("messages.input.proto.Sensors");
+        window.API.Vision = this.builder.build("messages.vision.proto");
 
 		this.mon(this.getRobotsStore(), 'add', this.onAddRobot, this);
 		this.mon(this.getRobotsStore(), 'update', this.onUpdateRobot, this);
@@ -56,7 +57,7 @@ Ext.define('NU.util.Network', {
 	},
 	processPacket: function (packet) {
 		if (packet !== null) {
-			try {
+//		    try {
 				var api_message, eventName, robotIP;
 				robotIP = packet.robotIP;
 				api_message = API.Message.decode(packet.message);
@@ -72,9 +73,9 @@ Ext.define('NU.util.Network', {
 				//console.log(robotIP, eventName);
 
 				this.fireEvent(eventName, robotIP, api_message);
-			} catch (e) {
-				console.log(e);
-			}
+//			} catch (e) {
+//				console.log(e);
+//			}
 		}
 		this.setPacket(null);
 	},

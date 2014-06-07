@@ -718,7 +718,7 @@ Ext.define('NU.controller.Classifier', {
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
 
-		NU.util.Network.on('vision', Ext.bind(this.onVision, this));
+		NU.util.Network.on('image', Ext.bind(this.onImage, this));
 		NU.util.Network.on('lookup_table', Ext.bind(this.onLookUpTable, this));
 		this.callParent(arguments);
 
@@ -866,7 +866,7 @@ Ext.define('NU.controller.Classifier', {
 		var message = new API.Message();
 		message.setUtcTimestamp(Date.now() / 1000);
 		message.setType(API.Message.Type.LOOKUP_TABLE);
-		var lookupTable = new API.Message.LookupTable();
+		var lookupTable = new API.Vision.LookUpTable();
 		lookupTable.setTable(this.getLookup());
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
@@ -943,15 +943,14 @@ Ext.define('NU.controller.Classifier', {
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
-	onVision: function (robotIP, api_message) {
+	onImage: function (robotIP, api_message) {
 
 		// TODO: remove
 		if (robotIP !== this.robotIP) {
 			return;
 		}
 
-		var api_vision = api_message.vision;
-		var image = api_vision.image;
+		var image = api_message.image;
 
 		if (image) {
 			var now = Date.now();
