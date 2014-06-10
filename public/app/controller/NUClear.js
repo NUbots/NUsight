@@ -40,7 +40,7 @@ Ext.define('NU.controller.NUClear', {
             return;
         }
 
-        var reactionStatistics = api_message.reactionStatistics;
+        var reactionStatistics = api_message.getReactionStatistics();
         var reactionId = reactionStatistics.reactionId.toNumber();
 
         var now = Date.now();
