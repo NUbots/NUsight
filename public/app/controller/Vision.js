@@ -93,12 +93,13 @@ Ext.define('NU.controller.Vision', {
             return;
         }
 
-        var height = 320;
-        var width = 240;
+        var height = 240;
+        var width = 320;
 
         var segments = message.getClassifiedImage().segment;
         var visualHorizon = message.getClassifiedImage().getVisualHorizon();
-        var imageData = this.context.createImageData(height, width);
+        var horizon = message.getClassifiedImage().getHorizon();
+        var imageData = this.context.createImageData(width, height);
         var pixels = imageData.data;
 
         for (var i = 0; i < height * width; i++)
@@ -115,24 +116,30 @@ Ext.define('NU.controller.Vision', {
 
             if (segment.start.x == segment.end.x) {
 
+                var x = segment.start.x;
+
                 // vertical lines
                 for (var y = segment.start.y; y <= segment.end.y; y++)
                 {
-                    pixels[(4 * height * y) + (4 * segment.start.x + 0)] = colour[0];
-                    pixels[(4 * height * y) + (4 * segment.start.x + 1)] = colour[1];
-                    pixels[(4 * height * y) + (4 * segment.start.x + 2)] = colour[2];
-                    pixels[(4 * height * y) + (4 * segment.start.x + 3)] = colour[3];
+
+                    pixels[4 * (width * y + x) + 0] = colour[0];
+                    pixels[4 * (width * y + x) + 1] = colour[1];
+                    pixels[4 * (width * y + x) + 2] = colour[2];
+                    pixels[4 * (width * y + x) + 3] = colour[3];
                 }
 
             } else if (segment.start.y == segment.end.y) {
 
+                var y = segment.start.y;
+
                 // horizontal lines
                 for (var x = segment.start.x; x <= segment.end.x; x++)
                 {
-                    pixels[(4 * height * segment.start.y) + (4 * x + 0)] = colour[0];
-                    pixels[(4 * height * segment.start.y) + (4 * x + 1)] = colour[1];
-                    pixels[(4 * height * segment.start.y) + (4 * x + 2)] = colour[2];
-                    pixels[(4 * height * segment.start.y) + (4 * x + 3)] = colour[3];
+
+                    pixels[4 * (width * y + x) + 0] = colour[0];
+                    pixels[4 * (width * y + x) + 1] = colour[1];
+                    pixels[4 * (width * y + x) + 2] = colour[2];
+                    pixels[4 * (width * y + x) + 3] = colour[3];
                 }
             }
             else {
@@ -141,12 +148,33 @@ Ext.define('NU.controller.Vision', {
             //segment.start_x, segment.start_y
             //segment.end_x, segment.end_y
         }
-        //Draw circles for green horizon points
-        for (var i = 0; i < visualHorizon.length; i++){
-            pixels[(4 * height * visualHorizonPoints[i].y) + (4 * visualHorizonPoints[i].x + 0)] = 0;
-            pixels[(4 * height * visualHorizonPoints[i].y) + (4 * visualHorizonPoints[i].x + 1)] = 255; //Green
-            pixels[(4 * height * visualHorizonPoints[i].y) + (4 * visualHorizonPoints[i].x + 2)] = 0;
-            pixels[(4 * height * visualHorizonPoints[i].y) + (4 * visualHorizonPoints[i].x + 3)] = 255;
+
+        // Draw the visual horizon
+        for (var i = 0; i < visualHorizon.length; i++) {
+
+            var start = visualHorizon[i].x;
+            var end = visualHorizon[i + 1] === undefined ? width : visualHorizon[i + 1].x;
+
+            for(var x = start; x < end; x++) {
+
+                var y = Math.round(visualHorizon[i].y * x + visualHorizon[i].z);
+
+                pixels[4 * (width * y + x) + 0] = 0;
+                pixels[4 * (width * y + x) + 1] = 255;
+                pixels[4 * (width * y + x) + 2] = 0;
+                pixels[4 * (width * y + x) + 3] = 255;
+            }
+        }
+
+        // Draw the actual horizon
+        for (var x = 0; x < width; x++) {
+
+            var y = Math.round(horizon.x * x + horizon.y);
+
+            pixels[4 * (width * y + x) + 0] = 0;
+            pixels[4 * (width * y + x) + 1] = 0;
+            pixels[4 * (width * y + x) + 2] = 255;
+            pixels[4 * (width * y + x) + 3] = 255;
         }
 
         imageData.data = pixels;
