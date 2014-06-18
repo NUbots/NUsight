@@ -1,41 +1,16 @@
-/**
- * Module dependencies.
- */
-
-var express = require('express')
-	, routes = require('./routes')
-	, user = require('./routes/user')
-	, http = require('http')
-	, path = require('path')
-	, NUbugger = require('./NUbugger');
+var express = require('express');
+var http = require('http');
+var favicon = require('serve-favicon');
+var compression = require('compression');
+var NUbugger = require('./NUbugger');
 
 var app = express();
-var server = http.createServer(app);
+var server = http.Server(app);
 
-app.configure(function () {
-	
-	app.set('port', 9090);
-	//app.set('views', __dirname + '/views');
-	//app.set('view engine', 'jade');
-	app.use(express.favicon());
-	app.use(express.logger('dev'));
-    app.use(express.json());
-    app.use(express.urlencoded());
-	app.use(express.methodOverride());
-	app.use(app.router);
-	app.use(express.compress());
-	app.use(express.static(path.join(__dirname, 'public')));
-	
-});
-
-//app.configure('development', function () {
-//	
-//	app.use(express.errorHandler());
-//	
-//});
-
-//app.get('/', routes.index);
-//app.get('/users', user.list);
+app.set('port', 9090);
+app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(compression());
+app.use(express.static(__dirname + '/public'));
 
 server.listen(app.get('port'), function () {
 	
