@@ -9,7 +9,7 @@ if (typeof Uint8ClampedArray !== 'undefined') {
 
 Ext.Loader.setConfig({
     enabled : true,
-    //disableCaching : true, // For debug only
+    disableCaching : false,
     paths : {
         'Ext': 'extjs/src',
         'NU': './app'

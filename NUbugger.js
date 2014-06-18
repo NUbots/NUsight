@@ -43,7 +43,6 @@ function NUbugger (io) {
 		socket.on('message', function (robotIP, message) {
 			var robot = self.getRobot(robotIP);
 			if (robot !== null) {
-//				console.log('message to', robotIP, '-', message.length);
 				robot.send(message);
 			}
 		});
@@ -74,53 +73,6 @@ function NUbugger (io) {
 		self.onMessage(robotIP, message);
 
 	});
-
-	//var filename = 'c:/Users/1260/Dropbox/education/University/Courses/nubots/NUbugger/logs/6_robots_data.log';
-	/*var filename = 'c:/Users/1260/Dropbox/education/University/Courses/nubots/NUbugger/logs/test.log';
-	 var input = fs.createReadStream(filename);
-	 var remaining = '';
-	 var self = this;
-	 var lines = [];
-	 var index = 0;
-
-	 input.on('data', function(data) {
-	 remaining += data;
-	 var index = remaining.indexOf('\n');
-	 while (index > -1) {
-	 var line = remaining.substring(0, index);
-	 remaining = remaining.substring(index + 1);
-	 input.emit('line', line);
-	 index = remaining.indexOf('\n');
-	 }
-	 });
-
-	 input.on('end', function() {
-	 if (remaining.length > 0) {
-	 input.emit('line', line);
-	 }
-
-	 setInterval(function () {
-
-	 //console.log('message', '10.0.1.54', lines[index]);//, index, lines.length);
-
-	 self.emit('message', '10.0.1.54', lines[index]);
-
-	 index = (index + 1) % lines.length;
-
-	 }, 10);
-	 });
-
-	 input.on('line', function (line) {
-
-	 lines.push(line);
-
-	 });*/
-
-	/*while (true) {
-	 lines.forEach(function (line) {
-	 self.emit(line);
-	 })
-	 }*/
 
 }
 
@@ -202,33 +154,11 @@ NUbugger.prototype.onMessage = function (robotIP, message)
 
 	self = this;
 
-	//console.log(robotIP, message.length);
-	//var timestamp = Date.now();
-	var filename = "c:/Users/Brendan/Documents/data.log";
-
-	//fs.appendFile(filename, message.toString('base64') + "\n");
-
-	//console.log(robotIP, message);
-
 	self.clients.forEach(function (client) {
 
 		client.socket.emit('message', robotIP, message);
-		//client.sub.emit('message', robotIP, message);
 
 	});
-
-	//var timestamp = Date.now();
-	//var filename = "logs/log_" + timestamp + ".log";
-	//
-	// TODO: make it one callback!?
-	//
-	//self.robot.on("message", function (message) {
-	//
-	//count++;
-	////fs.appendFile(filename, message);
-	//sub.emit("message", message.toString('base64'));
-	//
-	//});
 
 };
 
