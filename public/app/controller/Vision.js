@@ -121,10 +121,11 @@ Ext.define('NU.controller.Vision', {
                 // vertical lines
                 for (var y = segment.start.y; y <= segment.end.y; y++)
                 {
+                    var subsample = (y - segment.start.y) % segment.subsample === 0 ? 1 : 0.5;
 
-                    pixels[4 * (width * y + x) + 0] = colour[0];
-                    pixels[4 * (width * y + x) + 1] = colour[1];
-                    pixels[4 * (width * y + x) + 2] = colour[2];
+                    pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
+                    pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
+                    pixels[4 * (width * y + x) + 2] = colour[2] * subsample;
                     pixels[4 * (width * y + x) + 3] = colour[3];
                 }
 
@@ -135,10 +136,11 @@ Ext.define('NU.controller.Vision', {
                 // horizontal lines
                 for (var x = segment.start.x; x <= segment.end.x; x++)
                 {
+                    var subsample = (x - segment.start.x) % segment.subsample === 0 ? 1 : 0.5;
 
-                    pixels[4 * (width * y + x) + 0] = colour[0];
-                    pixels[4 * (width * y + x) + 1] = colour[1];
-                    pixels[4 * (width * y + x) + 2] = colour[2];
+                    pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
+                    pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
+                    pixels[4 * (width * y + x) + 2] = colour[2] * subsample;
                     pixels[4 * (width * y + x) + 3] = colour[3];
                 }
             }
