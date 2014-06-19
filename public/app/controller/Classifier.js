@@ -18,6 +18,7 @@ Ext.define('NU.controller.Classifier', {
 		classifiedImageData: null,
 		mouseX: 0,
 		mouseY: 0,
+		bitsPerPixel: 4,
 		imageWidth: 320,
 		imageHeight: 240,
 		leftMouseDown: false,
@@ -718,7 +719,7 @@ Ext.define('NU.controller.Classifier', {
 		var classifiedCanvas = classifiedElCanvas.dom;
 		var ctx = classifiedCanvas.getContext('2d');
 		this.setClassifiedContext(ctx);
-		this.setClassifiedImageData(ctx.getImageData(0, 0, 320, 240));
+		this.setClassifiedImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
 
 		function clickBind(callback, preventDefault) {
 			return function (e, element) {
@@ -937,7 +938,7 @@ Ext.define('NU.controller.Classifier', {
 			var now = Date.now();
 			if (!this.getFrozen() && now - this.getLastDraw() >= 500) {
 				this.drawImage(image, function (ctx) {
-					this.setRawImageData(ctx.getImageData(0, 0, 320, 240));
+					this.setRawImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
 					this.updateClassifiedData();
 					this.renderImages();
 					this.setLastDraw(now);
@@ -1061,13 +1062,15 @@ Ext.define('NU.controller.Classifier', {
 		}
 		var ycbcr = this.getYCBCR(x, y);
 		colours.push(ycbcr);
+		var imageWidth = this.getImageWidth();
+		var imageHeight = this.getImageHeight();
 		while (queue.length > 0) {
 			var point = queue.shift();
 			for (var dy = -1; dy <= 1; dy++) {
 				for (var dx = -1; dx <= 1; dx++) {
 					var neighbourX = point[0] + dx;
 					var neighbourY = point[1] + dy;
-					if ((dy === 0 && dx === 0) || neighbourX < 0 || neighbourX >= 320 || neighbourY < 0 || neighbourY >= 240) {
+					if ((dy === 0 && dx === 0) || neighbourX < 0 || neighbourX >= imageWidth || neighbourY < 0 || neighbourY >= imageHeight) {
 						break;
 					}
 					// ycbcr = this.getYCBCR(point[0], point[1]);
@@ -1407,11 +1410,12 @@ Ext.define('NU.controller.Classifier', {
 		}
 	},
 	getPointRGBA: function (x, y, data) {
-		var offset = 4 * y * 320 + 4 * x;
+		var bitsPerPixel = this.getBitsPerPixel();
+		var offset = bitsPerPixel * (y * this.getImageWidth() + x);
 		if (data === undefined) {
 			data = this.getRawImageData().data;
 		}
-		return data.slice(offset, offset + 4);
+		return data.slice(offset, offset + bitsPerPixel);
 	},
 	addLookupColour: function (ycbcr, type, range) {
 		var lookup = this.getLookup();
@@ -1510,13 +1514,16 @@ Ext.define('NU.controller.Classifier', {
 		}
 	},
 	renderImageUnderlay: function (ctx, rawImageData) {
-		var data = ctx.getImageData(0, 0, 320, 240);
+		var imageWidth = this.getImageWidth();
+		var imageHeight = this.getImageHeight();
+		var bitsPerPixel = this.getBitsPerPixel();
+		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 		var rawData = rawImageData.data;
 		var rawOpacity = this.getRawUnderlayOpacity();
 		var classifiedOpacity = 1 - this.getRawUnderlayOpacity();
-		for (var y = 0; y < 240; y++) {
-			for (var x = 0; x < 320; x++) {
-				var offset = 4 * 320 * y + 4 * x;
+		for (var y = 0; y < imageHeight; y++) {
+			for (var x = 0; x < imageWidth; x++) {
+				var offset = bitsPerPixel * (imageWidth * y + x);
 				data.data[offset] = Math.round(data.data[offset] * classifiedOpacity + rawData[offset] * rawOpacity);
 				data.data[offset + 1] = Math.round(data.data[offset + 1] * classifiedOpacity + rawData[offset + 1] * rawOpacity);
 				data.data[offset + 2] = Math.round(data.data[offset + 2] * classifiedOpacity + rawData[offset + 2] * rawOpacity);
@@ -1605,13 +1612,16 @@ Ext.define('NU.controller.Classifier', {
 		}
 	},
 	renderMagicWandOverlay: function (ctx) {
-		var data = ctx.getImageData(0, 0, 320, 240);
+		var imageWidth = this.getImageWidth();
+		var imageHeight = this.getImageHeight();
+		var bitsPerPixel = this.getBitsPerPixel();
+		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 		var points = this.getMagicWandPoints();
 //		var colours = [];
 		points.forEach(function (point) {
 			var x = point[0];
 			var y = point[1];
-			var offset = 4 * 320 * y + 4 * x;
+			var offset = bitsPerPixel * (imageWidth * y + x);
 //			colours.push([
 //				data.data[offset + 0],
 //				data.data[offset + 1],
@@ -1647,7 +1657,11 @@ Ext.define('NU.controller.Classifier', {
 		ctx.putImageData(data, 0, 0);
 	},
 	renderZoomOverlay: function (ctx, imageData) {
-		var data = ctx.getImageData(0, 0, 320, 240);
+		var imageWidth = this.getImageWidth();
+		var imageHeight = this.getImageHeight();
+		var bitsPerPixel = this.getBitsPerPixel();
+
+		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 		var originalData = imageData.data;
 		var mouseX = this.getMouseX();
 		var mouseY = this.getMouseY();
@@ -1656,9 +1670,8 @@ Ext.define('NU.controller.Classifier', {
 		var height = zoom * 21; // should be divisible by zoom and odd
 		var minX = 0;
 		var minY = 0;
-		var maxX = 320;
-		var maxY = 240;
-		var pxSize = 4;
+		var maxX = imageWidth;
+		var maxY = imageHeight;
 
 		var row = -Math.floor(height / 2 / zoom);
 		var col = -Math.floor(width / 2 / zoom);
@@ -1669,13 +1682,13 @@ Ext.define('NU.controller.Classifier', {
 				// calculate the real coordinates
 				var realX = mouseX + col;
 				var realY = mouseY + row;
-				var realOffset = pxSize * maxX * realY + pxSize * realX;
+				var realOffset = bitsPerPixel * (maxX * realY + realX);
 
 				for (var zy = -zoomDiff; zy <= zoomDiff; zy++) {
 					for (var zx = -zoomDiff; zx <= zoomDiff; zx++) {
 						var zoomX = x + zx;
 						var zoomY = y + zy;
-						var zoomOffset = pxSize * maxX * zoomY + pxSize * zoomX;
+						var zoomOffset = bitsPerPixel * (maxX * zoomY + zoomX);
 						if (realX < minX || realX >= maxX || realY < minY || realY >= maxY) {
 							data.data[zoomOffset] = 0;
 							data.data[zoomOffset + 1] = 0;
@@ -1700,7 +1713,7 @@ Ext.define('NU.controller.Classifier', {
 		for (var y = maxY - height - 1; y < maxY; y++) {
 			for (var x = maxX - width - 1; x < maxX; x++) {
 				if (y === maxY - height - 1 || x === maxX - width - 1) {
-					var offset = pxSize * maxX * y + pxSize * x;
+					var offset = bitsPerPixel * maxX * y + bitsPerPixel * x;
 					data.data[offset] = Math.round(data.data[offset] * (1 - borderOpacity) + 255 * borderOpacity);
 					data.data[offset + 1] = Math.round(data.data[offset + 1] * (1 - borderOpacity) + 255 * borderOpacity);
 					data.data[offset + 2] = Math.round(data.data[offset + 2] * (1 - borderOpacity) + 255 * borderOpacity);
@@ -1716,7 +1729,7 @@ Ext.define('NU.controller.Classifier', {
 				if (zy !== 0 && zx !== 0) {
 					continue;
 				}
-				var offset = 4 * maxX * (zoomCenterY + zy) + 4 * (zoomCenterX + zx);
+				var offset = bitsPerPixel * (maxX * (zoomCenterY + zy) + (zoomCenterX + zx));
 				data.data[offset] = 255;
 				data.data[offset + 1] = 255;
 				data.data[offset + 2] = 255;
@@ -1730,15 +1743,17 @@ Ext.define('NU.controller.Classifier', {
 		this.refreshScatter();
 	},
 	generateClassifiedData: function () {
-		var rawData = this.getRawImageData();
+		var imageWidth = this.getImageWidth();
+		var imageHeight = this.getImageHeight();
+		var bitsPerPixel = this.getBitsPerPixel();
 
 		var classifiedCtx = this.getClassifiedContext();
-		var classifiedData = classifiedCtx.createImageData(320, 240);
+		var classifiedData = classifiedCtx.createImageData(imageWidth, imageHeight);
 
 		var lookup = this.getLookup();
-		for (var row = 0; row < 240; row++) {
-			for (var col = 0; col < 320; col++) {
-				var offset = 4 * row * 320 + 4 * col;
+		for (var row = 0; row < imageHeight; row++) {
+			for (var col = 0; col < imageWidth; col++) {
+				var offset = bitsPerPixel * (row * imageWidth + col);
 				var ycbcr = this.getYCBCR(col, row);
 				var index = this.getLUTIndex(ycbcr);
 				if (lookup[index] !== this.self.Target.Unclassified) {
@@ -1759,9 +1774,11 @@ Ext.define('NU.controller.Classifier', {
 	},
 	getYCBCR: function (x, y) {
 		var components = this.getRawImageComponents();
+		var imageWidth = this.getImageWidth();
+		var imageHeight = this.getImageHeight();
 
-		x = 320 - x - 1;
-		y = 240 - y - 1;
+		x = imageWidth - x - 1;
+		y = imageHeight - y - 1;
 
 		var l = components[0].lines[y][x];
 		// divide cb and cr by 2 as it's using YUV422 so there is half the cb/cr
@@ -1810,14 +1827,16 @@ Ext.define('NU.controller.Classifier', {
 		var imageObj = new JpegImage();
 		imageObj.parse(d2);
 		var ctx = me.getRawContext();
-		var data = ctx.getImageData(0, 0, 320, 240);
+		var imageWidth = this.getImageWidth();
+		var imageHeight = this.getImageHeight();
+		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 		imageObj.copyToImageData(data);
 		ctx.putImageData(data, 0, 0);
 		ctx.save();
 		ctx.scale(-1, -1);
-		ctx.drawImage(ctx.canvas, -320, -240, 320, 240);
+		ctx.drawImage(ctx.canvas, -imageWidth, -imageHeight, imageWidth, imageHeight);
 		ctx.restore();
-		data = ctx.getImageData(0, 0, 320, 240);
+		data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 		me.setRawImageData(data);
 		me.setRawImageComponents(imageObj.components);
 		me.renderImages();
@@ -1833,17 +1852,19 @@ Ext.define('NU.controller.Classifier', {
 //          me.renderImages();
 //      };
 		var me = this;
+		var imageWidth = this.getImageWidth();
+		var imageHeight = this.getImageHeight();
 		var imageObj = new JpegImage();
 		imageObj.onload = function () {
 			var ctx = me.getRawContext();
-			var data = ctx.getImageData(0, 0, 320, 240);
+			var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 			imageObj.copyToImageData(data);
 			ctx.putImageData(data, 0, 0);
 			ctx.save();
 			ctx.scale(-1, -1);
-			ctx.drawImage(ctx.canvas, -320, -240, 320, 240);
+			ctx.drawImage(ctx.canvas, -imageWidth, -imageHeight, imageWidth, imageHeight);
 			ctx.restore();
-			data = ctx.getImageData(0, 0, 320, 240);
+			data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 			me.setRawImageData(data);
 			me.setRawImageComponents(imageObj.components);
 			me.renderImages();
