@@ -33,14 +33,13 @@ Ext.define('NU.controller.NUClear', {
         this.callParent(arguments);
 
     },
-    onReactionStatistics: function (robotIP, api_message) {
+    onReactionStatistics: function (robotIP, reactionStatistics) {
 
         // TODO: remove
         if (robotIP !== this.robotIP) {
             return;
         }
 
-        var reactionStatistics = api_message.reactionStatistics;
         var reactionId = reactionStatistics.reactionId.toNumber();
 
         var now = Date.now();

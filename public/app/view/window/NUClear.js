@@ -39,7 +39,7 @@ Ext.define('NU.view.window.NUClear', {
                 }, {
                     xtype: 'treecolumn',
                     text: 'Reaction',
-                    width: 800,
+                    flex: 1,
                     dataIndex: 'name',
                     type: 'string'
                 }, {

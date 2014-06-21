@@ -53,13 +53,11 @@ Ext.define('NU.controller.Vision', {
         this.callParent(arguments);
 
     },
-    onVision: function (robotIP, api_message) {
+    onVision: function (robotIP, vision) {
 
         if (robotIP != this.robotIP) { // TODO: delete
             return;
         }
-
-        var vision = api_message.vision;
 
         if (this.displayImage && vision.image) {
             this.drawImage(vision.image);

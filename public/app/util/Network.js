@@ -31,20 +31,29 @@ Ext.define('NU.util.Network', {
 		window.API = this.builder.build("messages.support.nubugger.proto");
 		// cry :'(
 		window.API.Sensors = this.builder.build("messages.input.proto.Sensors");
+		window.API.Behaviour = this.builder.build("messages.behaviour.proto.Behaviour");
+		window.API.ActionStateChange = this.builder.build("messages.behaviour.proto.ActionStateChange");
+
+		var typeMap = {};
+		Ext.iterate(API.Message.Type, function (key, type) {
+			var eventName = key.toLowerCase();
+			typeMap[type] = eventName;
+		}, this);
+		this.typeMap = typeMap;
 
 		this.mon(this.getRobotsStore(), 'add', this.onAddRobot, this);
 		this.mon(this.getRobotsStore(), 'update', this.onUpdateRobot, this);
 		this.mon(this.getRobotsStore(), 'remove', this.onRemoveRobot, this);
 
-		var me = this;
+		/*var me = this;
 		requestAnimationFrame(function () {
 			me.onAnimationFrame();
-		});
+		});*/
 
 		return this.callParent(arguments);
 
 	},
-	onAnimationFrame: function () {
+	/*onAnimationFrame: function () {
 		var packet = this.getPacket();
 		var me = this;
 
@@ -53,28 +62,23 @@ Ext.define('NU.util.Network', {
 		requestAnimationFrame(function () {
 			me.onAnimationFrame();
 		});
-	},
+	},*/
 	processPacket: function (packet) {
 		if (packet !== null) {
-			try {
+//			try {
 				var api_message, eventName, robotIP;
 				robotIP = packet.robotIP;
 				api_message = API.Message.decode(packet.message);
-				eventName = "unknown";
 
-				Ext.iterate(API.Message.Type, function (key, type) {
-					if (type === api_message.type) {
-						eventName = key.toLowerCase();
-						return false;
-					}
-				}, this);
-
+				var eventName = this.typeMap[api_message.type];
+				var event = api_message[eventName];
+				var time = new Date(api_message.getUtcTimestamp().toInt());
 				//console.log(robotIP, eventName);
-
-				this.fireEvent(eventName, robotIP, api_message);
-			} catch (e) {
-				console.log(e);
-			}
+				this.fireEvent(eventName, robotIP, event, time);
+//			} catch (e) {
+//				console.log(e.message);
+//				console.log(e.stack);
+//			}
 		}
 		this.setPacket(null);
 	},
@@ -128,11 +132,7 @@ Ext.define('NU.util.Network', {
 			console.log('dropped');
 		}*/
 
-		if (!this.getFilter()) {
-			this.processPacket(packet);
-		} else {
-			this.setPacket(packet);
-		}
+		this.processPacket(packet);
 	},
 	send: function (robotIP, message) {
 		this.getSocket().emit('message', robotIP, message.encode().toArrayBuffer());

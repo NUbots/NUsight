@@ -909,14 +909,14 @@ Ext.define('NU.controller.Classifier', {
 			}
 		}
 	},
-	onLookUpTable: function (robotIP, api_message) {
+	onLookUpTable: function (robotIP, lookuptable) {
 
 		// TODO: remove
 		if (robotIP !== this.robotIP) {
 			return;
 		}
 
-		var table = api_message.getLookupTable().getTable();
+		var table = lookuptable.getTable();
 
 		// TODO: validate?
 		var lut = new Uint8ClampedArray(table.toArrayBuffer());
@@ -924,14 +924,13 @@ Ext.define('NU.controller.Classifier', {
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
-	onVision: function (robotIP, api_message) {
+	onVision: function (robotIP, api_vision) {
 
 		// TODO: remove
 		if (robotIP !== this.robotIP) {
 			return;
 		}
 
-		var api_vision = api_message.vision;
 		var image = api_vision.image;
 
 		if (image) {
