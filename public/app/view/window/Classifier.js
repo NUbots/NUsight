@@ -118,13 +118,12 @@ Ext.define('NU.view.window.Classifier', {
 				},
 				items: [{
 					// raw image
-					style: {
-						marginBottom: '10px'
-					},
 					items: [{
 						style: {
-							border: '5px solid #000',
-							borderRadius: '5px'
+							display: 'block',
+							border: '2px solid #000',
+							borderRadius: '2px',
+							marginBottom: '3px'
 						},
 						items: {
 							itemId: 'rawImage',
@@ -153,8 +152,9 @@ Ext.define('NU.view.window.Classifier', {
 					// classified image
 					items: [{
 						style: {
-							border: '5px solid #000',
-							borderRadius: '5px'
+							display: 'block',
+							border: '2px solid #000',
+							borderRadius: '2px'
 						},
 						items: {
 							itemId: 'classifiedImage',
@@ -179,7 +179,9 @@ Ext.define('NU.view.window.Classifier', {
 						columns: 2
 					},
 					items: [{
-						layout: 'vbox',
+						layout: {
+							type: 'vbox'
+						},
 						items: [{
 							itemId: 'rawValue',
 							width: 320,
@@ -191,7 +193,7 @@ Ext.define('NU.view.window.Classifier', {
 						}, {
 							itemId: 'snapshot',
 							xtype: 'checkbox',
-							fieldLabel: 'Freeze',
+							fieldLabel: 'Freeze'
 						}, {
 							itemId: 'rangeValue',
 							xtype: 'numberfield',
@@ -214,6 +216,10 @@ Ext.define('NU.view.window.Classifier', {
 							text: 'Convex Hull'
 						}*/]
 					}, {
+						layout: {
+							type: 'vbox',
+							align: 'top'
+						},
 						items: [{
 							itemId: 'classifiedValue',
 							width: 320,
