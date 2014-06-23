@@ -5,6 +5,7 @@ Ext.define('NU.Application', {
         'NU.store.Robots',
         'NU.store.Streams',
         'NU.store.ReactionStatisticsTree',
+		'NU.store.ActionStateChange'
     ],
     init: function () {
         window._NU = this;
@@ -17,7 +18,9 @@ Ext.define('NU.Application', {
             robotsStore: 'NU.store.Robots',
             reactionStatisticsTreeStore: 'NU.store.ReactionStatisticsTree',
             classifierTargetStore: 'NU.store.classifier.Target',
-            classifierSelectionToolStore: 'NU.store.classifier.SelectionTool'
+            classifierSelectionToolStore: 'NU.store.classifier.SelectionTool',
+			actionStateChangeStore: 'NU.store.ActionStateChange',
+			registerActionTreeStore: 'NU.store.RegisterActionTree'
         });
 
         Ext.QuickTips.init();

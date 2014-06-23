@@ -64,7 +64,7 @@ Ext.define('NU.util.Network', {
 		});
 	},*/
 	processPacket: function (packet) {
-		if (packet !== null) {
+//		if (packet !== null) {
 //			try {
 				var api_message, eventName, robotIP;
 				robotIP = packet.robotIP;
@@ -72,15 +72,15 @@ Ext.define('NU.util.Network', {
 
 				var eventName = this.typeMap[api_message.type];
 				var event = api_message[eventName];
-				var time = new Date(api_message.getUtcTimestamp().toInt());
+				var time = new Date(api_message.getUtcTimestamp().toNumber());
 				//console.log(robotIP, eventName);
 				this.fireEvent(eventName, robotIP, event, time);
 //			} catch (e) {
 //				console.log(e.message);
 //				console.log(e.stack);
 //			}
-		}
-		this.setPacket(null);
+//		}
+//		this.setPacket(null);
 	},
 	setupSocket: function () {
 
