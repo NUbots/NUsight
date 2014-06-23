@@ -37,6 +37,13 @@ Ext.define('NU.controller.Toolbar', {
                 });
             }
         },
+		'add_behaviour_display': {
+			click: function () {
+				Ext.create('NU.view.window.Behaviour', {
+					constrainTo: this.getDisplay()
+				});
+			}
+		},
 		'visualise': {
 			click: function () {
 				// calculations

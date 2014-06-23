@@ -50,7 +50,7 @@ Ext.define('NU.controller.Vision', {
         this.callParent(arguments);
 
     },
-    onImage: function (robotIP, message) {
+    onImage: function (robotIP, image) {
 
         if (robotIP != this.robotIP || !this.displayImage) {
             return;
@@ -60,7 +60,7 @@ Ext.define('NU.controller.Vision', {
         // this.drawImageURL(image);
 
         // 2nd implementation - potentially faster
-        this.drawImageB64(message.image);
+        this.drawImageB64(image);
     },
     drawImageURL: function (image) {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});

@@ -2,7 +2,7 @@ var express = require('express');
 var http = require('http');
 var favicon = require('serve-favicon');
 var compression = require('compression');
-var NUbugger = require('./NUbugger');
+var NUbugger = require('./lib/NUbugger');
 
 var app = express();
 var server = http.Server(app);
