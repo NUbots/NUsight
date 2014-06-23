@@ -93,8 +93,11 @@ Ext.define('NU.controller.Vision', {
             return;
         }
 
-        var height = 240;
+        //var width = 320;
+        //var height = 240;
+
         var width = 320;
+        var height = 240;
 
         var segments = message.getClassifiedImage().segment;
         var visualHorizon = message.getClassifiedImage().getVisualHorizon();
@@ -121,7 +124,7 @@ Ext.define('NU.controller.Vision', {
                 // vertical lines
                 for (var y = segment.start.y; y <= segment.end.y; y++)
                 {
-                    var subsample = (y - segment.start.y) % segment.subsample === 0 ? 1 : 0.5;
+                    var subsample = (y - segment.start.y) % segment.subsample === 0 ? 1 : 0.7;
 
                     pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
                     pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
@@ -136,7 +139,7 @@ Ext.define('NU.controller.Vision', {
                 // horizontal lines
                 for (var x = segment.start.x; x <= segment.end.x; x++)
                 {
-                    var subsample = (x - segment.start.x) % segment.subsample === 0 ? 1 : 0.5;
+                    var subsample = (x - segment.start.x) % segment.subsample === 0 ? 1 : 0.7;
 
                     pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
                     pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
@@ -285,7 +288,7 @@ Ext.define('NU.controller.Vision', {
         switch (colourType)
         {
             case 0: // Unknown/Unclassified
-                colour = [0,0,0,255];
+                colour = [30,30,30,255];
                 break;
             case 1: // Field
                 colour = [0,255,0,255];
