@@ -198,25 +198,23 @@ Ext.define('NU.controller.Field', {
 		this.robots.push(robot);
 
 	},
-	onSensorData: function (robotIP, api_message) {
+	onSensorData: function (robotIP, api_sensor_data) {
 
 		var robot = this.getRobot(robotIP);
 		if (robot == null) {
 			// TODO: console.log('error', robotIP);
 			return;
 		}
-		var api_sensor_data = api_message.sensor_data;
 		robot.onSensorData(api_sensor_data);
 
 	},
-	onLocalisation: function (robotIP, api_message) {
+	onLocalisation: function (robotIP, api_localisation) {
 
 		var robot = this.getRobot(robotIP);
 		if (robot == null) {
 			console.log('error', robotIP);
 			return;
 		}
-		var api_localisation = api_message.localisation;
 		robot.onLocalisation(api_localisation);
 
 	},

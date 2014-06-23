@@ -137,7 +137,7 @@ Ext.define('NU.controller.Chart', {
         api_motor_data[ServoID.HEAD_PAN].present_position
         api_motor_data[ServoID.HEAD_TILT].present_position*/
     },
-    onDataPoint: function (robotIP, api_message) {
+    onDataPoint: function (robotIP, dataPoint) {
 
         // TODO: remove
         if (robotIP !== this.getRobotIP()) {
@@ -145,7 +145,6 @@ Ext.define('NU.controller.Chart', {
         }
 
         //console.log(api_message);
-        var dataPoint = api_message.dataPoint;
         var label = dataPoint.label;
         var values = dataPoint.value;
 

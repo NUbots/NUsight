@@ -14,24 +14,14 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  */
-
 /**
  * @license Long.js (c) 2013 Daniel Wirtz <dcode@dcode.io>
  * Released under the Apache License, Version 2.0
+ * Derived from goog.math.Long from the Closure Library
  * see: https://github.com/dcodeIO/Long.js for details
- * 
- * Long.js is based on goog.math.Long from the Closure Library.
- * Copyright 2009 The Closure Library Authors. All Rights Reserved.
- * Released under the Apache License, Version 2.0
- * see: https://code.google.com/p/closure-library/ for details
- */
-
-/**
- * Defines a Long class for representing a 64-bit two's-complement
- * integer value, which faithfully simulates the behavior of a Java "long". This
- * implementation is derived from LongLib in GWT.
  */
 (function(global) {
+    "use strict";
 
     /**
      * Constructs a 64-bit two's-complement integer, given its low and high 32-bit
@@ -54,12 +44,18 @@
      * 
      * @exports Long
      * @class A Long class for representing a 64-bit two's-complement integer value.
-     * @param {number} low The low (signed) 32 bits of the long.
-     * @param {number} high The high (signed) 32 bits of the long.
+     * @param {number|!{low: number, high: number, unsigned: boolean}} low The low (signed) 32 bits of the long.
+     *  Optionally accepts a Long-like object as the first parameter.
+     * @param {number=} high The high (signed) 32 bits of the long.
      * @param {boolean=} unsigned Whether unsigned or not. Defaults to `false` (signed).
      * @constructor
      */
     var Long = function(low, high, unsigned) {
+        if (low && typeof low === 'object') {
+            high = low.high;
+            unsigned = low.unsigned;
+            low = low.low;
+        }
         
         /**
          * The low 32 bits as a signed value.
@@ -237,6 +233,7 @@
                 result = result.add(Long.fromNumber(value));
             }
         }
+        result.unsigned = unsigned;
         return result;
     };
 
@@ -296,7 +293,19 @@
      * @type {!Long}
      * @expose
      */
+    Long.UZERO = Long.fromInt(0, true);
+
+    /**
+     * @type {!Long}
+     * @expose
+     */
     Long.ONE = Long.fromInt(1);
+
+    /**
+     * @type {!Long}
+     * @expose
+     */
+    Long.UONE = Long.fromInt(1, true);
 
     /**
      * @type {!Long}
@@ -711,27 +720,28 @@
         if (other.isZero()) {
             throw(new Error('division by zero'));
         } else if (this.isZero()) {
-            return Long.ZERO;
+            return this.unsigned ? Long.UZERO : Long.ZERO;
         }
+        var approx, rem, res;
         if (this.equals(Long.MIN_SIGNED_VALUE)) {
             if (other.equals(Long.ONE) || other.equals(Long.NEG_ONE)) {
-                return min;  // recall that -MIN_VALUE == MIN_VALUE
-            } else if (other.equals(Long.MIN_VALUE)) {
+                return Long.MIN_SIGNED_VALUE;  // recall that -MIN_VALUE == MIN_VALUE
+            } else if (other.equals(Long.MIN_SIGNED_VALUE)) {
                 return Long.ONE;
             } else {
                 // At this point, we have |other| >= 2, so |this/other| < |MIN_VALUE|.
                 var halfThis = this.shiftRight(1);
-                var approx = halfThis.div(other).shiftLeft(1);
+                approx = halfThis.div(other).shiftLeft(1);
                 if (approx.equals(Long.ZERO)) {
                     return other.isNegative() ? Long.ONE : Long.NEG_ONE;
                 } else {
-                    var rem = this.subtract(other.multiply(approx));
-                    var result = approx.add(rem.div(other));
-                    return result;
+                    rem = this.subtract(other.multiply(approx));
+                    res = approx.add(rem.div(other));
+                    return res;
                 }
             }
-        } else if (other.equals(Long.MIN_VALUE)) {
-            return Long.ZERO;
+        } else if (other.equals(Long.MIN_SIGNED_VALUE)) {
+            return this.unsigned ? Long.UZERO : Long.ZERO;
         }
         if (this.isNegative()) {
             if (other.isNegative()) {
@@ -742,18 +752,18 @@
         } else if (other.isNegative()) {
             return this.div(other.negate()).negate();
         }
-
+        
         // Repeat the following until the remainder is less than other:  find a
         // floating-point that approximates remainder / other *from below*, add this
         // into the result, and subtract it from the remainder.  It is critical that
         // the approximate value is less than or equal to the real value so that the
         // remainder never becomes negative.
-        var res = Long.ZERO;
-        var rem = this;
+        res = Long.ZERO;
+        rem = this;
         while (rem.greaterThanOrEqual(other)) {
             // Approximate the result of division. This may be a little greater or
             // smaller than the actual value.
-            var approx = Math.max(1, Math.floor(rem.toNumber() / other.toNumber()));
+            approx = Math.max(1, Math.floor(rem.toNumber() / other.toNumber()));
 
             // We will tweak the approximate result by changing it in the 48-th digit or
             // the smallest non-fractional digit, whichever is larger.

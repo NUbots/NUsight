@@ -7,6 +7,16 @@ a {
   color: #00B7FF;
 }
 
+.action-start {
+	background-color: #90d32b !important;
+	border: 1px solid #fff !important;
+}
+
+.action-kill {
+	background-color: #b82921 !important;
+	border: 1px solid #fff !important;
+}
+
 .icon-toolbar-point { background-image: url('../images/toolbar/point.png'); }
 .icon-toolbar-magic-wand { background-image: url('../images/toolbar/magic_wand.png'); }
 .icon-toolbar-polygon { background-image: url('../images/toolbar/polygon2.png'); }

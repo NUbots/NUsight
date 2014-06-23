@@ -17,6 +17,9 @@ Ext.define('NU.view.Toolbar', {
     }, {
         text: 'Add Classifier Display',
         itemId: 'add_classifier_display'
+    }, {
+        text: 'Add Behaviour Display',
+        itemId: 'add_behaviour_display'
     },'->', {
         text: 'Visualise',
         itemId: 'visualise'
