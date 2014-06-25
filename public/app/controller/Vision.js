@@ -87,7 +87,7 @@ Ext.define('NU.controller.Vision', {
 			ctx.restore();
         };
     },
-    onClassifiedImage: function (robotIP, message) {
+    onClassifiedImage: function (robotIP, image) {
 
         if(robotIP != this.robotIP || !this.displayClassifiedImage) {
             return;
@@ -96,12 +96,12 @@ Ext.define('NU.controller.Vision', {
         //var width = 320;
         //var height = 240;
 
-        var width = 320;
-        var height = 240;
+        var width = 640;
+        var height = 480;
 
-        var segments = message.getClassifiedImage().segment;
-        var visualHorizon = message.getClassifiedImage().getVisualHorizon();
-        var horizon = message.getClassifiedImage().getHorizon();
+        var segments = image.getSegment();
+        var visualHorizon = image.getVisualHorizon();
+        var horizon = image.getHorizon();
         var imageData = this.context.createImageData(width, height);
         var pixels = imageData.data;
 

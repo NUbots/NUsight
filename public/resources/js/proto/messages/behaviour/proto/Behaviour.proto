@@ -20,36 +20,36 @@
 package messages.behaviour.proto;
 
 message Behaviour {
-	enum Type {
-		ACTION_REGISTER = 1;
-		ACTION_STATE = 2;
-	}
+    enum Type {
+        ACTION_REGISTER = 1;
+        ACTION_STATE = 2;
+    }
 
-	required Type type = 1;
+    required Type type = 1;
 
-	optional ActionRegister action_register = 2;
-	optional ActionStateChange action_state_change = 3;
+    optional ActionRegister action_register = 2;
+    optional ActionStateChange action_state_change = 3;
 }
 
 message ActionRegister {
-	required uint32 id = 1;
-	required string name = 2;
-	repeated LimbSet limb_set = 3;
+    required uint32 id = 1;
+    required string name = 2;
+    repeated LimbSet limb_set = 3;
 }
 
 message ActionStateChange {
 
-	enum State {
-		START = 1;
-		KILL = 2;
-	}
+    enum State {
+        START = 1;
+        KILL = 2;
+    }
 
-	required State state = 1;
-	required string name = 2;
-	repeated uint32 limbs = 3;
+    required State state = 1; 
+    required string name = 2;
+    repeated uint32 limbs = 3;
 }
 
 message LimbSet {
-	required float priority = 1;
-	repeated uint32 limbs = 2;
+    required float priority = 1;
+    repeated uint32 limbs = 2;
 }
