@@ -868,7 +868,7 @@ Ext.define('NU.controller.Classifier', {
 		message.setUtcTimestamp(Date.now() / 1000);
 		message.setType(API.Message.Type.LOOKUP_TABLE);
 		var lookupTable = new API.Vision.LookUpTable();
-		lookupTable.setTable(this.getLookup());
+		lookupTable.setTable(dcodeIO.ByteBuffer.wrap(this.getLookup().buffer));
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
