@@ -93,11 +93,10 @@ Ext.define('NU.controller.Vision', {
             return;
         }
 
-        //var width = 320;
-        //var height = 240;
-
-        var width = 640;
-        var height = 480;
+        var width = 320;
+        var height = 240;
+        //var width = 640;
+        //var height = 480;
 
         var segments = image.getSegment();
         var visualHorizon = image.getVisualHorizon();
@@ -155,14 +154,14 @@ Ext.define('NU.controller.Vision', {
         }
 
         // Draw the visual horizon
-        for (var i = 0; i < visualHorizon.length; i++) {
+        for (var i = 0; i < visualHorizon.length - 1; i++) {
 
-            var start = visualHorizon[i].x;
-            var end = visualHorizon[i + 1] === undefined ? width : visualHorizon[i + 1].x;
+            var p1 = visualHorizon[i];
+            var p2 = visualHorizon[i + 1];
 
-            for(var x = start; x < end; x++) {
+            for(var x = p1.x; x <= p2.x; x++) {
 
-                var y = Math.round(visualHorizon[i].y * x + visualHorizon[i].z);
+                var y = Math.round(((p2.y - p1.y)/(p2.x - p1.x)) * (x - p1.x) + p1.y);
 
                 pixels[4 * (width * y + x) + 0] = 0;
                 pixels[4 * (width * y + x) + 1] = 255;
@@ -174,7 +173,7 @@ Ext.define('NU.controller.Vision', {
         // Draw the actual horizon
         for (var x = 0; x < width; x++) {
 
-            var y = Math.round(horizon.x * x + horizon.y);
+            var y = Math.round(x * horizon.gradient + horizon.intercept);
 
             pixels[4 * (width * y + x) + 0] = 0;
             pixels[4 * (width * y + x) + 1] = 0;

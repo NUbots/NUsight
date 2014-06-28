@@ -13,12 +13,12 @@ Ext.define('NU.view.window.Vision', {
     items: [{
         xtype: 'component',
         region: 'center',
-        width: 640,
-        height: 480,
+        width: 320,
+        height: 240,
         autoEl: {
             tag: 'canvas',
-            width: 640,
-            height: 480
+            width: 320,
+            height: 240
         },
         style: {
             backgroundColor: '#000',
