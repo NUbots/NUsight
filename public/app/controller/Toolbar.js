@@ -118,8 +118,8 @@ Ext.define('NU.controller.Toolbar', {
                     autoShow: true,
                     modal: true,
                     title: 'Network Settings',
-                    width: 400,
-                    height: 400,
+                    width: 500,
+                    height: 500,
 					layout: 'fit',
                     items: [{
                         xtype: 'networksettings'
