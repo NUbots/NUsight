@@ -14,7 +14,7 @@ Ext.define('NU.view.robot.List', {
         editor: 'textfield'
     }, {
         header: 'IP Address',
-        width: 170,
+        flex: 1,
         dataIndex: 'ipAddress',
         editor: 'textfield'
     }],
