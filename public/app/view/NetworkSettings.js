@@ -1,6 +1,7 @@
 Ext.define('NU.view.NetworkSettings', {
 	extend: 'Ext.tab.Panel',
 	requires: [
+		'NU.view.robot.List',
 		'Ext.grid.Panel',
 		'Ext.grid.column.CheckColumn'
 	],
@@ -10,20 +11,23 @@ Ext.define('NU.view.NetworkSettings', {
 	config: {
 		reactionHandlersStore: null
 	},
-	tbar: [{
-		xtype: 'checkbox',
-		fieldLabel: 'Manage Automatically',
-		labelWidth: 150,
-		checked: true
-	}],
 	initComponent: function () {
 
 		Ext.apply(this, {
 			items: [{
+				title: 'Robots',
+				xtype: 'robotlist'
+			}, {
 				title: 'Reactions',
 				xtype: 'gridpanel',
 				itemId: 'grid',
 				store: this.getReactionHandlersStore(),
+				tbar: [{
+					xtype: 'checkbox',
+					fieldLabel: 'Manage Automatically',
+					labelWidth: 150,
+					checked: true
+				}],
 				columns: [{
 					header: 'Name',
 					width: 170,

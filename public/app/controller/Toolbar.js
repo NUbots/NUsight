@@ -1,7 +1,6 @@
 Ext.define('NU.controller.Toolbar', {
     extend: 'Deft.mvc.ViewController',
     requires: [
-		'NU.view.robot.List',
 		'NU.view.NetworkSettings'
 	],
     control: {
@@ -94,21 +93,6 @@ Ext.define('NU.controller.Toolbar', {
 			click: function () {
 				Ext.WindowManager.each(function (window) {
 					window.close();
-				});
-			}
-		},
-		'list_robots': {
-			click: function () {
-				Ext.create('Ext.Window', {
-					autoShow: true,
-					modal: true,
-					title: 'Robot List',
-					width: 400,
-					height: 400,
-					layout: 'fit',
-					items: [{
-						xtype: 'robotlist'
-					}]
 				});
 			}
 		},
