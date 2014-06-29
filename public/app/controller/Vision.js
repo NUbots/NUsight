@@ -57,7 +57,7 @@ Ext.define('NU.controller.Vision', {
         }
 
         // 1st implementation - potentially slower
-        // this.drawImageURL(image);
+//        this.drawImageURL(image);
 
         // 2nd implementation - potentially faster
         this.drawImageB64(image);
@@ -74,8 +74,8 @@ Ext.define('NU.controller.Vision', {
         };
     },
     drawImageB64: function (image) {
-        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
-        var uri = 'data:image/jpeg;base64,' + btoa(data);
+//        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
+        var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
         var imageObj = new Image();
         var ctx = this.context;
         imageObj.src = uri;
@@ -87,6 +87,16 @@ Ext.define('NU.controller.Vision', {
 			ctx.restore();
         };
     },
+	arrayBufferToBase64: function (buffer) {
+		// from http://stackoverflow.com/a/9458996/868679
+		var binary = '';
+		var bytes = new Uint8Array(buffer);
+		var len = bytes.byteLength;
+		for (var i = 0; i < len; i++) {
+			binary += String.fromCharCode(bytes[i]);
+		}
+		return window.btoa(binary);
+	},
     onClassifiedImage: function (robotIP, image) {
 
         if(robotIP != this.robotIP || !this.displayClassifiedImage) {
