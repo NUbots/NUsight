@@ -45,7 +45,7 @@ Ext.define('NU.controller.Vision', {
 
         NU.util.Network.on('image', Ext.bind(this.onImage, this));
         NU.util.Network.on('classified_image', Ext.bind(this.onClassifiedImage, this));
-        NU.util.Network.on('vision_objects', Ext.bind(this.onVisionObjects, this));
+        NU.util.Network.on('vision_object', Ext.bind(this.onVisionObjects, this));
 
         this.callParent(arguments);
 
@@ -207,37 +207,17 @@ Ext.define('NU.controller.Vision', {
         var context = this.getContext();
 
         for (var i = 0; i < vision_objects.length; i++) {
-            var obj = vision_objects[i];    
-            switch (obj.shape_type){
-                case 1://VisionFieldObject.ShapeType.CIRCLE):
-                    context.beginPath();
-
-                    context.shadowColor = 'black';
-                    context.shadowBlur = 5;
-                    context.shadowOffsetX = 0;
-                    context.shadowOffsetY = 0;
-
-                    context.arc(obj.screen_x, obj.screen_y, obj.radius, 0, Math.PI*2, true);
-                    context.closePath();
-                    //context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
-                    //context.fill();
-                    context.strokeStyle = "rgba(255, 255, 255, 1)";
-                    context.lineWidth = 2;
-                    context.lineWidth = 2;
-                    context.stroke();
-
-                    var position = obj.measured_relative_position;
-                    break;
-
-                case 2://VisionFieldObject.ShapeType.QUAD):
+            var obj = vision_objects[i];
+            switch (obj.type) {
+                case 0: // Goal
 
                     context.beginPath();
 
-					var points = obj.points;
+                    var points = obj.points;
                     context.moveTo(points[0], points[1]);
                     for (var i = 2; i < points.length; i += 2) {
-						var x = points[i];
-						var y = points[i + 1];
+                        var x = points[i];
+                        var y = points[i + 1];
                         context.lineTo(x, y);
                     }
                     context.closePath();
@@ -257,32 +237,24 @@ Ext.define('NU.controller.Vision', {
                     context.stroke();
                     break;
 
-                case 4://VisionFieldObject.ShapeType.UNKNOWN):
-
-                    var topLeftX = obj.screen_x - (obj.width / 2);
-                    var topLeftY = obj.screen_y - obj.height; // TODO: waiting for shannon to fix height on obstacles
+                case 1: // Ball
 
                     context.beginPath();
-
-                    context.moveTo(topLeftX, topLeftY);
-                    context.lineTo(topLeftX + obj.width, topLeftY);
-                    context.lineTo(topLeftX + obj.width, topLeftY + obj.height);
-                    context.lineTo(topLeftX, topLeftY + obj.height);
-                    context.closePath();
 
                     context.shadowColor = 'black';
                     context.shadowBlur = 5;
                     context.shadowOffsetX = 0;
                     context.shadowOffsetY = 0;
 
-                    context.fillStyle = "rgba(255, 255, 255, 0.2)";
-                    context.fill();
-
-                    context.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                    context.arc(obj.ball.circle.centre.x, obj.ball.circle.centre.y, obj.ball.circle.radius, 0, Math.PI*2, true);
+                    context.closePath();
+                    //context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
+                    //context.fill();
+                    context.strokeStyle = "rgba(255, 255, 255, 1)";
                     context.lineWidth = 2;
                     context.lineWidth = 2;
-
                     context.stroke();
+
                     break;
                 
             }
