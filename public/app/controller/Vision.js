@@ -69,7 +69,7 @@ Ext.define('NU.controller.Vision', {
         var ctx = this.context;
         imageObj.src = url;
         imageObj.onload = function () {
-            ctx.drawImage(imageObj, 0, 0, image.width, image.height);
+            ctx.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
             URL.revokeObjectURL(url);
         };
     },
@@ -83,7 +83,7 @@ Ext.define('NU.controller.Vision', {
 			// flip image vertically
 			ctx.save();
 			ctx.scale(-1, -1);
-			ctx.drawImage(imageObj, -image.width, -image.height, image.width, image.height);
+			ctx.drawImage(imageObj, -image.dimensions.x, -image.dimensions.y, image.dimensions.x, image.dimensions.y);
 			ctx.restore();
         };
     },
