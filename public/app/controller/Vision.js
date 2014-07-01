@@ -213,13 +213,12 @@ Ext.define('NU.controller.Vision', {
 
                     context.beginPath();
 
-                    var points = obj.points;
-                    context.moveTo(points[0], points[1]);
-                    for (var i = 2; i < points.length; i += 2) {
-                        var x = points[i];
-                        var y = points[i + 1];
-                        context.lineTo(x, y);
-                    }
+                    var quad = obj.goal.quad;
+                    context.moveTo(quad.tl.x, quad.tl.y);
+                    context.lineTo(quad.tr.x, quad.tr.y);
+                    context.lineTo(quad.br.x, quad.br.y);
+                    context.lineTo(quad.bl.x, quad.bl.y);
+                    context.lineTo(quad.tl.x, quad.tl.y);
                     context.closePath();
 
                     context.shadowColor = 'black';
