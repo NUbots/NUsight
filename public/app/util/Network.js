@@ -3,8 +3,7 @@ Ext.define('NU.util.Network', {
 	config: {
 		socket: null,
 		robotsStore: null,
-		packet: null,
-		filter: true
+		cache: null
 	},
 	inject: [
 		'robotsStore'
@@ -13,6 +12,8 @@ Ext.define('NU.util.Network', {
 	constructor: function () {
 
 		this.initConfig();
+
+		this.setCache([]);
 
 		this.addEvents(
 			'robot_ip',
@@ -31,6 +32,7 @@ Ext.define('NU.util.Network', {
 		window.API = this.builder.build("messages.support.nubugger.proto");
 		// cry :'(
 		window.API.Sensors = this.builder.build("messages.input.proto.Sensors");
+        window.API.Vision = this.builder.build("messages.vision.proto");
 		window.API.Behaviour = this.builder.build("messages.behaviour.proto.Behaviour");
 		window.API.ActionStateChange = this.builder.build("messages.behaviour.proto.ActionStateChange");
 
@@ -45,42 +47,44 @@ Ext.define('NU.util.Network', {
 		this.mon(this.getRobotsStore(), 'update', this.onUpdateRobot, this);
 		this.mon(this.getRobotsStore(), 'remove', this.onRemoveRobot, this);
 
-		/*var me = this;
+		var me = this;
 		requestAnimationFrame(function () {
 			me.onAnimationFrame();
-		});*/
+		});
 
 		return this.callParent(arguments);
 
 	},
-	/*onAnimationFrame: function () {
-		var packet = this.getPacket();
+	onAnimationFrame: function () {
 		var me = this;
 
-		this.processPacket(packet);
+		var cache = this.getCache();
+		Ext.Object.each(cache, function (hash, event) {
+			var api_message = API.Message.decode(event.message);
+			var api_event = api_message[event.name];
+			var time = new Date(api_message.getUtcTimestamp().toNumber());
+			this.fireEvent(event.name, event.robotIP, api_event, time);
+			delete cache[hash];
+		}, this);
 
 		requestAnimationFrame(function () {
 			me.onAnimationFrame();
 		});
-	},*/
+	},
 	processPacket: function (packet) {
-//		if (packet !== null) {
-//			try {
-				var api_message, eventName, robotIP;
-				robotIP = packet.robotIP;
-				api_message = API.Message.decode(packet.message);
+		var message, eventName, robotIP, event, cache, hash;
+		robotIP = packet.robotIP;
+		message = new Uint8ClampedArray(packet.message);
+		eventName = this.typeMap[message[0]];
 
-				var eventName = this.typeMap[api_message.type];
-				var event = api_message[eventName];
-				var time = new Date(api_message.getUtcTimestamp().toNumber());
-				//console.log(robotIP, eventName);
-				this.fireEvent(eventName, robotIP, event, time);
-//			} catch (e) {
-//				console.log(e.message);
-//				console.log(e.stack);
-//			}
-//		}
-//		this.setPacket(null);
+		cache = this.getCache();
+		hash = eventName + ':' + robotIP;
+		event = {
+			name: eventName,
+			robotIP: robotIP,
+			message: packet.message.slice(1)
+		};
+		cache[hash] = event;
 	},
 	setupSocket: function () {
 
@@ -127,10 +131,6 @@ Ext.define('NU.util.Network', {
 			robotIP: robotIP,
 			message: message
 		};
-
-		/*if (this.getPacket() === null) {
-			console.log('dropped');
-		}*/
 
 		this.processPacket(packet);
 	},

@@ -17,33 +17,17 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-package messages.localisation.proto;
+package messages.support.nuclear.proto;
 
-message Model {
-    optional uint32 model_id = 1;
-
-    optional float wm_x = 2;
-    optional float wm_y = 3;
-
-    optional float sd_x = 4;
-    optional float sd_y = 5;
-
-    optional float sr_xx = 6;
-    optional float sr_xy = 7;
-    optional float sr_yy = 8;
-
-    optional float heading = 9;
-    optional float sd_heading = 10;
-
-    optional bool lost = 11;
-}
-
-message LocalisationFieldObject {
+message ReactionStatistics {
     optional string name = 1;
-
-    repeated Model models = 2;
-}
-
-message Localisation {
-    repeated LocalisationFieldObject field_object = 1;
+    optional string triggerName = 2;
+    optional string functionName = 3;
+    optional uint64 reactionId = 4;
+    optional uint64 taskId = 5;
+    optional uint64 causeReactionId = 6;
+    optional uint64 causeTaskId = 7;
+    optional uint64 emitted = 8;
+    optional uint64 started = 9;
+    optional uint64 finished = 10;
 }

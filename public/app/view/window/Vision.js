@@ -38,8 +38,7 @@ Ext.define('NU.view.window.Vision', {
             store: [
                 ['raw', 'Raw Image'],
                 ['classified', 'Classified Image'],
-                ['objects', 'Field Objects'],
-                ['transitions', 'Transitions']
+                ['objects', 'Field Objects']
             ],
             blankText: 'No items available',
             itemId: 'displaypicker'

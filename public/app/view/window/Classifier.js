@@ -98,6 +98,18 @@ Ext.define('NU.view.window.Classifier', {
 					allowDepress: false,
 					tooltip: 'Goal'
 				}, {
+					itemId: 'targetCyan',
+					iconCls: 'icon-toolbar-cyan',
+					toggleGroup: 'target',
+					allowDepress: false,
+					tooltip: 'Cyan'
+				}, {
+					itemId: 'targetMagenta',
+					iconCls: 'icon-toolbar-magenta',
+					toggleGroup: 'target',
+					allowDepress: false,
+					tooltip: 'Magenta'
+				}, {
 					itemId: 'targetWhite',
 					iconCls: 'icon-toolbar-white',
 					toggleGroup: 'target',
