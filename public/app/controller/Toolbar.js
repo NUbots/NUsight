@@ -1,6 +1,8 @@
 Ext.define('NU.controller.Toolbar', {
     extend: 'Deft.mvc.ViewController',
-    requires: 'NU.view.robot.List',
+    requires: [
+		'NU.view.NetworkSettings'
+	],
     control: {
         'add_localisation_display': {
             click: function () {
@@ -94,16 +96,17 @@ Ext.define('NU.controller.Toolbar', {
 				});
 			}
 		},
-        'list_robots': {
+        'network_settings': {
             click: function () {
                 Ext.create('Ext.Window', {
                     autoShow: true,
                     modal: true,
-                    title: 'Robot List',
-                    width: 400,
-                    height: 400,
+                    title: 'Network Settings',
+                    width: 500,
+                    height: 500,
+					layout: 'fit',
                     items: [{
-                        xtype: 'robotlist'
+                        xtype: 'networksettings'
                     }]
                 });
             }

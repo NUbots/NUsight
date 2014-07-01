@@ -137,6 +137,9 @@ Ext.define('NU.util.Network', {
 	send: function (robotIP, message) {
 		this.getSocket().emit('message', robotIP, message.encode().toArrayBuffer());
 	},
+	broadcast: function (message) {
+		this.getSocket().emit('broadcast', message.encode().toArrayBuffer());
+	},
 	getRobotIPs: function () {
 		var result = [];
 		this.getRobotsStore().each(function (record) {

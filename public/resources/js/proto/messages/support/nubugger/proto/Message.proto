@@ -30,34 +30,51 @@ import "messages/vision/proto/LookUpTable.proto";
 import "messages/behaviour/proto/Behaviour.proto";
 
 message Message {
-    enum Type {
-        SENSOR_DATA = 1;
-        IMAGE = 2;
-        CLASSIFIED_IMAGE = 3;
-        VISION_OBJECT = 4;
-        LOCALISATION = 5;
-        DATA_POINT = 6;
-        REACTION_STATISTICS = 7;
-        LOOKUP_TABLE = 8;
-        BEHAVIOUR = 9;
-        COMMAND = 10;
-    }
+	enum Type {
+		SENSOR_DATA = 1;
+		IMAGE = 2;
+		CLASSIFIED_IMAGE = 3;
+		VISION_OBJECT = 4;
+		LOCALISATION = 5;
+		DATA_POINT = 6;
+		REACTION_STATISTICS = 7;
+		LOOKUP_TABLE = 8;
+		BEHAVIOUR = 9;
+		COMMAND = 10;
+		REACTION_HANDLERS = 11;
+	}
 
-    required Type type = 1;
-    required uint64 utc_timestamp = 2;
+	required Type type = 1;
+	required uint64 utc_timestamp = 2;
 
-    optional messages.input.proto.Sensors sensor_data = 3;
-    optional messages.input.proto.Image image = 4;
-    optional messages.vision.proto.ClassifiedImage classified_image = 5;
-    repeated messages.vision.proto.VisionObject vision_object = 6;
-    optional messages.localisation.proto.Localisation localisation = 7;
-    optional messages.support.nubugger.proto.DataPoint data_point = 8;
-    optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 9;
-    optional messages.vision.proto.LookUpTable lookup_table = 10;
-    optional messages.behaviour.proto.Behaviour behaviour = 11;
-    optional Command command = 12;
+	optional messages.input.proto.Sensors sensor_data = 3;
+	optional messages.input.proto.Image image = 4;
+	optional messages.vision.proto.ClassifiedImage classified_image = 5;
+	repeated messages.vision.proto.VisionObject vision_object = 6;
+	optional messages.localisation.proto.Localisation localisation = 7;
+	optional messages.support.nubugger.proto.DataPoint data_point = 8;
+	optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 9;
+	optional messages.vision.proto.LookUpTable lookup_table = 10;
+	optional messages.behaviour.proto.Behaviour behaviour = 11;
+	optional Command command = 12;
+	optional ReactionHandlers reactionHandlers = 13;
 
-    message Command {
-        optional string command = 1;
-    }
+	message Command {
+		optional string command = 1;
+	}
+
+	message ReactionHandlers {
+		required bool dataPoints = 1;
+		required bool actionStart = 2;
+		required bool actionKill = 3;
+		required bool registerAction = 4;
+		required bool sensors = 5;
+		required bool reactionStatistics = 6;
+		required bool image = 7;
+		required bool classifiedImage = 8;
+		required bool goals = 9;
+		required bool balls = 10;
+		required bool localisation = 11;
+	}
 }
+

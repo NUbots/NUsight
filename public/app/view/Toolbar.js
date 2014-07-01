@@ -27,8 +27,8 @@ Ext.define('NU.view.Toolbar', {
 		text: 'Close All',
 		itemId: 'close_all'
 	}, {
-		text: 'Robots',
-		itemId: 'list_robots',
+		text: 'Settings',
+		itemId: 'network_settings',
 		iconCls: 'icon-cog'
 	}]
 });
