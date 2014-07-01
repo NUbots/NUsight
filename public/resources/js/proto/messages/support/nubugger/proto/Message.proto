@@ -33,7 +33,8 @@ message Message {
         LOOKUP_TABLE = 6;
         BEHAVIOUR = 7;
         COMMAND = 8;
-    }
+		REACTION_HANDLERS = 9;
+	}
 
     required Type type = 1;
     required uint64 utc_timestamp = 2;
@@ -45,9 +46,10 @@ message Message {
     optional ReactionStatistics reaction_statistics = 7;
     optional LookupTable lookup_table = 8;
     optional messages.behaviour.proto.Behaviour behaviour = 9;
-    optional Command command = 10;
+	optional Command command = 10;
+	optional ReactionHandlers reactionHandlers = 11;
 
-    message Command {
+	message Command {
         optional string command = 1;
     }
 
@@ -166,4 +168,18 @@ message Message {
     message Vector {
         repeated float float_value = 1;
     }
+
+	message ReactionHandlers {
+		required bool dataPoints = 1;
+		required bool actionStart = 2;
+		required bool actionKill = 3;
+		required bool registerAction = 4;
+		required bool sensors = 5;
+		required bool reactionStatistics = 6;
+		required bool image = 7;
+		required bool classifiedImage = 8;
+		required bool goals = 9;
+		required bool balls = 10;
+		required bool localisation = 11;
+	}
 }

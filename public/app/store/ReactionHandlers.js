@@ -8,16 +8,16 @@ Ext.define('NU.store.ReactionHandlers', {
 		}
 	},
 	data: [
-		{ name: 'Data Points', enabled: true },
-		{ name: 'Action Start', enabled: true },
-		{ name: 'Action Kill', enabled: true },
-		{ name: 'Register Action', enabled: true },
-		{ name: 'Sensors', enabled: true },
-		{ name: 'Image', enabled: true },
-		{ name: 'Reaction Statistics', enabled: true },
-		{ name: 'Classified Image', enabled: true },
-		{ name: 'Goals', enabled: true },
-		{ name: 'Balls', enabled: true },
-		{ name: 'Localisation', enabled: true }
+		{ name: 'Data Points', fieldName: 'dataPoints', enabled: true },
+		{ name: 'Action Start', fieldName: 'actionStart', enabled: true },
+		{ name: 'Action Kill', fieldName: 'actionKill', enabled: true },
+		{ name: 'Register Action', fieldName: 'registerAction', enabled: true },
+		{ name: 'Sensors', fieldName: 'sensors', enabled: true },
+		{ name: 'Image', fieldName: 'image', enabled: true },
+		{ name: 'Reaction Statistics', fieldName: 'reactionStatistics', enabled: false },
+		{ name: 'Classified Image', fieldName: 'classifiedImage', enabled: true },
+		{ name: 'Goals', fieldName: 'goals', enabled: true },
+		{ name: 'Balls', fieldName: 'balls', enabled: true },
+		{ name: 'Localisation', fieldName: 'localisation', enabled: true }
 	]
 });

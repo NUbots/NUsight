@@ -1,34 +1,27 @@
 Ext.define('NU.controller.NetworkSettings', {
 	extend: 'Deft.mvc.ViewController',
-//	inject: 'robotsStore',
-//	config: {
-//		robotsStore: null
-//	},
-//	control: {
-//		'addRobot': {
-//			click: function (combo, records, eOpts) {
-//				var grid = this.getView();
-//				var rowEditing = grid.getPlugin('rowEditing');
-//				rowEditing.cancelEdit();
-//				this.getRobotsStore().insert(0, {
-//					name: '',
-//					ipAddress: ''
-//				});
-//				rowEditing.startEdit(0, 0);
-//			}
-//		},
-//		'removeRobot': {
-//			click: function (combo, records, eOpts) {
-//				var grid = this.getView();
-//				var rowEditing = grid.getPlugin('rowEditing');
-//				var sm = grid.getSelectionModel();
-//				rowEditing.cancelEdit();
-//				var store = this.getRobotsStore();
-//				store.remove(sm.getSelection());
-//				if (store.getCount() > 0) {
-//					sm.select(0);
-//				}
-//			}
-//		}
-//	}
+	inject: 'reactionHandlersStore',
+	config: {
+		reactionHandlersStore: null
+	},
+	control: {
+		'save': {
+			click: function () {
+				this.save();
+			}
+		}
+	},
+	save: function () {
+		var message = new API.Message();
+		message.setUtcTimestamp(Date.now());
+		message.setType(API.Message.Type.REACTION_HANDLERS);
+		var reactionHandlers = new API.Message.ReactionHandlers();
+		this.getReactionHandlersStore().each(function (reactionHandler) {
+			var fieldName = reactionHandler.get('fieldName');
+			var setter = 'set' + fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+			reactionHandlers[setter](reactionHandler.get('enabled'));
+		});
+		message.setReactionHandlers(reactionHandlers);
+		NU.util.Network.broadcast(message);
+	}
 });

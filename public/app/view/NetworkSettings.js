@@ -26,7 +26,11 @@ Ext.define('NU.view.NetworkSettings', {
 					xtype: 'checkbox',
 					fieldLabel: 'Manage Automatically',
 					labelWidth: 150,
-					checked: true
+					checked: false,
+					disabled: true
+				}, '->', {
+					text: 'Save',
+					itemId: 'save'
 				}],
 				columns: [{
 					header: 'Name',

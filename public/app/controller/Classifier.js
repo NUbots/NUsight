@@ -835,7 +835,7 @@ Ext.define('NU.controller.Classifier', {
 	},
 	download: function () {
 		var message = new API.Message();
-		message.setUtcTimestamp(Date.now() / 1000);
+		message.setUtcTimestamp(Date.now());
 		message.setType(API.Message.Type.COMMAND);
 		var command = new API.Message.Command();
 		command.setCommand("download_lut");
@@ -845,7 +845,7 @@ Ext.define('NU.controller.Classifier', {
 	upload: function (save) {
 		save = !!save; // convert to bool
 		var message = new API.Message();
-		message.setUtcTimestamp(Date.now() / 1000);
+		message.setUtcTimestamp(Date.now());
 		message.setType(API.Message.Type.LOOKUP_TABLE);
 		var lookupTable = new API.Message.LookupTable();
 		lookupTable.setTable(dcodeIO.ByteBuffer.wrap(this.getLookup().buffer));
