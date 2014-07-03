@@ -235,7 +235,8 @@ Ext.define('NU.controller.Classifier', {
 		},
 		'rawValue': true,
 		'classifiedValue': true,
-		'scatter3d': true
+		'scatter3d': true,
+		'reel': true
 	},
 	init: function () {
 		// these must initialized here so there is an object per-controller

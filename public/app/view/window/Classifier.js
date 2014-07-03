@@ -5,8 +5,12 @@ Ext.define('NU.view.window.Classifier', {
 	controller: 'NU.controller.Classifier',
 	title: 'Classifier',
 	width: 800,
-	height: 750,
-	layout: 'hbox',
+	height: 780,
+	layout: {
+		type: 'vbox',
+		align: 'stretch',
+		flex: 1
+	},
 	initComponent: function () {
 		Ext.apply(this, {
 			tbar: [{
@@ -265,6 +269,40 @@ Ext.define('NU.view.window.Classifier', {
 							fieldLabel: 'Render Cube'
 						}]
 					}]
+				}]
+			}, {
+				itemId: 'reel',
+				layout: {
+					type: 'hbox'
+				},
+				defaults: {
+					flex: 1,
+					height: 50,
+					style: {
+						border: '3px solid #000',
+						marginLeft: '5px'
+					}
+				},
+				items: [{
+					html: 'Slide 1'
+				}, {
+					html: 'Slide 2'
+				}, {
+					html: 'Slide 3'
+				}, {
+					html: 'Slide 4'
+				}, {
+					html: 'Slide 5'
+				}, {
+					html: 'Slide 6'
+				}, {
+					html: 'Slide 7'
+				}, {
+					html: 'Slide 8'
+				}, {
+					html: 'Slide 9'
+				}, {
+					html: 'Slide 10'
 				}]
 			}]
 		});
