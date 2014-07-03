@@ -6,10 +6,36 @@ Ext.define('NU.controller.LayeredCanvas', {
 		width: 320,
 		height: 240
 	},
+	control: {
+		'view': {
+			boxready: function (view, width, height) {
+				this.autoSize(width, height);
+			},
+			resize: function (view, width, height) {
+				this.autoSize(width, height);
+			}
+		}
+	},
 	init: function () {
 		this.setLayers([]);
 		this.setContainer(this.getView().getEl());
-		this.add('default');
+//		this.add('default');
+	},
+	autoSize: function (width, height) {
+		if (width === undefined) {
+			width = this.getView().getWidth();
+		}
+		if (height === undefined) {
+			height = this.getView().getHeight();
+		}
+
+		if (width / height > this.getWidth() / this.getHeight()) {
+			// resize to height
+			this.setImageSize('auto', height + 'px');
+		} else {
+			// resize to width
+			this.setImageSize(width + 'px', 'auto');
+		}
 	},
 	add: function (name, group) {
 		var layers = this.getLayers();
@@ -17,7 +43,9 @@ Ext.define('NU.controller.LayeredCanvas', {
 			var canvas = new Ext.Element(document.createElement('canvas'));
 			canvas.setStyle({
 				zIndex: layers.length,
-				position: 'absolute'
+				position: 'absolute',
+				top: 0,
+				left: 0
 			});
 			canvas.set({
 				width: this.getWidth(),
@@ -32,9 +60,30 @@ Ext.define('NU.controller.LayeredCanvas', {
 				context: canvas.dom.getContext('2d'),
 				hidden: true
 			});
+			this.autoSize();
 			return canvas;
 		}
 		return null;
+	},
+	setImageSize: function (width, height) {
+		var layers = this.getLayers();
+		layers.forEach(function (layer) {
+			var canvas = layer.canvas;
+			canvas.setStyle({
+				width: width,
+				height: height
+			})
+		});
+	},
+	setCanvasSize: function (width, height) {
+		var layers = this.getLayers();
+		layers.forEach(function (layer) {
+			var canvas = layer.canvas;
+			canvas.set({
+				width: width,
+				height: height
+			})
+		});
 	},
 	remove: function (name) {
 		var layers = this.getLayers();

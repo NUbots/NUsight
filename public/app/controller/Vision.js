@@ -209,76 +209,78 @@ Ext.define('NU.controller.Vision', {
         this.getContext('classified_image').putImageData(imageData, 0, 0);
 
     },
-    onVisionObjects: function (robotIP, vision_objects) {
+	onVisionObjects: function (robotIP, vision_objects) {
 
-        if(robotIP != this.robotIP || !this.displayFieldObjects) {
-            return;
-        }
+		if(robotIP !== this.robotIP || !this.displayFieldObjects) {
+			return;
+		}
 
-        // var api_ball = vision_objects[0];
-        // var api_goals = [];
-        // var api_obstacles = [];
+		switch (vision_objects.getType()) {
+			case 0: // Goae
+				this.drawGoals(vision_objects.getGoal());
+				break;
+			case 1: // Ball
+				this.drawBalls(vision_objects.getBall());
+				break;
+		}
 
+	},
+	drawGoals: function (goals) {
 
-        for (var i = 0; i < vision_objects.length; i++) {
-            var obj = vision_objects[i];
-            switch (obj.type) {
-                case 0: // Goal
-					var context = this.getContext('goals');
-					context.clearRect(0, 0, 320, 240); // TODO
+		var context = this.getContext('goals');
+		context.clearRect(0, 0, 320, 240); // TODO
 
-                    context.beginPath();
+		for (var i = 0; i < goals.length; i++) {
+			var goal = goals[i];
+			context.beginPath();
 
-                    var quad = obj.goal.quad;
-                    context.moveTo(quad.tl.x, quad.tl.y);
-                    context.lineTo(quad.tr.x, quad.tr.y);
-                    context.lineTo(quad.br.x, quad.br.y);
-                    context.lineTo(quad.bl.x, quad.bl.y);
-                    context.lineTo(quad.tl.x, quad.tl.y);
-                    context.closePath();
+			var quad = goal.quad;
+			context.moveTo(quad.tl.x, quad.tl.y);
+			context.lineTo(quad.tr.x, quad.tr.y);
+			context.lineTo(quad.br.x, quad.br.y);
+			context.lineTo(quad.bl.x, quad.bl.y);
+			context.lineTo(quad.tl.x, quad.tl.y);
+			context.closePath();
 
-                    context.shadowColor = 'black';
-                    context.shadowBlur = 5;
-                    context.shadowOffsetX = 0;
-                    context.shadowOffsetY = 0;
+			context.shadowColor = 'black';
+			context.shadowBlur = 5;
+			context.shadowOffsetX = 0;
+			context.shadowOffsetY = 0;
 
-                    context.fillStyle = "rgba(255, 242, 0, 0.2)";
-                    context.fill();
+			context.fillStyle = "rgba(255, 242, 0, 0.2)";
+			context.fill();
 
-                    context.strokeStyle = "rgba(255, 242, 0, 1)";
-                    context.lineWidth = 2;
-                    context.lineWidth = 2;
+			context.strokeStyle = "rgba(255, 242, 0, 1)";
+			context.lineWidth = 2;
+			context.lineWidth = 2;
 
-                    context.stroke();
-                    break;
+			context.stroke();
+		}
+	},
+	drawBalls: function (balls) {
 
-                case 1: // Ball
-					var context = this.getContext('balls');
-					context.clearRect(0, 0, 320, 240); // TODO
+		var context = this.getContext('balls');
+		context.clearRect(0, 0, 320, 240); // TODO
 
-                    context.beginPath();
+		for (var i = 0; i < balls.length; i++) {
+			var ball = balls[i];
+			context.beginPath();
 
-                    context.shadowColor = 'black';
-                    context.shadowBlur = 5;
-                    context.shadowOffsetX = 0;
-                    context.shadowOffsetY = 0;
+			context.shadowColor = 'black';
+			context.shadowBlur = 5;
+			context.shadowOffsetX = 0;
+			context.shadowOffsetY = 0;
 
-                    context.arc(obj.ball.circle.centre.x, obj.ball.circle.centre.y, obj.ball.circle.radius, 0, Math.PI*2, true);
-                    context.closePath();
-                    //context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
-                    //context.fill();
-                    context.strokeStyle = "rgba(255, 255, 255, 1)";
-                    context.lineWidth = 2;
-                    context.lineWidth = 2;
-                    context.stroke();
-
-                    break;
-                
-            }
-
-        }
-
-    },
+			context.arc(ball.circle.centre.x, ball.circle.centre.y, ball.circle.radius, 0, Math.PI * 2, true);
+			context.closePath();
+			//context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
+			//context.fill();
+			context.strokeStyle = "rgba(255, 255, 255, 1)";
+			context.lineWidth = 2;
+			context.lineWidth = 2;
+			context.stroke();
+		}
+	},
     segmentColourToRGB: function (colourType)
     {
         var colour;

@@ -7,11 +7,11 @@ Ext.define('NU.view.window.Vision', {
 	],
     controller: 'NU.controller.Vision',
     title: 'Vision Display',
-    width: 410,
+    width: 454,
     height: 295,
-    resizable: {
-        preserveRatio: true
-    },
+//    resizable: {
+//        preserveRatio: true
+//    },
     layout: 'border',
     items: [{
         xtype: 'nu_layered_canvas',
@@ -19,10 +19,10 @@ Ext.define('NU.view.window.Vision', {
         width: 320,
         height: 240,
         style: {
-            backgroundColor: '#000',
-            backgroundImage: "url('resources/images/camera.png')",
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center'
+            backgroundColor: '#000'
+//            backgroundImage: "url('resources/images/camera.png')",
+//            backgroundRepeat: 'no-repeat',
+//            backgroundPosition: 'center'
         },
         itemId: 'canvas'
     }, {

@@ -5,5 +5,8 @@ Ext.define('NU.view.LayeredCanvas', {
 	autoEl: {
 		tag: 'div'
 	},
+	style: {
+		position: 'relative'
+	},
 	layout: 'fit'
 });
