@@ -1,7 +1,10 @@
 Ext.define('NU.view.window.Vision', {
     extend : 'NU.view.window.Display',
     alias : ['widget.nu_vision_window'],
-    requires: 'Ext.ux.form.MultiSelect',
+    requires: [
+		'Ext.ux.form.MultiSelect',
+		'NU.view.LayeredCanvas'
+	],
     controller: 'NU.controller.Vision',
     title: 'Vision Display',
     width: 410,
@@ -11,23 +14,17 @@ Ext.define('NU.view.window.Vision', {
     },
     layout: 'border',
     items: [{
-        xtype: 'component',
+        xtype: 'nu_layered_canvas',
         region: 'center',
         width: 320,
         height: 240,
-        autoEl: {
-            tag: 'canvas',
-            width: 320,
-            height: 240
-        },
         style: {
             backgroundColor: '#000',
             backgroundImage: "url('resources/images/camera.png')",
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center'
         },
-        itemId: 'canvas',
-        layout: 'fit'
+        itemId: 'canvas'
     }, {
         region: 'east',
         width: 150,

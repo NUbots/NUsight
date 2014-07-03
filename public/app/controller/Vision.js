@@ -1,10 +1,10 @@
 Ext.define('NU.controller.Vision', {
     extend: 'NU.controller.Display',
     config: {
-        context: null,
         displayImage: false,
         displayClassifiedImage: false,
-        displayFieldObjects: false
+        displayFieldObjects: false,
+		layeredCanvas: null
     },
     control: {
         'displaypicker': {
@@ -12,16 +12,21 @@ Ext.define('NU.controller.Vision', {
                 this.displayImage = false;
                 this.displayClassifiedImage = false;
                 this.displayFieldObjects = false;
+				var layeredCanvas = this.getLayeredCanvas();
+				layeredCanvas.hideAll();
                 Ext.each(newValue, function (value) {
                     switch (value) {
                         case 'raw':
                             this.displayImage = true;
+							layeredCanvas.show('image');
                             break;
                         case 'classified':
                             this.displayClassifiedImage = true;
+							layeredCanvas.show('classified_image');
                             break;
                         case 'objects':
                             this.displayFieldObjects = true;
+							layeredCanvas.showGroup('field_objects');
                             break;
                     }
                 }, this);
@@ -37,10 +42,16 @@ Ext.define('NU.controller.Vision', {
         'canvas': true
     },
     init: function () {
+		var layeredCanvas = this.getCanvas().getController();
+		layeredCanvas.add('image');
+		layeredCanvas.add('classified_image');
+		layeredCanvas.add('goals', 'field_objects');
+		layeredCanvas.add('balls', 'field_objects');
+		this.setLayeredCanvas(layeredCanvas);
 
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
-        this.setContext(this.getCanvas().el.dom.getContext('2d'));
+//        this.setContext(this.getCanvas().el.dom.getContext('2d'));
         //this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
 
         NU.util.Network.on('image', Ext.bind(this.onImage, this));
@@ -50,6 +61,9 @@ Ext.define('NU.controller.Vision', {
         this.callParent(arguments);
 
     },
+	getContext: function (name) {
+		return this.getLayeredCanvas().getContext(name);
+	},
     onImage: function (robotIP, image) {
 
         if (robotIP != this.robotIP || !this.displayImage) {
@@ -66,7 +80,7 @@ Ext.define('NU.controller.Vision', {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
         var url = URL.createObjectURL(blob);
         var imageObj = new Image();
-        var ctx = this.context;
+        var ctx = this.getContext('image');
         imageObj.src = url;
         imageObj.onload = function () {
             ctx.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
@@ -77,7 +91,7 @@ Ext.define('NU.controller.Vision', {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
         var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
         var imageObj = new Image();
-        var ctx = this.context;
+        var ctx = this.getContext("image");
         imageObj.src = uri;
         imageObj.onload = function () {
 			// flip image vertically
@@ -111,16 +125,16 @@ Ext.define('NU.controller.Vision', {
         var segments = image.getSegment();
         var visualHorizon = image.getVisualHorizon();
         var horizon = image.getHorizon();
-        var imageData = this.context.createImageData(width, height);
+        var imageData = this.getContext('classified_image').createImageData(width, height);
         var pixels = imageData.data;
 
-        for (var i = 0; i < height * width; i++)
+        /*for (var i = 0; i < height * width; i++)
         {
             pixels[4 * i + 0] = 0;
             pixels[4 * i + 1] = 0;
             pixels[4 * i + 2] = 0;
-            pixels[4 * i + 3] = 255;
-        }
+            pixels[4 * i + 3] = 0;
+        }*/
 
         for (var i = 0; i < segments.length; i++) {
             var segment = segments[i];
@@ -192,7 +206,7 @@ Ext.define('NU.controller.Vision', {
         }
 
         imageData.data = pixels;
-        this.context.putImageData(imageData, 0, 0);
+        this.getContext('classified_image').putImageData(imageData, 0, 0);
 
     },
     onVisionObjects: function (robotIP, vision_objects) {
@@ -204,12 +218,14 @@ Ext.define('NU.controller.Vision', {
         // var api_ball = vision_objects[0];
         // var api_goals = [];
         // var api_obstacles = [];
-        var context = this.getContext();
+
 
         for (var i = 0; i < vision_objects.length; i++) {
             var obj = vision_objects[i];
             switch (obj.type) {
                 case 0: // Goal
+					var context = this.getContext('goals');
+					context.clearRect(0, 0, 320, 240); // TODO
 
                     context.beginPath();
 
@@ -237,6 +253,8 @@ Ext.define('NU.controller.Vision', {
                     break;
 
                 case 1: // Ball
+					var context = this.getContext('balls');
+					context.clearRect(0, 0, 320, 240); // TODO
 
                     context.beginPath();
 
