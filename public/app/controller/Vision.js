@@ -18,8 +18,11 @@ Ext.define('NU.controller.Vision', {
                         case 'raw':
 							layeredCanvas.show('image');
                             break;
-                        case 'classified':
-                            layeredCanvas.show('classified_image');
+                        case 'classified_search':
+                            layeredCanvas.show('classified_image_search');
+                            break;
+                        case 'classified_refine':
+                            layeredCanvas.show('classified_image_refine');
                             break;
                         case 'visual_horizon':
                             layeredCanvas.show('visual_horizon');
@@ -39,7 +42,8 @@ Ext.define('NU.controller.Vision', {
     init: function () {
 		var layeredCanvas = this.getCanvas().getController();
 		layeredCanvas.add('image');
-        layeredCanvas.add('classified_image');
+        layeredCanvas.add('classified_image_search');
+        layeredCanvas.add('classified_image_refine');
         layeredCanvas.add('visual_horizon');
         layeredCanvas.add('horizon');
 		layeredCanvas.add('goals', 'field_objects');
@@ -142,15 +146,19 @@ Ext.define('NU.controller.Vision', {
         var width = this.getWidth();
         var height = this.getHeight();
 
-        var imageData = this.getContext('classified_image').createImageData(width, height);
-        var pixels = imageData.data;
+        var searchData = this.getContext('classified_image_search').createImageData(width, height);
+        var refinedData = this.getContext('classified_image_refine').createImageData(width, height);
+        var searchPixels = searchData.data;
+        var refinedPixels = refinedData.data;
+        var pixels;
+
         var segments = image.getSegment();
 
         for (var i = 0; i < segments.length; i++) {
             var segment = segments[i];
             var colour = this.segmentColourToRGB(segment.colour);
 
-            if (segment.start.x == segment.end.x) {
+            if (segment.start.x === segment.end.x) {
 
                 var x = segment.start.x;
 
@@ -159,13 +167,16 @@ Ext.define('NU.controller.Vision', {
                 {
                     var subsample = (y - segment.start.y) % segment.subsample === 0 ? 1 : 0.7;
 
+                    // Pick which layer to draw to
+                    pixels = segment.subsample === 1 ? refinedPixels : searchPixels;
+
                     pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
                     pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
                     pixels[4 * (width * y + x) + 2] = colour[2] * subsample;
                     pixels[4 * (width * y + x) + 3] = colour[3];
                 }
 
-            } else if (segment.start.y == segment.end.y) {
+            } else if (segment.start.y === segment.end.y) {
 
                 var y = segment.start.y;
 
@@ -173,6 +184,9 @@ Ext.define('NU.controller.Vision', {
                 for (var x = segment.start.x; x <= segment.end.x; x++)
                 {
                     var subsample = (x - segment.start.x) % segment.subsample === 0 ? 1 : 0.7;
+
+                    // Pick which layer to draw to
+                    pixels = segment.subsample === 1 ? refinedPixels : searchPixels;
 
                     pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
                     pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
@@ -185,7 +199,8 @@ Ext.define('NU.controller.Vision', {
             }
         }
 
-        this.getContext('classified_image').putImageData(imageData, 0, 0);
+        this.getContext('classified_image_search').putImageData(searchData, 0, 0);
+        this.getContext('classified_image_refine').putImageData(refinedData, 0, 0);
     },
     drawVisualHorizon: function(horizonPoints) {
 
@@ -234,7 +249,7 @@ Ext.define('NU.controller.Vision', {
             points.push([this.getWidth(), y2]);
         }
 
-        if(points.length == 2) {
+        if(points.length === 2) {
             context.beginPath();
             context.moveTo(points[0][0], points[0][1]);
             context.lineTo(points[1][0], points[1][1]);

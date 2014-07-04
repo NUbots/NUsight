@@ -34,7 +34,8 @@ Ext.define('NU.view.window.Vision', {
             width: 148,
             store: [
                 ['raw', 'Raw Image'],
-                ['classified', 'Classified Image'],
+                ['classified_search', 'Classified Image Search'],
+                ['classified_refine', 'Classified Image Refined'],
                 ['visual_horizon', 'Visual Horizon'],
                 ['horizon', 'Horizon'],
                 ['objects', 'Field Objects']
