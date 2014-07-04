@@ -34,13 +34,6 @@ Ext.define('NU.controller.Vision', {
                 }, this);
             }
         },
-        'view': {
-            resize: function () {
-//                var canvas = this.getCanvas();
-//                canvas.setWidth(obj.body.getWidth());
-//                this.getCa.setHeight(obj.body.getHeight());
-            }
-        },
         'canvas': true
     },
     init: function () {

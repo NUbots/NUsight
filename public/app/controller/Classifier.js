@@ -31,9 +31,9 @@ Ext.define('NU.controller.Classifier', {
 		magicWandColours: null,
 		target: 'Field',
 		centerEllipse: false,
-		lastDraw: 0,
 		renderYUV: false,
-		renderCube: false
+		renderCube: false,
+		layeredCanvas: null
 	},
 	statics: {
 		Target: {
@@ -247,13 +247,17 @@ Ext.define('NU.controller.Classifier', {
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
 
+		var layeredCanvas = this.getRawImage().getController();
+		layeredCanvas.add('raw');
+		layeredCanvas.add('zoom');
+		layeredCanvas.add('selection');
+		this.setLayeredCanvas(layeredCanvas);
+
 		NU.util.Network.on('image', Ext.bind(this.onImage, this));
 		NU.util.Network.on('lookup_table', Ext.bind(this.onLookUpTable, this));
 		this.callParent(arguments);
 
-		var rawElCanvas = this.getRawImage().getEl();
-		var rawCanvas = rawElCanvas.dom;
-		this.setRawContext(rawCanvas.getContext('2d'));
+		this.setRawContext(layeredCanvas.getContext('raw'));
 
 		var classifiedElCanvas = this.getClassifiedImage().getEl();
 		var classifiedCanvas = classifiedElCanvas.dom;
@@ -275,7 +279,9 @@ Ext.define('NU.controller.Classifier', {
 			};
 		}
 
-		[rawElCanvas, classifiedElCanvas].forEach(function (element) {
+		var rawContainer = this.getRawImage().getEl();
+
+		[rawContainer, classifiedElCanvas].forEach(function (element) {
 			this.mon(element, {
 				click: clickBind(this.onImageClick),
 				dblclick: clickBind(this.onImageDblClick),
@@ -303,6 +309,9 @@ Ext.define('NU.controller.Classifier', {
 		}, this);
 
 		this.testDrawImage();
+	},
+	getContext: function (name) {
+		return this.getLayeredCanvas().getContext(name);
 	},
 	refreshScatter: function () {
 
@@ -479,18 +488,26 @@ Ext.define('NU.controller.Classifier', {
 			return;
 		}
 
-		if (image) {
-			var now = Date.now();
-			if (!this.getFrozen() && now - this.getLastDraw() >= 500) {
+		if (image) { // TODO: is this needed?
+			if (!this.getFrozen()) {
+				this.autoSize(image.dimensions.x, image.dimensions.y);
 				this.drawImage(image, function (ctx) {
 					this.setRawImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
 					this.updateClassifiedData();
 					this.renderImages();
-					this.setLastDraw(now);
 				}, this);
 			}
 		}
 
+	},
+	autoSize: function (width, height) {
+		if (width === this.getImageWidth() && height === this.getImageHeight()) {
+			return; // didn't change
+		}
+
+		this.setImageWidth(width);
+		this.setImageHeight(height);
+		this.getLayeredCanvas().setCanvasSize(width, height);
 	},
 	onImageMouseMove: function (x, y, e) {
 		this.setMouseX(x);

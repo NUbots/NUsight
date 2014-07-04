@@ -124,6 +124,10 @@ Ext.define('NU.controller.LayeredCanvas', {
 		});
 		layer.hidden = false;
 	},
+	clear: function (name) {
+		var context = this.getContext(name);
+		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+	},
 	showGroup: function (name) {
 		var layers = this.getLayers();
 		layers.forEach(function (layer) {

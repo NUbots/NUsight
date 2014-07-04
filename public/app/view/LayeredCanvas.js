@@ -6,7 +6,8 @@ Ext.define('NU.view.LayeredCanvas', {
 		tag: 'div'
 	},
 	style: {
-		position: 'relative'
+		position: 'relative',
+		display: 'block'
 	},
 	layout: 'fit'
 });
