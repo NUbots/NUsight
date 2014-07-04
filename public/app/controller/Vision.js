@@ -11,24 +11,24 @@ Ext.define('NU.controller.Vision', {
     control: {
         'displaypicker': {
             change: function (obj, newValue, oldValue, e) {
-                this.displayImage = false;
-                this.displayClassifiedImage = false;
-                this.displayFieldObjects = false;
 				var layeredCanvas = this.getLayeredCanvas();
 				layeredCanvas.hideAll();
                 Ext.each(newValue, function (value) {
                     switch (value) {
                         case 'raw':
-                            this.displayImage = true;
 							layeredCanvas.show('image');
                             break;
                         case 'classified':
-                            this.displayClassifiedImage = true;
-							layeredCanvas.show('classified_image');
+                            layeredCanvas.show('classified_image');
+                            break;
+                        case 'visual_horizon':
+                            layeredCanvas.show('visual_horizon');
+                            break;
+                        case 'horizon':
+                            layeredCanvas.show('horizon');
                             break;
                         case 'objects':
-                            this.displayFieldObjects = true;
-							layeredCanvas.showGroup('field_objects');
+                            layeredCanvas.showGroup('field_objects');
                             break;
                     }
                 }, this);
@@ -46,7 +46,9 @@ Ext.define('NU.controller.Vision', {
     init: function () {
 		var layeredCanvas = this.getCanvas().getController();
 		layeredCanvas.add('image');
-		layeredCanvas.add('classified_image');
+        layeredCanvas.add('classified_image');
+        layeredCanvas.add('visual_horizon');
+        layeredCanvas.add('horizon');
 		layeredCanvas.add('goals', 'field_objects');
 		layeredCanvas.add('balls', 'field_objects');
 		this.setLayeredCanvas(layeredCanvas);
@@ -77,7 +79,7 @@ Ext.define('NU.controller.Vision', {
 	},
     onImage: function (robotIP, image) {
 
-        if (robotIP != this.robotIP || !this.displayImage) {
+        if (robotIP != this.robotIP) {
             return;
         }
 
@@ -129,7 +131,7 @@ Ext.define('NU.controller.Vision', {
 	},
     onClassifiedImage: function (robotIP, image) {
 
-        if(robotIP != this.robotIP || !this.displayClassifiedImage) {
+        if(robotIP != this.robotIP) {
             return;
         }
 
@@ -137,19 +139,19 @@ Ext.define('NU.controller.Vision', {
 		var height = image.dimensions.y;
 		this.autoSize(width, height);
 
-        var segments = image.getSegment();
-        var visualHorizon = image.getVisualHorizon();
-        var horizon = image.getHorizon();
+        this.drawClassifiedImage(image);
+        this.drawVisualHorizon(image.getVisualHorizon());
+        this.drawHorizon(image.getHorizon());
+
+    },
+    drawClassifiedImage: function(image) {
+
+        var width = this.getWidth();
+        var height = this.getHeight();
+
         var imageData = this.getContext('classified_image').createImageData(width, height);
         var pixels = imageData.data;
-
-        /*for (var i = 0; i < height * width; i++)
-        {
-            pixels[4 * i + 0] = 0;
-            pixels[4 * i + 1] = 0;
-            pixels[4 * i + 2] = 0;
-            pixels[4 * i + 3] = 0;
-        }*/
+        var segments = image.getSegment();
 
         for (var i = 0; i < segments.length; i++) {
             var segment = segments[i];
@@ -188,54 +190,82 @@ Ext.define('NU.controller.Vision', {
             else {
                 console.log('unsupported diagonal classified image segment');
             }
-            //segment.start_x, segment.start_y
-            //segment.end_x, segment.end_y
         }
 
-        // Draw the visual horizon
-        for (var i = 0; i < visualHorizon.length - 1; i++) {
-
-            var p1 = visualHorizon[i];
-            var p2 = visualHorizon[i + 1];
-
-            for(var x = p1.x; x <= p2.x; x++) {
-
-                var y = Math.round(((p2.y - p1.y)/(p2.x - p1.x)) * (x - p1.x) + p1.y);
-
-                pixels[4 * (width * y + x) + 0] = 0;
-                pixels[4 * (width * y + x) + 1] = 255;
-                pixels[4 * (width * y + x) + 2] = 0;
-                pixels[4 * (width * y + x) + 3] = 255;
-            }
-        }
-
-        // Draw the actual horizon
-        for (var x = 0; x < width; x++) {
-
-            var y = Math.round(x * horizon.gradient + horizon.intercept);
-
-            pixels[4 * (width * y + x) + 0] = 0;
-            pixels[4 * (width * y + x) + 1] = 0;
-            pixels[4 * (width * y + x) + 2] = 255;
-            pixels[4 * (width * y + x) + 3] = 255;
-        }
-
-        imageData.data = pixels;
         this.getContext('classified_image').putImageData(imageData, 0, 0);
-
     },
-	onVisionObjects: function (robotIP, vision_objects) {
+    drawVisualHorizon: function(horizonPoints) {
 
-		if(robotIP !== this.robotIP || !this.displayFieldObjects) {
+        var context = this.getContext('visual_horizon');
+        context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+        context.moveTo(horizonPoints[0].x, horizonPoints[0].y);
+
+        for(var i = 1; i < horizonPoints.length; i++) {
+            var point = horizonPoints[i];
+            context.lineTo(point.x, point.y);
+        }
+
+        context.shadowColor = 'black';
+        context.shadowBlur = 5;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
+
+        context.strokeStyle = "rgba(0, 255, 0, 1)";
+        context.lineWidth = 2;
+
+        context.stroke();
+    },
+    drawHorizon: function(horizon) {
+
+        var context = this.getContext('visual_horizon');
+        context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+        var points = [];
+
+        var x1 = horizon.distance / horizon.normal.x;
+        var x2 = (horizon.distance - this.getWidth() * horizon.normal) / horizon.normal.y;
+        var y1 = horizon.distance / horizon.normal.y;
+        var y2 = (horizon.distance - this.getHeight() * horizon.normal.y) / horizon.normal.x;
+
+        if (x1 > 0 && x1 < this.getWidth()) {
+            points.push([x1, 0]);
+        }
+        if (x2 > 0 && x2 < this.getWidth()) {
+            points.push([x2, 0]);
+        }
+        if (y1 > 0 && y1 < this.getHeight()) {
+            points.push([0, y1]);
+        }
+        if (y2 > 0 && y2 < this.getHeight()) {
+            points.push([0, y1]);
+        }
+
+        if(points.length == 2) {
+            context.moveTo(points[0][0], points[0][1]);
+            context.lineTo(points[1][0], points[1][1]);
+
+            context.shadowColor = 'black';
+            context.shadowBlur = 5;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+
+            context.strokeStyle = "rgba(0, 255, 0, 1)";
+            context.lineWidth = 2;
+        }
+    },
+	onVisionObjects: function (robotIP, visionObjects) {
+
+		if(robotIP !== this.robotIP) {
 			return;
 		}
 
-		switch (vision_objects.getType()) {
-			case 0: // Goae
-				this.drawGoals(vision_objects.getGoal());
+		switch (visionObjects.getType()) {
+			case 0: // Goal
+				this.drawGoals(visionObjects.getGoal());
 				break;
 			case 1: // Ball
-				this.drawBalls(vision_objects.getBall());
+				this.drawBalls(visionObjects.getBall());
 				break;
 		}
 
@@ -267,7 +297,6 @@ Ext.define('NU.controller.Vision', {
 
 			context.strokeStyle = "rgba(255, 242, 0, 1)";
 			context.lineWidth = 2;
-			context.lineWidth = 2;
 
 			context.stroke();
 		}
@@ -288,10 +317,8 @@ Ext.define('NU.controller.Vision', {
 
 			context.arc(ball.circle.centre.x, ball.circle.centre.y, ball.circle.radius, 0, Math.PI * 2, true);
 			context.closePath();
-			//context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
-			//context.fill();
+
 			context.strokeStyle = "rgba(255, 255, 255, 1)";
-			context.lineWidth = 2;
 			context.lineWidth = 2;
 			context.stroke();
 		}
