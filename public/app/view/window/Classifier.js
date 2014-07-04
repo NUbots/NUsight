@@ -167,18 +167,13 @@ Ext.define('NU.view.window.Classifier', {
 							borderRadius: '2px'
 						},
 						items: {
+							xtype: 'nu_layered_canvas',
 							itemId: 'classifiedImage',
 							width: 320,
 							height: 240,
-							autoEl: {
-								tag: 'canvas',
-								width: 320,
-								height: 240
-							},
 							style: {
 								backgroundColor: '#000',
-								cursor: 'crosshair',
-								display: 'block'
+								cursor: 'crosshair'
 							}
 						}
 					}]

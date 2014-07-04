@@ -3,8 +3,10 @@ Ext.define('NU.controller.LayeredCanvas', {
 	config: {
 		layers: null,
 		container: null,
-		width: 320,
-		height: 240
+		canvasWidth: 320,
+		canvasHeight: 240,
+		imageWidth: 320,
+		imageHeight: 240
 	},
 	control: {
 		'view': {
@@ -29,7 +31,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 			height = this.getView().getHeight();
 		}
 
-		if (width / height > this.getWidth() / this.getHeight()) {
+		if (width / height > this.getCanvasWidth() / this.getCanvasHeight()) {
 			// resize to height
 			this.setImageSize('auto', height + 'px');
 		} else {
@@ -48,20 +50,21 @@ Ext.define('NU.controller.LayeredCanvas', {
 				left: 0
 			});
 			canvas.set({
-				width: this.getWidth(),
-				height: this.getHeight()
+				width: this.getCanvasWidth(),
+				height: this.getCanvasHeight()
 			});
 			var container = this.getContainer();
 			container.appendChild(canvas);
-			layers.push({
+			var layer = {
 				name: name,
 				group: group,
 				canvas: canvas,
 				context: canvas.dom.getContext('2d'),
 				hidden: true
-			});
+			};
+			layers.push(layer);
 			this.autoSize();
-			return canvas;
+			return layer;
 		}
 		return null;
 	},
@@ -72,8 +75,11 @@ Ext.define('NU.controller.LayeredCanvas', {
 			canvas.setStyle({
 				width: width,
 				height: height
-			})
-		});
+			});
+			// TODO: do once?
+			this.setImageWidth(canvas.getWidth());
+			this.setImageHeight(canvas.getHeight());
+		}, this);
 	},
 	setCanvasSize: function (width, height) {
 		var layers = this.getLayers();
@@ -82,10 +88,10 @@ Ext.define('NU.controller.LayeredCanvas', {
 			canvas.set({
 				width: width,
 				height: height
-			})
-		});
-		this.setWidth(width);
-		this.setHeight(height);
+			});
+		}, this);
+		this.setCanvasWidth(width);
+		this.setCanvasHeight(height);
 		this.autoSize();
 	},
 	remove: function (name) {
@@ -95,7 +101,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 			if (layer.name !== name) {
 				newLayers.push(layer);
 			}
-		});
+		}, this);
 		this.setLayers(newLayers);
 	},
 	hideAll: function () {
@@ -126,7 +132,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 	},
 	clear: function (name) {
 		var context = this.getContext(name);
-		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+		context.clearRect(0, 0, this.getCanvasWidth(), this.getCanvasHeight());
 	},
 	showGroup: function (name) {
 		var layers = this.getLayers();
