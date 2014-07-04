@@ -4,7 +4,9 @@ Ext.define('NU.controller.Vision', {
         displayImage: false,
         displayClassifiedImage: false,
         displayFieldObjects: false,
-		layeredCanvas: null
+		layeredCanvas: null,
+		width: 320,
+		height: 240
     },
     control: {
         'displaypicker': {
@@ -64,11 +66,25 @@ Ext.define('NU.controller.Vision', {
 	getContext: function (name) {
 		return this.getLayeredCanvas().getContext(name);
 	},
+	autoSize: function (width, height) {
+		if (width === this.getWidth() && height === this.getHeight()) {
+			return; // didn't change
+		}
+
+		this.setWidth(width);
+		this.setHeight(height);
+		this.getLayeredCanvas().setCanvasSize(width, height);
+	},
     onImage: function (robotIP, image) {
 
         if (robotIP != this.robotIP || !this.displayImage) {
             return;
         }
+
+		var width = image.dimensions.x;
+		var height = image.dimensions.y;
+		this.autoSize(width, height);
+
 
         // 1st implementation - potentially slower
 //        this.drawImageURL(image);
@@ -117,10 +133,9 @@ Ext.define('NU.controller.Vision', {
             return;
         }
 
-        var width = 320;
-        var height = 240;
-        //var width = 640;
-        //var height = 480;
+		var width = image.dimensions.x;
+		var height = image.dimensions.y;
+		this.autoSize(width, height);
 
         var segments = image.getSegment();
         var visualHorizon = image.getVisualHorizon();
@@ -228,7 +243,7 @@ Ext.define('NU.controller.Vision', {
 	drawGoals: function (goals) {
 
 		var context = this.getContext('goals');
-		context.clearRect(0, 0, 320, 240); // TODO
+		context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
 		for (var i = 0; i < goals.length; i++) {
 			var goal = goals[i];
@@ -260,7 +275,7 @@ Ext.define('NU.controller.Vision', {
 	drawBalls: function (balls) {
 
 		var context = this.getContext('balls');
-		context.clearRect(0, 0, 320, 240); // TODO
+		context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
 		for (var i = 0; i < balls.length; i++) {
 			var ball = balls[i];

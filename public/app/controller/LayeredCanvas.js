@@ -84,6 +84,9 @@ Ext.define('NU.controller.LayeredCanvas', {
 				height: height
 			})
 		});
+		this.setWidth(width);
+		this.setHeight(height);
+		this.autoSize();
 	},
 	remove: function (name) {
 		var layers = this.getLayers();
