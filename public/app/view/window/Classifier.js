@@ -1,6 +1,9 @@
 Ext.define('NU.view.window.Classifier', {
 	extend : 'NU.view.window.Display',
-	requires: ['Ext.ux.plot.Scatter3D'],
+	requires: [
+		'Ext.ux.plot.Scatter3D',
+		'NU.view.LayeredCanvas'
+	],
 	alias : ['widget.nu_classifier_window'],
 	controller: 'NU.controller.Classifier',
 	title: 'Classifier',
@@ -138,21 +141,16 @@ Ext.define('NU.view.window.Classifier', {
 							marginBottom: '3px'
 						},
 						items: {
+							xtype: 'nu_layered_canvas',
 							itemId: 'rawImage',
 							width: 320,
 							height: 240,
-							autoEl: {
-								tag: 'canvas',
-								width: 320,
-								height: 240
-							},
 							style: {
 								backgroundColor: '#000',
-								backgroundImage: "url('resources/images/camera.png')",
-								backgroundRepeat: 'no-repeat',
-								backgroundPosition: 'center',
-								cursor: 'crosshair',
-								display: 'block'
+								cursor: 'crosshair'
+//								backgroundImage: "url('resources/images/camera.png')",
+//								backgroundRepeat: 'no-repeat',
+//								backgroundPosition: 'center',
 							}
 						}
 					}]
@@ -169,18 +167,13 @@ Ext.define('NU.view.window.Classifier', {
 							borderRadius: '2px'
 						},
 						items: {
+							xtype: 'nu_layered_canvas',
 							itemId: 'classifiedImage',
 							width: 320,
 							height: 240,
-							autoEl: {
-								tag: 'canvas',
-								width: 320,
-								height: 240
-							},
 							style: {
 								backgroundColor: '#000',
-								cursor: 'crosshair',
-								display: 'block'
+								cursor: 'crosshair'
 							}
 						}
 					}]

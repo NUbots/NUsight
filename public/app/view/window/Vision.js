@@ -1,33 +1,30 @@
 Ext.define('NU.view.window.Vision', {
     extend : 'NU.view.window.Display',
     alias : ['widget.nu_vision_window'],
-    requires: 'Ext.ux.form.MultiSelect',
+    requires: [
+		'Ext.ux.form.MultiSelect',
+		'NU.view.LayeredCanvas'
+	],
     controller: 'NU.controller.Vision',
     title: 'Vision Display',
-    width: 410,
+    width: 454,
     height: 295,
-    resizable: {
-        preserveRatio: true
-    },
+//    resizable: {
+//        preserveRatio: true
+//    },
     layout: 'border',
     items: [{
-        xtype: 'component',
+        xtype: 'nu_layered_canvas',
         region: 'center',
         width: 320,
         height: 240,
-        autoEl: {
-            tag: 'canvas',
-            width: 320,
-            height: 240
-        },
         style: {
-            backgroundColor: '#000',
-            backgroundImage: "url('resources/images/camera.png')",
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center'
+            backgroundColor: '#000'
+//            backgroundImage: "url('resources/images/camera.png')",
+//            backgroundRepeat: 'no-repeat',
+//            backgroundPosition: 'center'
         },
-        itemId: 'canvas',
-        layout: 'fit'
+        itemId: 'canvas'
     }, {
         region: 'east',
         width: 150,
@@ -36,8 +33,12 @@ Ext.define('NU.view.window.Vision', {
             xtype: 'multiselect',
             width: 148,
             store: [
-                ['raw', 'Raw Image'],
-                ['classified', 'Classified Image'],
+                ['all', 'All'],
+				['raw', 'Raw Image'],
+                ['classified_search', 'Classified Search'],
+                ['classified_refine', 'Classified Refined'],
+                ['visual_horizon', 'Visual Horizon'],
+                ['horizon', 'Horizon'],
                 ['objects', 'Field Objects']
             ],
             blankText: 'No items available',

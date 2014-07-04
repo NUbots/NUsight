@@ -1,46 +1,61 @@
 Ext.define('NU.controller.Vision', {
     extend: 'NU.controller.Display',
     config: {
-        context: null,
         displayImage: false,
         displayClassifiedImage: false,
-        displayFieldObjects: false
+        displayFieldObjects: false,
+		layeredCanvas: null,
+		width: 320,
+		height: 240
     },
     control: {
         'displaypicker': {
             change: function (obj, newValue, oldValue, e) {
-                this.displayImage = false;
-                this.displayClassifiedImage = false;
-                this.displayFieldObjects = false;
+				var layeredCanvas = this.getLayeredCanvas();
+				layeredCanvas.hideAll();
                 Ext.each(newValue, function (value) {
                     switch (value) {
+						case 'all':
+							layeredCanvas.showAll();
+							break;
                         case 'raw':
-                            this.displayImage = true;
+							layeredCanvas.show('image');
                             break;
-                        case 'classified':
-                            this.displayClassifiedImage = true;
+                        case 'classified_search':
+                            layeredCanvas.show('classified_image_search');
+                            break;
+                        case 'classified_refine':
+                            layeredCanvas.show('classified_image_refine');
+                            break;
+                        case 'visual_horizon':
+                            layeredCanvas.show('visual_horizon');
+                            break;
+                        case 'horizon':
+                            layeredCanvas.show('horizon');
                             break;
                         case 'objects':
-                            this.displayFieldObjects = true;
+                            layeredCanvas.showGroup('field_objects');
                             break;
                     }
                 }, this);
             }
         },
-        'view': {
-            resize: function () {
-//                var canvas = this.getCanvas();
-//                canvas.setWidth(obj.body.getWidth());
-//                this.getCa.setHeight(obj.body.getHeight());
-            }
-        },
         'canvas': true
     },
     init: function () {
+		var layeredCanvas = this.getCanvas().getController();
+		layeredCanvas.add('image');
+        layeredCanvas.add('classified_image_search');
+        layeredCanvas.add('classified_image_refine');
+        layeredCanvas.add('visual_horizon');
+        layeredCanvas.add('horizon');
+		layeredCanvas.add('goals', 'field_objects');
+		layeredCanvas.add('balls', 'field_objects');
+		this.setLayeredCanvas(layeredCanvas);
 
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
-        this.setContext(this.getCanvas().el.dom.getContext('2d'));
+//        this.setContext(this.getCanvas().el.dom.getContext('2d'));
         //this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
 
         NU.util.Network.on('image', Ext.bind(this.onImage, this));
@@ -50,11 +65,28 @@ Ext.define('NU.controller.Vision', {
         this.callParent(arguments);
 
     },
+	getContext: function (name) {
+		return this.getLayeredCanvas().getContext(name);
+	},
+	autoSize: function (width, height) {
+		if (width === this.getWidth() && height === this.getHeight()) {
+			return; // didn't change
+		}
+
+		this.setWidth(width);
+		this.setHeight(height);
+		this.getLayeredCanvas().setCanvasSize(width, height);
+	},
     onImage: function (robotIP, image) {
 
-        if (robotIP != this.robotIP || !this.displayImage) {
+        if (robotIP != this.robotIP) {
             return;
         }
+
+		var width = image.dimensions.x;
+		var height = image.dimensions.y;
+		this.autoSize(width, height);
+
 
         // 1st implementation - potentially slower
 //        this.drawImageURL(image);
@@ -66,7 +98,7 @@ Ext.define('NU.controller.Vision', {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
         var url = URL.createObjectURL(blob);
         var imageObj = new Image();
-        var ctx = this.context;
+        var ctx = this.getContext('image');
         imageObj.src = url;
         imageObj.onload = function () {
             ctx.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
@@ -77,7 +109,7 @@ Ext.define('NU.controller.Vision', {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
         var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
         var imageObj = new Image();
-        var ctx = this.context;
+        var ctx = this.getContext("image");
         imageObj.src = uri;
         imageObj.onload = function () {
 			// flip image vertically
@@ -99,34 +131,37 @@ Ext.define('NU.controller.Vision', {
 	},
     onClassifiedImage: function (robotIP, image) {
 
-        if(robotIP != this.robotIP || !this.displayClassifiedImage) {
+        if(robotIP != this.robotIP) {
             return;
         }
 
-        var width = 320;
-        var height = 240;
-        //var width = 640;
-        //var height = 480;
+		var width = image.dimensions.x;
+		var height = image.dimensions.y;
+		this.autoSize(width, height);
+
+        this.drawClassifiedImage(image);
+        this.drawVisualHorizon(image.getVisualHorizon());
+        this.drawHorizon(image.getHorizon());
+
+    },
+    drawClassifiedImage: function(image) {
+
+        var width = this.getWidth();
+        var height = this.getHeight();
+
+        var searchData = this.getContext('classified_image_search').createImageData(width, height);
+        var refinedData = this.getContext('classified_image_refine').createImageData(width, height);
+        var searchPixels = searchData.data;
+        var refinedPixels = refinedData.data;
+        var pixels;
 
         var segments = image.getSegment();
-        var visualHorizon = image.getVisualHorizon();
-        var horizon = image.getHorizon();
-        var imageData = this.context.createImageData(width, height);
-        var pixels = imageData.data;
-
-        for (var i = 0; i < height * width; i++)
-        {
-            pixels[4 * i + 0] = 0;
-            pixels[4 * i + 1] = 0;
-            pixels[4 * i + 2] = 0;
-            pixels[4 * i + 3] = 255;
-        }
 
         for (var i = 0; i < segments.length; i++) {
             var segment = segments[i];
             var colour = this.segmentColourToRGB(segment.colour);
 
-            if (segment.start.x == segment.end.x) {
+            if (segment.start.x === segment.end.x) {
 
                 var x = segment.start.x;
 
@@ -135,13 +170,16 @@ Ext.define('NU.controller.Vision', {
                 {
                     var subsample = (y - segment.start.y) % segment.subsample === 0 ? 1 : 0.7;
 
+                    // Pick which layer to draw to
+                    pixels = segment.subsample === 1 ? refinedPixels : searchPixels;
+
                     pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
                     pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
                     pixels[4 * (width * y + x) + 2] = colour[2] * subsample;
                     pixels[4 * (width * y + x) + 3] = colour[3];
                 }
 
-            } else if (segment.start.y == segment.end.y) {
+            } else if (segment.start.y === segment.end.y) {
 
                 var y = segment.start.y;
 
@@ -149,6 +187,9 @@ Ext.define('NU.controller.Vision', {
                 for (var x = segment.start.x; x <= segment.end.x; x++)
                 {
                     var subsample = (x - segment.start.x) % segment.subsample === 0 ? 1 : 0.7;
+
+                    // Pick which layer to draw to
+                    pixels = segment.subsample === 1 ? refinedPixels : searchPixels;
 
                     pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
                     pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
@@ -159,108 +200,142 @@ Ext.define('NU.controller.Vision', {
             else {
                 console.log('unsupported diagonal classified image segment');
             }
-            //segment.start_x, segment.start_y
-            //segment.end_x, segment.end_y
         }
 
-        // Draw the visual horizon
-        for (var i = 0; i < visualHorizon.length - 1; i++) {
-
-            var p1 = visualHorizon[i];
-            var p2 = visualHorizon[i + 1];
-
-            for(var x = p1.x; x <= p2.x; x++) {
-
-                var y = Math.round(((p2.y - p1.y)/(p2.x - p1.x)) * (x - p1.x) + p1.y);
-
-                pixels[4 * (width * y + x) + 0] = 0;
-                pixels[4 * (width * y + x) + 1] = 255;
-                pixels[4 * (width * y + x) + 2] = 0;
-                pixels[4 * (width * y + x) + 3] = 255;
-            }
-        }
-
-        // Draw the actual horizon
-        for (var x = 0; x < width; x++) {
-
-            var y = Math.round(x * horizon.gradient + horizon.intercept);
-
-            pixels[4 * (width * y + x) + 0] = 0;
-            pixels[4 * (width * y + x) + 1] = 0;
-            pixels[4 * (width * y + x) + 2] = 255;
-            pixels[4 * (width * y + x) + 3] = 255;
-        }
-
-        imageData.data = pixels;
-        this.context.putImageData(imageData, 0, 0);
-
+        this.getContext('classified_image_search').putImageData(searchData, 0, 0);
+        this.getContext('classified_image_refine').putImageData(refinedData, 0, 0);
     },
-    onVisionObjects: function (robotIP, vision_objects) {
+    drawVisualHorizon: function(horizonPoints) {
 
-        if(robotIP != this.robotIP || !this.displayFieldObjects) {
-            return;
+        var context = this.getContext('visual_horizon');
+        context.clearRect(0, 0, this.getWidth(), this.getHeight());
+        context.beginPath();
+        context.moveTo(horizonPoints[0].x, horizonPoints[0].y);
+
+        for(var i = 1; i < horizonPoints.length; i++) {
+            var point = horizonPoints[i];
+            context.lineTo(point.x, point.y);
         }
 
-        // var api_ball = vision_objects[0];
-        // var api_goals = [];
-        // var api_obstacles = [];
-        var context = this.getContext();
+        context.shadowColor = 'black';
+        context.shadowBlur = 5;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
 
-        for (var i = 0; i < vision_objects.length; i++) {
-            var obj = vision_objects[i];
-            switch (obj.type) {
-                case 0: // Goal
+        context.strokeStyle = "rgba(0, 255, 0, 1)";
+        context.lineWidth = 2;
 
-                    context.beginPath();
-
-                    var quad = obj.goal.quad;
-                    context.moveTo(quad.tl.x, quad.tl.y);
-                    context.lineTo(quad.tr.x, quad.tr.y);
-                    context.lineTo(quad.br.x, quad.br.y);
-                    context.lineTo(quad.bl.x, quad.bl.y);
-                    context.lineTo(quad.tl.x, quad.tl.y);
-                    context.closePath();
-
-                    context.shadowColor = 'black';
-                    context.shadowBlur = 5;
-                    context.shadowOffsetX = 0;
-                    context.shadowOffsetY = 0;
-
-                    context.fillStyle = "rgba(255, 242, 0, 0.2)";
-                    context.fill();
-
-                    context.strokeStyle = "rgba(255, 242, 0, 1)";
-                    context.lineWidth = 2;
-                    context.lineWidth = 2;
-
-                    context.stroke();
-                    break;
-
-                case 1: // Ball
-
-                    context.beginPath();
-
-                    context.shadowColor = 'black';
-                    context.shadowBlur = 5;
-                    context.shadowOffsetX = 0;
-                    context.shadowOffsetY = 0;
-
-                    context.arc(obj.ball.circle.centre.x, obj.ball.circle.centre.y, obj.ball.circle.radius, 0, Math.PI*2, true);
-                    context.closePath();
-                    //context.fillStyle = "rgba(255, 0, 0, 1)";//"rgba(255, 85, 0, 0.5)";
-                    //context.fill();
-                    context.strokeStyle = "rgba(255, 255, 255, 1)";
-                    context.lineWidth = 2;
-                    context.lineWidth = 2;
-                    context.stroke();
-
-                    break;
-                
-            }
-
-        }
-
+        context.stroke();
     },
+    drawHorizon: function(horizon) {
+
+        var context = this.getContext('horizon');
+        context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+        var points = [];
+
+        var x1 = horizon.distance / horizon.normal.x;
+        var x2 = (horizon.distance - this.getHeight() * horizon.normal.y) / horizon.normal.x;
+        var y1 = horizon.distance / horizon.normal.y;
+        var y2 = (horizon.distance - this.getWidth() * horizon.normal.x) / horizon.normal.y;
+
+        if (x1 > 0 && x1 < this.getWidth()) {
+            points.push([x1, 0]);
+        }
+        if (x2 > 0 && x2 < this.getWidth()) {
+            points.push([x2, this.getHeight()]);
+        }
+        if (y1 > 0 && y1 < this.getHeight()) {
+            points.push([0, y1]);
+        }
+        if (y2 > 0 && y2 < this.getHeight()) {
+            points.push([this.getWidth(), y2]);
+        }
+
+        if(points.length === 2) {
+            context.beginPath();
+            context.moveTo(points[0][0], points[0][1]);
+            context.lineTo(points[1][0], points[1][1]);
+
+            context.shadowColor = 'black';
+            context.shadowBlur = 5;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+
+            context.strokeStyle = "rgba(0, 0, 255, 1)";
+            context.lineWidth = 2;
+            context.stroke();
+        }
+    },
+	onVisionObjects: function (robotIP, visionObjects) {
+
+		if(robotIP !== this.robotIP) {
+			return;
+		}
+
+		switch (visionObjects.getType()) {
+			case 0: // Goal
+				this.drawGoals(visionObjects.getGoal());
+				break;
+			case 1: // Ball
+				this.drawBalls(visionObjects.getBall());
+				break;
+		}
+
+	},
+	drawGoals: function (goals) {
+
+		var context = this.getContext('goals');
+		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+		for (var i = 0; i < goals.length; i++) {
+			var goal = goals[i];
+			context.beginPath();
+
+			var quad = goal.quad;
+			context.moveTo(quad.tl.x, quad.tl.y);
+			context.lineTo(quad.tr.x, quad.tr.y);
+			context.lineTo(quad.br.x, quad.br.y);
+			context.lineTo(quad.bl.x, quad.bl.y);
+			context.lineTo(quad.tl.x, quad.tl.y);
+			context.closePath();
+
+			context.shadowColor = 'black';
+			context.shadowBlur = 5;
+			context.shadowOffsetX = 0;
+			context.shadowOffsetY = 0;
+
+			context.fillStyle = "rgba(255, 242, 0, 0.2)";
+			context.fill();
+
+			context.strokeStyle = "rgba(255, 242, 0, 1)";
+			context.lineWidth = 2;
+
+			context.stroke();
+		}
+	},
+	drawBalls: function (balls) {
+
+		var context = this.getContext('balls');
+		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+		for (var i = 0; i < balls.length; i++) {
+			var ball = balls[i];
+			context.beginPath();
+
+			context.shadowColor = 'black';
+			context.shadowBlur = 5;
+			context.shadowOffsetX = 0;
+			context.shadowOffsetY = 0;
+
+			context.arc(ball.circle.centre.x, ball.circle.centre.y, ball.circle.radius, 0, Math.PI * 2, true);
+			context.closePath();
+
+			context.strokeStyle = "rgba(255, 255, 255, 1)";
+			context.lineWidth = 2;
+			context.stroke();
+		}
+	},
     segmentColourToRGB: function (colourType)
     {
         var colour;

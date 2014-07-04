@@ -31,9 +31,10 @@ Ext.define('NU.controller.Classifier', {
 		magicWandColours: null,
 		target: 'Field',
 		centerEllipse: false,
-		lastDraw: 0,
 		renderYUV: false,
-		renderCube: false
+		renderCube: false,
+		rawLayeredCanvas: null,
+		classifiedLayeredCanvas: null
 	},
 	statics: {
 		Target: {
@@ -247,19 +248,22 @@ Ext.define('NU.controller.Classifier', {
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
 
+		var rawLayeredCanvas = this.getRawImage().getController();
+		var rawContext = rawLayeredCanvas.add('raw').context;
+		rawLayeredCanvas.add('zoom');
+		rawLayeredCanvas.add('selection');
+		this.setRawContext(rawContext);
+		this.setRawLayeredCanvas(rawLayeredCanvas);
+
 		NU.util.Network.on('image', Ext.bind(this.onImage, this));
 		NU.util.Network.on('lookup_table', Ext.bind(this.onLookUpTable, this));
 		this.callParent(arguments);
 
-		var rawElCanvas = this.getRawImage().getEl();
-		var rawCanvas = rawElCanvas.dom;
-		this.setRawContext(rawCanvas.getContext('2d'));
-
-		var classifiedElCanvas = this.getClassifiedImage().getEl();
-		var classifiedCanvas = classifiedElCanvas.dom;
-		var ctx = classifiedCanvas.getContext('2d');
-		this.setClassifiedContext(ctx);
-		this.setClassifiedImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
+		var classifiedLayeredCanvas = this.getClassifiedImage().getController();
+		var classifiedContext = classifiedLayeredCanvas.add('classified').context;
+		this.setClassifiedLayeredCanvas(classifiedLayeredCanvas);
+		this.setClassifiedContext(classifiedContext);
+		this.setClassifiedImageData(classifiedContext.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
 
 		function clickBind(callback, preventDefault) {
 			return function (e, element) {
@@ -268,14 +272,20 @@ Ext.define('NU.controller.Classifier', {
 				}
 
 				var el = Ext.get(element);
-				var x = e.getX() - el.getLeft();
-				var y = e.getY() - el.getTop();
+				var rawX = e.getX() - el.getLeft();
+				var rawY = e.getY() - el.getTop();
 
-				callback.call(this, x, y, e);
+				var x = rawX * (this.getImageWidth() / this.getRawLayeredCanvas().getImageWidth());
+				var y = rawY * (this.getImageHeight() / this.getRawLayeredCanvas().getImageHeight());
+
+				callback.call(this, x, y, rawX, rawY, e);
 			};
 		}
 
-		[rawElCanvas, classifiedElCanvas].forEach(function (element) {
+		var rawContainer = this.getRawImage().getEl();
+		var classifiedContainer = this.getClassifiedImage().getEl();
+
+		[rawContainer, classifiedContainer].forEach(function (element) {
 			this.mon(element, {
 				click: clickBind(this.onImageClick),
 				dblclick: clickBind(this.onImageDblClick),
@@ -479,20 +489,30 @@ Ext.define('NU.controller.Classifier', {
 			return;
 		}
 
-		if (image) {
-			var now = Date.now();
-			if (!this.getFrozen() && now - this.getLastDraw() >= 500) {
+		if (image) { // TODO: is this needed?
+			if (!this.getFrozen()) {
+				this.autoSize(image.dimensions.x, image.dimensions.y);
 				this.drawImage(image, function (ctx) {
+					debugger;
 					this.setRawImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
 					this.updateClassifiedData();
 					this.renderImages();
-					this.setLastDraw(now);
 				}, this);
 			}
 		}
 
 	},
-	onImageMouseMove: function (x, y, e) {
+	autoSize: function (width, height) {
+		if (width === this.getImageWidth() && height === this.getImageHeight()) {
+			return; // didn't change
+		}
+
+		this.setImageWidth(width);
+		this.setImageHeight(height);
+		this.getRawLayeredCanvas().setCanvasSize(width, height);
+		this.getClassifiedLayeredCanvas().setCanvasSize(width, height);
+	},
+	onImageMouseMove: function (x, y) {
 		this.setMouseX(x);
 		this.setMouseY(y);
 		this.renderRawImage();
@@ -1388,7 +1408,8 @@ Ext.define('NU.controller.Classifier', {
 		data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 		me.setRawImageData(data);
 		me.setRawImageComponents(imageObj.components);
-		me.renderImages();
+//		me.renderImages();
+		callback.call(thisArg, ctx);
 	},
 	testDrawImage: function () {
 		var uri = 'resources/images/test_image2.jpg';
