@@ -198,7 +198,7 @@ Ext.define('NU.controller.Vision', {
 
         var context = this.getContext('visual_horizon');
         context.clearRect(0, 0, this.getWidth(), this.getHeight());
-
+        context.beginPath();
         context.moveTo(horizonPoints[0].x, horizonPoints[0].y);
 
         for(var i = 1; i < horizonPoints.length; i++) {
@@ -218,30 +218,31 @@ Ext.define('NU.controller.Vision', {
     },
     drawHorizon: function(horizon) {
 
-        var context = this.getContext('visual_horizon');
+        var context = this.getContext('horizon');
         context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
         var points = [];
 
         var x1 = horizon.distance / horizon.normal.x;
-        var x2 = (horizon.distance - this.getWidth() * horizon.normal) / horizon.normal.y;
+        var x2 = (horizon.distance - this.getHeight() * horizon.normal.y) / horizon.normal.x;
         var y1 = horizon.distance / horizon.normal.y;
-        var y2 = (horizon.distance - this.getHeight() * horizon.normal.y) / horizon.normal.x;
+        var y2 = (horizon.distance - this.getWidth() * horizon.normal.x) / horizon.normal.y;
 
         if (x1 > 0 && x1 < this.getWidth()) {
             points.push([x1, 0]);
         }
         if (x2 > 0 && x2 < this.getWidth()) {
-            points.push([x2, 0]);
+            points.push([x2, this.getHeight()]);
         }
         if (y1 > 0 && y1 < this.getHeight()) {
             points.push([0, y1]);
         }
         if (y2 > 0 && y2 < this.getHeight()) {
-            points.push([0, y1]);
+            points.push([this.getWidth(), y2]);
         }
 
         if(points.length == 2) {
+            context.beginPath();
             context.moveTo(points[0][0], points[0][1]);
             context.lineTo(points[1][0], points[1][1]);
 
@@ -250,8 +251,9 @@ Ext.define('NU.controller.Vision', {
             context.shadowOffsetX = 0;
             context.shadowOffsetY = 0;
 
-            context.strokeStyle = "rgba(0, 255, 0, 1)";
+            context.strokeStyle = "rgba(0, 0, 255, 1)";
             context.lineWidth = 2;
+            context.stroke();
         }
     },
 	onVisionObjects: function (robotIP, visionObjects) {
