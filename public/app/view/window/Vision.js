@@ -33,9 +33,10 @@ Ext.define('NU.view.window.Vision', {
             xtype: 'multiselect',
             width: 148,
             store: [
-                ['raw', 'Raw Image'],
-                ['classified_search', 'Classified Image Search'],
-                ['classified_refine', 'Classified Image Refined'],
+                ['all', 'All'],
+				['raw', 'Raw Image'],
+                ['classified_search', 'Classified Search'],
+                ['classified_refine', 'Classified Refined'],
                 ['visual_horizon', 'Visual Horizon'],
                 ['horizon', 'Horizon'],
                 ['objects', 'Field Objects']

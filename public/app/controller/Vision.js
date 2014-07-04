@@ -15,6 +15,9 @@ Ext.define('NU.controller.Vision', {
 				layeredCanvas.hideAll();
                 Ext.each(newValue, function (value) {
                     switch (value) {
+						case 'all':
+							layeredCanvas.showAll();
+							break;
                         case 'raw':
 							layeredCanvas.show('image');
                             break;
