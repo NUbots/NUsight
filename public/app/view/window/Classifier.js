@@ -51,7 +51,7 @@ Ext.define('NU.view.window.Classifier', {
 					toggleGroup: 'tool',
 					pressed: true,
 					allowDepress: false,
-					tooltip: 'Magic Wand Tool - Select the point clicked and similar surrounding pixels using tolerance (right click to classify)'
+					tooltip: 'Magic Wand Tool - Select the point clicked and similar surrounding pixels using tolerance (right click to classify, ctrl+click to quickly classify without selecting)'
 				}, {
 					itemId: 'toolRectangle',
 					iconCls: 'icon-shape-square',

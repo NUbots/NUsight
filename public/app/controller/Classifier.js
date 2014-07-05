@@ -546,7 +546,7 @@ Ext.define('NU.controller.Classifier', {
 		var rgba = this.getPointRGBA(x, y, this.getClassifiedImageData().data);
 		this.getClassifiedValue().update("(" + x + ", " + y + ") = rgb(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ")");
 	},
-	onImageClick: function (x, y) {
+	onImageClick: function (x, y, rawX, rawY, e) {
 		switch (this.getSelectionTool()) {
 			case 'point':
 				this.addHistory();
@@ -554,6 +554,9 @@ Ext.define('NU.controller.Classifier', {
 				break;
 			case 'magic_wand':
 				this.magicWandSelect(x, y);
+				if (e.ctrlKey) {
+					this.magicWandClassify(x, y);
+				}
 				break;
 			case 'rectangle':
 				if (this.getStartPoint() === null) {
@@ -590,7 +593,7 @@ Ext.define('NU.controller.Classifier', {
 				break;
 		}
 	},
-	onImageRightClick: function (x, y) {
+	onImageRightClick: function (x, y, rawX, rawY, e) {
 		switch (this.getSelectionTool()) {
 			case 'point':
 				// temporarily turn override on and restore after
@@ -602,6 +605,9 @@ Ext.define('NU.controller.Classifier', {
 				break;
 			case 'magic_wand':
 				this.addHistory();
+				if (e.ctrlKey) {
+					this.magicWandSelect(x, y);
+				}
 				this.magicWandClassify(x, y);
 				break;
 			case 'rectangle':
