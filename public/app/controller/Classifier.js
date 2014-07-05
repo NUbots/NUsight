@@ -557,7 +557,7 @@ Ext.define('NU.controller.Classifier', {
 				break;
 			case 'magic_wand':
 				this.magicWandSelect(x, y);
-				if (e.ctrlKey) {
+				if (e.ctrlKey || e.button === 1) {
 					this.magicWandClassify(x, y);
 				}
 				break;
@@ -1510,6 +1510,7 @@ Ext.define('NU.controller.Classifier', {
 			data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 			me.setRawImageData(data);
 			me.setRawImageComponents(imageObj.components);
+			me.setImageFormat(API.Image.Format.JPEG);
 			me.renderImages();
 		};
 		imageObj.load(uri);
