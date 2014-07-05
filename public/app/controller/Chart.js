@@ -21,9 +21,6 @@ Ext.define('NU.controller.Chart', {
         streams: null
     },
     control: {
-        'view': {
-            resize: 'onResize'
-        },
         'streampicker': {
             change: 'onStreamSelect'
         },
@@ -62,7 +59,8 @@ Ext.define('NU.controller.Chart', {
 
         this.callParent(arguments);
 
-        this.onResize();
+        var view = this.getView();
+        this.onResize(view, view.getWidth(), view.getHeight());
 
     },
     onStreamSelect: function (obj, newValue, oldValue, e) {
@@ -110,6 +108,8 @@ Ext.define('NU.controller.Chart', {
             canvasDom.width = canvasEl.getWidth();
             canvasDom.height = canvasEl.getHeight();
         }
+
+        return this.callParent(arguments);
 
     },
     onSensorData: function (api_sensor_data) {

@@ -18,17 +18,9 @@ Ext.define('NU.controller.Display', {
             }
         },
         'view': {
-            resize: function (view, width, height) {
-                // hack because ExtJS seems not to do this correctly! >_<
-                if (view.maximized) {
-                    var newBox = view.constrainTo.getViewSize(false);
-                    newBox.x = 0;
-                    newBox.y = 0;
-                    view.setBox(newBox)
-                }
-            }
+            boxready: 'onResize',
+            resize: 'onResize'
         }
-
     },
     constructor: function() {
 
@@ -49,5 +41,14 @@ Ext.define('NU.controller.Display', {
         }
 
         return this.callParent(arguments);
+    },
+    onResize: function (view, width, height) {
+        // hack because ExtJS seems not to do this correctly! >_<
+        if (view.maximized) {
+            var newBox = view.constrainTo.getViewSize(false);
+            newBox.x = 0;
+            newBox.y = 0;
+            view.setBox(newBox)
+        }
     }
 });
