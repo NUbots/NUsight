@@ -16,7 +16,19 @@ Ext.define('NU.controller.Display', {
                     this.fireEvent('selectRobotIP', robotIP);
                 }
             }
+        },
+        'view': {
+            resize: function (view, width, height) {
+                // hack because ExtJS seems not to do this correctly! >_<
+                if (view.maximized) {
+                    var newBox = view.constrainTo.getViewSize(false);
+                    newBox.x = 0;
+                    newBox.y = 0;
+                    view.setBox(newBox)
+                }
+            }
         }
+
     },
     constructor: function() {
 
