@@ -244,8 +244,6 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		},
-		'rawValue': true,
-		'classifiedValue': true,
 		'scatter3d': true
 	},
 	init: function () {
@@ -288,8 +286,8 @@ Ext.define('NU.controller.Classifier', {
 				var rawX = e.getX() - el.getLeft();
 				var rawY = e.getY() - el.getTop();
 
-				var x = rawX * (this.getImageWidth() / this.getRawLayeredCanvas().getImageWidth());
-				var y = rawY * (this.getImageHeight() / this.getRawLayeredCanvas().getImageHeight());
+				var x = Math.round(rawX * (this.getImageWidth() / this.getRawLayeredCanvas().getImageWidth()));
+				var y = Math.round(rawY * (this.getImageHeight() / this.getRawLayeredCanvas().getImageHeight()));
 
 				callback.call(this, x, y, rawX, rawY, e);
 			};
@@ -542,12 +540,6 @@ Ext.define('NU.controller.Classifier', {
 				this.setCenterEllipse(e.altKey);
 				break;
 		}
-
-		var rgba = this.getPointRGBA(x, y, this.getRawImageData().data);
-		this.getRawValue().update("(" + x + ", " + y + ") = rgb(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ")");
-
-		var rgba = this.getPointRGBA(x, y, this.getClassifiedImageData().data);
-		this.getClassifiedValue().update("(" + x + ", " + y + ") = rgb(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ")");
 	},
 	onImageClick: function (x, y, rawX, rawY, e) {
 		switch (this.getSelectionTool()) {

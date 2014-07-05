@@ -8,8 +8,12 @@ Ext.define('NU.view.window.Classifier', {
 	controller: 'NU.controller.Classifier',
 	title: 'Classifier',
 	width: 800,
-	height: 750,
-	layout: 'hbox',
+	height: 780,
+	layout: {
+		type: 'vbox',
+		align: 'stretch',
+		flex: 1
+	},
 	initComponent: function () {
 		Ext.apply(this, {
 			tbar: [{
@@ -128,74 +132,86 @@ Ext.define('NU.view.window.Classifier', {
 			}],
 			items: [{
 				layout: {
-					type: 'table',
-					columns: 2
+					type: 'vbox',
+					align: 'stretch'
 				},
+				flex: 1,
 				items: [{
-					// raw image
+					// images
+					layout: {
+						type: 'hbox',
+						align: 'stretch'
+					},
+					flex: 1,
 					items: [{
-						style: {
-							display: 'block',
-							border: '2px solid #000',
-							borderRadius: '2px',
-							marginBottom: '3px'
+						// camera
+						layout: {
+							type: 'vbox',
+							align: 'stretch'
 						},
-						items: {
-							xtype: 'nu_layered_canvas',
-							itemId: 'rawImage',
-							width: 320,
-							height: 240,
+						flex: 1,
+						items: [{
+							// raw image
+							layout: 'fit',
+							flex: 1,
 							style: {
-								backgroundColor: '#000',
-								cursor: 'crosshair'
+								display: 'block',
+								border: '2px solid #000',
+								borderRadius: '2px',
+								marginBottom: '3px'
+							},
+							items: {
+								xtype: 'nu_layered_canvas',
+								itemId: 'rawImage',
+								width: 320,
+								height: 240,
+								style: {
+									backgroundColor: '#000',
+									cursor: 'crosshair'
 //								backgroundImage: "url('resources/images/camera.png')",
 //								backgroundRepeat: 'no-repeat',
 //								backgroundPosition: 'center',
+								}
 							}
-						}
-					}]
-				}, {
-					rowspan: 2,
-					xtype: 'scatter3d',
-					itemId: 'scatter3d'
-				}, {
-					// classified image
-					items: [{
-						style: {
-							display: 'block',
-							border: '2px solid #000',
-							borderRadius: '2px'
-						},
-						items: {
-							xtype: 'nu_layered_canvas',
-							itemId: 'classifiedImage',
-							width: 320,
-							height: 240,
+						}, {
+							// classified
+							layout: 'fit',
+							flex: 1,
 							style: {
-								backgroundColor: '#000',
-								cursor: 'crosshair'
+								display: 'block',
+								border: '2px solid #000',
+								borderRadius: '2px'
+							},
+							items: {
+								xtype: 'nu_layered_canvas',
+								itemId: 'classifiedImage',
+								width: 320,
+								height: 240,
+								style: {
+									backgroundColor: '#000',
+									cursor: 'crosshair'
+								}
 							}
-						}
+						}]
+					}, {
+						// 3d scatter
+						xtype: 'scatter3d',
+						itemId: 'scatter3d',
+						flex: 1
 					}]
 				}, {
-					colspan: 2,
+					// controls
 					layout: {
-						type: 'table',
-						columns: 2
+						type: 'hbox',
+						align: 'stretch'
 					},
 					items: [{
+						// left controls
 						layout: {
 							type: 'vbox'
 						},
+						flex: 1,
 						items: [{
-							itemId: 'rawValue',
-							width: 320,
-							html: '(X, Y) = rgb(R, G, B)',
-							style: {
-								margin: '5px',
-								textAlign: 'center'
-							}
-						}, {
 							itemId: 'snapshot',
 							xtype: 'checkbox',
 							fieldLabel: 'Freeze'
@@ -221,19 +237,12 @@ Ext.define('NU.view.window.Classifier', {
 							text: 'Convex Hull'
 						}*/]
 					}, {
+						// right controls
 						layout: {
-							type: 'vbox',
-							align: 'top'
+							type: 'vbox'
 						},
+						flex: 1,
 						items: [{
-							itemId: 'classifiedValue',
-							width: 320,
-							html: '(X, Y) = rgb(R, G, B)',
-							style: {
-								margin: '5px',
-								textAlign: 'center'
-							}
-						}, {
 							itemId: 'rawUnderlay',
 							xtype: 'checkbox',
 							checked: true,
