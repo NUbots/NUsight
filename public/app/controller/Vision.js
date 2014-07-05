@@ -6,7 +6,8 @@ Ext.define('NU.controller.Vision', {
         displayFieldObjects: false,
 		layeredCanvas: null,
 		width: 320,
-		height: 240
+		height: 240,
+		bitsPerPixel: 4
     },
     control: {
         'displaypicker': {
@@ -86,13 +87,22 @@ Ext.define('NU.controller.Vision', {
 		var width = image.dimensions.x;
 		var height = image.dimensions.y;
 		this.autoSize(width, height);
+		var Format = API.Image.Format;
 
+		switch (image.format) {
+			case Format.JPEG:
+				// 1st implementation - potentially slower
+				//	        this.drawImageURL(image);
 
-        // 1st implementation - potentially slower
-//        this.drawImageURL(image);
-
-        // 2nd implementation - potentially faster
-        this.drawImageB64(image);
+				// 2nd implementation - potentially faster
+				this.drawImageB64(image);
+				break;
+			case Format.YCbCr444:
+				this.drawImageYbCr444(image);
+				break;
+			default:
+				throw 'Unsupported Format';
+		}
     },
     drawImageURL: function (image) {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
@@ -105,11 +115,43 @@ Ext.define('NU.controller.Vision', {
             URL.revokeObjectURL(url);
         };
     },
+	YCbCrtoRGB: function (ycbcr) {
+		// from http://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion
+		return [
+			255 / 219 * (ycbcr[0] - 16) + 255 / 112 * 0.701 * (ycbcr[2] - 128),
+			255 / 219 * (ycbcr[0] - 16) - 255 / 112 * 0.886 * 0.114 / 0.587 * (ycbcr[1] - 128) - 255 / 112 * 0.701 * 0.299 / 0.587 * (ycbcr[2] - 128),
+			255 / 219 * (ycbcr[0] - 16) + 255 / 112 * 0.886 * (ycbcr[1] - 128)
+		];
+	},
+	drawImageYbCr444: function (image) {
+		var width = this.getWidth();
+		var height = this.getHeight();
+		var ctx = this.getContext('image');
+		var imageData = ctx.createImageData(width, height);
+		var data = new Uint8ClampedArray(image.data.toArrayBuffer());
+		var bitsPerPixel = this.getBitsPerPixel();
+		var bitsPerPixel2 = 3;
+		var total = width * height * bitsPerPixel2;
+		for (var i = 0; i < data.length / bitsPerPixel2; i++) {
+			var offset = bitsPerPixel * i;
+			var offset2 = total - bitsPerPixel2 * i;
+			var rgb = this.YCbCrtoRGB([
+				data[offset2 + 0],
+				data[offset2 + 1],
+				data[offset2 + 2],
+			]);
+			imageData.data[offset + 0] = rgb[0];
+			imageData.data[offset + 1] = rgb[1];
+			imageData.data[offset + 2] = rgb[2];
+			imageData.data[offset + 3] = 255;
+		}
+		ctx.putImageData(imageData, 0, 0);
+	},
     drawImageB64: function (image) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
         var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
         var imageObj = new Image();
-        var ctx = this.getContext("image");
+        var ctx = this.getContext('image');
         imageObj.src = uri;
         imageObj.onload = function () {
 			// flip image vertically

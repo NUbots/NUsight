@@ -34,7 +34,8 @@ Ext.define('NU.controller.Classifier', {
 		renderYUV: false,
 		renderCube: false,
 		rawLayeredCanvas: null,
-		classifiedLayeredCanvas: null
+		classifiedLayeredCanvas: null,
+		imageFormat: null
 	},
 	statics: {
 		Target: {
@@ -503,6 +504,8 @@ Ext.define('NU.controller.Classifier', {
 
 		if (image) { // TODO: is this needed?
 			if (!this.getFrozen()) {
+				var Format = API.Image.Format;
+
 				this.autoSize(image.dimensions.x, image.dimensions.y);
 				this.drawImage(image, function (ctx) {
 					this.setRawImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
@@ -1360,12 +1363,22 @@ Ext.define('NU.controller.Classifier', {
 		x = imageWidth - x - 1;
 		y = imageHeight - y - 1;
 
-		var l = components[0].lines[y][x];
-		// divide cb and cr by 2 as it's using YUV422 so there is half the cb/cr
-		var cb = components[1].lines[y][Math.floor(x / 2)];
-		var cr = components[2].lines[y][Math.floor(x / 2)];
-
-		return [l, cb, cr];
+		var Format = API.Image.Format;
+		switch (this.getImageFormat()) {
+			case Format.JPEG:
+				var l = components[0].lines[y][x];
+				// divide cb and cr by 2 as it's using YUV422 so there is half the cb/cr
+				var cb = components[1].lines[y][Math.floor(x / 2)];
+				var cr = components[2].lines[y][Math.floor(x / 2)];
+				return [l, cb, cr];
+			case Format.YCbCr444:
+				var l = components[3 * (y * imageWidth + x) + 0];
+				var cb = components[3 * (y * imageWidth + x) + 1];
+				var cr = components[3 * (y * imageWidth + x) + 2];
+				return [l, cb, cr];
+			default:
+				throw 'Unsupported format';
+		}
 	},
 	getRGBfromType: function (typeId) {
 		var Target = this.self.Target;
@@ -1389,8 +1402,53 @@ Ext.define('NU.controller.Classifier', {
 		}
 	},
 	drawImage: function (image, callback, thisArg) {
-		//this.drawImageB64(image, callback, thisArg);
-		this.drawImageB64YUV(image, callback, thisArg);
+		var Format = API.Image.Format;
+		this.setImageFormat(image.format);
+		switch (image.format) {
+			case Format.JPEG:
+				//this.drawImageB64(image, callback, thisArg);
+				this.drawImageB64YUV(image, callback, thisArg);
+				break;
+			case Format.YCbCr444:
+				this.drawImageYbCr444(image, callback, thisArg);
+				break;
+			default:
+				throw 'Unsupported Format';
+		}
+	},
+	YCbCrtoRGB: function (ycbcr) {
+		// from http://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion
+		return [
+				255 / 219 * (ycbcr[0] - 16) + 255 / 112 * 0.701 * (ycbcr[2] - 128),
+				255 / 219 * (ycbcr[0] - 16) - 255 / 112 * 0.886 * 0.114 / 0.587 * (ycbcr[1] - 128) - 255 / 112 * 0.701 * 0.299 / 0.587 * (ycbcr[2] - 128),
+				255 / 219 * (ycbcr[0] - 16) + 255 / 112 * 0.886 * (ycbcr[1] - 128)
+		];
+	},
+	drawImageYbCr444: function (image, callback, thisArg) {
+		var width = this.getImageWidth();
+		var height = this.getImageHeight();
+		var ctx = this.getRawContext();
+		var imageData = ctx.createImageData(width, height);
+		var data = new Uint8ClampedArray(image.data.toArrayBuffer());
+		var bitsPerPixel = this.getBitsPerPixel();
+		var bitsPerPixel2 = 3;
+		var total = width * height * bitsPerPixel2;
+		for (var i = 0; i < data.length / bitsPerPixel2; i++) {
+			var offset = bitsPerPixel * i;
+			var offset2 = total - bitsPerPixel2 * i;
+			var rgb = this.YCbCrtoRGB([
+				data[offset2 + 0],
+				data[offset2 + 1],
+				data[offset2 + 2],
+			]);
+			imageData.data[offset + 0] = rgb[0];
+			imageData.data[offset + 1] = rgb[1];
+			imageData.data[offset + 2] = rgb[2];
+			imageData.data[offset + 3] = 255;
+		}
+		ctx.putImageData(imageData, 0, 0);
+		this.setRawImageComponents(data);
+		callback.call(thisArg, ctx);
 	},
 	drawImageB64: function (image, callback, thisArg) {
 		var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
