@@ -25,7 +25,7 @@ Ext.define('NU.controller.Classifier', {
 		range: 10,
 		tolerance: 50,
 		renderZoom: false,
-		renderRawUnderlay: false,
+		renderRawUnderlay: true,
 		rawUnderlayOpacity: 0.5,
 		magicWandPoints: null,
 		magicWandColours: null,
@@ -117,6 +117,10 @@ Ext.define('NU.controller.Classifier', {
 		'toolZoom': {
 			toggle: function (btn, pressed) {
 				this.setRenderZoom(pressed);
+				if (!pressed) {
+					this.getRawLayeredCanvas().clear('zoom');
+					this.getClassifiedLayeredCanvas().clear('zoom');
+				}
 				this.renderImages();
 			}
 		},
@@ -207,6 +211,8 @@ Ext.define('NU.controller.Classifier', {
 		'rawUnderlay': {
 			change: function (checkbox, newValue, oldValue, eOpts) {
 				this.setRenderRawUnderlay(newValue);
+				var layer = this.getClassifiedLayeredCanvas().get('underlay');
+				layer.clear();
 				this.renderClassifiedImage();
 			}
 		},
@@ -214,6 +220,9 @@ Ext.define('NU.controller.Classifier', {
 			change: function (checkbox, newValue, oldValue, eOpts) {
 				if (checkbox.isValid()) {
 					this.setRawUnderlayOpacity(newValue);
+					var layer = this.getClassifiedLayeredCanvas().get('underlay');
+					layer.clear();
+					layer.setOpacity(this.getRawUnderlayOpacity());
 					this.renderClassifiedImage();
 				}
 			}
@@ -250,8 +259,8 @@ Ext.define('NU.controller.Classifier', {
 
 		var rawLayeredCanvas = this.getRawImage().getController();
 		var rawContext = rawLayeredCanvas.add('raw').context;
-		rawLayeredCanvas.add('zoom');
 		rawLayeredCanvas.add('selection');
+		rawLayeredCanvas.add('zoom');
 		this.setRawContext(rawContext);
 		this.setRawLayeredCanvas(rawLayeredCanvas);
 
@@ -260,7 +269,10 @@ Ext.define('NU.controller.Classifier', {
 		this.callParent(arguments);
 
 		var classifiedLayeredCanvas = this.getClassifiedImage().getController();
+		classifiedLayeredCanvas.add('underlay').setOpacity(this.getRawUnderlayOpacity());
 		var classifiedContext = classifiedLayeredCanvas.add('classified').context;
+		classifiedLayeredCanvas.add('selection');
+		classifiedLayeredCanvas.add('zoom');
 		this.setClassifiedLayeredCanvas(classifiedLayeredCanvas);
 		this.setClassifiedContext(classifiedContext);
 		this.setClassifiedImageData(classifiedContext.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
@@ -493,7 +505,6 @@ Ext.define('NU.controller.Classifier', {
 			if (!this.getFrozen()) {
 				this.autoSize(image.dimensions.x, image.dimensions.y);
 				this.drawImage(image, function (ctx) {
-					debugger;
 					this.setRawImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
 					this.updateClassifiedData();
 					this.renderImages();
@@ -1054,48 +1065,46 @@ Ext.define('NU.controller.Classifier', {
 		this.renderClassifiedImage();
 	},
 	renderRawImage: function () {
-		var ctx = this.getRawContext();
-		ctx.putImageData(this.getRawImageData(), 0, 0);
-		this.renderEllipseOverlay(ctx);
-		this.renderRectangleOverlay(ctx);
-		this.renderPolygonOverlay(ctx);
-		this.renderMagicWandOverlay(ctx);
+//		var ctx = this.getRawContext();
+//		ctx.putImageData(this.getRawImageData(), 0, 0);
+		var layeredCanvas = this.getRawLayeredCanvas();
+		var selectionLayer = layeredCanvas.get('selection');
+		selectionLayer.clear();
+		var selectionContext = selectionLayer.context;
+		this.renderEllipseOverlay(selectionContext);
+		this.renderRectangleOverlay(selectionContext);
+		this.renderPolygonOverlay(selectionContext);
+		this.renderMagicWandOverlay(selectionContext);
 		if (this.getRenderZoom()) {
-			this.renderZoomOverlay(ctx, this.getRawImageData());
+			var zoomContext = layeredCanvas.getContext('zoom');
+			this.renderZoomOverlay(zoomContext, this.getRawImageData());
 		}
 	},
 	renderClassifiedImage: function () {
 		var ctx = this.getClassifiedContext();
 		ctx.putImageData(this.getClassifiedImageData(), 0, 0);
+		var layeredCanvas = this.getClassifiedLayeredCanvas();
 		if (this.getRenderRawUnderlay()) {
-			this.renderImageUnderlay(ctx, this.getRawImageData());
+			this.renderImageUnderlay();
 		}
-		this.renderEllipseOverlay(ctx);
-		this.renderRectangleOverlay(ctx);
-		this.renderPolygonOverlay(ctx);
-		this.renderMagicWandOverlay(ctx);
+		var selectionLayer = layeredCanvas.get('selection');
+		selectionLayer.clear();
+		var selectionContext = selectionLayer.context;
+		this.renderEllipseOverlay(selectionContext);
+		this.renderRectangleOverlay(selectionContext);
+		this.renderPolygonOverlay(selectionContext);
+		this.renderMagicWandOverlay(selectionContext);
 		if (this.getRenderZoom()) {
-			this.renderZoomOverlay(ctx, this.getClassifiedImageData());
+			var zoomContext = layeredCanvas.getContext('zoom');
+			this.renderZoomOverlay(zoomContext, this.getClassifiedImageData())
 		}
 	},
-	renderImageUnderlay: function (ctx, rawImageData) {
-		var imageWidth = this.getImageWidth();
-		var imageHeight = this.getImageHeight();
-		var bitsPerPixel = this.getBitsPerPixel();
-		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-		var rawData = rawImageData.data;
-		var rawOpacity = this.getRawUnderlayOpacity();
-		var classifiedOpacity = 1 - this.getRawUnderlayOpacity();
-		for (var y = 0; y < imageHeight; y++) {
-			for (var x = 0; x < imageWidth; x++) {
-				var offset = bitsPerPixel * (imageWidth * y + x);
-				data.data[offset] = Math.round(data.data[offset] * classifiedOpacity + rawData[offset] * rawOpacity);
-				data.data[offset + 1] = Math.round(data.data[offset + 1] * classifiedOpacity + rawData[offset + 1] * rawOpacity);
-				data.data[offset + 2] = Math.round(data.data[offset + 2] * classifiedOpacity + rawData[offset + 2] * rawOpacity);
-				data.data[offset + 3] = 255;
-			}
-		}
-		ctx.putImageData(data, 0, 0);
+	renderImageUnderlay: function () {
+		var rawLayeredCanvas = this.getRawLayeredCanvas();
+		var classifiedLayeredCanvas = this.getClassifiedLayeredCanvas();
+
+		var rawCanvas = rawLayeredCanvas.get('raw').canvas;
+		classifiedLayeredCanvas.get('underlay').context.drawImage(rawCanvas.dom, 0, 0);
 	},
 	renderPolygonOverlays: function () {
 		this.renderPolygonOverlay(this.getClassifiedContext());
@@ -1263,7 +1272,7 @@ Ext.define('NU.controller.Classifier', {
 							data.data[zoomOffset] = originalData[realOffset];
 							data.data[zoomOffset + 1] = originalData[realOffset + 1];
 							data.data[zoomOffset + 2] = originalData[realOffset + 2];
-							data.data[zoomOffset + 3] = originalData[realOffset + 3];
+							data.data[zoomOffset + 3] = 255;
 						}
 					}
 				}
@@ -1331,7 +1340,7 @@ Ext.define('NU.controller.Classifier', {
 					classifiedData.data[offset + 0] = 0;
 					classifiedData.data[offset + 1] = 0;
 					classifiedData.data[offset + 2] = 0;
-					classifiedData.data[offset + 3] = 255;
+					classifiedData.data[offset + 3] = 0;
 				}
 			}
 		}

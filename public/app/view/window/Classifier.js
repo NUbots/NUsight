@@ -236,7 +236,7 @@ Ext.define('NU.view.window.Classifier', {
 						}, {
 							itemId: 'rawUnderlay',
 							xtype: 'checkbox',
-							checked: false,
+							checked: true,
 							fieldLabel: 'Underlay'
 						}, {
 							itemId: 'rawUnderlayOpacity',

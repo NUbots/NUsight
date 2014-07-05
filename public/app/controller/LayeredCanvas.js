@@ -38,6 +38,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 			// resize to width
 			this.setImageSize(width + 'px', 'auto');
 		}
+		return this;
 	},
 	add: function (name, group) {
 		var layers = this.getLayers();
@@ -60,7 +61,9 @@ Ext.define('NU.controller.LayeredCanvas', {
 				group: group,
 				canvas: canvas,
 				context: canvas.dom.getContext('2d'),
-				hidden: true
+				hidden: true,
+				clear: Ext.pass(this.clear, [name], this),
+				setOpacity: Ext.pass(this.setOpacity, [name], this)
 			};
 			layers.push(layer);
 			this.autoSize();
@@ -80,6 +83,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 			this.setImageWidth(canvas.getWidth());
 			this.setImageHeight(canvas.getHeight());
 		}, this);
+		return this;
 	},
 	setCanvasSize: function (width, height) {
 		var layers = this.getLayers();
@@ -93,6 +97,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 		this.setCanvasWidth(width);
 		this.setCanvasHeight(height);
 		this.autoSize();
+		return this;
 	},
 	remove: function (name) {
 		var layers = this.getLayers();
@@ -103,18 +108,21 @@ Ext.define('NU.controller.LayeredCanvas', {
 			}
 		}, this);
 		this.setLayers(newLayers);
+		return this;
 	},
 	hideAll: function () {
 		var layers = this.getLayers();
 		layers.forEach(function (layer) {
 			this.hide(layer);
 		}, this);
+		return this;
 	},
 	showAll: function () {
 		var layers = this.getLayers();
 		layers.forEach(function (layer) {
 			this.show(layer);
 		}, this);
+		return this;
 	},
 	hide: function (name) {
 		var layer = typeof name !== "string" ? name : this.get(name);
@@ -122,6 +130,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 			display: 'none'
 		});
 		layer.hidden = true;
+		return this;
 	},
 	show: function (name) {
 		var layer = typeof name !== "string" ? name : this.get(name);
@@ -129,10 +138,19 @@ Ext.define('NU.controller.LayeredCanvas', {
 			display: 'block'
 		});
 		layer.hidden = false;
+		return this;
 	},
 	clear: function (name) {
 		var context = this.getContext(name);
 		context.clearRect(0, 0, this.getCanvasWidth(), this.getCanvasHeight());
+		return this;
+	},
+	setOpacity: function (name, opacity) {
+		var layer = this.get(name);
+		layer.canvas.setStyle({
+			opacity: opacity
+		});
+		return this;
 	},
 	showGroup: function (name) {
 		var layers = this.getLayers();
@@ -141,6 +159,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 				this.show(layer);
 			}
 		}, this);
+		return this;
 	},
 	hideGroup: function (name) {
 		var layers = this.getLayers();
@@ -149,6 +168,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 				this.hide(layer);
 			}
 		}, this);
+		return this;
 	},
 	get: function (name) {
 		var result = null;
