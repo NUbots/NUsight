@@ -18,10 +18,11 @@
      */
     Cylinder = function (topRadius, bottomRadius, height, rotation, color) {
         var cylinder;
+        var segments = 50;
         // call super constructor
         THREE.Object3D.call(this);
         // create the cylinder geometry
-        var geometry = new THREE.CylinderGeometry(topRadius, bottomRadius, height, 50, 50);
+        var geometry = new THREE.CylinderGeometry(topRadius, bottomRadius, height, segments);
         // create a material
         var material = new THREE.MeshLambertMaterial({
             color: color
@@ -31,8 +32,8 @@
         // rotate the cylinder
         cylinder.rotation.set(rotation.x, rotation.y, rotation.z);
         // move the cylinder so it's origin is on the ground
-        cylinder.position.z = height / 2;
-        // add this cylinder to the object
+        cylinder.position.z = height * 0.5;
+        // add the cylinder to the object
         this.add(cylinder);
     };
 

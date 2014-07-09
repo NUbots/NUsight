@@ -58,6 +58,17 @@ Ext.define('NU.view.window.Field', {
 			}]
 		}
 	}],
+    bbar: [{
+        xtype: 'component',
+        itemId: 'coordinates',
+        height: 15,
+        tpl: 'X: {x}, Y: {y}, Z: {z}',
+        data: {
+            x: 0,
+            y: 0,
+            z: 0
+        }
+    }],
 	items: [{
 		xtype: 'threejs',
 		itemId: 'mainscene'

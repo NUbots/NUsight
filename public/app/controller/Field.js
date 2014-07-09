@@ -7,13 +7,16 @@ Ext.define('NU.controller.Field', {
 		closeHeight: 0.2,
         // shape enum
         Shape: {
+            BOX: {},
             CIRCLE: {},
             CYLINDER: {},
+            PYRAMID: {},
             SPHERE: {}
         }
 	},
 	control: {
-		'mainscene': true,
+        'mainscene': true,
+        'coordinates': true,
 		'hawkeye': {
 			click: function () {
 				// These controls use Threejs coordinates not field coordinates
@@ -104,7 +107,6 @@ Ext.define('NU.controller.Field', {
         }
 	},
 	init: function () {
-
 		this.mainScene = this.createMainScene();
 		this.getMainscene()
 			.setComponents(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera, this.mainScene.effect)
@@ -116,50 +118,75 @@ Ext.define('NU.controller.Field', {
 		controls.yawObject.rotation.set(0, 0, 0);
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 
+        // todo make this work with proper movement not mousemove
+        var me = this;
+        this.mainScene.renderer.domElement.addEventListener('mousemove', function (e) {
+            var projector = new THREE.Projector();
+            var vector = new THREE.Vector3((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1, 0.5);
+            projector.unprojectVector(vector, me.getMainScene().camera);
+            var direction = vector.sub(controls.getPosition()).normalize();
+            var distance = - controls.getPosition().z / direction.z;
+            var position = controls.getPosition().clone().add(direction.multiplyScalar(distance));
+            me.getCoordinates().update({
+                x: position.x.toFixed(2),
+                y: position.y.toFixed(2),
+                z: position.z.toFixed(2)
+            });
+            //console.log("X: " + position.x + " Y: " + position.y + " Z: " + position.z);
+        });
+
 		NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
 		NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
 		NU.util.Network.on('addRobot', Ext.bind(this.onAddRobot, this));
-		Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
+
+        Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
 			this.onAddRobot(robotIP);
 		}, this);
-		this.on('selectRobotIP', Ext.bind(this.onSelectRobotIP, this));
-		this.callParent(arguments);
 
+        this.on('selectRobotIP', Ext.bind(this.onSelectRobotIP, this));
+
+        this.callParent(arguments);
 	},
 	onSelectRobotIP: function (robotIP) {
         this.robots.forEach(function (robot) {
             if (robot.robotIP !== robotIP) {
                 robot.darwinModels.forEach(function (model) {
-                    model.traverse(function (object) { object.visible = false; });
+                    model.traverse(function (object) {
+                        object.visible = false;
+                    });
                 });
                 robot.ballModels.forEach(function (model) {
-                    model.traverse(function (object) { object.visible = false; });
+                    model.traverse(function (object) {
+                        object.visible = false;
+                    });
                 });
             } else {
                 robot.darwinModels.forEach(function (model) {
-                    model.traverse(function (object) { object.visible = true; });
+                    model.traverse(function (object) {
+                        object.visible = true;
+                    });
                 });
                 robot.ballModels.forEach(function (model) {
-                    model.traverse(function (object) { object.visible = true; });
+                    model.traverse(function (object) {
+                        object.visible = true;
+                    });
                 });
             }
         })
     },
 	onAddRobot: function (robotIP) {
-
 		var robot;
-
 		robot = this.getRobot(robotIP);
 
-		if (robot !== null) {
+        if (robot !== null) {
 			return; // TODO: already exists
 		}
 
-		robot = Ext.create('NU.view.field.Robot', {
+        robot = Ext.create('NU.view.field.Robot', {
 			robotIP: robotIP
 		});
 
-		robot.on('loaded', function () {
+        robot.on('loaded', function () {
 			if (robotIP !== this.getRobotIP()) {
                 robot.darwinModels.forEach(function (model) {
                     model.traverse(function (object) { object.visible = false; });
@@ -168,7 +195,6 @@ Ext.define('NU.controller.Field', {
                     model.traverse(function (object) { object.visible = false; });
                 });
             }
-
             robot.darwinModels.forEach(function (model) {
                 this.mainScene.scene.add(model);
             }, this);
@@ -180,9 +206,13 @@ Ext.define('NU.controller.Field', {
 		robot.on('darwin-model-list-resized', function (numModels) {
             for (var i = 0; i < robot.darwinModels.length; i++) {
                 if (i < numModels) {
-                    robot.darwinModels[i].traverse(function (object) { object.visible = true; });
+                    robot.darwinModels[i].traverse(function (object) {
+                        object.visible = true;
+                    });
                 } else {
-                    robot.darwinModels[i].traverse(function (object) { object.visible = false; });
+                    robot.darwinModels[i].traverse(function (object) {
+                        object.visible = false;
+                    });
                 }
             }
         }, this);
@@ -190,64 +220,56 @@ Ext.define('NU.controller.Field', {
         robot.on('ball-model-list-resized', function (numModels) {
             for (var i = 0; i < robot.ballModels.length; i++) {
                 if (i < numModels) {
-                    robot.ballModels[i].traverse(function (object) { object.visible = true; });
+                    robot.ballModels[i].traverse(function (object) {
+                        object.visible = true;
+                    });
                 } else {
-                    robot.ballModels[i].traverse(function (object) { object.visible = false; });
+                    robot.ballModels[i].traverse(function (object) {
+                        object.visible = false;
+                    });
                 }
             }
         }, this);
 //        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
 
-        //todo remove this temp thing
-        debugger;
+        // todo remove this temp thing
         this.mainScene.scene.add(robot.createBallModel());
         this.mainScene.scene.add(robot.createGoalModel());
-
-		window.a = this;
+        this.mainScene.scene.add(robot.createObstacleModel());
+        this.mainScene.scene.add(robot.createOtherModel());
 		this.robots.push(robot);
-
 	},
 	onSensorData: function (robotIP, api_sensor_data) {
-
 		var robot = this.getRobot(robotIP);
 		if (robot == null) {
 			// TODO: console.log('error', robotIP);
 			return;
 		}
 		robot.onSensorData(api_sensor_data);
-
 	},
 	onLocalisation: function (robotIP, api_localisation) {
-
 		var robot = this.getRobot(robotIP);
 		if (robot == null) {
 			console.log('error', robotIP);
 			return;
 		}
 		robot.onLocalisation(api_localisation);
-
 	},
 	getRobot: function (robotIP) {
 		var foundRobot = null;
 		Ext.each(this.robots, function (robot) {
-
 			if (robot.robotIP == robotIP) {
 				foundRobot = robot;
 				return false;
 			}
 			return true;
-
 		});
-
 		return foundRobot;
 	},
 	createMainScene: function () {
-
 		var darwin, field, ball, camera, scene, renderer;
-
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50);
-
 		camera.lookAt(scene.position);
 
 		/*darwin = new DarwinOP();

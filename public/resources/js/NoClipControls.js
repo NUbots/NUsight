@@ -86,10 +86,12 @@
 	};
 
 	NoClipControls.prototype.getObject = function () {
-
 		return this.orientationCorrection;
-
 	};
+
+    NoClipControls.prototype.getPosition = function () {
+        return this.yawObject.matrixWorld.getPosition()
+    };
 
 	NoClipControls.prototype.pointerLockChange = function () {
 

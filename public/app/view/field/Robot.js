@@ -29,15 +29,32 @@ Ext.define('NU.view.field.Robot', {
 		return ball;
 	},
     createGoalModel: function () {
-        // todo get better radius' and height
-        var goal = new Cylinder(0.0335, 0.0335, 0.5, new THREE.Vector3(0.5 * Math.PI, 0, 0), 0xFFCF12);
-        // todo change colour
+        var radius = 0.05;
+        var height = 1.1;
+        var goal = new Cylinder(radius, radius, height, new THREE.Vector3(0.5 * Math.PI, 0, 0), 0xFFCF12);
         goal = LocalisationVisualiser.visualise(goal, {
-            color: 0x000000
+            color: 0xFF5E45
         });
         goal.position.x = 1;
         return goal;
-
+    },
+    createObstacleModel: function () {
+        var dimension = 0.25;
+        var box = new Box(dimension, dimension, dimension, 0x2B6E8F);
+        box = LocalisationVisualiser.visualise(box, {
+            color: 0x000000
+        });
+        box.position.x = -1;
+        return box;
+    },
+    createOtherModel: function () {
+        var dimension = 0.25;
+        var pyramid = new Pyramid(dimension, dimension, 0x8F2F7C);
+        pyramid = LocalisationVisualiser.visualise(pyramid, {
+            color: 0x155412
+        });
+        pyramid.position.x = -1.5;
+        return pyramid;
     },
 	constructor: function () {
 		var darwin, ball;

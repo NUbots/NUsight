@@ -29,13 +29,12 @@
         sphere = new THREE.Mesh(geometry, material);
         // move the sphere so it's origin is on the ground
         sphere.position.z = radius;
-        // add this mesh to the object
+        // add the sphere to the object
         this.add(sphere);
 	};
 
 	Sphere.prototype = Object.create(THREE.Object3D.prototype);
-
-	//Export the object
+	// export the object
 	window.Sphere = Sphere;
 
 }(window.THREE));
