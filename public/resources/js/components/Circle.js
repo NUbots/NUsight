@@ -22,13 +22,13 @@
         
         var shape = this.drawShape(this.resolution);
         var geometry = new THREE.ShapeGeometry(shape);
-        var material = new THREE.MeshBasicMaterial({color: this.color, opacity: 0.5, transparent: true})
+        var material = new THREE.MeshBasicMaterial({color: this.color, opacity: 0.5, transparent: true});
         var circle = new THREE.Mesh(geometry, material);
         circle.position.set(0, 0.001, 0);
         circle.rotation.set(-Math.PI / 2, 0, 0);
         this.add(circle);
         
-        material = new THREE.LineBasicMaterial({color: 0x0, opacity: 0.5, transparent: true})
+        material = new THREE.LineBasicMaterial({color: 0x0, opacity: 0.5, transparent: true});
         geometry = new THREE.ShapeGeometry(shape);
         var line = new THREE.Line(geometry, material);
         line.position.set(0, 0.001, 0);

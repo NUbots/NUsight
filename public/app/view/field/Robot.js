@@ -21,13 +21,24 @@ Ext.define('NU.view.field.Robot', {
 		return darwin;
 	},
 	createBallModel: function () {
-		var ball = new Ball();
-        
-        ball = LocalisationVisualiser.visualise(ball, {color: 0x0000ff});
+		var ball = new Sphere(0.0335, 0xFFA500);
+        ball = LocalisationVisualiser.visualise(ball, {
+            color: 0x0000ff
+        });
         ball.position.x = 0.2;
-
 		return ball;
 	},
+    createGoalModel: function () {
+        // todo get better radius' and height
+        var goal = new Cylinder(0.0335, 0.0335, 0.5, new THREE.Vector3(0.5 * Math.PI, 0, 0), 0xFFCF12);
+        // todo change colour
+        goal = LocalisationVisualiser.visualise(goal, {
+            color: 0x000000
+        });
+        goal.position.x = 1;
+        return goal;
+
+    },
 	constructor: function () {
 		var darwin, ball;
 		

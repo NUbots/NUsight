@@ -4,7 +4,13 @@ Ext.define('NU.controller.Field', {
 		mainScene: null,
 		robots: [],
 		closeDistance: 0.4,
-		closeHeight: 0.2
+		closeHeight: 0.2,
+        // shape enum
+        Shape: {
+            CIRCLE: {},
+            CYLINDER: {},
+            SPHERE: {}
+        }
 	},
 	control: {
 		'mainscene': true,
@@ -117,7 +123,6 @@ Ext.define('NU.controller.Field', {
 			this.onAddRobot(robotIP);
 		}, this);
 		this.on('selectRobotIP', Ext.bind(this.onSelectRobotIP, this));
-
 		this.callParent(arguments);
 
 	},
@@ -193,8 +198,12 @@ Ext.define('NU.controller.Field', {
         }, this);
 //        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
 
-		window.a = this;
+        //todo remove this temp thing
+        debugger;
+        this.mainScene.scene.add(robot.createBallModel());
+        this.mainScene.scene.add(robot.createGoalModel());
 
+		window.a = this;
 		this.robots.push(robot);
 
 	},
@@ -305,8 +314,9 @@ Ext.define('NU.controller.Field', {
 		 var line = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: info[i][6], opacity: 0.8, linewidth: 1}));
 		 scene.add(line);
 		 }*/
-
-		renderer = new THREE.WebGLRenderer({antialias: true});
+		renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
 		renderer.setClearColor("#000");
 		renderer.setSize(window.innerWidth, window.innerHeight);
 

@@ -27,7 +27,7 @@
     var goalWidth = 1.5;
     var goalAreaLength = 0.6;
     var goalAreaWidth = 2.2;
-    var goalCrossbarHeight = 1.0;
+    var goalCrossbarHeight = 1.1;
     var goalpostDiameter = 0.1;
     var goalNetHeight = 0.8;
     var penaltyMarkDistance = 1.80;
@@ -60,6 +60,11 @@
 			circle.applyMatrix(new THREE.Matrix4().makeTranslation(x, y, 0));
 			return circle;
 		}
+        function buildCylinder(x, y, radius, height, color) {
+            var cylinder = new Cylinder(radius, radius, height, new THREE.Vector3(0.5 * Math.PI, 0, 0), color);
+            cylinder.position = new THREE.Vector3(x, y, 0.001);
+            return cylinder;
+        }
 		function buildRectangle(x, y, w, h, lw) {
 			lw = typeof lw !== 'undefined' ? lw : lineWidth;
 
@@ -125,30 +130,35 @@
 		var goalH = (goalWidth + goalpostDiameter);
 		var goalPostRadius = goalpostDiameter * 0.5;
 		var goalPostX = halfLength + goalPostRadius * 0.5;
+        var blue = 0x0000ff;
+        var yellow = 0xffff00;
 
 		// Define goals
 		var blueGoalBox = buildRectangle(-goalX, -goalY, goalW, goalH, goalLineWidth);
 		var yellowGoalBox = buildRectangle(goalX - goalW, -goalY, goalW, goalH, goalLineWidth);
-		var blueLeftGoalPost = buildCircle(-goalPostX, -goalY, goalPostRadius);
-		var blueRightGoalPost = buildCircle(-goalPostX, goalY, goalPostRadius);
-		var yellowLeftGoalPost = buildCircle(goalPostX, -goalY, goalPostRadius);
-		var yellowRightGoalPost = buildCircle(goalPostX, goalY, goalPostRadius);
+        var blueLeftGoalPost = buildCylinder(-goalPostX, goalY, goalPostRadius, goalCrossbarHeight, blue);
+        var blueRightGoalPost = buildCylinder(-goalPostX, -goalY, goalPostRadius, goalCrossbarHeight, blue);
+        var yellowLeftGoalPost = buildCylinder(goalPostX, -goalY, goalPostRadius, goalCrossbarHeight, yellow);
+        var yellowRightGoalPost = buildCylinder(goalPostX, goalY, goalPostRadius, goalCrossbarHeight, yellow);
+		//var blueRightGoalPost = buildCircle(-goalPostX, goalY, goalPostRadius);
+		//var yellowLeftGoalPost = buildCircle(goalPostX, -goalY, goalPostRadius);
+		//var yellowRightGoalPost = buildCircle(goalPostX, goalY, goalPostRadius);
 
 		var blueGoal = new THREE.Geometry();
 		THREE.GeometryUtils.merge(blueGoal, blueGoalBox);
-		THREE.GeometryUtils.merge(blueGoal, blueLeftGoalPost);
-		THREE.GeometryUtils.merge(blueGoal, blueRightGoalPost);
+		//THREE.GeometryUtils.merge(blueGoal, blueLeftGoalPost);
+		//THREE.GeometryUtils.merge(blueGoal, blueRightGoalPost);
 		var blueGoalMesh = new THREE.Mesh(blueGoal, new THREE.MeshBasicMaterial({
-			color: 0x0000ff
+			color: blue
 		}));
 		blueGoalMesh.position.z = 0.001;
 
 		var yellowGoal = new THREE.Geometry();
 		THREE.GeometryUtils.merge(yellowGoal, yellowGoalBox);
-		THREE.GeometryUtils.merge(yellowGoal, yellowLeftGoalPost);
-		THREE.GeometryUtils.merge(yellowGoal, yellowRightGoalPost);
+		//THREE.GeometryUtils.merge(yellowGoal, yellowLeftGoalPost);
+		//THREE.GeometryUtils.merge(yellowGoal, yellowRightGoalPost);
 		var yellowGoalMesh = new THREE.Mesh(yellowGoal, new THREE.MeshBasicMaterial({
-			color: 0xffff00
+			color: yellow
 		}));
 		yellowGoalMesh.position.z = 0.001;
 
@@ -171,6 +181,10 @@
 			color: 0x009900
 		}));
 		fieldGroundMesh.add(fieldMarkingsMesh);
+        fieldGroundMesh.add(blueLeftGoalPost);
+        fieldGroundMesh.add(blueRightGoalPost);
+        fieldGroundMesh.add(yellowLeftGoalPost);
+        fieldGroundMesh.add(yellowRightGoalPost);
 
 		return fieldGroundMesh;
 	}
