@@ -7,9 +7,9 @@ Ext.define('NU.view.NetworkSettings', {
 	],
 	controller: 'NU.controller.NetworkSettings',
 	alias: 'widget.networksettings',
-	inject: 'reactionHandlersStore',
+	inject: 'reactionHandlesStore',
 	config: {
-		reactionHandlersStore: null
+		reactionHandlesStore: null
 	},
 	initComponent: function () {
 
@@ -21,7 +21,7 @@ Ext.define('NU.view.NetworkSettings', {
 				title: 'Reactions',
 				xtype: 'gridpanel',
 				itemId: 'grid',
-				store: this.getReactionHandlersStore(),
+				store: this.getReactionHandlesStore(),
 				tbar: [{
 					xtype: 'checkbox',
 					fieldLabel: 'Manage Automatically',
