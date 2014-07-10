@@ -55,6 +55,10 @@ Ext.define('NU.view.window.Field', {
 				xtype: 'checkbox',
 				fieldLabel: 'Inverted',
 				checked: true
+			},  {
+				itemId: 'displayCrosshair',
+				xtype: 'checkbox',
+				fieldLabel: 'Crosshair'
 			}]
 		}
 	}],

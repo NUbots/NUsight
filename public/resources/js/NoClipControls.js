@@ -39,7 +39,7 @@
 
 		this.orientationCorrection = new THREE.Object3D();
 		this.orientationCorrection.add(this.yawObject);
-		this.orientationCorrection.rotation.x = Math.PI/2;
+		this.orientationCorrection.rotation.x = Math.PI * 0.5;
 
 		this.lastX = 0;
 		this.lastY = 0;
@@ -53,9 +53,7 @@
 			}
 
 			element.addEventListener(event, function () {
-
 				listener.apply(self, arguments);
-
 			}, false);
 
 		}
@@ -77,10 +75,8 @@
 			this.domElement.requestPointerLock = this.domElement.requestPointerLock || this.domElement.mozRequestPointerLock || this.domElement.webkitRequestPointerLock;
 
 			addEventListener('click', function () {
-
 				//window.document.requestFullscreen();
 				this.domElement.requestPointerLock();
-
 			});
 		}
 	};
@@ -89,14 +85,29 @@
 		return this.orientationCorrection;
 	};
 
+	/**
+	 * This method gets the position of the object that wraps the camera (for consistent values among frameworks)
+	 *
+	 * @returns {*|Number[]} the camera x, y, z components
+	 */
     NoClipControls.prototype.getPosition = function () {
-        return this.yawObject.matrixWorld.getPosition()
+	    return new THREE.Vector3().applyMatrix4(this.yawObject.matrixWorld);
     };
 
+	/**
+	 * This method returns the camera direction vector based on the camera being positioned at the origin <0, 0, 0>,
+	 * always looking down at vector <0, 0, -1>
+	 *
+	 * @returns {XMLList|XML|String|*|Array} the camera direction vector
+	 */
+	NoClipControls.prototype.getDirection = function () {
+		var vector = new THREE.Vector3(0, 0, -1);
+		var point = vector.applyMatrix4(this.camera.matrixWorld);
+		return point.sub(this.getPosition()).normalize();
+	};
+
 	NoClipControls.prototype.pointerLockChange = function () {
-
 		var me = this;
-
 		if (document.pointerLockElement === this.domElement || document.mozPointerLockElement === this.domElement || document.webkitPointerLockElement === this.domElement) {
 			me.enabled = true;
 		} else {
@@ -105,13 +116,10 @@
 	};
 
 	NoClipControls.prototype.pointerLockError = function () {
-
 		console.log("pointer lock error");
-
 	};
 
 	NoClipControls.prototype.onMouseMove = function (event) {
-
 		if (this.enabled) {
 			var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 			var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
@@ -128,7 +136,6 @@
 			this.lastX = movementX;
 			this.lastY = movementY;
 		}
-
 	};
 
 	NoClipControls.prototype.onKeyDown = function (event) {
@@ -136,7 +143,6 @@
 		//event.preventDefault();
 
 		switch (event.keyCode) {
-
 			case 16: /*shift*/
 				if (!this.slow) {
 					this.forwardSpeed *= this.slowSpeedMultiplier;
@@ -295,23 +301,18 @@
 	};
 
 	NoClipControls.prototype.update = function (delta) {
-
 		if (!this.enabled) {
 			return;
 		}
-
 		if (this.gamepad) {
 			this.updateGamepad();
 		}
-
 		var actualSpeed = delta * this.movementSpeed;
-
 		// project direction vector onto Z axis (?)
 		this.yawObject.translateZ(-actualSpeed * this.forwardSpeed * Math.cos(this.pitchObject.rotation.x));
 		this.yawObject.translateX(actualSpeed * this.strafeSpeed);
 		// project direction vector onto Y axis, add speeds (?)
 		this.yawObject.translateY(actualSpeed * this.verticalSpeed + (actualSpeed * this.forwardSpeed * Math.sin(this.pitchObject.rotation.x)));
-
 	};
 
 }());

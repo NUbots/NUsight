@@ -2,23 +2,6 @@
 	"use strict";
 
 	var Field;
-
-//    // Field dimensions
-//	   var lineWidth = 0.05;
-//    var markWidth = 0.1;
-//    var fieldLength = 9.0;
-//    var fieldWidth = 6.0;
-//    var goalDepth = 0.5;
-//    var goalWidth = 2.25;
-//    var goalAreaLength = 0.6;
-//    var goalAreaWidth = 3.45;
-//    var goalCrossbarHeight = 1.10;
-//    var goalpostDiameter = 0.1;
-//    var goalNetHeight = 1.0;
-//    var penaltyMarkDistance = 1.80;
-//    var centerCircleDiameter = 1.50;
-//    var borderStripMinWidth = 0.7;
-
     var lineWidth = 0.05;
     var markWidth = 0.1;
     var fieldLength = 6;
@@ -231,7 +214,7 @@
 	};
 	
 	Field.prototype = Object.create(THREE.Object3D.prototype);
-
+	// export the object
 	window.Field = Field;
 
 }(window.THREE));

@@ -58,19 +58,15 @@ Ext.define('NU.view.field.Robot', {
     },
 	constructor: function () {
 		var darwin, ball;
-		
 		this.callParent(arguments);
-
         this.addEvents(['loaded', 'model-list-resized']);
-		
+
 		darwin = this.createDarwinModel();
-        
         field = new Field();
         ball = this.createBallModel();
-		
+
 		this.darwinModels = [ darwin ];
 		this.ballModel = [ ball ];
-		
 		return this;
 		
 	},

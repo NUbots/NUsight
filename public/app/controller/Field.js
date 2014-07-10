@@ -5,6 +5,7 @@ Ext.define('NU.controller.Field', {
 		robots: [],
 		closeDistance: 0.4,
 		closeHeight: 0.2,
+		objects: [],
         // shape enum
         Shape: {
             BOX: {},
@@ -17,6 +18,7 @@ Ext.define('NU.controller.Field', {
 	control: {
         'mainscene': true,
         'coordinates': true,
+		'crosshair': true,
 		'hawkeye': {
 			click: function () {
 				// These controls use Threejs coordinates not field coordinates
@@ -89,6 +91,12 @@ Ext.define('NU.controller.Field', {
 				controls.inverted = newValue;
 			}
 		},
+		'displayCrosshair': {
+			change: function (obj, newValue, oldValue, eOpt) {
+				var crosshair = this.getCrosshair();
+				crosshair.setVisible(crosshair.isHidden() ? true : false);
+			}
+		},
 		'orientation': {
 			change: function (obj, newValue, oldValue, eOpts) {
 				this.robots.forEach(function (robot) {
@@ -121,18 +129,19 @@ Ext.define('NU.controller.Field', {
         // todo make this work with proper movement not mousemove
         var me = this;
         this.mainScene.renderer.domElement.addEventListener('mousemove', function (e) {
-            var projector = new THREE.Projector();
-            var vector = new THREE.Vector3((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1, 0.5);
-            projector.unprojectVector(vector, me.getMainScene().camera);
-            var direction = vector.sub(controls.getPosition()).normalize();
-            var distance = - controls.getPosition().z / direction.z;
-            var position = controls.getPosition().clone().add(direction.multiplyScalar(distance));
-            me.getCoordinates().update({
-                x: position.x.toFixed(2),
-                y: position.y.toFixed(2),
-                z: position.z.toFixed(2)
-            });
-            //console.log("X: " + position.x + " Y: " + position.y + " Z: " + position.z);
+	        function updatePoints (points) {
+		        me.getCoordinates().update({
+			        x: points.x.toFixed(2),
+			        y: points.y.toFixed(2),
+			        z: points.z.toFixed(2)
+		        });
+	        }
+	        // create a ray caster that takes the parameter of the origin position and direction vector
+	        var raycaster = new THREE.Raycaster(controls.getPosition(), controls.getDirection());
+	        // checks for intersection between all objects where true checks all children
+	        var intersects = raycaster.intersectObjects(me.objects, true);
+	        // update the points using the closest intersection or reset to origin
+	        updatePoints(intersects.length > 0 ? intersects[0].point : new THREE.Vector3(0, 0, 0));
         });
 
 		NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
@@ -235,9 +244,11 @@ Ext.define('NU.controller.Field', {
         // todo remove this temp thing
         this.mainScene.scene.add(robot.createBallModel());
         this.mainScene.scene.add(robot.createGoalModel());
-        this.mainScene.scene.add(robot.createObstacleModel());
-        this.mainScene.scene.add(robot.createOtherModel());
+        //this.mainScene.scene.add(robot.createObstacleModel());
+        //this.mainScene.scene.add(robot.createOtherModel());
 		this.robots.push(robot);
+		//this.addObject(robot.darwinModels);
+		//todo this.addObject(robot.ballModels);
 	},
 	onSensorData: function (robotIP, api_sensor_data) {
 		var robot = this.getRobot(robotIP);
@@ -289,6 +300,8 @@ Ext.define('NU.controller.Field', {
 
 		field = new Field();
 		scene.add(field);
+		// adds the field to the objects array
+		this.addObject(field);
 
 		//var circle = new THREE.Circle();
 		//scene.add(circle);
@@ -351,5 +364,13 @@ Ext.define('NU.controller.Field', {
 			renderer: renderer,
 			effect: effect
 		};
+	},
+	/**
+	 * Adds a 3d object to the objects array
+	 *
+	 * @param object the object being added to the array
+	 */
+	addObject: function (object) {
+		this.objects.push(object);
 	}
 });
