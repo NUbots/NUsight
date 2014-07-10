@@ -4,7 +4,7 @@ Ext.define('NU.controller.Behaviour', {
 		'registerActionTreeStore'
 	],
 	config: {
-		'registerActionTreeStore': null,
+		'registerActionTreeStore': null
 	},
 	control: {
 		'actions': true,

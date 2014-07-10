@@ -46,6 +46,13 @@ Ext.define('NU.controller.Toolbar', {
 				});
 			}
 		},
+		'add_gamecontroller_display': {
+			click: function () {
+				Ext.create('NU.view.window.GameController', {
+					constrainTo: this.getDisplay()
+				});
+			}
+		},
 		'visualise': {
 			click: function () {
 				// calculations
