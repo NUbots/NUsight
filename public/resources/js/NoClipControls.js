@@ -2,12 +2,15 @@
 
 	"use strict";
 
-	var NoClipControls = THREE.NoClipControls = function (camera, domElement) {
+	var NoClipControls = THREE.NoClipControls = function (camera, domElement, objects, coordinates) {
 
 		var self = this;
 		this.enabled = false;
 
 		this.camera = camera;
+		this.objects = objects;
+		// todo fix not passing in (painful using ext.componentquery.query)
+		this.coordinates = coordinates;
 
 		this.slow = false;
 		this.movementSpeed = 1;
@@ -45,17 +48,14 @@
 		this.lastY = 0;
 
 		function addEventListener(element, event, listener) {
-
 			if (listener === undefined) {
 				listener = event;
 				event = element;
 				element = self.domElement;
 			}
-
 			element.addEventListener(event, function () {
 				listener.apply(self, arguments);
 			}, false);
-
 		}
 
 		var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -107,12 +107,7 @@
 	};
 
 	NoClipControls.prototype.pointerLockChange = function () {
-		var me = this;
-		if (document.pointerLockElement === this.domElement || document.mozPointerLockElement === this.domElement || document.webkitPointerLockElement === this.domElement) {
-			me.enabled = true;
-		} else {
-			me.enabled = false;
-		}
+		this.enabled = document.pointerLockElement === this.domElement || document.mozPointerLockElement === this.domElement || document.webkitPointerLockElement === this.domElement;
 	};
 
 	NoClipControls.prototype.pointerLockError = function () {
@@ -123,24 +118,29 @@
 		if (this.enabled) {
 			var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 			var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-
 			if (Math.abs(this.lastX - movementX) > 100 || Math.abs(this.lastY - movementY) > 100) {
 				return;
 			}
-
 			this.yawObject.rotation.y -= movementX * 0.002;
 			this.pitchObject.rotation.x -= movementY * 0.002;
-
 			this.pitchObject.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pitchObject.rotation.x));
-
 			this.lastX = movementX;
 			this.lastY = movementY;
+			this.updateCoordinates();
 		}
 	};
 
 	NoClipControls.prototype.onKeyDown = function (event) {
-
-		//event.preventDefault();
+		var me = this;
+		function calculateSpeed (speed) {
+			var speedDirection = speed;
+			if (me.slow) {
+				speedDirection *= me.slowSpeedMultiplier;
+			}
+			// updates the coordinates during movement
+			me.updateCoordinates();
+			return speedDirection;
+		}
 
 		switch (event.keyCode) {
 			case 16: /*shift*/
@@ -154,57 +154,36 @@
 
 			case 38: /*up*/
 			case 87: /*W*/
-				this.forwardSpeed = 1;
-				if (this.slow) {
-					this.forwardSpeed *= this.slowSpeedMultiplier;
-				}
+				this.forwardSpeed = calculateSpeed(1);
 				break;
 
 			case 37: /*left*/
 			case 65: /*A*/
-				this.strafeSpeed = -1;
-				if (this.slow) {
-					this.strafeSpeed *= this.slowSpeedMultiplier;
-				}
+				this.strafeSpeed = calculateSpeed(-1);
 				break;
 
 			case 40: /*down*/
 			case 83: /*S*/
-				this.forwardSpeed = -1;
-				if (this.slow) {
-					this.forwardSpeed *= this.slowSpeedMultiplier;
-				}
+				this.forwardSpeed = calculateSpeed(-1);
 				break;
 
 			case 39: /*right*/
 			case 68: /*D*/
-				this.strafeSpeed = 1;
-				if (this.slow) {
-					this.strafeSpeed *= this.slowSpeedMultiplier;
-				}
+				this.strafeSpeed = calculateSpeed(1);
 				break;
 
 			case 82: /*R*/
-				this.verticalSpeed = 1;
-				if (this.slow) {
-					this.verticalSpeed *= this.slowSpeedMultiplier;
-				}
+				this.verticalSpeed = calculateSpeed(1);
 				break;
+
 			case 70: /*F*/
-				this.verticalSpeed = -1;
-				if (this.slow) {
-					this.verticalSpeed *= this.slowSpeedMultiplier;
-				}
+				this.verticalSpeed = calculateSpeed(-1);
 				break;
-
 		}
-
 	};
 
 	NoClipControls.prototype.onKeyUp = function (event) {
-
 		switch (event.keyCode) {
-
 			case 16: /*shift*/
 				if (this.slow) {
 					this.forwardSpeed /= this.slowSpeedMultiplier;
@@ -241,22 +220,16 @@
 			case 70: /*F*/
 				this.verticalSpeed = 0;
 				break;
-
 		}
-
 	};
 
 	NoClipControls.prototype.updateGamepad = function () {
-
 		// TODO: remove backwards compatibility when chrome updates plz (chrome vs canary use different APIs at the time of this writing (18-03-2014)
 		var oldAPI = navigator.webkitGetGamepads !== undefined;
-
 		var getGamepads = navigator.webkitGetGamepads || navigator.getGamepads;
-
 		var gamepads = getGamepads.call(navigator);
 
-		for (var i = 0; i < gamepads.length; ++i)
-		{
+		for (var i = 0; i < gamepads.length; ++i) {
 			var pad = gamepads[i];
 			// kinda hacky
 			if (pad === undefined || pad.buttons.length != 16 || pad.axes.length != 4) {
@@ -264,7 +237,6 @@
 			}
 			var axes = pad.axes;
 			var buttons = pad.buttons;
-
 			// based on https://dvcs.w3.org/hg/gamepad/raw-file/default/gamepad.html#gamepad-interface
 			var leftX = axes[0];
 			var leftY = axes[1];
@@ -279,7 +251,6 @@
 
 			this.yawObject.rotation.y -= rightX * 0.05;
 			this.pitchObject.rotation.x -= (this.inverted ? -1 : 1) * rightY * 0.05;
-
 			this.pitchObject.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pitchObject.rotation.x));
 
 			if (oldAPI) {
@@ -294,10 +265,9 @@
 				this.strafeSpeed *= this.slowSpeedMultiplier / value;
 				this.verticalSpeed *= this.slowSpeedMultiplier / value;
 			}
-
 			break;
 		}
-
+		this.updateCoordinates();
 	};
 
 	NoClipControls.prototype.update = function (delta) {
@@ -314,5 +284,26 @@
 		// project direction vector onto Y axis, add speeds (?)
 		this.yawObject.translateY(actualSpeed * this.verticalSpeed + (actualSpeed * this.forwardSpeed * Math.sin(this.pitchObject.rotation.x)));
 	};
+
+	/**
+	 * Updates the coordinates listed at the bottom of the localisation display
+	 */
+	NoClipControls.prototype.updateCoordinates = function () {
+		var me = this;
+		function updatePoints (points) {
+			// updates the coordinate template
+			me.coordinates.update({
+				x: points.x.toFixed(2),
+				y: points.y.toFixed(2),
+				z: points.z.toFixed(2)
+			});
+		}
+		// create a ray caster that takes the parameter of the origin position and direction vector
+		var raycaster = new THREE.Raycaster(this.getPosition(), this.getDirection());
+		// checks for intersection between all objects where true checks all children
+		var intersects = raycaster.intersectObjects(this.objects, true);
+		// update the points using the closest intersection or reset to origin
+		updatePoints(intersects.length > 0 ? intersects[0].point : new THREE.Vector3(0, 0, 0));
+	}
 
 }());

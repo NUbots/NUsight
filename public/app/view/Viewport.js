@@ -1,7 +1,8 @@
 Ext.define('NU.view.Viewport', {
     extend: 'Ext.container.Viewport',
     requires: [
-        'NU.view.Toolbar'
+        'NU.view.Toolbar',
+	    'Ext.layout.container.Border'
     ],
     cls: 'desktop',
     layout: 'border',

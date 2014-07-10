@@ -1,10 +1,10 @@
 Ext.define("Ext.ux.ThreeJS", {
-	extend : 'Ext.Container',
-	alias : ['widget.threejs'],
+	extend: 'Ext.Container',
+	alias: ['widget.threejs'],
 	renderer: null,
     effect: null,
 	camera: null,
-	scene: null,
+	scene:  null,
 	controls: null,
 	items: [{
 		xtype: 'component',
@@ -13,8 +13,7 @@ Ext.define("Ext.ux.ThreeJS", {
 	}, {
 		xtype: 'component',
 		itemId: 'crosshair',
-		cls: 'crosshair',
-		hidden: true
+		cls: 'crosshair'
 	}],
     config: {
         renderEffect: false
@@ -25,7 +24,6 @@ Ext.define("Ext.ux.ThreeJS", {
 		this.camera = camera;
         this.effect = effect;
 		this.clock = new THREE.Clock();
-
 		this.domElementContainer = this.getComponent('domElementContainer').getEl().dom;
 		this.domElementContainer.appendChild(this.renderer.domElement);
 		this.domElement = this.domElementContainer.firstChild;
@@ -39,8 +37,8 @@ Ext.define("Ext.ux.ThreeJS", {
 
 		return this;
 	},
-	enableControls: function (parameters) {
-		this.controls = new THREE.NoClipControls(this.camera, this.domElement);
+	enableControls: function (parameters, objects, coordinates) {
+		this.controls = new THREE.NoClipControls(this.camera, this.domElement, objects, coordinates);
 		this.scene.add(this.controls.getObject());
 		Ext.apply(this.controls, parameters);
 		return this;

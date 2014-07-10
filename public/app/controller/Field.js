@@ -17,7 +17,7 @@ Ext.define('NU.controller.Field', {
 	},
 	control: {
         'mainscene': true,
-        'coordinates': true,
+		'coordinates': true,
 		'crosshair': true,
 		'hawkeye': {
 			click: function () {
@@ -120,29 +120,11 @@ Ext.define('NU.controller.Field', {
 			.setComponents(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera, this.mainScene.effect)
 			.enableControls({
 				movementSpeed: 2
-			});
+			}, this.objects, this.getCoordinates());
 		var controls = this.getMainscene().controls;
 		controls.yawObject.position.set(0, 3.5, 0);
 		controls.yawObject.rotation.set(0, 0, 0);
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
-
-        // todo make this work with proper movement not mousemove
-        var me = this;
-        this.mainScene.renderer.domElement.addEventListener('mousemove', function (e) {
-	        function updatePoints (points) {
-		        me.getCoordinates().update({
-			        x: points.x.toFixed(2),
-			        y: points.y.toFixed(2),
-			        z: points.z.toFixed(2)
-		        });
-	        }
-	        // create a ray caster that takes the parameter of the origin position and direction vector
-	        var raycaster = new THREE.Raycaster(controls.getPosition(), controls.getDirection());
-	        // checks for intersection between all objects where true checks all children
-	        var intersects = raycaster.intersectObjects(me.objects, true);
-	        // update the points using the closest intersection or reset to origin
-	        updatePoints(intersects.length > 0 ? intersects[0].point : new THREE.Vector3(0, 0, 0));
-        });
 
 		NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
 		NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
@@ -153,7 +135,6 @@ Ext.define('NU.controller.Field', {
 		}, this);
 
         this.on('selectRobotIP', Ext.bind(this.onSelectRobotIP, this));
-
         this.callParent(arguments);
 	},
 	onSelectRobotIP: function (robotIP) {
@@ -198,17 +179,21 @@ Ext.define('NU.controller.Field', {
         robot.on('loaded', function () {
 			if (robotIP !== this.getRobotIP()) {
                 robot.darwinModels.forEach(function (model) {
-                    model.traverse(function (object) { object.visible = false; });
+                    model.traverse(function (object) {
+	                    object.visible = false;
+                    });
                 });
                 robot.ballModels.forEach(function (model) {
-                    model.traverse(function (object) { object.visible = false; });
+                    model.traverse(function (object) {
+	                    object.visible = true;
+                    });
                 });
             }
             robot.darwinModels.forEach(function (model) {
-                this.mainScene.scene.add(model);
+                this.getMainScene().scene.add(model);
             }, this);
             robot.ballModels.forEach(function (model) {
-                this.mainScene.scene.add(model);
+                this.getMainScene().scene.add(model);
             }, this);
 		}, this);
 
@@ -239,14 +224,28 @@ Ext.define('NU.controller.Field', {
                 }
             }
         }, this);
-//        robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
 
-        // todo remove this temp thing
-        this.mainScene.scene.add(robot.createBallModel());
-        this.mainScene.scene.add(robot.createGoalModel());
-        //this.mainScene.scene.add(robot.createObstacleModel());
-        //this.mainScene.scene.add(robot.createOtherModel());
+		/**
+		 * Fires when a model is added onto a robot. This method adds the object into the scene and the objects array.
+		 */
+		robot.on('add-model', function (object) {
+			this.getMainScene().scene.add(object);
+			this.objects.push(object);
+		}, this);
+
+		/**
+		 * Fires when a ball model is being removed from the robot. This method removes the ball from the scene and
+		 * the objects array.
+		 */
+		robot.on('remove-model', function (object) {
+			this.getMainScene().scene.remove(object);
+			Ext.Array.remove(this.objects, object);
+		}, this);
+//      robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
+
 		this.robots.push(robot);
+		//todo remove this:
+		this.onAddObject(robot);
 		//this.addObject(robot.darwinModels);
 		//todo this.addObject(robot.ballModels);
 	},
@@ -265,6 +264,11 @@ Ext.define('NU.controller.Field', {
 			return;
 		}
 		robot.onLocalisation(api_localisation);
+	},
+	onAddObject: function (robot) {
+		robot.createBallModel();
+		robot.createGoalModel();
+		robot.removeBallModel(this.objects[1]);
 	},
 	getRobot: function (robotIP) {
 		var foundRobot = null;
@@ -301,7 +305,7 @@ Ext.define('NU.controller.Field', {
 		field = new Field();
 		scene.add(field);
 		// adds the field to the objects array
-		this.addObject(field);
+		this.objects.push(field);
 
 		//var circle = new THREE.Circle();
 		//scene.add(circle);
@@ -364,13 +368,5 @@ Ext.define('NU.controller.Field', {
 			renderer: renderer,
 			effect: effect
 		};
-	},
-	/**
-	 * Adds a 3d object to the objects array
-	 *
-	 * @param object the object being added to the array
-	 */
-	addObject: function (object) {
-		this.objects.push(object);
 	}
 });

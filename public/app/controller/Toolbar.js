@@ -1,7 +1,7 @@
 Ext.define('NU.controller.Toolbar', {
     extend: 'Deft.mvc.ViewController',
     requires: [
-		'NU.view.NetworkSettings'
+		'NU.view.NetworkSettings',
 	],
     control: {
         'add_localisation_display': {

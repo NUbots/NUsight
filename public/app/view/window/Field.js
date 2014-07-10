@@ -1,16 +1,17 @@
 Ext.define('NU.view.window.Field', {
-	extend : 'NU.view.window.Display',
-	alias : ['widget.nu_field_window'],
+	extend: 'NU.view.window.Display',
+	alias: 'widget.nu_field_window',
 	requires: [
 		'NU.view.field.Robot',
-		'NU.view.robot.Selector'
+		'NU.view.robot.Selector',
+		'Ext.form.field.Checkbox'
 	],
 	controller: 'NU.controller.Field',
 	title: 'Localisation Display',
 	width: 800,
 	height: 400,
 	layout: 'fit',
-	tbar:  [{
+	tbar: [{
 		xtype: 'robot_selector'
 	}, {
 		itemId: 'hawkeye',
@@ -58,7 +59,8 @@ Ext.define('NU.view.window.Field', {
 			},  {
 				itemId: 'displayCrosshair',
 				xtype: 'checkbox',
-				fieldLabel: 'Crosshair'
+				fieldLabel: 'Crosshair',
+				checked: true
 			}]
 		}
 	}],
