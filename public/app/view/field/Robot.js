@@ -3,7 +3,7 @@ Ext.define('NU.view.field.Robot', {
     alias : ['widget.nu_field_robot'],
 	config: {
 		robotIP: null,
-        showOrientation: true
+        showOrientation: false
 	},
 	darwinModels: [],
 	ballModels: [],
