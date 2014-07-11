@@ -21,8 +21,8 @@ Ext.define('NU.view.Toolbar', {
         text: 'Behaviour',
         itemId: 'add_behaviour_display'
     }, {
-        text: 'GameController',
-        itemId: 'add_gamecontroller_display'
+        text: 'GameState',
+        itemId: 'add_gamestate_display'
     },'->', {
         text: 'Visualise',
         itemId: 'visualise'

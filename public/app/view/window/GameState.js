@@ -1,14 +1,14 @@
-Ext.define('NU.view.window.GameController', {
+Ext.define('NU.view.window.GameState', {
 	extend : 'NU.view.window.Display',
 	alias : ['widget.nu_gamecontroller_window'],
-	controller: 'NU.controller.GameController',
+	controller: 'NU.controller.GameState',
 	inject: [
 		'gameControllerPacketsStore'
 	],
 	config: {
 		'gameControllerPacketsStore': null
 	},
-	title: 'GameController',
+	title: 'GameState',
 	width: 600,
 	height: 400,
 	initComponent: function () {

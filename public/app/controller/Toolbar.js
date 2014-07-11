@@ -46,9 +46,9 @@ Ext.define('NU.controller.Toolbar', {
 				});
 			}
 		},
-		'add_gamecontroller_display': {
+		'add_gamestate_display': {
 			click: function () {
-				Ext.create('NU.view.window.GameController', {
+				Ext.create('NU.view.window.GameState', {
 					constrainTo: this.getDisplay()
 				});
 			}

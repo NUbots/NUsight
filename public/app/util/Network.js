@@ -65,6 +65,7 @@ Ext.define('NU.util.Network', {
 			var api_event = api_message[event.name];
 			var time = new Date(api_message.getUtcTimestamp().toNumber());
 			this.fireEvent(event.name, event.robotIP, api_event, time);
+//			console.log(event.robotIP, event.name);
 			delete cache[hash];
 		}, this);
 
