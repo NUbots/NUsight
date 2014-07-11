@@ -25,104 +25,101 @@ Ext.define('NU.view.field.Robot', {
 	 * This method fires the event in the field controller to add the model in the scene.
 	 *
 	 * @param model the model to add to the field
+	 * @param name the name of the type of model e.g. ball, goal, etc
 	 */
-	addModel: function (model) {
+	addModel: function (model, name) {
 		this.fireEvent('add-model', model);
+		console.log(Ext.String.format("Adding {0} model", name));
 	},
 	/**
-	 * This method fires the event in the field controller to remove the model from the scene.
+	 * This method removes the model from the correct array and fires the event in the field controller to remove the
+	 * model from the scene.
 	 *
 	 * @param model the model to be removed from the field
 	 */
 	removeModel: function (model) {
+		var name;
+		// find which array the model belongs to and remove it from the array
+		switch (true) {
+			case Ext.Array.contains(this.ballModels, model): // ball
+				Ext.Array.remove(this.ballModels, model);
+				name = "ball";
+				break;
+			case Ext.Array.contains(this.goalModels, model): // goal
+				Ext.Array.remove(this.goalModels, model);
+				name = "goal";
+				break;
+			case Ext.Array.contains(this.obstacleModels, model): // obstacle
+				Ext.Array.remove(this.obstacleModels, model);
+				name = "obstacle";
+				break;
+		}
+		// fire the event in the field controller to remove the model from the scene
 		this.fireEvent('remove-model', model);
+		console.log(Ext.String.format("Removing {0} model", name));
 	},
 	/**
 	 * This method creates a sphere object to represent the field ball.
 	 *
+	 * @param x the x coordinate to place the ball model in
+	 * @param y the y coordinate to place the ball model in
 	 * @returns {Sphere} a Sphere object that represents a ball
 	 */
-	createBallModel: function () {
+	createBallModel: function (x, y) {
 		var ball = new Sphere(0.0335, 0xFFA500);
         ball = LocalisationVisualiser.visualise(ball, {
             color: 0x0000ff
         });
-        ball.position.x = 0.2;
+        ball.position = new THREE.Vector3(x, y, ball.position.z);
 		// add the ball to the list of balls
 		this.ballModels.push(ball);
 		// call the method to fire the event to add the ball to the field
-		this.addModel(ball);
+		this.addModel(ball, "ball");
 		return ball;
-	},
-	/**
-	 * This method removes the specified ball object from the ball models. It then calls a method to fire an event in
-	 * the field controller to remove the ball from the scene.
-	 *
-	 * @param model the ball being removed
-	 */
-	removeBallModel: function (model) {
-		Ext.Array.remove(this.ballModels, model);
-		this.removeModel(model);
 	},
 	/**
 	 * This method creates a cylinder object to represent the field goal.
 	 *
+	 * @param x the x coordinate to place the goal model in
+	 * @param y the y coordinate to place the goal model in
 	 * @returns {Cylinder} a Cylinder object that represents a goal post
 	 */
-    createGoalModel: function () {
+    createGoalModel: function (x, y) {
         var radius = 0.05;
         var height = 1.1;
         var goal = new Cylinder(radius, radius, height, new THREE.Vector3(0.5 * Math.PI, 0, 0), 0xFFCF12);
         goal = LocalisationVisualiser.visualise(goal, {
             color: 0xFF5E45
         });
-        goal.position.x = 1;
+        goal.position = new THREE.Vector3(x, y, goal.position.z);
 	    // add the goal to the list of goals
 	    this.goalModels.push(goal);
 	    // call the method to fire the event to add the goal to the field
-	    this.addModel(goal);
+	    this.addModel(goal, "goal");
         return goal;
     },
 	/**
-	 * This method removes the specified goal object from the goal models. It then calls a method to fire an event in
-	 * the field controller to remove the goal from the scene.
-	 *
-	 * @param model the goal being removed
-	 */
-	removeGoalModel: function (model) {
-		Ext.Array.remove(this.goalModels, model);
-		this.removeModel(model);
-	},
-	/**
 	 * This method creates a box object to represent an obstacle.
 	 *
+ * 	 * @param x the x coordinate to place the obstacle model in
+	 * @param y the y coordinate to place the obstacle model in
 	 * @returns {Box} a Box object that represents an obstacle
 	 */
-    createObstacleModel: function () {
+    createObstacleModel: function (x, y) {
         var dimension = 0.25;
         var obstacle = new Box(dimension, dimension, dimension, 0x2B6E8F);
 		obstacle = LocalisationVisualiser.visualise(obstacle, {
             color: 0x000000
         });
-		obstacle.position.x = -1;
+		obstacle.position = new THREE.Vector3(x, y, obstacle.position.z);
 		// add the obstacle to the list of obstacles
 		this.obstacleModels.push(obstacle);
 		// call the method to fire the event to add the obstacle to the field
-		this.addModel(obstacle);
+		this.addModel(obstacle, "obstacle");
         return box;
     },
-	/**
-	 * This method removes the specified obstacle object from the obstacle models. It then calls a method to fire an
-	 * event in the field controller to remove the obstacle from the scene.
-	 *
-	 * @param model the obstacle being removed
-	 */
-	removeObstacleModel: function (model) {
-		Ext.Array.remove(this.obstacleModels, model);
-		this.removeModel(model);
-	},
 	//todo me
-    createOtherModel: function () {
+    createOtherModel: function (x, y) {
         var dimension = 0.25;
         var pyramid = new Pyramid(dimension, dimension, 0x8F2F7C);
         pyramid = LocalisationVisualiser.visualise(pyramid, {

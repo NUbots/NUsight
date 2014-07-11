@@ -8,11 +8,26 @@ Ext.define('NU.controller.Field', {
 		objects: [],
         // shape enum
         Shape: {
-            BOX: {},
-            CIRCLE: {},
-            CYLINDER: {},
-            PYRAMID: {},
-            SPHERE: {}
+            BOX: {
+	            value: 0,
+	            name: "Box"
+            },
+            CIRCLE: {
+	            value: 1,
+	            name: "Circle"
+            },
+            CYLINDER: {
+	            value: 2,
+	            name: "Cylinder"
+            },
+            PYRAMID: {
+	            value: 3,
+	            name: "Pyramid"
+            },
+            SPHERE: {
+	            value: 4,
+	            name: "Sphere"
+            }
         }
 	},
 	control: {
@@ -266,9 +281,43 @@ Ext.define('NU.controller.Field', {
 		robot.onLocalisation(api_localisation);
 	},
 	onAddObject: function (robot) {
-		robot.createBallModel();
-		robot.createGoalModel();
-		robot.removeBallModel(this.objects[1]);
+		// get some data from network fuuuuuuucked if i know how?
+		var me = this;
+		// loop every five seconds
+		var add = setInterval(function () {
+			// get the shape requested over the network
+			var shape = function () {
+				var index = Math.floor(Math.random() * Object.keys(me.Shape).length);
+				return Ext.Object.getValues(me.Shape)[index];
+			}();
+			// todo networkify
+			// get the x and y coordinates requested over the network
+			var x = Math.floor(Math.random() * 3);
+			var y = Math.floor(Math.random() * 3);
+			// create a new shape onto the specified robot
+			switch (shape) {
+				case me.Shape.BOX: // box
+					//robot.createObstacleModel(x, y);
+					break;
+				case me.Shape.CIRCLE: // circle
+					break;
+				case me.Shape.CYLINDER: // cylinder
+					robot.createGoalModel(x, y);
+					break;
+				case me.Shape.PYRAMID: // pyramid
+					break;
+				case me.Shape.SPHERE: // sphere
+					robot.createBallModel(x, y);
+					break;
+			}
+		}, 2500);
+		// loop every ten seconds
+		var remove = setInterval(function () {
+			// hack hack
+			if (me.objects.length > 1) {
+				robot.removeModel(me.objects[1]);
+			}
+		}, 5000);
 	},
 	getRobot: function (robotIP) {
 		var foundRobot = null;
@@ -282,7 +331,7 @@ Ext.define('NU.controller.Field', {
 		return foundRobot;
 	},
 	createMainScene: function () {
-		var darwin, field, ball, camera, scene, renderer;
+		var field, camera, scene, renderer;
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50);
 		camera.lookAt(scene.position);
