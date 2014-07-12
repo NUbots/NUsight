@@ -144,6 +144,7 @@ Ext.define('NU.controller.Field', {
 		NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
 		NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
 		NU.util.Network.on('addRobot', Ext.bind(this.onAddRobot, this));
+        // todo add: NU.util.Network.on('addObjects', Ext.bind(this.onAddObjects, this));
 
         Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
 			this.onAddRobot(robotIP);
@@ -280,8 +281,96 @@ Ext.define('NU.controller.Field', {
 		}
 		robot.onLocalisation(api_localisation);
 	},
+    onAddObjects: function (robotIP, event, timestamp) {
+        // TODO: remove
+        if (robotIP !== this.robotIP) {
+            return;
+        }
+        // get the robot from the IP sent from the network
+        var robot = this.getRobot(robotIP);
+        // loop through each of the objects being added to the field
+        Ext.each(event.getObjects(), function (object) {
+            // get the shape requested over the network
+            var shape = object.getShape();
+            // get the x and y coordinates requested over the network
+            var x = object.getX();
+            var y = object.getY();
+            // declare a variable for the model that is being created
+            var model;
+            // get the values for the shapes
+            // box
+            var boxWidth = object.getBoxWidth();
+            var boxHeight = object.getBoxHeight();
+            var boxDepth = object.getBoxDepth();
+            var boxColor= object.getBoxColor();
+            // cylinder
+            var cylinderRadius = object.getCylinderRadius();
+            var cylinderHeight = object.getCylinderHeight();
+            var cylinderColor = object.getCylinderColor();
+            // pyramid
+            var pyramidRadius = object.getPyramidRadius();
+            var pyramidHeight = object.getPyramidHeight();
+            var pyramidFaces = object.getPyramidFaces();
+            var pyramidColor = object.getPyramidColor();
+            // sphere
+            var sphereRadius = object.getRadius();
+            var sphereColor = object.getSphereColor();
+            // create a new shape onto the specified robot
+            switch (shape) {
+                case this.Shape.BOX: // box
+                    model = robot.createObstacleModel({
+                        x: x,
+                        y: y,
+                        width: boxWidth,
+                        height: boxHeight,
+                        depth: boxDepth,
+                        color: boxColor
+                    });
+                    break;
+                case this.Shape.CIRCLE: // circle
+                    // todo
+                    break;
+                case this.Shape.CYLINDER: // cylinder
+                    model = robot.createGoalModel({
+                        x: x,
+                        y: y,
+                        topRadius: cylinderRadius,
+                        bottomRadius: cylinderRadius,
+                        height: cylinderHeight,
+                        color: cylinderColor
+                    });
+                    break;
+                case this.Shape.PYRAMID: // pyramid
+                    model = robot.createOtherModel({
+                        x: x,
+                        y: y,
+                        radius: pyramidRadius,
+                        height: pyramidHeight,
+                        faces: pyramidFaces,
+                        color: pyramidColor
+                    });
+                    break;
+                case this.Shape.SPHERE: // sphere
+                    model = robot.createBallModel({
+                        x: x,
+                        y: y,
+                        radius: sphereRadius,
+                        color: sphereColor
+                    });
+                    break;
+            }
+            // check if we want to display the certainty circle
+            if (object.getDisplayCertainty()) {
+                // display the certainty of the model
+                model = robot.localiseModel(model, object.getCertaintyColour());
+            }
+            // call the method to fire the event to add the model to the field
+            robot.addModel(model, object.getName());
+            // fade out the model using the specified timeout
+            robot.fadeOutModel(model, object.getTimeOut() || 5);
+        }, this);
+    },
 	onAddObject: function (robot) {
-		// get some data from network fuuuuuuucked if i know how?
 		var me = this;
 		// loop every five seconds
 		var add = setInterval(function () {
@@ -290,34 +379,64 @@ Ext.define('NU.controller.Field', {
 				var index = Math.floor(Math.random() * Object.keys(me.Shape).length);
 				return Ext.Object.getValues(me.Shape)[index];
 			}();
-			// todo networkify
+            var model;
+            var color;
+            var displayCertainty = true;
+            var name = "something";
 			// get the x and y coordinates requested over the network
-			var x = Math.floor(Math.random() * 3);
-			var y = Math.floor(Math.random() * 3);
+			var x = Math.random() * 3;
+			var y = Math.random() * 3;
 			// create a new shape onto the specified robot
 			switch (shape) {
 				case me.Shape.BOX: // box
-					//robot.createObstacleModel(x, y);
-					break;
+					model = robot.createObstacleModel({
+                        x: x,
+                        y: y
+                    });
+                    color = 0x000000;
+                    break;
 				case me.Shape.CIRCLE: // circle
 					break;
 				case me.Shape.CYLINDER: // cylinder
-					robot.createGoalModel(x, y);
+					model = robot.createGoalModel({
+                        x: x,
+                        y: y
+                    });
+                    color = 0xFF5E45;
 					break;
 				case me.Shape.PYRAMID: // pyramid
+                    model = robot.createOtherModel({
+                        x: x,
+                        y: y
+                    });
+                    color = 0x155412;
 					break;
 				case me.Shape.SPHERE: // sphere
-					robot.createBallModel(x, y);
+					model = robot.createBallModel({
+                        x: x,
+                        y: y
+                    });
+                    color = 0x0000ff;
 					break;
 			}
+            if (displayCertainty) {
+                // localise the model
+                model = robot.localiseModel(model, {
+                    color: color
+                });
+            }
+            // call the method to fire the event to add the goal to the field
+            robot.addModel(model, name);
+            // fade the model out using the specified time
+            robot.fadeOutModel(model, 5);
 		}, 2500);
 		// loop every ten seconds
-		var remove = setInterval(function () {
+		/*var remove = setInterval(function () {
 			// hack hack
 			if (me.objects.length > 1) {
 				robot.removeModel(me.objects[1]);
 			}
-		}, 5000);
+		}, 5000);*/
 	},
 	getRobot: function (robotIP) {
 		var foundRobot = null;

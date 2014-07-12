@@ -9,28 +9,31 @@
     /**
      * This constructs a sphere of a particular radius and color.
      *
-     * @param radius the size of the radius
-     * @param color the color of the sphere
+     * @param parameters the radius and color of the sphere
      * @constructor
      */
-	Sphere = function (radius, color) {
-		var sphere;
-        var segments = 16;
-        var rings = 16;
+	Sphere = function (parameters) {
 		// call super constructor
 		THREE.Object3D.call(this);
+        // ensure parameters is not undefined
+        parameters = parameters || {};
+        // the radius and the amount of segments and rings in the sphere and its color
+        var radius = parameters.radius || 0.0335;
+        var segments = 16;
+        var rings = 16;
+        var color = parameters.color || 0xffcc00;
         // create the sphere geometry
         var geometry = new THREE.SphereGeometry(radius, segments, rings);
         // create a material
         var material = new THREE.MeshLambertMaterial({
             color: color
         });
-        // create the sphere with its geometry and specified material
-        sphere = new THREE.Mesh(geometry, material);
+        // create the sphere mesh with its geometry and specified material
+        this.mesh = new THREE.Mesh(geometry, material);
         // move the sphere so it's origin is on the ground
-        sphere.position.z = radius;
+        this.mesh.position.z = radius;
         // add the sphere to the object
-        this.add(sphere);
+        this.add(this.mesh);
 	};
 
 	Sphere.prototype = Object.create(THREE.Object3D.prototype);

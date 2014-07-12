@@ -9,137 +9,19 @@ Ext.define('NU.view.field.Robot', {
 	ballModels: [],
 	goalModels: [],
 	obstacleModels: [],
-	createDarwinModel: function () {
-		var darwin = new DarwinOP(function () {
-            this.fireEvent('loaded');
-        }, this);
-		//		var DarwinModel = Modeler.model(DarwinDataModel);
-		//        darwin.bindToData(DarwinModel);
-		//        var model = Ext.create('NU.model.DarwinOP');
-		//        darwin.setModel(model);
-		darwin = LocalisationVisualiser.visualise(darwin);
-		darwin = BehaviourVisualiser.visualise(darwin);
-		return darwin;
-	},
-	/**
-	 * This method fires the event in the field controller to add the model in the scene.
-	 *
-	 * @param model the model to add to the field
-	 * @param name the name of the type of model e.g. ball, goal, etc
-	 */
-	addModel: function (model, name) {
-		this.fireEvent('add-model', model);
-		console.log(Ext.String.format("Adding {0} model", name));
-	},
-	/**
-	 * This method removes the model from the correct array and fires the event in the field controller to remove the
-	 * model from the scene.
-	 *
-	 * @param model the model to be removed from the field
-	 */
-	removeModel: function (model) {
-		var name;
-		// find which array the model belongs to and remove it from the array
-		switch (true) {
-			case Ext.Array.contains(this.ballModels, model): // ball
-				Ext.Array.remove(this.ballModels, model);
-				name = "ball";
-				break;
-			case Ext.Array.contains(this.goalModels, model): // goal
-				Ext.Array.remove(this.goalModels, model);
-				name = "goal";
-				break;
-			case Ext.Array.contains(this.obstacleModels, model): // obstacle
-				Ext.Array.remove(this.obstacleModels, model);
-				name = "obstacle";
-				break;
-		}
-		// fire the event in the field controller to remove the model from the scene
-		this.fireEvent('remove-model', model);
-		console.log(Ext.String.format("Removing {0} model", name));
-	},
-	/**
-	 * This method creates a sphere object to represent the field ball.
-	 *
-	 * @param x the x coordinate to place the ball model in
-	 * @param y the y coordinate to place the ball model in
-	 * @returns {Sphere} a Sphere object that represents a ball
-	 */
-	createBallModel: function (x, y) {
-		var ball = new Sphere(0.0335, 0xFFA500);
-        ball = LocalisationVisualiser.visualise(ball, {
-            color: 0x0000ff
-        });
-        ball.position = new THREE.Vector3(x, y, ball.position.z);
-		// add the ball to the list of balls
-		this.ballModels.push(ball);
-		// call the method to fire the event to add the ball to the field
-		this.addModel(ball, "ball");
-		return ball;
-	},
-	/**
-	 * This method creates a cylinder object to represent the field goal.
-	 *
-	 * @param x the x coordinate to place the goal model in
-	 * @param y the y coordinate to place the goal model in
-	 * @returns {Cylinder} a Cylinder object that represents a goal post
-	 */
-    createGoalModel: function (x, y) {
-        var radius = 0.05;
-        var height = 1.1;
-        var goal = new Cylinder(radius, radius, height, new THREE.Vector3(0.5 * Math.PI, 0, 0), 0xFFCF12);
-        goal = LocalisationVisualiser.visualise(goal, {
-            color: 0xFF5E45
-        });
-        goal.position = new THREE.Vector3(x, y, goal.position.z);
-	    // add the goal to the list of goals
-	    this.goalModels.push(goal);
-	    // call the method to fire the event to add the goal to the field
-	    this.addModel(goal, "goal");
-        return goal;
-    },
-	/**
-	 * This method creates a box object to represent an obstacle.
-	 *
- * 	 * @param x the x coordinate to place the obstacle model in
-	 * @param y the y coordinate to place the obstacle model in
-	 * @returns {Box} a Box object that represents an obstacle
-	 */
-    createObstacleModel: function (x, y) {
-        var dimension = 0.25;
-        var obstacle = new Box(dimension, dimension, dimension, 0x2B6E8F);
-		obstacle = LocalisationVisualiser.visualise(obstacle, {
-            color: 0x000000
-        });
-		obstacle.position = new THREE.Vector3(x, y, obstacle.position.z);
-		// add the obstacle to the list of obstacles
-		this.obstacleModels.push(obstacle);
-		// call the method to fire the event to add the obstacle to the field
-		this.addModel(obstacle, "obstacle");
-        return box;
-    },
-	//todo me
-    createOtherModel: function (x, y) {
-        var dimension = 0.25;
-        var pyramid = new Pyramid(dimension, dimension, 0x8F2F7C);
-        pyramid = LocalisationVisualiser.visualise(pyramid, {
-            color: 0x155412
-        });
-        pyramid.position.x = -1.5;
-        return pyramid;
-    },
-	constructor: function () {
-		this.callParent(arguments);
+    otherModels: [],
+    constructor: function () {
+        this.callParent(arguments);
         this.addEvents([
-	        'loaded',
-	        'model-list-resized',
-	        'add-model',
-	        'remove-model'
+            'loaded',
+            'model-list-resized',
+            'add-model',
+            'remove-model'
         ]);
-		var darwin = this.createDarwinModel();
-		this.darwinModels = [darwin];
-		return this;
-	},
+        var darwin = this.createDarwinModel();
+        this.darwinModels = [darwin];
+        return this;
+    },
 	onSensorData: function (api_sensor_data) {
 		this.darwinModels.forEach(function (darwinModel) {
 			var darwin = darwinModel;
@@ -224,6 +106,181 @@ Ext.define('NU.view.field.Robot', {
 			}
 		}, this);
 	},
+    createDarwinModel: function () {
+        var darwin = new DarwinOP(function () {
+            this.fireEvent('loaded');
+        }, this);
+        //		var DarwinModel = Modeler.model(DarwinDataModel);
+        //        darwin.bindToData(DarwinModel);
+        //        var model = Ext.create('NU.model.DarwinOP');
+        //        darwin.setModel(model);
+        darwin = LocalisationVisualiser.visualise(darwin);
+        darwin = BehaviourVisualiser.visualise(darwin);
+        return darwin;
+    },
+    /**
+     * This method fires the event in the field controller to add the model in the scene.
+     *
+     * @param model the model to add to the field
+     * @param name the name of the type of model e.g. ball, goal, etc
+     */
+    addModel: function (model, name) {
+        this.fireEvent('add-model', model);
+        console.log(Ext.String.format("Adding {0} model", name));
+    },
+    /**
+     * This method removes the model from the correct array and fires the event in the field controller to remove the
+     * model from the scene.
+     *
+     * @param model the model to be removed from the field
+     */
+    removeModel: function (model) {
+        var name;
+        // find which array the model belongs to and remove it from the array
+        switch (true) {
+            case Ext.Array.contains(this.ballModels, model): // ball
+                Ext.Array.remove(this.ballModels, model);
+                name = "ball";
+                break;
+            case Ext.Array.contains(this.goalModels, model): // goal
+                Ext.Array.remove(this.goalModels, model);
+                name = "goal";
+                break;
+            case Ext.Array.contains(this.obstacleModels, model): // obstacle
+                Ext.Array.remove(this.obstacleModels, model);
+                name = "obstacle";
+                break;
+            case Ext.Array.contains(this.otherModels, model): // other model
+                Ext.Array.remove(this.otherModels, model);
+                name = "other";
+                break;
+        }
+        // fire the event in the field controller to remove the model from the scene
+        this.fireEvent('remove-model', model);
+        // reduce the z height so the z does not increase over time
+        LocalisationVisualiser.z -= LocalisationVisualiser.zDifference;
+        console.log(Ext.String.format("Removing {0} model", name));
+    },
+    /**
+     * This method localises a particular model with a certain colour
+     *
+     * @param model the model being localised
+     * @param color the colour being used for the localisation
+     * @returns {*} the visual representation of the localisation for a particular model/object
+     */
+    localiseModel: function (model, color) {
+        return LocalisationVisualiser.visualise(model, color);
+    },
+    /**
+     * This method fades out a particular model using the material's
+     *
+     * @param model the model being faded out
+     * @param time the amount of time in seconds when the model will fade out
+     */
+    fadeOutModel: function (model, time) {
+        var me = this;
+        // the number of steps to fade out
+        var steps = 50;
+        // the opacity to decrement and the mesh material from the model
+        var opacity = 0.5 / steps;
+        var material = model.object.mesh.material;
+        // ensure the material is able to be transparent
+        material.transparent = true;
+        // the method used upon each interval
+        function updateClock () {
+            // reduce the opacity of the mesh material
+            material.opacity -= opacity;
+            // traverse through all of the visualiser's children (its certainty) and reduce the opacity
+            model.visualiser.traverse(function (object) {
+                if (object.mesh !== undefined) {
+                    // get the material of the visualiser
+                    var material = object.mesh.material;
+                    // set the material to be transparent and reduce its opacity
+                    material.transparent = true;
+                    material.opacity -= opacity;
+                }
+            });
+            // check if the mesh should be removed from the scene
+            if (material.opacity <= 0) {
+                // remove the model and stop the running task
+                me.removeModel(model);
+                Ext.TaskManager.stop(task);
+            }
+        }
+        // the task being executed
+        var task = Ext.TaskManager.start({
+            run: updateClock,
+            interval: time * 1000 / steps
+        });
+    },
+    /**
+     * This method creates a sphere object to represent the field ball.
+     *
+     * @param parameters the x, y coordinates and the radius and color of the sphere
+     * @returns {Sphere} a Sphere object that represents a ball
+     */
+    createBallModel: function (parameters) {
+        // create a new sphere
+        var ball = new Sphere(parameters);
+        // set the coordinates of the sphere
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        ball.position = new THREE.Vector3(x, y, ball.position.z);
+        // add the ball to the list of balls
+        this.ballModels.push(ball);
+        return ball;
+    },
+    /**
+     * This method creates a cylinder object to represent the field goal.
+     *
+     * @param parameters the x, y coordinates and the top and bottom radius, height and color of the cylinder
+     * @returns {Cylinder} a Cylinder object that represents a goal post
+     */
+    createGoalModel: function (parameters) {
+        // create a new cylinder
+        var goal = new Cylinder(parameters);
+        // set the coordinates of the cylinder
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        goal.position = new THREE.Vector3(x, y, goal.position.z);
+        // add the goal to the list of goals
+        this.goalModels.push(goal);
+        return goal;
+    },
+    /**
+     * This method creates a box object to represent an obstacle.
+     *
+     * @param parameters the x, y coordinates and the width, height, depth and color of the box
+     * @returns {Box} a Box object that represents an obstacle
+     */
+    createObstacleModel: function (parameters) {
+        // create a new box
+        var obstacle = new Box(parameters);
+        // set the coordinates of the box
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        obstacle.position = new THREE.Vector3(x, y, obstacle.position.z);
+        // add the obstacle to the list of obstacles
+        this.obstacleModels.push(obstacle);
+        return obstacle;
+    },
+    /**
+     * This method creates a pyramid object to represent some model.
+     *
+     * @param parameters the x, y coordinates and the radius, height, amount of faces and color of the pyramid
+     * @returns {Pyramid} a Pyramid object that represents some model
+     */
+    createOtherModel: function (parameters) {
+        // create a new pyramid
+        var other = new Pyramid(parameters);
+        // set the coordinates of the pyramid
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        other.position = new THREE.Vector3(x, y, other.position.z);
+        // add the other model to the list of other models
+        this.otherModels.push(other);
+        return other;
+    },
 	vectorToArray: function (vector, type) {
 		var arr = [];
 		var values = vector[type + "_value"];

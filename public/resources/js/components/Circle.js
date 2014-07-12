@@ -2,52 +2,39 @@
     
     "use strict";
     
-    var Circle = THREE.Circle = function (parameters) {
-        
+    var Circle;
+
+    Circle = THREE.Circle = function (parameters) {
         THREE.Object3D.call(this, parameters);
-        
-        this.resolution = 128;
-        //this.scale.set(50, 1, 50);
+        /*this.resolution = 128;
         this.scale.set(0.5, 1, 0.5);
-        
         this.color = (parameters && parameters.color) || 0xff00ff;
-        
-        this.render();
-        
+        this.render();*/
+        // ensure parameters is not undefined
+        parameters = parameters || {};
+        // the radius and amount of segments in the circle and its color
+        var radius = 1;
+        var segments = 128;
+        var color = parameters.color || 0xff00ff;
+        // create the circle geometry
+        var geometry = new THREE.CircleGeometry(radius, segments);
+        // create a material
+        var material = new THREE.MeshBasicMaterial({
+            color: color
+        });
+        // create the circle mesh with its geometry and specified material
+        this.mesh = new THREE.Mesh(geometry, material);
+        // set the rotation of the circle
+        var rotationX = (parameters.rotation && parameters.rotation.x) || -(0.5 * Math.PI);
+        var rotationY = (parameters.rotation && parameters.rotation.y) || 0;
+        var rotationZ = (parameters.rotation && parameters.rotation.z) || 0;
+        this.mesh.rotation.set(rotationX, rotationY, rotationZ);
+        // add the circle to the object
+        this.add(this.mesh);
     };
-    
+
     Circle.prototype = Object.create(THREE.Object3D.prototype);
-    
-    Circle.prototype.render = function () {
-        
-        var shape = this.drawShape(this.resolution);
-        var geometry = new THREE.ShapeGeometry(shape);
-        var material = new THREE.MeshBasicMaterial({color: this.color, opacity: 0.5, transparent: true});
-        var circle = new THREE.Mesh(geometry, material);
-        circle.position.set(0, 0.001, 0);
-        circle.rotation.set(-Math.PI / 2, 0, 0);
-        this.add(circle);
-        
-        material = new THREE.LineBasicMaterial({color: 0x0, opacity: 0.5, transparent: true});
-        geometry = new THREE.ShapeGeometry(shape);
-        var line = new THREE.Line(geometry, material);
-        line.position.set(0, 0.001, 0);
-        line.rotation.set(-Math.PI / 2, 0, 0);
-        this.add(line);
-        
-    };
-    
-    Circle.prototype.drawShape = function (resolution) {
-        
-        var shape = new THREE.Shape();
-        shape.moveTo(1, 0);
-        for (var theta = Math.PI / resolution * 2; theta <= 2 * Math.PI; theta += Math.PI / resolution * 2) {
-            var x = Math.cos(theta);
-            var y = Math.sin(theta);
-            shape.lineTo(x, y);
-        }
-        //shape.closePath();
-        return shape;
-    };
+    // export the object
+    window.Circle = Circle;
     
 }());

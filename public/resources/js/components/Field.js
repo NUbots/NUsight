@@ -1,25 +1,12 @@
 (function (THREE) {
-	"use strict";
+
+    "use strict";
 
 	var Field;
-    var lineWidth = 0.05;
-    var markWidth = 0.1;
-    var fieldLength = 6;
-    var fieldWidth = 4;
-    var goalDepth = 0.5;
-    var goalWidth = 1.5;
-    var goalAreaLength = 0.6;
-    var goalAreaWidth = 2.2;
-    var goalCrossbarHeight = 1.1;
-    var goalpostDiameter = 0.1;
-    var goalNetHeight = 0.8;
-    var penaltyMarkDistance = 1.80;
-    var centerCircleDiameter = 1.20;
-    var borderStripMinWidth = 0.7;
 
 	function buildFieldMesh() {
 		function buildHorizontalLine(x1, x2, y, width) {
-			width = typeof width !== 'undefined' ? width : lineWidth;
+			width = typeof width !== 'undefined' ? width : Field.constants.LINE_WIDTH;
 			y = typeof y !== 'undefined' ? y : 0;
 
 			var length = x2 - x1;
@@ -28,7 +15,7 @@
 			return hLine;
 		}
 		function buildVerticalLine(y1, y2, x, width) {
-			width = typeof width !== 'undefined' ? width : lineWidth;
+			width = typeof width !== 'undefined' ? width : Field.constants.LINE_WIDTH;
 			x = typeof x !== 'undefined' ? x : 0;
 
 			var length = y2 - y1;
@@ -49,7 +36,7 @@
             return cylinder;
         }
 		function buildRectangle(x, y, w, h, lw) {
-			lw = typeof lw !== 'undefined' ? lw : lineWidth;
+			lw = typeof lw !== 'undefined' ? lw : Field.constants.LINE_WIDTH;
 
 			var x1 = x - lw * 0.5;
 			var x2 = x + w + lw * 0.5;
@@ -68,27 +55,27 @@
 		}
 
 		// Convenience variables
-		var ccInnerR = (centerCircleDiameter - lineWidth) * 0.5;
-		var ccOuterR = (centerCircleDiameter + lineWidth) * 0.5;
-		var halfLength = fieldLength * 0.5;
-		var halfWidth = fieldWidth * 0.5;
-		var goalAreaHalfWidth = goalAreaWidth * 0.5;
+		var ccInnerR = (Field.constants.CENTER_CIRCLE_DIAMETER - Field.constants.LINE_WIDTH) * 0.5;
+		var ccOuterR = (Field.constants.CENTER_CIRCLE_DIAMETER + Field.constants.LINE_WIDTH) * 0.5;
+		var halfLength = Field.constants.FIELD_LENGTH * 0.5;
+		var halfWidth = Field.constants.FIELD_WIDTH * 0.5;
+		var goalAreaHalfWidth = Field.constants.GOAL_AREA_WIDTH * 0.5;
 		
 
 		// Define field lines
 		var centerCircle = new THREE.RingGeometry(ccInnerR, ccOuterR, 128);
 
-		var blueHalf = buildRectangle(-halfLength, -halfWidth, halfLength, fieldWidth);
-		var yellowHalf = buildRectangle(0, -halfWidth, halfLength, fieldWidth);
-		var blueGoalArea = buildRectangle(-halfLength, -goalAreaWidth * 0.5, goalAreaLength, goalAreaWidth);
-		var yellowGoalArea = buildRectangle(halfLength - goalAreaLength, -goalAreaWidth * 0.5, goalAreaLength, goalAreaWidth);
+		var blueHalf = buildRectangle(-halfLength, -halfWidth, halfLength, Field.constants.FIELD_WIDTH);
+		var yellowHalf = buildRectangle(0, -halfWidth, halfLength, Field.constants.FIELD_WIDTH);
+		var blueGoalArea = buildRectangle(-halfLength, -Field.constants.GOAL_AREA_WIDTH * 0.5, Field.constants.GOAL_AREA_LENGTH, Field.constants.GOAL_AREA_WIDTH);
+		var yellowGoalArea = buildRectangle(halfLength - Field.constants.GOAL_AREA_LENGTH, -Field.constants.GOAL_AREA_WIDTH * 0.5, Field.constants.GOAL_AREA_LENGTH, Field.constants.GOAL_AREA_WIDTH);
 
-		var markX = halfLength - penaltyMarkDistance;
-		var blueMarkVLine = buildVerticalLine(-markWidth * 0.5, markWidth * 0.5, -markX);
-		var blueMarkHLine = buildHorizontalLine(-markX - markWidth * 0.5, -markX + markWidth * 0.5, 0);
+		var markX = halfLength - Field.constants.PENALTY_MARK_DISTANCE;
+		var blueMarkVLine = buildVerticalLine(-Field.constants.MARK_WIDTH * 0.5, Field.constants.MARK_WIDTH * 0.5, -markX);
+		var blueMarkHLine = buildHorizontalLine(-markX - Field.constants.MARK_WIDTH * 0.5, -markX + Field.constants.MARK_WIDTH * 0.5, 0);
 
-		var yellowMarkVLine = buildVerticalLine(-markWidth * 0.5, markWidth * 0.5, markX);
-		var yellowMarkHLine = buildHorizontalLine(markX - markWidth * 0.5, markX + markWidth * 0.5, 0);
+		var yellowMarkVLine = buildVerticalLine(-Field.constants.MARK_WIDTH * 0.5, Field.constants.MARK_WIDTH * 0.5, markX);
+		var yellowMarkHLine = buildHorizontalLine(markX - Field.constants.MARK_WIDTH * 0.5, markX + Field.constants.MARK_WIDTH * 0.5, 0);
 
 		// Merge all field lines into a single geometry for performance
 		var fieldLines = new THREE.Geometry();
@@ -106,12 +93,12 @@
 		// Goal convenience variables
 		// TODO: Check that 'Goal depth' is handled correctly
 		// (should be from the front of the baseline to the back of the goal)
-		var goalLineWidth = lineWidth * 0.5;
-		var goalX = (halfLength - lineWidth * 0.5 + goalDepth + goalLineWidth * 0.5);
-		var goalY = (goalWidth + goalpostDiameter) * 0.5;
-		var goalW = (goalDepth - lineWidth + goalLineWidth * 0.5);
-		var goalH = (goalWidth + goalpostDiameter);
-		var goalPostRadius = goalpostDiameter * 0.5;
+		var goalLineWidth = Field.constants.LINE_WIDTH * 0.5;
+		var goalX = (halfLength - Field.constants.LINE_WIDTH * 0.5 + Field.constants.GOAL_DEPTH + goalLineWidth * 0.5);
+		var goalY = (Field.constants.GOAL_WIDTH + Field.constants.GOAL_POST_DIAMETER) * 0.5;
+		var goalW = (Field.constants.GOAL_DEPTH - Field.constants.LINE_WIDTH + goalLineWidth * 0.5);
+		var goalH = (Field.constants.GOAL_WIDTH + Field.constants.GOAL_POST_DIAMETER);
+		var goalPostRadius = Field.constants.GOAL_POST_DIAMETER * 0.5;
 		var goalPostX = halfLength + goalPostRadius * 0.5;
         var blue = 0x0000ff;
         var yellow = 0xffff00;
@@ -119,10 +106,10 @@
 		// Define goals
 		var blueGoalBox = buildRectangle(-goalX, -goalY, goalW, goalH, goalLineWidth);
 		var yellowGoalBox = buildRectangle(goalX - goalW, -goalY, goalW, goalH, goalLineWidth);
-        var blueLeftGoalPost = buildCylinder(-goalPostX, goalY, goalPostRadius, goalCrossbarHeight, blue);
-        var blueRightGoalPost = buildCylinder(-goalPostX, -goalY, goalPostRadius, goalCrossbarHeight, blue);
-        var yellowLeftGoalPost = buildCylinder(goalPostX, -goalY, goalPostRadius, goalCrossbarHeight, yellow);
-        var yellowRightGoalPost = buildCylinder(goalPostX, goalY, goalPostRadius, goalCrossbarHeight, yellow);
+        var blueLeftGoalPost = buildCylinder(-goalPostX, goalY, goalPostRadius, Field.constants.GOAL_CROSSBAR_HEIGHT, blue);
+        var blueRightGoalPost = buildCylinder(-goalPostX, -goalY, goalPostRadius, Field.constants.GOAL_CROSSBAR_HEIGHT, blue);
+        var yellowLeftGoalPost = buildCylinder(goalPostX, -goalY, goalPostRadius, Field.constants.GOAL_CROSSBAR_HEIGHT, yellow);
+        var yellowRightGoalPost = buildCylinder(goalPostX, goalY, goalPostRadius, Field.constants.GOAL_CROSSBAR_HEIGHT, yellow);
 		//var blueRightGoalPost = buildCircle(-goalPostX, goalY, goalPostRadius);
 		//var yellowLeftGoalPost = buildCircle(goalPostX, -goalY, goalPostRadius);
 		//var yellowRightGoalPost = buildCircle(goalPostX, goalY, goalPostRadius);
@@ -158,8 +145,8 @@
 		// 								 fieldLength + borderStripMinWidth * 2,
 		// 								 fieldWidth + borderStripMinWidth * 2);
 		var fieldGround = new THREE.PlaneGeometry(
-			fieldLength + borderStripMinWidth * 2,
-			fieldWidth + borderStripMinWidth * 2);
+            Field.constants.FIELD_LENGTH + Field.constants.BORDER_STRIP_MIN_WIDTH * 2,
+            Field.constants.FIELD_WIDTH + Field.constants.BORDER_STRIP_MIN_WIDTH * 2);
 		var fieldGroundMesh = new THREE.Mesh(fieldGround, new THREE.MeshBasicMaterial({
 			color: 0x009900
 		}));
@@ -214,7 +201,26 @@
 	};
 	
 	Field.prototype = Object.create(THREE.Object3D.prototype);
-	// export the object
+
+	// field constants
+    Field.constants = {
+        LINE_WIDTH: 0.05,
+        MARK_WIDTH: 0.1,
+        FIELD_LENGTH: 6,
+        FIELD_WIDTH: 4,
+        GOAL_DEPTH: 0.5,
+        GOAL_WIDTH: 1.5,
+        GOAL_AREA_LENGTH: 0.6,
+        GOAL_AREA_WIDTH: 2.2,
+        GOAL_CROSSBAR_HEIGHT: 1.1,
+        GOAL_POST_DIAMETER: 0.1,
+        GOAL_NET_HEIGHT: 0.8,
+        PENALTY_MARK_DISTANCE: 1.80,
+        CENTER_CIRCLE_DIAMETER: 1.20,
+        BORDER_STRIP_MIN_WIDTH: 0.7
+    };
+
+    // export the object
 	window.Field = Field;
 
 }(window.THREE));
