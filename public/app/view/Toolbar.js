@@ -3,23 +3,26 @@ Ext.define('NU.view.Toolbar', {
     alias: 'widget.nu_toolbar',
     controller: 'NU.controller.Toolbar',
     items: [{
-        text: 'Add Localisation Display',
+        text: 'Localisation',
         itemId: 'add_localisation_display'
     }, {
-        text: 'Add Vision Display',
+        text: 'Vision',
         itemId: 'add_vision_display'
     }, {
-        text: 'Add Chart Display',
+        text: 'Chart',
         itemId: 'add_chart_display'
     }, {
-        text: 'Add NUClear Display',
+        text: 'NUClear',
         itemId: 'add_nuclear_display'
     }, {
-        text: 'Add Classifier Display',
+        text: 'Classifier',
         itemId: 'add_classifier_display'
     }, {
-        text: 'Add Behaviour Display',
+        text: 'Behaviour',
         itemId: 'add_behaviour_display'
+    }, {
+        text: 'GameState',
+        itemId: 'add_gamestate_display'
     },'->', {
         text: 'Visualise',
         itemId: 'visualise'
