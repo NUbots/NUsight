@@ -68,8 +68,8 @@ Ext.define('NU.controller.NUClear', {
                 });
 
                 reactionNode.set({
-                    name: Ext.util.Format.htmlEncode(this.getShortName(reactionStatistics)),
-                    qtip: Ext.util.Format.htmlEncode(reactionStatistics.triggerName),
+                    name: Ext.htmlEncode(this.getShortName(reactionStatistics)),
+                    qtip: Ext.htmlEncode(reactionStatistics.triggerName),
                     reactionId: reactionStatistics.reactionId.toNumber(),
                     sumTime: diff,
                     numTime: 1

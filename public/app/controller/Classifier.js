@@ -550,6 +550,7 @@ Ext.define('NU.controller.Classifier', {
 			case 'magic_wand':
 				this.magicWandSelect(x, y);
 				if (e.ctrlKey || e.button === 1) {
+					this.addHistory();
 					this.magicWandClassify(x, y);
 				}
 				break;
@@ -574,13 +575,13 @@ Ext.define('NU.controller.Classifier', {
 				break;
 		}
 	},
-	onImageDblClick: function (x, y) {
+	onImageDblClick: function (x, y, rawX, rawY, e) {
 		switch (this.getSelectionTool()) {
 			case 'point':
 			case 'magic_wand':
 			case 'rectangle':
 			case 'ellipse':
-				this.onImageClick(x, y);
+				this.onImageClick(x, y, rawX, rawY, e);
 				break;
 			case 'polygon':
 				this.addHistory();
