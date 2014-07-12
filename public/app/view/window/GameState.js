@@ -3,10 +3,10 @@ Ext.define('NU.view.window.GameState', {
 	alias : ['widget.nu_gamecontroller_window'],
 	controller: 'NU.controller.GameState',
 	inject: [
-		'gameControllerPacketsStore'
+		'gameStatesStore'
 	],
 	config: {
-		'gameControllerPacketsStore': null
+		'gameStatesStore': null
 	},
 	title: 'GameState',
 	width: 600,
@@ -14,13 +14,20 @@ Ext.define('NU.view.window.GameState', {
 	initComponent: function () {
 		var me = this;
 		Ext.apply(this, {
+			tbar: [{
+				xtype: 'robot_selector'
+			}, '->', {
+				itemId: 'clearStateLog',
+				text: 'Clear Log'
+			}],
 			items: [{
+				itemId: 'gameStates',
 				xtype: 'grid',
-				store: this.getGameControllerPacketsStore(),
+				store: this.getGameStatesStore(),
 				columns: [
 					{text: 'Time', dataIndex: 'time', xtype: 'datecolumn', format: 'H:i:s', width: 75},
 					{text: 'Event', flex: 1, renderer: function(value, metaData, record) {
-						return me.renderEvent(record);
+						return Ext.htmlEncode(me.renderEvent(record));
 					}}
 				]
 			}]
@@ -33,6 +40,8 @@ Ext.define('NU.view.window.GameState', {
 				return this.renderInitialEvent(record);
 			case 'statePlaying':
 				return this.renderPlayingEvent(record);
+			default:
+				return record.get('eventName');
 		}
 	},
 	renderInitialEvent: function (record) {

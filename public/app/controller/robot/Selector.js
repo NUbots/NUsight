@@ -9,9 +9,11 @@ Ext.define('NU.controller.robot.Selector', {
     control: {
         'view': {
             select: function (combo, records, eOpts) {
-                var robotIP = records[0].data.ipAddress;
+                var robotIP = records[0].get('ipAddress');
                 this.setRobotIP(robotIP);
-                combo.fireEvent('selectRobotIP', robotIP);
+				setTimeout(function () { // hack to allow live selectors to have attached
+					combo.fireEvent('selectRobotIP', robotIP);
+				}, 1);
             }
         }
     },

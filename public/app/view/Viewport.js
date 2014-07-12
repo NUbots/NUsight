@@ -1,7 +1,8 @@
 Ext.define('NU.view.Viewport', {
     extend: 'Ext.container.Viewport',
     requires: [
-        'NU.view.Toolbar'
+        'NU.view.Toolbar',
+		'NU.view.StatusBar'
     ],
     cls: 'desktop',
     layout: 'border',
@@ -16,5 +17,8 @@ Ext.define('NU.view.Viewport', {
         style: {
             backgroundColor: '#000'
         }
-    }]
+    }/*, {
+		xtype: 'nu_statusbar',
+		region: 'south'
+	}*/]
 });

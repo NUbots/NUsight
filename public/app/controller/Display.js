@@ -13,7 +13,7 @@ Ext.define('NU.controller.Display', {
             listeners: {
                 selectRobotIP: function (robotIP) {
                     this.setRobotIP(robotIP);
-                    this.fireEvent('selectRobotIP', robotIP);
+                    this.getView().fireEvent('selectRobotIP', robotIP);
                 }
             }
         },
@@ -37,7 +37,7 @@ Ext.define('NU.controller.Display', {
         if (this.getRobotSelector() !== null) {
             var robotIP = this.getRobotSelector().getController().getRobotIP();
             this.setRobotIP(robotIP);
-            this.fireEvent('selectRobotIP', robotIP);
+            this.getView().fireEvent('selectRobotIP', robotIP);
         }
 
         return this.callParent(arguments);

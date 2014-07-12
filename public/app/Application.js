@@ -22,7 +22,10 @@ Ext.define('NU.Application', {
 			actionStateChangeStore: 'NU.store.ActionStateChange',
 			registerActionTreeStore: 'NU.store.RegisterActionTree',
 			reactionHandlesStore: 'NU.store.ReactionHandles',
-			gameControllerPacketsStore: 'NU.store.GameControllerPackets'
+			gameStatesStore: {
+				className: 'NU.store.GameStates',
+				singleton: false
+			}
         });
 
         Ext.QuickTips.init();
