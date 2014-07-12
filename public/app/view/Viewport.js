@@ -17,8 +17,8 @@ Ext.define('NU.view.Viewport', {
         style: {
             backgroundColor: '#000'
         }
-    }/*, {
+    }, {
 		xtype: 'nu_statusbar',
 		region: 'south'
-	}*/]
+	}]
 });

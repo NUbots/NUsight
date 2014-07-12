@@ -87,6 +87,8 @@ Ext.define('NU.util.Network', {
 			message: packet.message.slice(1)
 		};
 		cache[hash] = event;
+
+		this.fireEvent('packet', robotIP, packet);
 	},
 	setupSocket: function () {
 
