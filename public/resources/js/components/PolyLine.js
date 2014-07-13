@@ -15,7 +15,6 @@
         parameters = parameters || {};
         // the vertices and fill of the polygon and its color
         var vertices = parameters.vertices;
-        debugger;
         var lineWidth = parameters.lineWidth || 500;
         var fill = parameters.fill || true;
         var color = parameters.color || 0x00FF45;

@@ -26,7 +26,7 @@
         // create the circle mesh with its geometry and specified material
         this.mesh = new THREE.Mesh(geometry, material);
         // set the rotation of the circle
-        var rotationX = (parameters.rotation && parameters.rotation.x) || -(0.5 * Math.PI);
+        var rotationX = (parameters.rotation && parameters.rotation.x) || 0;
         var rotationY = (parameters.rotation && parameters.rotation.y) || 0;
         var rotationZ = (parameters.rotation && parameters.rotation.z) || 0;
         this.mesh.rotation.set(rotationX, rotationY, rotationZ);

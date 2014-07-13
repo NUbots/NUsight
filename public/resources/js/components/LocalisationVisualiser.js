@@ -15,8 +15,7 @@
         THREE.Circle.call(this, parameters);
         // set the position and rotation of the circle
         LocalisationVisualiser.z += LocalisationVisualiser.zDifference;
-        this.position.z = LocalisationVisualiser.z; // keep the slightly apart
-        this.rotation.x = Math.PI / 2;
+        this.position.z = LocalisationVisualiser.z; // keep them slightly apart
         this.mesh.material.transparent = true;
         this.mesh.material.opacity = 0.6;
     };
