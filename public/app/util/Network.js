@@ -74,19 +74,28 @@ Ext.define('NU.util.Network', {
 		});
 	},
 	processPacket: function (packet) {
-		var message, eventName, robotIP, event, cache, hash;
+		var message, eventName, filterId, robotIP, event, cache, hash;
 		robotIP = packet.robotIP;
 		message = new Uint8ClampedArray(packet.message);
 		eventName = this.typeMap[message[0]];
+		filterId = message[1];
 
-		cache = this.getCache();
-		hash = eventName + ':' + robotIP;
 		event = {
 			name: eventName,
 			robotIP: robotIP,
-			message: packet.message.slice(1)
+			message: packet.message.slice(2)
 		};
-		cache[hash] = event;
+
+		if (filterId > 0) {
+			cache = this.getCache();
+			hash = eventName + ':' + filterId + ':' + robotIP;
+			cache[hash] = event;
+		} else {
+			var api_message = API.Message.decode(event.message);
+			var api_event = api_message[event.name];
+			var time = new Date(api_message.getUtcTimestamp().toNumber());
+			this.fireEvent(event.name, event.robotIP, api_event, time);
+		}
 
 		this.fireEvent('packet', robotIP, packet);
 	},

@@ -404,8 +404,9 @@ Ext.define('NU.controller.Classifier', {
 	},
 	download: function () {
 		var message = new API.Message();
-		message.setUtcTimestamp(Date.now() / 1000);
 		message.setType(API.Message.Type.COMMAND);
+		message.setFilterId(0);
+		message.setUtcTimestamp(Date.now() / 1000);
 		var command = new API.Message.Command();
 		command.setCommand("download_lut");
 		message.setCommand(command);
@@ -414,8 +415,9 @@ Ext.define('NU.controller.Classifier', {
 	upload: function (save) {
 		save = !!save; // convert to bool
 		var message = new API.Message();
-		message.setUtcTimestamp(Date.now() / 1000);
 		message.setType(API.Message.Type.LOOKUP_TABLE);
+		message.setFilterId(0);
+		message.setUtcTimestamp(Date.now() / 1000);
 		var lookupTable = new API.Vision.LookUpTable();
 		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
