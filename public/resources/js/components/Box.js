@@ -31,7 +31,7 @@
         });
         // create the box mesh with its geometry and specified material
         this.mesh = new THREE.Mesh(geometry, material);
-        // move the box so it's origin is on the ground
+        // move the box so its origin is on the ground
         this.mesh.position.z = height * 0.5;
         // add this mesh to the object
         this.add(this.mesh);

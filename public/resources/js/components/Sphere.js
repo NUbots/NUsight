@@ -21,7 +21,7 @@
         var radius = parameters.radius || 0.0335;
         var segments = 16;
         var rings = 16;
-        var color = parameters.color || 0xffcc00;
+        var color = parameters.color || 0xFFCC00;
         // create the sphere geometry
         var geometry = new THREE.SphereGeometry(radius, segments, rings);
         // create a material
@@ -30,7 +30,7 @@
         });
         // create the sphere mesh with its geometry and specified material
         this.mesh = new THREE.Mesh(geometry, material);
-        // move the sphere so it's origin is on the ground
+        // move the sphere so its origin is on the ground
         this.mesh.position.z = radius;
         // add the sphere to the object
         this.add(this.mesh);

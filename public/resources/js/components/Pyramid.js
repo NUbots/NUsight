@@ -14,7 +14,7 @@
      */
     Pyramid = function (parameters) {
         // call super constructor
-        THREE.Object3D.call(this);
+        THREE.Geometry.call(this);
         // ensure parameters is not undefined
         parameters = parameters || {};
         // the radius, height and amount of faces in the cylinder and its color

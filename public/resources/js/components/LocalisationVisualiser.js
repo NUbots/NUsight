@@ -26,7 +26,7 @@
      *
      * @type {number}
      */
-    LocalisationVisualiser.zDifference = 0.001;
+    LocalisationVisualiser.zDifference = 0.002;
 
     /**
      * A static variable for the z value of the last object.

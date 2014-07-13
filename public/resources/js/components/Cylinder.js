@@ -36,7 +36,7 @@
         var rotationY = (parameters.rotation && parameters.rotation.y) || 0;
         var rotationZ = (parameters.rotation && parameters.rotation.z) || 0;
         this.mesh.rotation.set(rotationX, rotationY, rotationZ);
-        // move the cylinder so it's origin is on the ground
+        // move the cylinder so its origin is on the ground
         this.mesh.position.z = height * 0.5;
         // add the cylinder to the object
         this.add(this.mesh);

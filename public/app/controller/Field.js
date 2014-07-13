@@ -20,12 +20,20 @@ Ext.define('NU.controller.Field', {
 	            value: 2,
 	            name: "Cylinder"
             },
+            POLYLINE: {
+                value: 3,
+                name: "PolyLine"
+            },
             PYRAMID: {
-	            value: 3,
+	            value: 4,
 	            name: "Pyramid"
             },
+            RECTANGLE: {
+                value: 5,
+                name: "Rectangle"
+            },
             SPHERE: {
-	            value: 4,
+	            value: 6,
 	            name: "Sphere"
             }
         }
@@ -297,66 +305,143 @@ Ext.define('NU.controller.Field', {
             var y = object.getY();
             // declare a variable for the model that is being created
             var model;
-            // get the values for the shapes
-            // box
-            var boxWidth = object.getBoxWidth();
-            var boxHeight = object.getBoxHeight();
-            var boxDepth = object.getBoxDepth();
-            var boxColor= object.getBoxColor();
-            // cylinder
-            var cylinderRadius = object.getCylinderRadius();
-            var cylinderHeight = object.getCylinderHeight();
-            var cylinderColor = object.getCylinderColor();
-            // pyramid
-            var pyramidRadius = object.getPyramidRadius();
-            var pyramidHeight = object.getPyramidHeight();
-            var pyramidFaces = object.getPyramidFaces();
-            var pyramidColor = object.getPyramidColor();
-            // sphere
-            var sphereRadius = object.getRadius();
-            var sphereColor = object.getSphereColor();
+            // the function to create a box model
+            function createBoxModel() {
+                // get the box values
+                var width = object.getBoxWidth();
+                var height = object.getBoxHeight();
+                var depth = object.getBoxDepth();
+                var color= object.getBoxColor();
+                // create the model
+                model = robot.createBoxModel({
+                    x: x,
+                    y: y,
+                    width: width,
+                    height: height,
+                    depth: depth,
+                    color: color
+                });
+            }
+            // the function to create a circle model
+            function createCircleModel() {
+                // get the circle values
+                var width = object.getCircleWidth();
+                var height = object.getCircleHeight();
+                var rotation = object.getCircleRotation();
+                var color = object.getCircleColor();
+                // create the model
+                model = robot.createCircleModel({
+                    x: x,
+                    y: y,
+                    width: width,
+                    height: height,
+                    rotation: rotation,
+                    color: color
+                });
+            }
+            // the function to create the cylinder model
+            function createCylinderModel() {
+                // get the cylinder values
+                var topRadius = object.getCylinderTopRadius();
+                var bottomRadius = object.getCylinderBottomRadius();
+                var height = object.getCylinderHeight();
+                var rotation = object.getCylinderRotation();
+                var color = object.getCylinderColor();
+                // create the model
+                model = robot.createCylinderModel({
+                    x: x,
+                    y: y,
+                    topRadius: topRadius,
+                    bottomRadius: bottomRadius,
+                    height: height,
+                    rotation: rotation,
+                    color: color
+                });
+            }
+            // the function to create the polyLine model
+            function createPolyLineModel() {
+                // get the polyLine values
+                var vertices = object.getPolyLineVertices();
+                var lineWidth = object.getPolyLineLineWidth();
+                var fill = object.getPolyLineFill();
+                var color = object.getPolyLineColor();
+                // create the model
+                model = robot.createPolyLineModel({
+                    x: x,
+                    y: y,
+                    vertices: vertices,
+                    lineWidth: lineWidth,
+                    fill: fill,
+                    color: color
+                });
+            }
+            // the function to create the pyramid model
+            function createPyramidModel() {
+                // get the pyramid values
+                var radius = object.getPyramidRadius();
+                var height = object.getPyramidHeight();
+                var faces = object.getPyramidFaces();
+                var rotation = object.getPyramidRotation();
+                var color = object.getPyramidColor();
+                // create the model
+                model = robot.createPyramidModel({
+                    x: x,
+                    y: y,
+                    radius: radius,
+                    height: height,
+                    faces: faces,
+                    rotation: rotation,
+                    color: color
+                });
+            }
+            // the function to create the rectangle model
+            function createRectangleModel() {
+                // get the rectangle values
+                var width = object.getRectangleWidth();
+                var length = object.getRectangleLength();
+                var color = object.getRectangleColor();
+                // create the model
+                model = robot.createRectangleModel({
+                    x: x,
+                    y: y,
+                    width: width,
+                    length: length,
+                    color: color
+                });
+            }
+            // the function to create the sphere model
+            function createSphereModel() {
+                var radius = object.getRadius();
+                var color = object.getSphereColor();
+                model = robot.createSphereModel({
+                    x: x,
+                    y: y,
+                    radius: radius,
+                    color: color
+                });
+            }
             // create a new shape onto the specified robot
             switch (shape) {
                 case this.Shape.BOX: // box
-                    model = robot.createObstacleModel({
-                        x: x,
-                        y: y,
-                        width: boxWidth,
-                        height: boxHeight,
-                        depth: boxDepth,
-                        color: boxColor
-                    });
+                    createBoxModel();
                     break;
                 case this.Shape.CIRCLE: // circle
-                    // todo
+                    createCircleModel();
                     break;
                 case this.Shape.CYLINDER: // cylinder
-                    model = robot.createGoalModel({
-                        x: x,
-                        y: y,
-                        topRadius: cylinderRadius,
-                        bottomRadius: cylinderRadius,
-                        height: cylinderHeight,
-                        color: cylinderColor
-                    });
+                    createCylinderModel();
+                    break;
+                case this.Shape.POLYLINE: // polygon
+                    createPolyLineModel();
                     break;
                 case this.Shape.PYRAMID: // pyramid
-                    model = robot.createOtherModel({
-                        x: x,
-                        y: y,
-                        radius: pyramidRadius,
-                        height: pyramidHeight,
-                        faces: pyramidFaces,
-                        color: pyramidColor
-                    });
+                    createPyramidModel();
+                    break;
+                case this.Shape.RECTANGLE: // rectangle
+                    createRectangleModel();
                     break;
                 case this.Shape.SPHERE: // sphere
-                    model = robot.createBallModel({
-                        x: x,
-                        y: y,
-                        radius: sphereRadius,
-                        color: sphereColor
-                    });
+                    createSphereModel();
                     break;
             }
             // check if we want to display the certainty circle
@@ -367,7 +452,7 @@ Ext.define('NU.controller.Field', {
             // call the method to fire the event to add the model to the field
             robot.addModel(model, object.getName());
             // fade out the model using the specified timeout
-            robot.fadeOutModel(model, object.getTimeOut() || 5);
+            robot.fadeOutModel(model, object.getTimeOut() || 2.5);
         }, this);
     },
 	onAddObject: function (robot) {
@@ -384,35 +469,57 @@ Ext.define('NU.controller.Field', {
             var displayCertainty = true;
             var name = "something";
 			// get the x and y coordinates requested over the network
-			var x = Math.random() * 3;
-			var y = Math.random() * 3;
+			var x = Math.random() * 2;
+			var y = Math.random() * 2;
 			// create a new shape onto the specified robot
-			switch (shape) {
+			switch (me.Shape.POLYLINE) {//shape) {
 				case me.Shape.BOX: // box
-					model = robot.createObstacleModel({
+					model = robot.createBoxModel({
                         x: x,
                         y: y
                     });
                     color = 0x000000;
                     break;
 				case me.Shape.CIRCLE: // circle
+                    model = robot.createCircleModel({
+                        x: x,
+                        y: y
+                    });
+                    color = 0xF1400D;
 					break;
 				case me.Shape.CYLINDER: // cylinder
-					model = robot.createGoalModel({
+					model = robot.createCylinderModel({
                         x: x,
                         y: y
                     });
                     color = 0xFF5E45;
 					break;
+                case me.Shape.POLYLINE: // polygon
+                    model = robot.createPolyLineModel({
+                        x: x,
+                        y: y,
+                        vertices: [[1, 1, 3], [1, 1, 1], [2, 1, 3]]
+                    });
+                    color = 0x00FF45;
+                    displayCertainty = false;
+                    break;
 				case me.Shape.PYRAMID: // pyramid
-                    model = robot.createOtherModel({
+                    model = robot.createPyramidModel({
                         x: x,
                         y: y
                     });
                     color = 0x155412;
 					break;
+                case me.Shape.RECTANGLE: // rectangle
+                    model = robot.createRectangleModel({
+                        x: x,
+                        y: y
+                    });
+                    displayCertainty = false;
+                    color = 0x55FF33;
+                    break;
 				case me.Shape.SPHERE: // sphere
-					model = robot.createBallModel({
+					model = robot.createSphereModel({
                         x: x,
                         y: y
                     });
@@ -428,7 +535,7 @@ Ext.define('NU.controller.Field', {
             // call the method to fire the event to add the goal to the field
             robot.addModel(model, name);
             // fade the model out using the specified time
-            robot.fadeOutModel(model, 5);
+            robot.fadeOutModel(model, 2.5);
 		}, 2500);
 		// loop every ten seconds
 		/*var remove = setInterval(function () {

@@ -6,10 +6,8 @@ Ext.define('NU.view.field.Robot', {
         showOrientation: true
 	},
 	darwinModels: [],
-	ballModels: [],
-	goalModels: [],
-	obstacleModels: [],
-    otherModels: [],
+    ballModels: [],
+	fieldObjects: [],
     constructor: function () {
         this.callParent(arguments);
         this.addEvents([
@@ -106,6 +104,13 @@ Ext.define('NU.view.field.Robot', {
 			}
 		}, this);
 	},
+    createBallModel: function () {
+        var ball = new Sphere();
+        ball = LocalisationVisualiser.visualise(ball, {
+            color: 0x0000ff
+        });
+        return ball;
+    },
     createDarwinModel: function () {
         var darwin = new DarwinOP(function () {
             this.fireEvent('loaded');
@@ -129,37 +134,19 @@ Ext.define('NU.view.field.Robot', {
         console.log(Ext.String.format("Adding {0} model", name));
     },
     /**
-     * This method removes the model from the correct array and fires the event in the field controller to remove the
+     * This method removes the model from the array and fires the event in the field controller to remove the
      * model from the scene.
      *
      * @param model the model to be removed from the field
      */
     removeModel: function (model) {
-        var name;
-        // find which array the model belongs to and remove it from the array
-        switch (true) {
-            case Ext.Array.contains(this.ballModels, model): // ball
-                Ext.Array.remove(this.ballModels, model);
-                name = "ball";
-                break;
-            case Ext.Array.contains(this.goalModels, model): // goal
-                Ext.Array.remove(this.goalModels, model);
-                name = "goal";
-                break;
-            case Ext.Array.contains(this.obstacleModels, model): // obstacle
-                Ext.Array.remove(this.obstacleModels, model);
-                name = "obstacle";
-                break;
-            case Ext.Array.contains(this.otherModels, model): // other model
-                Ext.Array.remove(this.otherModels, model);
-                name = "other";
-                break;
-        }
+        // remove the model from the field objects array
+        Ext.Array.remove(this.fieldObjects, model);
         // fire the event in the field controller to remove the model from the scene
         this.fireEvent('remove-model', model);
         // reduce the z height so the z does not increase over time
         LocalisationVisualiser.z -= LocalisationVisualiser.zDifference;
-        console.log(Ext.String.format("Removing {0} model", name));
+        console.log(Ext.String.format("Removing {0} model", "some model"));
     },
     /**
      * This method localises a particular model with a certain colour
@@ -183,23 +170,26 @@ Ext.define('NU.view.field.Robot', {
         var steps = 50;
         // the opacity to decrement and the mesh material from the model
         var opacity = 0.5 / steps;
-        var material = model.object.mesh.material;
+        var material = (model.object && model.object.mesh.material) || model.mesh.material;
         // ensure the material is able to be transparent
         material.transparent = true;
         // the method used upon each interval
         function updateClock () {
             // reduce the opacity of the mesh material
             material.opacity -= opacity;
-            // traverse through all of the visualiser's children (its certainty) and reduce the opacity
-            model.visualiser.traverse(function (object) {
-                if (object.mesh !== undefined) {
-                    // get the material of the visualiser
-                    var material = object.mesh.material;
-                    // set the material to be transparent and reduce its opacity
-                    material.transparent = true;
-                    material.opacity -= opacity;
-                }
-            });
+            // check if a visualiser exists
+            if (model.visualiser != undefined) {
+                // traverse through all of the visualiser's children (its certainty) and reduce the opacity
+                model.visualiser.traverse(function (object) {
+                    if (object.mesh !== undefined) {
+                        // get the material of the visualiser
+                        var material = object.mesh.material;
+                        // set the material to be transparent and reduce its opacity
+                        material.transparent = true;
+                        material.opacity -= opacity;
+                    }
+                });
+            }
             // check if the mesh should be removed from the scene
             if (material.opacity <= 0) {
                 // remove the model and stop the running task
@@ -214,72 +204,123 @@ Ext.define('NU.view.field.Robot', {
         });
     },
     /**
-     * This method creates a sphere object to represent the field ball.
+     * This method creates a box object.
+     *
+     * @param parameters the x, y coordinates and the width, height, depth and color of the box
+     * @returns {Box} a Box object
+     */
+    createBoxModel: function (parameters) {
+        // create a new box
+        var box = new Box(parameters);
+        // set the coordinates of the box
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        box.position = new THREE.Vector3(x, y, box.position.z);
+        // add the box to the list of field objects
+        this.fieldObjects.push(box);
+        return box;
+    },
+    /**
+     * This method creates a circle object that can be used to represent a localisation visualiser.
+     *
+     * @param parameters the x, y coordinates and the width, height and rotation of the circle
+     * @returns {Circle} a Circle object that can be used to represent a localisation visualiser
+     */
+    createCircleModel: function (parameters) {
+        // create a new circle
+        var circle = new Circle(parameters);
+        // set the coordinates of the circle
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        circle.position = new THREE.Vector3(x, y, circle.position.z);
+        // add the circle to the list of field objects
+        this.fieldObjects.push(circle);
+        return circle;
+    },
+    /**
+     * This method creates a cylinder object that can be used to represent a goal post.
+     *
+     * @param parameters the x, y coordinates and the top and bottom radius, height, color and rotation of the cylinder
+     * @returns {Cylinder} a Cylinder object that can be used to represent a goal post
+     */
+    createCylinderModel: function (parameters) {
+        // create a new cylinder
+        var cylinder = new Cylinder(parameters);
+        // set the coordinates of the cylinder
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        cylinder.position = new THREE.Vector3(x, y, cylinder.position.z);
+        // add the cylinder to the list of field objects
+        this.fieldObjects.push(cylinder);
+        return cylinder;
+    },
+    /**
+     * This method creates a polygon object.
+     *
+     * @param parameters the x, y coordinates and the list of vertices of the polygon
+     * @returns {PolyLine} a PolyLine object
+     */
+    createPolyLineModel: function (parameters) {
+        // create a new polyline
+        var polyLine = new PolyLine(parameters);
+        // set the coordinates of the polyline
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        polyLine.position = new THREE.Vector3(x, y, polyLine.position.z);
+        // add the poyline to the list of field objects
+        this.fieldObjects.push(polyLine);
+        return polyLine;
+    },
+    /**
+     * This method creates a pyramid object.
+     *
+     * @param parameters the x, y coordinates and the radius, height, amount of faces, color and rotation of the pyramid
+     * @returns {Pyramid} a Pyramid object
+     */
+    createPyramidModel: function (parameters) {
+        // create a new pyramid
+        var pyramid = new Pyramid(parameters);
+        // set the coordinates of the pyramid
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        pyramid.position = new THREE.Vector3(x, y, pyramid.position.z);
+        // add the pyramid to the list of field objects
+        this.fieldObjects.push(pyramid);
+        return pyramid;
+    },
+    /**
+     * This method creates a rectangle object.
+     *
+     * @param parameters the x, y coordinates and the width, length and color of the rectangle
+     * @returns {Rectangle} a Rectangle object
+     */
+    createRectangleModel: function (parameters) {
+        // create a new rectangle
+        var rectangle = new Rectangle(parameters);
+        // set the coordinates of the rectangle
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        rectangle.position = new THREE.Vector3(x, y, rectangle.position.z);
+        // add the rectangle to the list of field objects
+        this.fieldObjects.push(rectangle);
+        return rectangle;
+    },
+    /**
+     * This method creates a sphere object that can be used to represent the field ball.
      *
      * @param parameters the x, y coordinates and the radius and color of the sphere
      * @returns {Sphere} a Sphere object that represents a ball
      */
-    createBallModel: function (parameters) {
+    createSphereModel: function (parameters) {
         // create a new sphere
-        var ball = new Sphere(parameters);
+        var sphere = new Sphere(parameters);
         // set the coordinates of the sphere
         var x = parameters.x || 0;
         var y = parameters.y || 0;
-        ball.position = new THREE.Vector3(x, y, ball.position.z);
-        // add the ball to the list of balls
-        this.ballModels.push(ball);
-        return ball;
-    },
-    /**
-     * This method creates a cylinder object to represent the field goal.
-     *
-     * @param parameters the x, y coordinates and the top and bottom radius, height and color of the cylinder
-     * @returns {Cylinder} a Cylinder object that represents a goal post
-     */
-    createGoalModel: function (parameters) {
-        // create a new cylinder
-        var goal = new Cylinder(parameters);
-        // set the coordinates of the cylinder
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        goal.position = new THREE.Vector3(x, y, goal.position.z);
-        // add the goal to the list of goals
-        this.goalModels.push(goal);
-        return goal;
-    },
-    /**
-     * This method creates a box object to represent an obstacle.
-     *
-     * @param parameters the x, y coordinates and the width, height, depth and color of the box
-     * @returns {Box} a Box object that represents an obstacle
-     */
-    createObstacleModel: function (parameters) {
-        // create a new box
-        var obstacle = new Box(parameters);
-        // set the coordinates of the box
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        obstacle.position = new THREE.Vector3(x, y, obstacle.position.z);
-        // add the obstacle to the list of obstacles
-        this.obstacleModels.push(obstacle);
-        return obstacle;
-    },
-    /**
-     * This method creates a pyramid object to represent some model.
-     *
-     * @param parameters the x, y coordinates and the radius, height, amount of faces and color of the pyramid
-     * @returns {Pyramid} a Pyramid object that represents some model
-     */
-    createOtherModel: function (parameters) {
-        // create a new pyramid
-        var other = new Pyramid(parameters);
-        // set the coordinates of the pyramid
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        other.position = new THREE.Vector3(x, y, other.position.z);
-        // add the other model to the list of other models
-        this.otherModels.push(other);
-        return other;
+        sphere.position = new THREE.Vector3(x, y, sphere.position.z);
+        // add the sphere to the list of field objects
+        this.fieldObjects.push(sphere);
+        return sphere;
     },
 	vectorToArray: function (vector, type) {
 		var arr = [];
