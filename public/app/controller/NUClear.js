@@ -28,7 +28,8 @@ Ext.define('NU.controller.NUClear', {
         // update default
         this.getUpdatespeed().setRawValue(this.getUpdateSpeed());
 
-        NU.util.Network.on('reaction_statistics', Ext.bind(this.onReactionStatistics, this));
+		var view = this.getView();
+        view.mon(NU.util.Network, 'reaction_statistics', this.onReactionStatistics, this);
 
         this.callParent(arguments);
 

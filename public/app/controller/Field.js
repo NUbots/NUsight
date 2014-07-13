@@ -110,9 +110,11 @@ Ext.define('NU.controller.Field', {
 		controls.yawObject.rotation.set(0, 0, 0);
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 
-		NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
-		NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
-		NU.util.Network.on('addRobot', Ext.bind(this.onAddRobot, this));
+		var view = this.getView();
+		view.mon(NU.util.Network, 'sensor_data', this.onSensorData, this);
+		view.mon(NU.util.Network, 'localisation', this.onLocalisation, this);
+		view.mon(NU.util.Network, 'addRobot', this.onAddRobot, this);
+
 		Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
 			this.onAddRobot(robotIP);
 		}, this);

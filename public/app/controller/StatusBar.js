@@ -16,7 +16,8 @@ Ext.define('NU.controller.StatusBar', {
 	},
 	init: function () {
 		this.robotMap = {};
-		NU.util.Network.on('packet', Ext.bind(this.onPacket, this));
+		var view = this.getView();
+		view.mon(NU.util.Network, 'packet', this.onPacket, this);
 		this.addRobots();
 	},
 	addRobots: function () {

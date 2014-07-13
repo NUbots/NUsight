@@ -22,7 +22,8 @@ Ext.define('NU.controller.GameState', {
 		}
 	},
 	init: function () {
-		NU.util.Network.on('game_state', Ext.bind(this.onGameState, this));
+		var view = this.getView();
+		view.mon(NU.util.Network, 'game_state', this.onGameState, this);
 
 		this.setStore(this.getView().getGameStatesStore());
 	},

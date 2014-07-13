@@ -263,8 +263,9 @@ Ext.define('NU.controller.Classifier', {
 		this.setRawContext(rawContext);
 		this.setRawLayeredCanvas(rawLayeredCanvas);
 
-		NU.util.Network.on('image', Ext.bind(this.onImage, this));
-		NU.util.Network.on('lookup_table', Ext.bind(this.onLookUpTable, this));
+		var view = this.getView();
+		view.mon(NU.util.Network, 'image', this.onImage, this);
+		view.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
 		this.callParent(arguments);
 
 		var classifiedLayeredCanvas = this.getClassifiedImage().getController();

@@ -59,9 +59,10 @@ Ext.define('NU.controller.Vision', {
 //        this.setContext(this.getCanvas().el.dom.getContext('2d'));
         //this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
 
-        NU.util.Network.on('image', Ext.bind(this.onImage, this));
-        NU.util.Network.on('classified_image', Ext.bind(this.onClassifiedImage, this));
-        NU.util.Network.on('vision_object', Ext.bind(this.onVisionObjects, this));
+		var view = this.getView();
+        view.mon(NU.util.Network, 'image', this.onImage, this);
+		view.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
+		view.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
 
         this.callParent(arguments);
 

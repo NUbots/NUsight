@@ -21,7 +21,8 @@ Ext.define('NU.controller.Behaviour', {
 		}
 	},
 	init: function () {
-		NU.util.Network.on('behaviour', Ext.bind(this.onBehaviour, this));
+		var view = this.getView();
+		view.mon(NU.util.Network, 'behaviour', this.onBehaviour, this);
 	},
 	onBehaviour: function (robotIP, event, timestamp) {
 		// TODO: remove
