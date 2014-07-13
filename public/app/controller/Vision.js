@@ -80,7 +80,7 @@ Ext.define('NU.controller.Vision', {
 	},
     onImage: function (robotIP, image) {
 
-        if (robotIP != this.robotIP) {
+        if (robotIP != this.robotIP || image === null) {
             return;
         }
 

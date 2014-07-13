@@ -18,6 +18,6 @@ Ext.define('NU.view.StatusBar', {
 		style: {
 			textAlign: 'right'
 		},
-		tpl: 'Packet Count: {count}'
+		tpl: 'Total: {count}'
 	}]
 });

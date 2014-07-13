@@ -41,7 +41,7 @@ Ext.define('NU.view.field.Robot', {
         ball = this.createBallModel();
 		
 		this.darwinModels = [ darwin ];
-		this.ballModel = [ ball ];
+		this.ballModels = [ ball ];
 		
 		return this;
 		
