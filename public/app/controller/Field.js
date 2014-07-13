@@ -148,7 +148,7 @@ Ext.define('NU.controller.Field', {
 		NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
 		NU.util.Network.on('localisation', Ext.bind(this.onLocalisation, this));
 		NU.util.Network.on('addRobot', Ext.bind(this.onAddRobot, this));
-        // todo add: NU.util.Network.on('addObjects', Ext.bind(this.onAddObjects, this));
+        NU.util.Network.on('addObjects', Ext.bind(this.onAddObjects, this));
 
         Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
 			this.onAddRobot(robotIP);
@@ -265,7 +265,7 @@ Ext.define('NU.controller.Field', {
 
 		this.robots.push(robot);
 		//todo remove this:
-		this.onAddObject(robot);
+//		this.onAddObject(robot);
 		//this.addObject(robot.darwinModels);
 		//todo this.addObject(robot.ballModels);
 	},
@@ -487,7 +487,7 @@ Ext.define('NU.controller.Field', {
 			var x = Math.random() * 2;
 			var y = Math.random() * 2;
 			// create a new shape onto the specified robot
-			switch (me.Shape.ARROW) {//shape) {
+            switch (shape) {
                 case me.Shape.ARROW: // arrow
                     model = robot.createArrowModel({
                         x: x,

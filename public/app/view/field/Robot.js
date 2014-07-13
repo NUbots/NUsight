@@ -131,7 +131,7 @@ Ext.define('NU.view.field.Robot', {
      */
     addModel: function (model, name) {
         this.fireEvent('add-model', model);
-        console.log(Ext.String.format("Adding {0} model", name));
+//        console.log(Ext.String.format("Adding {0} model", name));
     },
     /**
      * This method removes the model from the array and fires the event in the field controller to remove the
@@ -146,7 +146,7 @@ Ext.define('NU.view.field.Robot', {
         this.fireEvent('remove-model', model);
         // reduce the z height so the z does not increase over time
         LocalisationVisualiser.z -= LocalisationVisualiser.zDifference;
-        console.log(Ext.String.format("Removing {0} model", "some model"));
+//        console.log(Ext.String.format("Removing {0} model", "some model"));
     },
     /**
      * This method localises a particular model with a certain colour
