@@ -417,7 +417,7 @@ Ext.define('NU.controller.Classifier', {
 		message.setUtcTimestamp(Date.now() / 1000);
 		message.setType(API.Message.Type.LOOKUP_TABLE);
 		var lookupTable = new API.Vision.LookUpTable();
-		lookupTable.setTable(dcodeIO.ByteBuffer.wrap(this.getLookup().buffer));
+		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
@@ -489,6 +489,7 @@ Ext.define('NU.controller.Classifier', {
 
 		// TODO: validate?
 		var lut = new Uint8ClampedArray(table.toArrayBuffer());
+		this.addHistory();
 		this.setLookup(lut);
 		this.updateClassifiedData();
 		this.renderClassifiedImage();

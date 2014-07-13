@@ -1,12 +1,15 @@
 Ext.define('NU.controller.StatusBar', {
 	extend: 'Deft.mvc.ViewController',
+	requires: [
+		'NU.util.Display'
+	],
 	inject:  'robotsStore',
 	config: {
 		packetCounter: 0,
 		robotsStore: null,
-		insertIndex: 0
+		insertIndex: 0,
+		updateRate: 600
 	},
-	lastUpdate: 0,
 	robotMap: null,
 	control: {
 		'packetCount': true
@@ -44,17 +47,15 @@ Ext.define('NU.controller.StatusBar', {
 		this.incPacketCounter();
 		var robot = this.robotMap[robotIP];
 		robot.counter++;
-		var now = Date.now();
-		if (now > this.lastUpdate + 50) {
-			this.getPacketCount().update({
-				count: this.getPacketCounter()
-			});
-			robot.panel.update({
-				name: robot.name,
-				count: robot.counter
-			});
-			this.lastUpdate = now;
-		}
+
+		NU.util.Display.updateDelayed(this.getPacketCount(), {
+			count: this.getPacketCounter()
+		}, this.getUpdateRate());
+
+		NU.util.Display.updateDelayed(robot.panel, {
+			name: robot.name,
+			count: robot.counter
+		}, this.getUpdateRate());
 	},
 	incPacketCounter: function () {
 		this.packetCounter++;
