@@ -20,15 +20,30 @@ Ext.define('NU.view.window.GameState', {
 				itemId: 'clearStateLog',
 				text: 'Clear Log'
 			}],
+			layout: 'hbox',
 			items: [{
 				itemId: 'gameStates',
 				xtype: 'grid',
 				store: this.getGameStatesStore(),
+				layout: 'fit',
+				flex: 1,
 				columns: [
 					{text: 'Time', dataIndex: 'time', xtype: 'datecolumn', format: 'H:i:s', width: 75},
 					{text: 'Event', flex: 1, renderer: function(value, metaData, record) {
 						return Ext.htmlEncode(me.renderEvent(record));
 					}}
+				]
+			}, {
+				xtype: 'splitter'
+			}, {
+				itemId: 'state',
+				xtype: 'grid',
+				store: [],
+				layout: 'fit',
+				flex: 1,
+				columns: [
+					{text: 'Key'},
+					{text: 'Value'}
 				]
 			}]
 		});
