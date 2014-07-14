@@ -8,32 +8,28 @@ Ext.define('NU.controller.Field', {
 		objects: [],
         // shape enum
         Shape: {
+            ARROW: {
+                name: "Arrow"
+            },
             BOX: {
-	            value: 0,
 	            name: "Box"
             },
             CIRCLE: {
-	            value: 1,
 	            name: "Circle"
             },
             CYLINDER: {
-	            value: 2,
 	            name: "Cylinder"
             },
             POLYLINE: {
-                value: 3,
                 name: "PolyLine"
             },
             PYRAMID: {
-	            value: 4,
 	            name: "Pyramid"
             },
             RECTANGLE: {
-                value: 5,
                 name: "Rectangle"
             },
             SPHERE: {
-	            value: 6,
 	            name: "Sphere"
             }
         }
@@ -305,6 +301,22 @@ Ext.define('NU.controller.Field', {
             var y = object.getY();
             // declare a variable for the model that is being created
             var model;
+            function createArrowModel() {
+                // get the arrow values
+                var direction = object.getArrowDirection();
+                var length = object.getArrowLength();
+                var depth = object.getArrowLength();
+                var color = object.getArrowColor();
+                // create the model
+                model = robot.createArrowModel({
+                    x: x,
+                    y: y,
+                    direction: direction,
+                    length: length,
+                    depth: depth,
+                    color: color
+                });
+            }
             // the function to create a box model
             function createBoxModel() {
                 // get the box values
@@ -422,6 +434,9 @@ Ext.define('NU.controller.Field', {
             }
             // create a new shape onto the specified robot
             switch (shape) {
+                case this.Shape.ARROW: // arrow
+                    createArrowModel();
+                    break;
                 case this.Shape.BOX: // box
                     createBoxModel();
                     break;
@@ -472,7 +487,14 @@ Ext.define('NU.controller.Field', {
 			var x = Math.random() * 2;
 			var y = Math.random() * 2;
 			// create a new shape onto the specified robot
-			switch (me.Shape.POLYLINE) {//shape) {
+			switch (me.Shape.ARROW) {//shape) {
+                case me.Shape.ARROW: // arrow
+                    model = robot.createArrowModel({
+                        x: x,
+                        y: y
+                    });
+                    displayCertainty = false;
+                    break;
 				case me.Shape.BOX: // box
 					model = robot.createBoxModel({
                         x: x,

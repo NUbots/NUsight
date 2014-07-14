@@ -204,6 +204,23 @@ Ext.define('NU.view.field.Robot', {
         });
     },
     /**
+     * This method creates an arrow object.
+     *
+     * @param parameters the x, y coordinates and the direction, length, depth and color of the arrow
+     * @returns {Arrow} an Arrow object
+     */
+    createArrowModel: function (parameters) {
+        // create the arrow
+        var arrow = new Arrow(parameters);
+        // set the coordinates of the arrow
+        var x = parameters.x || 0;
+        var y = parameters.y || 0;
+        arrow.position = new THREE.Vector3(x, y, arrow.position.z);
+        // add the arrow to the list of field objects
+        this.fieldObjects.push(arrow);
+        return arrow;
+    },
+    /**
      * This method creates a box object.
      *
      * @param parameters the x, y coordinates and the width, height, depth and color of the box
