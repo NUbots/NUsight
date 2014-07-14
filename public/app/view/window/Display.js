@@ -11,5 +11,6 @@ Ext.define('NU.view.window.Display', {
 	onEsc: Ext.emptyFn,
     tbar: [{
         xtype: 'robot_selector'
-    }]
+    }],
+	layout: 'fit'
 });

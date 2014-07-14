@@ -1,8 +1,8 @@
 Ext.define('NU.controller.NetworkSettings', {
 	extend: 'Deft.mvc.ViewController',
-	inject: 'reactionHandlersStore',
+	inject: 'reactionHandlesStore',
 	config: {
-		reactionHandlersStore: null
+		reactionHandlesStore: null
 	},
 	control: {
 		'save': {
@@ -14,14 +14,15 @@ Ext.define('NU.controller.NetworkSettings', {
 	save: function () {
 		var message = new API.Message();
 		message.setUtcTimestamp(Date.now());
-		message.setType(API.Message.Type.REACTION_HANDLERS);
-		var reactionHandlers = new API.Message.ReactionHandlers();
-		this.getReactionHandlersStore().each(function (reactionHandler) {
-			var fieldName = reactionHandler.get('fieldName');
-			var setter = 'set' + fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
-			reactionHandlers[setter](reactionHandler.get('enabled'));
+		message.setType(API.Message.Type.REACTION_HANDLES);
+		var reactionHandles = new API.Message.ReactionHandles();
+		this.getReactionHandlesStore().each(function (reactionHandle) {
+			reactionHandles.handles.push({
+				name: reactionHandle.get('fieldName'),
+				enabled: reactionHandle.get('enabled')
+			});
 		});
-		message.setReactionHandlers(reactionHandlers);
+		message.setReactionHandles(reactionHandles);
 		NU.util.Network.broadcast(message);
 	}
 });

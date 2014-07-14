@@ -38,7 +38,7 @@ Ext.define('NU.view.window.Field', {
 				itemId: 'orientation',
 				xtype: 'checkbox',
 				fieldLabel: 'Orientation',
-				checked: true
+				checked: false
 			}, {
 				itemId: 'resetOrientation',
 				text: 'Reset Orientation',

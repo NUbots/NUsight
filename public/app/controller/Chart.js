@@ -54,8 +54,9 @@ Ext.define('NU.controller.Chart', {
         smoothie.streamTo(canvasDom, 0);
 
         // setup network hook
-        NU.util.Network.on('data_point', Ext.bind(this.onDataPoint, this));
-        NU.util.Network.on('sensor_data', Ext.bind(this.onSensorData, this));
+		var view = this.getView();
+        view.mon(NU.util.Network, 'data_point', this.onDataPoint, this);
+        view.mon(NU.util.Network, 'sensor_data', this.onSensorData, this);
 
         this.callParent(arguments);
 

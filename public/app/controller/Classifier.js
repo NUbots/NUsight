@@ -265,8 +265,9 @@ Ext.define('NU.controller.Classifier', {
 		this.setRawContext(rawContext);
 		this.setRawLayeredCanvas(rawLayeredCanvas);
 
-		NU.util.Network.on('image', Ext.bind(this.onImage, this));
-		NU.util.Network.on('lookup_table', Ext.bind(this.onLookUpTable, this));
+		var view = this.getView();
+		view.mon(NU.util.Network, 'image', this.onImage, this);
+		view.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
 		this.callParent(arguments);
 
 		var classifiedLayeredCanvas = this.getClassifiedImage().getController();
@@ -406,8 +407,9 @@ Ext.define('NU.controller.Classifier', {
 	},
 	download: function () {
 		var message = new API.Message();
-		message.setUtcTimestamp(Date.now() / 1000);
 		message.setType(API.Message.Type.COMMAND);
+		message.setFilterId(0);
+		message.setUtcTimestamp(Date.now() / 1000);
 		var command = new API.Message.Command();
 		command.setCommand("download_lut");
 		message.setCommand(command);
@@ -416,10 +418,11 @@ Ext.define('NU.controller.Classifier', {
 	upload: function (save) {
 		save = !!save; // convert to bool
 		var message = new API.Message();
-		message.setUtcTimestamp(Date.now() / 1000);
 		message.setType(API.Message.Type.LOOKUP_TABLE);
+		message.setFilterId(0);
+		message.setUtcTimestamp(Date.now() / 1000);
 		var lookupTable = new API.Vision.LookUpTable();
-		lookupTable.setTable(dcodeIO.ByteBuffer.wrap(this.getLookup().buffer));
+		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
@@ -491,6 +494,7 @@ Ext.define('NU.controller.Classifier', {
 
 		// TODO: validate?
 		var lut = new Uint8ClampedArray(table.toArrayBuffer());
+		this.addHistory();
 		this.setLookup(lut);
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
@@ -552,6 +556,7 @@ Ext.define('NU.controller.Classifier', {
 			case 'magic_wand':
 				this.magicWandSelect(x, y);
 				if (e.ctrlKey || e.button === 1) {
+					this.addHistory();
 					this.magicWandClassify(x, y);
 				}
 				break;
@@ -576,13 +581,13 @@ Ext.define('NU.controller.Classifier', {
 				break;
 		}
 	},
-	onImageDblClick: function (x, y) {
+	onImageDblClick: function (x, y, rawX, rawY, e) {
 		switch (this.getSelectionTool()) {
 			case 'point':
 			case 'magic_wand':
 			case 'rectangle':
 			case 'ellipse':
-				this.onImageClick(x, y);
+				this.onImageClick(x, y, rawX, rawY, e);
 				break;
 			case 'polygon':
 				this.addHistory();

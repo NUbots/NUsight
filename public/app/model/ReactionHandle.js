@@ -1,4 +1,4 @@
-Ext.define('NU.model.ReactionHandler', {
+Ext.define('NU.model.ReactionHandle', {
 	extend: 'Ext.data.Model',
 	fields: [
 		{ name: 'name', type: 'string' },
