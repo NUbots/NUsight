@@ -9,7 +9,7 @@ Ext.define('NU.Application', {
 	    'NU.store.classifier.SelectionTool',
 		'NU.store.ActionStateChange',
 	    'NU.store.RegisterActionTree',
-	    'NU.store.ReactionHandlers'
+	    'NU.store.ReactionHandles'
     ],
     init: function () {
         window._NU = this;

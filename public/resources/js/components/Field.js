@@ -31,9 +31,14 @@
 			return circle;
 		}
         function buildCylinder(x, y, radius, height, color) {
-            var cylinder = new Cylinder(radius, radius, height, new THREE.Vector3(0.5 * Math.PI, 0, 0), color);
-            cylinder.position = new THREE.Vector3(x, y, 0.001);
-            return cylinder;
+            return new Cylinder({
+				position: new THREE.Vector3(x, y, 0.001 + height * 0.5),
+				radius: radius,
+				height: height,
+				color: color
+			});//, radius, height, new THREE.Vector3(0.5 * Math.PI, 0, 0), color);
+            //cylinder.position = new THREE.Vector3(x, y, 0.001);
+            //return cylinder;
         }
 		function buildRectangle(x, y, w, h, lw) {
 			lw = typeof lw !== 'undefined' ? lw : Field.constants.LINE_WIDTH;

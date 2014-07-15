@@ -149,7 +149,7 @@ Ext.define('NU.controller.Field', {
 		view.mon(NU.util.Network, 'sensor_data', this.onSensorData, this);
 		view.mon(NU.util.Network, 'localisation', this.onLocalisation, this);
 		view.mon(NU.util.Network, 'addRobot', this.onAddRobot, this);
-        view.mon(NU.util.Network, 'addObjects', this.onAddObjects, this);
+        view.mon(NU.util.Network, 'draw_objects', this.onDrawObjects, this);
 
 		Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
 			this.onAddRobot(robotIP);
@@ -286,7 +286,7 @@ Ext.define('NU.controller.Field', {
 		}
 		robot.onLocalisation(api_localisation);
 	},
-    onAddObjects: function (robotIP, event, timestamp) {
+    onDrawObjects: function (robotIP, event, timestamp) {
         // TODO: remove
         if (robotIP !== this.robotIP) {
             return;
@@ -297,21 +297,27 @@ Ext.define('NU.controller.Field', {
         Ext.each(event.getObjects(), function (object) {
             // get the shape requested over the network
             var shape = object.getShape();
-            // get the x and y coordinates requested over the network
-            var x = object.getX();
-            var y = object.getY();
+            // get the position requested over the network
+            var position = object.getPosition();
+			position = new THREE.Vector3(position.getX(), position.getY(), position.getZ());
             // declare a variable for the model that is being created
             var model;
+			// the function to convert the protocol to a vec3
+			function toVec3(vector) {
+				return vector == null ? null : new THREE.Vector3(vector.getX(), vector.getY(), vector.getZ());
+			}
+			// the function to create the arrow model
             function createArrowModel() {
                 // get the arrow values
-                var direction = object.getArrowDirection();
-                var length = object.getArrowLength();
-                var depth = object.getArrowLength();
-                var color = object.getArrowColor();
+				var target = toVec3(object.getTarget());
+                var direction = toVec3(object.getDirection());
+				var length = object.getLength();
+                var depth = object.getDepth();
+                var color = object.getColor();
                 // create the model
                 model = robot.createArrowModel({
-                    x: x,
-                    y: y,
+                    position: position,
+					target: target,
                     direction: direction,
                     length: length,
                     depth: depth,
@@ -321,14 +327,13 @@ Ext.define('NU.controller.Field', {
             // the function to create a box model
             function createBoxModel() {
                 // get the box values
-                var width = object.getBoxWidth();
-                var height = object.getBoxHeight();
-                var depth = object.getBoxDepth();
-                var color= object.getBoxColor();
+                var width = object.getWidth();
+                var height = object.getHeight();
+                var depth = object.getDepth();
+                var color= object.getColor();
                 // create the model
                 model = robot.createBoxModel({
-                    x: x,
-                    y: y,
+                    position: position,
                     width: width,
                     height: height,
                     depth: depth,
@@ -338,14 +343,13 @@ Ext.define('NU.controller.Field', {
             // the function to create a circle model
             function createCircleModel() {
                 // get the circle values
-                var width = object.getCircleWidth();
-                var height = object.getCircleHeight();
-                var rotation = object.getCircleRotation();
-                var color = object.getCircleColor();
+                var width = object.getWidth();
+                var height = object.getHeight();
+                var rotation = toVec3(object.getRotation());
+                var color = object.getColor();
                 // create the model
                 model = robot.createCircleModel({
-                    x: x,
-                    y: y,
+					position: position,
                     width: width,
                     height: height,
                     rotation: rotation,
@@ -355,15 +359,14 @@ Ext.define('NU.controller.Field', {
             // the function to create the cylinder model
             function createCylinderModel() {
                 // get the cylinder values
-                var topRadius = object.getCylinderTopRadius();
-                var bottomRadius = object.getCylinderBottomRadius();
-                var height = object.getCylinderHeight();
-                var rotation = object.getCylinderRotation();
-                var color = object.getCylinderColor();
+                var topRadius = object.getTopRadius();
+                var bottomRadius = object.getBottomRadius();
+                var height = object.getHeight();
+                var rotation = toVec3(object.getRotation());
+                var color = object.getColor();
                 // create the model
                 model = robot.createCylinderModel({
-                    x: x,
-                    y: y,
+					position: position,
                     topRadius: topRadius,
                     bottomRadius: bottomRadius,
                     height: height,
@@ -374,14 +377,13 @@ Ext.define('NU.controller.Field', {
             // the function to create the polyLine model
             function createPolyLineModel() {
                 // get the polyLine values
-                var vertices = object.getPolyLineVertices();
-                var lineWidth = object.getPolyLineLineWidth();
-                var fill = object.getPolyLineFill();
-                var color = object.getPolyLineColor();
+                var vertices = object.getVertices();
+                var lineWidth = object.getLineWidth();
+                var fill = object.getFill();
+                var color = object.getColor();
                 // create the model
                 model = robot.createPolyLineModel({
-                    x: x,
-                    y: y,
+					position: position,
                     vertices: vertices,
                     lineWidth: lineWidth,
                     fill: fill,
@@ -391,15 +393,14 @@ Ext.define('NU.controller.Field', {
             // the function to create the pyramid model
             function createPyramidModel() {
                 // get the pyramid values
-                var radius = object.getPyramidRadius();
-                var height = object.getPyramidHeight();
-                var faces = object.getPyramidFaces();
-                var rotation = object.getPyramidRotation();
-                var color = object.getPyramidColor();
+                var radius = object.getRadius();
+                var height = object.getHeight();
+                var faces = object.getFaces();
+                var rotation = object.getRotation();
+                var color = object.getColor();
                 // create the model
                 model = robot.createPyramidModel({
-                    x: x,
-                    y: y,
+					position: position,
                     radius: radius,
                     height: height,
                     faces: faces,
@@ -410,13 +411,12 @@ Ext.define('NU.controller.Field', {
             // the function to create the rectangle model
             function createRectangleModel() {
                 // get the rectangle values
-                var width = object.getRectangleWidth();
-                var length = object.getRectangleLength();
-                var color = object.getRectangleColor();
+                var width = object.getWidth();
+                var length = object.getLength();
+                var color = object.getColor();
                 // create the model
                 model = robot.createRectangleModel({
-                    x: x,
-                    y: y,
+					position: position,
                     width: width,
                     length: length,
                     color: color
@@ -425,50 +425,51 @@ Ext.define('NU.controller.Field', {
             // the function to create the sphere model
             function createSphereModel() {
                 var radius = object.getRadius();
-                var color = object.getSphereColor();
+                var color = object.getColor();
                 model = robot.createSphereModel({
-                    x: x,
-                    y: y,
+					position: position,
                     radius: radius,
                     color: color
                 });
             }
             // create a new shape onto the specified robot
+			var Shape = API.DrawObject.Shape;
             switch (shape) {
-                case this.Shape.ARROW: // arrow
+                case Shape.ARROW: // arrow
                     createArrowModel();
                     break;
-                case this.Shape.BOX: // box
+                case Shape.BOX: // box
                     createBoxModel();
                     break;
-                case this.Shape.CIRCLE: // circle
+                case Shape.CIRCLE: // circle
                     createCircleModel();
                     break;
-                case this.Shape.CYLINDER: // cylinder
+                case Shape.CYLINDER: // cylinder
                     createCylinderModel();
                     break;
-                case this.Shape.POLYLINE: // polygon
+                case Shape.POLYLINE: // polygon
                     createPolyLineModel();
                     break;
-                case this.Shape.PYRAMID: // pyramid
+                case Shape.PYRAMID: // pyramid
                     createPyramidModel();
                     break;
-                case this.Shape.RECTANGLE: // rectangle
+                case Shape.RECTANGLE: // rectangle
                     createRectangleModel();
                     break;
-                case this.Shape.SPHERE: // sphere
+                case Shape.SPHERE: // sphere
                     createSphereModel();
                     break;
             }
             // check if we want to display the certainty circle
+            /* TODO
             if (object.getDisplayCertainty()) {
                 // display the certainty of the model
                 model = robot.localiseModel(model, object.getCertaintyColour());
-            }
+            }*/
             // call the method to fire the event to add the model to the field
             robot.addModel(model, object.getName());
             // fade out the model using the specified timeout
-            robot.fadeOutModel(model, object.getTimeOut() || 2.5);
+//            robot.fadeOutModel(model, object.getTimeOut() || 2.5);
         }, this);
     },
 	onAddObject: function (robot) {

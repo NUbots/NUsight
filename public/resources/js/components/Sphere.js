@@ -30,8 +30,8 @@
         });
         // create the sphere mesh with its geometry and specified material
         this.mesh = new THREE.Mesh(geometry, material);
-        // move the sphere so its origin is on the ground
-        this.mesh.position.z = radius;
+		// move the position of the object
+		this.position = parameters.position || new THREE.Vector3(0, 0, 0);
         // add the sphere to the object
         this.add(this.mesh);
 	};

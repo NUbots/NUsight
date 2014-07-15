@@ -31,13 +31,13 @@
         });
         // create the cylinder mesh with its geometry and specified material
         this.mesh = new THREE.Mesh(geometry, material);
+		// move the position of the object
+		this.position = parameters.position || new THREE.Vector3(0, 0, 0);
         // set the rotation of the cylinder
         var rotationX = (parameters.rotation && parameters.rotation.x) || (0.5 * Math.PI);
         var rotationY = (parameters.rotation && parameters.rotation.y) || 0;
         var rotationZ = (parameters.rotation && parameters.rotation.z) || 0;
         this.mesh.rotation.set(rotationX, rotationY, rotationZ);
-        // move the cylinder so its origin is on the ground
-        this.mesh.position.z = height * 0.5;
         // add the cylinder to the object
         this.add(this.mesh);
     };

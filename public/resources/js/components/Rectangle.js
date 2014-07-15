@@ -32,8 +32,8 @@
         });
         // create the rectangle mesh with its geometry and specified material
         this.mesh = new THREE.Mesh(geometry, material);
-        // move the rectangle so its origin is on the ground
-        this.mesh.position.z = 0.001;
+		// move the position of the object
+		this.position = parameters.position || new THREE.Vector3(0, 0, 0);
         // add the rectangle to the object
         this.add(this.mesh);
     };

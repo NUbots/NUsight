@@ -167,7 +167,7 @@ Ext.define('NU.view.field.Robot', {
     fadeOutModel: function (model, time) {
         var me = this;
         // the number of steps to fade out
-        var steps = 50;
+        var steps = 10;
         // the opacity to decrement and the mesh material from the model
         var opacity = 0.5 / steps;
         var material = (model.object && model.object.mesh.material) || model.mesh.material;
@@ -212,10 +212,6 @@ Ext.define('NU.view.field.Robot', {
     createArrowModel: function (parameters) {
         // create the arrow
         var arrow = new Arrow(parameters);
-        // set the coordinates of the arrow
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        arrow.position = new THREE.Vector3(x, y, arrow.position.z);
         // add the arrow to the list of field objects
         this.fieldObjects.push(arrow);
         return arrow;
@@ -229,10 +225,6 @@ Ext.define('NU.view.field.Robot', {
     createBoxModel: function (parameters) {
         // create a new box
         var box = new Box(parameters);
-        // set the coordinates of the box
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        box.position = new THREE.Vector3(x, y, box.position.z);
         // add the box to the list of field objects
         this.fieldObjects.push(box);
         return box;
@@ -246,10 +238,6 @@ Ext.define('NU.view.field.Robot', {
     createCircleModel: function (parameters) {
         // create a new circle
         var circle = new Circle(parameters);
-        // set the coordinates of the circle
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        circle.position = new THREE.Vector3(x, y, circle.position.z);
         // add the circle to the list of field objects
         this.fieldObjects.push(circle);
         return circle;
@@ -263,10 +251,6 @@ Ext.define('NU.view.field.Robot', {
     createCylinderModel: function (parameters) {
         // create a new cylinder
         var cylinder = new Cylinder(parameters);
-        // set the coordinates of the cylinder
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        cylinder.position = new THREE.Vector3(x, y, cylinder.position.z);
         // add the cylinder to the list of field objects
         this.fieldObjects.push(cylinder);
         return cylinder;
@@ -280,10 +264,6 @@ Ext.define('NU.view.field.Robot', {
     createPolyLineModel: function (parameters) {
         // create a new polyline
         var polyLine = new PolyLine(parameters);
-        // set the coordinates of the polyline
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        polyLine.position = new THREE.Vector3(x, y, polyLine.position.z);
         // add the poyline to the list of field objects
         this.fieldObjects.push(polyLine);
         return polyLine;
@@ -297,10 +277,6 @@ Ext.define('NU.view.field.Robot', {
     createPyramidModel: function (parameters) {
         // create a new pyramid
         var pyramid = new Pyramid(parameters);
-        // set the coordinates of the pyramid
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        pyramid.position = new THREE.Vector3(x, y, pyramid.position.z);
         // add the pyramid to the list of field objects
         this.fieldObjects.push(pyramid);
         return pyramid;
@@ -314,10 +290,6 @@ Ext.define('NU.view.field.Robot', {
     createRectangleModel: function (parameters) {
         // create a new rectangle
         var rectangle = new Rectangle(parameters);
-        // set the coordinates of the rectangle
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        rectangle.position = new THREE.Vector3(x, y, rectangle.position.z);
         // add the rectangle to the list of field objects
         this.fieldObjects.push(rectangle);
         return rectangle;
@@ -331,10 +303,6 @@ Ext.define('NU.view.field.Robot', {
     createSphereModel: function (parameters) {
         // create a new sphere
         var sphere = new Sphere(parameters);
-        // set the coordinates of the sphere
-        var x = parameters.x || 0;
-        var y = parameters.y || 0;
-        sphere.position = new THREE.Vector3(x, y, sphere.position.z);
         // add the sphere to the list of field objects
         this.fieldObjects.push(sphere);
         return sphere;
