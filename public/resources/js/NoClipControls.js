@@ -21,8 +21,6 @@
 		this.gamepad = false;
 		this.inverted = true; // the only way ;)
 
-		this.constrainVertical = [-0.9, 0.9];
-
 		this.forward = new THREE.Vector3(0, 0, 1);
 
 		this.deltaX = 0;
@@ -118,9 +116,10 @@
 		if (this.enabled) {
 			var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 			var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+			/* todo: don't know why this is in here...comment plz. was causing mouse freezing.
 			if (Math.abs(this.lastX - movementX) > 100 || Math.abs(this.lastY - movementY) > 100) {
 				return;
-			}
+			}*/
 			this.yawObject.rotation.y -= movementX * 0.002;
 			this.pitchObject.rotation.x -= movementY * 0.002;
 			this.pitchObject.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pitchObject.rotation.x));

@@ -44,8 +44,8 @@ Ext.define("Ext.ux.ThreeJS", {
 		return this;
 	},
 	startAnimation: function () {
-		var self, delta;
-		self = this;
+		var self = this;
+		var delta;
 		
 		function animate () {
 			delta = self.clock.getDelta();
