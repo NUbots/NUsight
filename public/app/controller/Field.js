@@ -266,7 +266,7 @@ Ext.define('NU.controller.Field', {
 
 		this.robots.push(robot);
 		//todo remove this:
-//		this.onAddObject(robot);
+		this.onAddObject(robot);
 		//this.addObject(robot.darwinModels);
 		//todo this.addObject(robot.ballModels);
 	},
@@ -298,8 +298,7 @@ Ext.define('NU.controller.Field', {
             // get the shape requested over the network
             var shape = object.getShape();
             // get the position requested over the network
-            var position = object.getPosition();
-			position = new THREE.Vector3(position.getX(), position.getY(), position.getZ());
+            var position = toVec3(object.getPosition());
             // declare a variable for the model that is being created
             var model;
 			// the function to convert the protocol to a vec3
@@ -469,7 +468,7 @@ Ext.define('NU.controller.Field', {
             // call the method to fire the event to add the model to the field
             robot.addModel(model, object.getName());
             // fade out the model using the specified timeout
-//            robot.fadeOutModel(model, object.getTimeOut() || 2.5);
+			robot.fadeOutModel(model, object.getTimeOut() || 2.5);
         }, this);
     },
 	onAddObject: function (robot) {
@@ -486,42 +485,37 @@ Ext.define('NU.controller.Field', {
             var displayCertainty = true;
             var name = "something";
 			// get the x and y coordinates requested over the network
-			var x = Math.random() * 2;
-			var y = Math.random() * 2;
+			var position = new THREE.Vector3(Math.random() * 2, Math.random() * 2, Math.random() * 2);
 			// create a new shape onto the specified robot
-            switch (shape) {
+            switch (me.Shape.ARROW) {//shape) {
                 case me.Shape.ARROW: // arrow
                     model = robot.createArrowModel({
-                        x: x,
-                        y: y
+                        position: position,
+	                    target: new THREE.Vector3(1, 1, 2)
                     });
                     displayCertainty = false;
                     break;
 				case me.Shape.BOX: // box
 					model = robot.createBoxModel({
-                        x: x,
-                        y: y
+						position: position
                     });
                     color = 0x000000;
                     break;
 				case me.Shape.CIRCLE: // circle
                     model = robot.createCircleModel({
-                        x: x,
-                        y: y
+	                    position: position
                     });
                     color = 0xF1400D;
 					break;
 				case me.Shape.CYLINDER: // cylinder
 					model = robot.createCylinderModel({
-                        x: x,
-                        y: y
+						position: position
                     });
                     color = 0xFF5E45;
 					break;
                 case me.Shape.POLYLINE: // polygon
                     model = robot.createPolyLineModel({
-                        x: x,
-                        y: y,
+	                    position: position,
                         vertices: [[1, 1, 3], [1, 1, 1], [2, 1, 3]]
                     });
                     color = 0x00FF45;
@@ -529,23 +523,20 @@ Ext.define('NU.controller.Field', {
                     break;
 				case me.Shape.PYRAMID: // pyramid
                     model = robot.createPyramidModel({
-                        x: x,
-                        y: y
+	                    position: position
                     });
                     color = 0x155412;
 					break;
                 case me.Shape.RECTANGLE: // rectangle
                     model = robot.createRectangleModel({
-                        x: x,
-                        y: y
+	                    position: position
                     });
                     displayCertainty = false;
                     color = 0x55FF33;
                     break;
 				case me.Shape.SPHERE: // sphere
 					model = robot.createSphereModel({
-                        x: x,
-                        y: y
+						position: position
                     });
                     color = 0x0000ff;
 					break;
@@ -561,13 +552,6 @@ Ext.define('NU.controller.Field', {
             // fade the model out using the specified time
             robot.fadeOutModel(model, 2.5);
 		}, 2500);
-		// loop every ten seconds
-		/*var remove = setInterval(function () {
-			// hack hack
-			if (me.objects.length > 1) {
-				robot.removeModel(me.objects[1]);
-			}
-		}, 5000);*/
 	},
 	getRobot: function (robotIP) {
 		var foundRobot = null;

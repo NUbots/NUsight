@@ -38,15 +38,15 @@
         var arrowBodyRight = arrowOrigin.y + width * 0.5;
         // the arrow head is 1/4 of the length, we need a 0.75 multiplier
         var arrowHeadMultiplier = 0.75;
-        // the value for the end of the arrow body
-        var arrowBodyEnd = (arrowOrigin.x + length) * 0.9;
 		// the left and right arrow head position
 		var arrowHeadLeft = arrowBodyLeft - width * 2;
 		var arrowHeadRight = arrowBodyRight + width * 2;
-        // the bottom of the arrow head x coordinate
-        var arrowHeadBottom = (arrowOrigin.x + length) * arrowHeadMultiplier;
+        // the bottom of the arrow head x coordinate with a maximum value
+        var arrowHeadBottom = Math.max((arrowOrigin.x + length) * arrowHeadMultiplier, length - 0.25);
         // the top of the arrow head x coordinate
         var arrowHeadTop = arrowHeadBottom + width * 0.5;
+	    // the value for the end of the arrow body
+	    var arrowBodyEnd = arrowHeadBottom + width * 2 * Math.tan(55 * Math.PI / 180); // Math.tan needs to be in radians
         // end of the arrow
         var arrowEnd = arrowOrigin.x + length;
         var color = parameters.color || 0xF0FAB0;
