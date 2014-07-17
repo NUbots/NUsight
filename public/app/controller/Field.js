@@ -266,7 +266,7 @@ Ext.define('NU.controller.Field', {
 
 		this.robots.push(robot);
 		//todo remove this:
-		this.onAddObject(robot);
+//		this.onAddObject(robot);
 		//this.addObject(robot.darwinModels);
 		//todo this.addObject(robot.ballModels);
 	},
