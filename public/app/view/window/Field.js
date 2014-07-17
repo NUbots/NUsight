@@ -1,16 +1,17 @@
 Ext.define('NU.view.window.Field', {
-	extend : 'NU.view.window.Display',
-	alias : ['widget.nu_field_window'],
+	extend: 'NU.view.window.Display',
+	alias: 'widget.nu_field_window',
 	requires: [
 		'NU.view.field.Robot',
-		'NU.view.robot.Selector'
+		'NU.view.robot.Selector',
+		'Ext.form.field.Checkbox'
 	],
 	controller: 'NU.controller.Field',
 	title: 'Localisation Display',
 	width: 800,
 	height: 400,
 	layout: 'fit',
-	tbar:  [{
+	tbar: [{
 		xtype: 'robot_selector'
 	}, {
 		itemId: 'hawkeye',
@@ -55,9 +56,25 @@ Ext.define('NU.view.window.Field', {
 				xtype: 'checkbox',
 				fieldLabel: 'Inverted',
 				checked: true
+			},  {
+				itemId: 'displayCrosshair',
+				xtype: 'checkbox',
+				fieldLabel: 'Crosshair',
+				checked: true
 			}]
 		}
 	}],
+    bbar: [{
+        xtype: 'component',
+        itemId: 'coordinates',
+        height: 15,
+        tpl: 'X: {x}, Y: {y}, Z: {z}',
+        data: {
+            x: 0,
+            y: 0,
+            z: 0
+        }
+    }],
 	items: [{
 		xtype: 'threejs',
 		itemId: 'mainscene'

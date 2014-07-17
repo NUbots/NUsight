@@ -5,11 +5,14 @@ Ext.define('NU.Application', {
         'NU.store.Robots',
         'NU.store.Streams',
         'NU.store.ReactionStatisticsTree',
-		'NU.store.ActionStateChange'
+	    'NU.store.classifier.Target',
+	    'NU.store.classifier.SelectionTool',
+		'NU.store.ActionStateChange',
+	    'NU.store.RegisterActionTree',
+	    'NU.store.ReactionHandles'
     ],
     init: function () {
         window._NU = this;
-
         Deft.Injector.configure({
             streamsStore: {
                 className: 'NU.store.Streams',
@@ -27,15 +30,11 @@ Ext.define('NU.Application', {
 				singleton: false
 			}
         });
-
         Ext.QuickTips.init();
-
         Ext.apply(Ext.QuickTips.getQuickTip(), {
             dismissDelay: 0
         });
-
         Ext.syncRequire('NU.util.Network');
-
         Ext.create('NU.view.Viewport');
     }
 });

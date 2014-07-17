@@ -31,3 +31,9 @@ a {
 .icon-toolbar-magenta { background-image: url('../images/toolbar/magenta.png'); }
 .icon-toolbar-black { background-image: url('../images/toolbar/black.png'); }
 
+div.crosshair {
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	background-image: url('../images/crosshair.png');
+}

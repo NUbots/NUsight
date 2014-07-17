@@ -1,4 +1,6 @@
 Ext.define('NU.controller.Classifier', {
+	// TODO: COOOOOOMENT THIS MONSTER
+	// GOD DAMN
 	extend: 'NU.controller.Display',
 	config: {
 		rawContext: null,

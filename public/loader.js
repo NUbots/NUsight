@@ -17,4 +17,8 @@ Ext.Loader.setConfig({
 });
 
 // Required for DeftJS
-Ext.syncRequire(['Ext.Component', 'Ext.ComponentManager', 'Ext.ComponentQuery']);
+Ext.syncRequire([
+	'Ext.Component',
+	'Ext.ComponentManager',
+	'Ext.ComponentQuery'
+]);

@@ -35,7 +35,7 @@ Ext.define('NU.util.Network', {
         window.API.Vision = this.builder.build("messages.vision.proto");
 		window.API.Behaviour = this.builder.build("messages.behaviour.proto.Behaviour");
 		window.API.ActionStateChange = this.builder.build("messages.behaviour.proto.ActionStateChange");
-		window.API.Image = this.builder.build("messages.input.proto.Image")
+		window.API.Image = this.builder.build("messages.input.proto.Image");
 
 		var typeMap = {};
 		Ext.iterate(API.Message.Type, function (key, type) {
