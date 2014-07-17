@@ -127,11 +127,10 @@ Ext.define('NU.view.field.Robot', {
      * This method fires the event in the field controller to add the model in the scene.
      *
      * @param model the model to add to the field
-     * @param name the name of the type of model e.g. ball, goal, etc
      */
-    addModel: function (model, name) {
+    addModel: function (model) {
         this.fireEvent('add-model', model);
-//        console.log(Ext.String.format("Adding {0} model", name));
+        console.log(Ext.String.format("Adding {0} model", model.name));
     },
     /**
      * This method removes the model from the array and fires the event in the field controller to remove the
@@ -146,7 +145,7 @@ Ext.define('NU.view.field.Robot', {
         this.fireEvent('remove-model', model);
         // reduce the z height so the z does not increase over time
         LocalisationVisualiser.z -= LocalisationVisualiser.zDifference;
-//        console.log(Ext.String.format("Removing {0} model", "some model"));
+        console.log(Ext.String.format("Removing {0} model", model.name));
     },
     /**
      * This method localises a particular model with a certain colour
@@ -170,13 +169,23 @@ Ext.define('NU.view.field.Robot', {
         var steps = 10;
         // the opacity to decrement and the mesh material from the model
         var opacity = 0.5 / steps;
-        var material = (model.object && model.object.mesh.material) || model.mesh.material;
-        // ensure the material is able to be transparent
-        material.transparent = true;
+	    var mesh = (model.object && model.object.mesh) || model.mesh;
+	    var materials = [];
+	    // add each material to the array and ensure it is able to be transparent
+	    mesh.traverse(function (object) {
+		    var material = object.material;
+		    // check if there is a material on the child
+		    if (material != undefined) {
+			    materials.push(material);
+			    material.transparent = true;
+		    }
+	    });
         // the method used upon each interval
         function updateClock () {
-            // reduce the opacity of the mesh material
-            material.opacity -= opacity;
+            // reduce the opacity of the mesh materials
+	        Ext.each(materials, function (material) {
+		        material.opacity -= opacity;
+	        });
             // check if a visualiser exists
             if (model.visualiser != undefined) {
                 // traverse through all of the visualiser's children (its certainty) and reduce the opacity
@@ -191,7 +200,7 @@ Ext.define('NU.view.field.Robot', {
                 });
             }
             // check if the mesh should be removed from the scene
-            if (material.opacity <= 0) {
+            if (materials[0].opacity <= 0) {
                 // remove the model and stop the running task
                 me.removeModel(model);
                 Ext.TaskManager.stop(task);

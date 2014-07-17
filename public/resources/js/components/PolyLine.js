@@ -36,6 +36,8 @@
         this.mesh = new THREE.Line(geometry, material);
 		// move the position of the object
 		this.position = parameters.position || new THREE.Vector3(0, 0, 0);
+	    // add a name to the object
+	    this.name = parameters.name || "PolyLine";
         // add the rectangle to the object
         this.add(this.mesh);
     };

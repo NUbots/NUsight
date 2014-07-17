@@ -297,8 +297,10 @@ Ext.define('NU.controller.Field', {
         Ext.each(event.getObjects(), function (object) {
             // get the shape requested over the network
             var shape = object.getShape();
-            // get the position requested over the network
-            var position = toVec3(object.getPosition());
+            // get the name, position and color requested over the network
+            var name = object.getName();
+	        var position = toVec3(object.getPosition());
+	        var color = object.getColor();
             // declare a variable for the model that is being created
             var model;
 			// the function to convert the protocol to a vec3
@@ -312,9 +314,9 @@ Ext.define('NU.controller.Field', {
                 var direction = toVec3(object.getDirection());
 				var length = object.getLength();
                 var depth = object.getDepth();
-                var color = object.getColor();
                 // create the model
                 model = robot.createArrowModel({
+	                name: name,
                     position: position,
 					target: target,
                     direction: direction,
@@ -329,10 +331,10 @@ Ext.define('NU.controller.Field', {
                 var width = object.getWidth();
                 var height = object.getHeight();
                 var depth = object.getDepth();
-                var color= object.getColor();
                 // create the model
                 model = robot.createBoxModel({
-                    position: position,
+                    name: name,
+	                position: position,
                     width: width,
                     height: height,
                     depth: depth,
@@ -345,10 +347,10 @@ Ext.define('NU.controller.Field', {
                 var width = object.getWidth();
                 var height = object.getHeight();
                 var rotation = toVec3(object.getRotation());
-                var color = object.getColor();
                 // create the model
                 model = robot.createCircleModel({
-					position: position,
+	                name: name,
+	                position: position,
                     width: width,
                     height: height,
                     rotation: rotation,
@@ -362,10 +364,10 @@ Ext.define('NU.controller.Field', {
                 var bottomRadius = object.getBottomRadius();
                 var height = object.getHeight();
                 var rotation = toVec3(object.getRotation());
-                var color = object.getColor();
                 // create the model
                 model = robot.createCylinderModel({
-					position: position,
+	                name: name,
+	                position: position,
                     topRadius: topRadius,
                     bottomRadius: bottomRadius,
                     height: height,
@@ -379,10 +381,10 @@ Ext.define('NU.controller.Field', {
                 var vertices = object.getVertices();
                 var lineWidth = object.getLineWidth();
                 var fill = object.getFill();
-                var color = object.getColor();
                 // create the model
                 model = robot.createPolyLineModel({
-					position: position,
+	                name: name,
+	                position: position,
                     vertices: vertices,
                     lineWidth: lineWidth,
                     fill: fill,
@@ -396,10 +398,10 @@ Ext.define('NU.controller.Field', {
                 var height = object.getHeight();
                 var faces = object.getFaces();
                 var rotation = object.getRotation();
-                var color = object.getColor();
                 // create the model
                 model = robot.createPyramidModel({
-					position: position,
+	                name: name,
+	                position: position,
                     radius: radius,
                     height: height,
                     faces: faces,
@@ -410,12 +412,14 @@ Ext.define('NU.controller.Field', {
             // the function to create the rectangle model
             function createRectangleModel() {
                 // get the rectangle values
+	            var target = object.getTarget();
                 var width = object.getWidth();
                 var length = object.getLength();
-                var color = object.getColor();
                 // create the model
                 model = robot.createRectangleModel({
-					position: position,
+	                name: name,
+	                position: position,
+	                target: target,
                     width: width,
                     length: length,
                     color: color
@@ -424,9 +428,9 @@ Ext.define('NU.controller.Field', {
             // the function to create the sphere model
             function createSphereModel() {
                 var radius = object.getRadius();
-                var color = object.getColor();
                 model = robot.createSphereModel({
-					position: position,
+	                name: name,
+	                position: position,
                     radius: radius,
                     color: color
                 });
@@ -483,11 +487,10 @@ Ext.define('NU.controller.Field', {
             var model;
             var color;
             var displayCertainty = true;
-            var name = "something";
 			// get the x and y coordinates requested over the network
 			var position = new THREE.Vector3(Math.random() * 2, Math.random() * 2, Math.random() * 2);
 			// create a new shape onto the specified robot
-            switch (me.Shape.ARROW) {//shape) {
+            switch (me.Shape.BOX) {//shape) {
                 case me.Shape.ARROW: // arrow
                     model = robot.createArrowModel({
                         position: position,
@@ -515,7 +518,7 @@ Ext.define('NU.controller.Field', {
 					break;
                 case me.Shape.POLYLINE: // polygon
                     model = robot.createPolyLineModel({
-	                    position: position,
+	                    position: new THREE.Vector3(1, 1, 0),
                         vertices: [[1, 1, 3], [1, 1, 1], [2, 1, 3]]
                     });
                     color = 0x00FF45;
@@ -541,14 +544,14 @@ Ext.define('NU.controller.Field', {
                     color = 0x0000ff;
 					break;
 			}
-            if (displayCertainty) {
+            /*if (displayCertainty) {
                 // localise the model
                 model = robot.localiseModel(model, {
                     color: color
                 });
-            }
+            } */
             // call the method to fire the event to add the goal to the field
-            robot.addModel(model, name);
+            robot.addModel(model);
             // fade the model out using the specified time
             robot.fadeOutModel(model, 2.5);
 		}, 2500);

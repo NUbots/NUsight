@@ -32,6 +32,8 @@
         this.mesh = new THREE.Mesh(geometry, material);
 		// move the position of the object
 		this.position = parameters.position || new THREE.Vector3(0, 0, 0);
+		// add a name to the object
+		this.name = parameters.name || "Sphere";
         // add the sphere to the object
         this.add(this.mesh);
 	};

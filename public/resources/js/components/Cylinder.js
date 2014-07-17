@@ -38,6 +38,8 @@
         var rotationY = (parameters.rotation && parameters.rotation.y) || 0;
         var rotationZ = (parameters.rotation && parameters.rotation.z) || 0;
         this.mesh.rotation.set(rotationX, rotationY, rotationZ);
+	    // add a name to the object
+	    this.name = parameters.name || "Cylinder";
         // add the cylinder to the object
         this.add(this.mesh);
     };

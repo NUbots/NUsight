@@ -35,6 +35,8 @@
         // change the width and height of the circle
         this.mesh.scale.y = parameters.width * 2 || 1;
         this.mesh.scale.x = parameters.height * 2 || 1;
+	    // add a name to the object
+	    this.name = parameters.name || "Circle";
         // add the circle to the object
         this.add(this.mesh);
     };
