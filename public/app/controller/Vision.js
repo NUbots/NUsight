@@ -156,10 +156,11 @@ Ext.define('NU.controller.Vision', {
         imageObj.src = uri;
         imageObj.onload = function () {
 			// flip image vertically
-			ctx.save();
-			ctx.scale(-1, -1);
-			ctx.drawImage(imageObj, -image.dimensions.x, -image.dimensions.y, image.dimensions.x, image.dimensions.y);
-			ctx.restore();
+//			ctx.save();
+//			ctx.scale(-1, -1);
+//			ctx.drawImage(imageObj, -image.dimensions.x, -image.dimensions.y, image.dimensions.x, image.dimensions.y);
+			ctx.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
+//			ctx.restore();
         };
     },
 	arrayBufferToBase64: function (buffer) {

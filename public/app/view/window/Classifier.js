@@ -228,6 +228,33 @@ Ext.define('NU.view.window.Classifier', {
 							fieldLabel: 'Tolerance',
 							value: 50,
 							step: 1
+						}, {
+							layout: 'hbox',
+							defaults: {
+								width: 120
+							},
+							items: [{
+								itemId: 'ybits',
+								xtype: 'numberfield',
+								fieldLabel: 'Y Bits',
+								labelWidth: 50,
+								value: 6,
+								step: 1
+							}, {
+								itemId: 'cbbits',
+								xtype: 'numberfield',
+								fieldLabel: 'Cb Bits',
+								labelWidth: 50,
+								value: 6,
+								step: 1
+							}, {
+								itemId: 'crbits',
+								xtype: 'numberfield',
+								fieldLabel: 'Cr Bits',
+								labelWidth: 50,
+								value: 6,
+								step: 1
+							}]
 						}/*, {
 							itemId: 'metaball',
 							xtype: 'button',

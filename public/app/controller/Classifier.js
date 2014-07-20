@@ -54,9 +54,9 @@ Ext.define('NU.controller.Classifier', {
 			'MagicWand': 1,
 			'Polygon': 2
 		},
-		LutBitsPerColorY: 4,
-		LutBitsPerColorCb: 5,
-		LutBitsPerColorCr: 4
+		LutBitsPerColorY: 6,
+		LutBitsPerColorCb: 6,
+		LutBitsPerColorCr: 6
 	},
 	control: {
 		'rawImage': true,
@@ -246,7 +246,38 @@ Ext.define('NU.controller.Classifier', {
 				}
 			}
 		},
-		'scatter3d': true
+		'scatter3d': true,
+		'ybits': {
+			change: function (field, newValue, oldValue, eOpts) {
+				if (field.isValid()) {
+					this.self.LutBitsPerColorY = newValue;
+					this.resetBits();
+				}
+			}
+		},
+		'cbbits': {
+			change: function (field, newValue, oldValue, eOpts) {
+				if (field.isValid()) {
+					this.self.LutBitsPerColorCb = newValue;
+					this.resetBits();
+				}
+			}
+		},
+		'crbits': {
+			change: function (field, newValue, oldValue, eOpts) {
+				if (field.isValid()) {
+					this.self.LutBitsPerColorCr = newValue;
+					this.resetBits();
+				}
+			}
+		}
+	},
+	resetBits: function () {
+		this.resetLUT();
+		this.updateClassifiedData();
+		// TODO: add bit sizes into lookup table object so undo/redo can work over bit size changes
+		this.setLookupForwardHistory([]);
+		this.setLookupBackwardHistory([]);
 	},
 	init: function () {
 		// these must initialized here so there is an object per-controller
@@ -399,7 +430,7 @@ Ext.define('NU.controller.Classifier', {
 
 	},
 	resetLUT: function () {
-		var lut = new Uint8ClampedArray(Math.pow(2, 3 * this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr));
+		var lut = new Uint8ClampedArray(Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr));
 		for (var i = 0; i < lut.length; i++) {
 			lut[i] = this.self.Target.Unclassified;
 		}
@@ -1359,8 +1390,8 @@ Ext.define('NU.controller.Classifier', {
 		var imageWidth = this.getImageWidth();
 		var imageHeight = this.getImageHeight();
 
-		x = imageWidth - x - 1;
-		y = imageHeight - y - 1;
+//		x = imageWidth - x - 1;
+//		y = imageHeight - y - 1;
 
 		var Format = API.Image.Format;
 		switch (this.getImageFormat()) {
@@ -1473,10 +1504,11 @@ Ext.define('NU.controller.Classifier', {
 		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 		imageObj.copyToImageData(data);
 		ctx.putImageData(data, 0, 0);
-		ctx.save();
-		ctx.scale(-1, -1);
-		ctx.drawImage(ctx.canvas, -imageWidth, -imageHeight, imageWidth, imageHeight);
-		ctx.restore();
+//		ctx.save();
+//		ctx.scale(-1, -1);
+//		ctx.drawImage(ctx.canvas, -imageWidth, -imageHeight, imageWidth, imageHeight);
+		ctx.drawImage(ctx.canvas, 0, 0, imageWidth, imageHeight);
+//		ctx.restore();
 		data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 		me.setRawImageData(data);
 		me.setRawImageComponents(imageObj.components);
@@ -1502,10 +1534,11 @@ Ext.define('NU.controller.Classifier', {
 			var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 			imageObj.copyToImageData(data);
 			ctx.putImageData(data, 0, 0);
-			ctx.save();
-			ctx.scale(-1, -1);
-			ctx.drawImage(ctx.canvas, -imageWidth, -imageHeight, imageWidth, imageHeight);
-			ctx.restore();
+//			ctx.save();
+//			ctx.scale(-1, -1);
+//			ctx.drawImage(ctx.canvas, -imageWidth, -imageHeight, imageWidth, imageHeight);
+			ctx.drawImage(ctx.canvas, 0, 0, imageWidth, imageHeight);
+//			ctx.restore();
 			data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 			me.setRawImageData(data);
 			me.setRawImageComponents(imageObj.components);

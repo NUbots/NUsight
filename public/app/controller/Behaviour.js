@@ -26,6 +26,7 @@ Ext.define('NU.controller.Behaviour', {
 	},
 	onBehaviour: function (robotIP, event, timestamp) {
 		// TODO: remove
+		debugger;
 		if (robotIP !== this.robotIP) {
 			return;
 		}
@@ -33,7 +34,7 @@ Ext.define('NU.controller.Behaviour', {
 		var type = event.getType();
 		switch (type) {
 			case API.Behaviour.Type.ACTION_REGISTER:
-				// TODO
+				this.onActionRegister(robotIP, event.getActionRegister(), timestamp);
 				break;
 			case API.Behaviour.Type.ACTION_STATE:
 				this.onActionStateChange(robotIP, event.getActionStateChange(), timestamp);
@@ -41,6 +42,9 @@ Ext.define('NU.controller.Behaviour', {
 			default:
 				console.error('Unknown behaviour type: ', type);
 		}
+	},
+	onActionRegister: function (robotIP, actionRegister, timestamp) {
+		console.log(actionRegister);
 	},
 	onActionStateChange: function (robotIP, stateActionChange, timestamp) {
 		this.getLogs().getStore().add({
