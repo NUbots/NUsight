@@ -210,18 +210,18 @@
 	// field constants
     Field.constants = {
         LINE_WIDTH: 0.05,
-        MARK_WIDTH: 0.1,
-        FIELD_LENGTH: 6,
-        FIELD_WIDTH: 4,
+        MARK_WIDTH: 0.05,
+        FIELD_LENGTH: 9,
+        FIELD_WIDTH: 6,
         GOAL_DEPTH: 0.5,
-        GOAL_WIDTH: 1.5,
+        GOAL_WIDTH: 2.25,
         GOAL_AREA_LENGTH: 0.6,
-        GOAL_AREA_WIDTH: 2.2,
+        GOAL_AREA_WIDTH: 3.45,
         GOAL_CROSSBAR_HEIGHT: 1.1,
         GOAL_POST_DIAMETER: 0.1,
-        GOAL_NET_HEIGHT: 0.8,
+        GOAL_NET_HEIGHT: 1,
         PENALTY_MARK_DISTANCE: 1.80,
-        CENTER_CIRCLE_DIAMETER: 1.20,
+        CENTER_CIRCLE_DIAMETER: 1.50,
         BORDER_STRIP_MIN_WIDTH: 0.7
     };
 

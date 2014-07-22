@@ -1465,7 +1465,7 @@ Ext.define('NU.controller.Classifier', {
 		var total = width * height * bitsPerPixel2;
 		for (var i = 0; i < data.length / bitsPerPixel2; i++) {
 			var offset = bitsPerPixel * i;
-			var offset2 = total - bitsPerPixel2 * i;
+			var offset2 = bitsPerPixel2 * i;
 			var rgb = this.YCbCrtoRGB([
 				data[offset2 + 0],
 				data[offset2 + 1],
