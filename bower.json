@@ -23,6 +23,7 @@
     "protobuf": "~3.5.4",
     "smoothie": "*",
     "jpgjs": "notmasteryet/jpgjs",
-    "numericjs": "~1.2.6"
+    "numericjs": "~1.2.6",
+    "operative": "~0.3.1"
   }
 }
