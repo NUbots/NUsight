@@ -19,8 +19,10 @@
   "dependencies": {
     "threejs": "*",
     "extjs": "~4.2",
-    "extjs-deft-bowerpackage" : "*",
+    "extjs-deft-bowerpackage": "*",
     "protobuf": "~3.5.4",
-    "smoothie": "*"
+    "smoothie": "*",
+    "jpgjs": "notmasteryet/jpgjs",
+    "numericjs": "~1.2.6"
   }
 }
