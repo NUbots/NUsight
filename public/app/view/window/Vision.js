@@ -3,7 +3,8 @@ Ext.define('NU.view.window.Vision', {
     alias : ['widget.nu_vision_window'],
     requires: [
 		'Ext.ux.form.MultiSelect',
-		'NU.view.LayeredCanvas'
+		'NU.view.LayeredCanvas',
+		'NU.view.camera.Selector'
 	],
     controller: 'NU.controller.Vision',
     title: 'Vision Display',
@@ -13,6 +14,11 @@ Ext.define('NU.view.window.Vision', {
 //        preserveRatio: true
 //    },
     layout: 'border',
+	tbar: [{
+		xtype: 'robot_selector'
+	}, {
+		xtype: 'camera_selector'
+	}],
     items: [{
         xtype: 'nu_layered_canvas',
         region: 'center',

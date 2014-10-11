@@ -3,6 +3,7 @@ Ext.define('NU.Application', {
     requires: [
         'NU.view.Viewport',
         'NU.store.Robots',
+		'NU.store.Camera',
         'NU.store.Streams',
         'NU.store.ReactionStatisticsTree',
 	    'NU.store.classifier.Target',
@@ -19,6 +20,7 @@ Ext.define('NU.Application', {
                 singleton: false
             },
             robotsStore: 'NU.store.Robots',
+			cameraStore: 'NU.store.Camera',
             reactionStatisticsTreeStore: 'NU.store.ReactionStatisticsTree',
             classifierTargetStore: 'NU.store.classifier.Target',
             classifierSelectionToolStore: 'NU.store.classifier.SelectionTool',

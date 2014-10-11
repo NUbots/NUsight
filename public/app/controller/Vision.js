@@ -1,6 +1,7 @@
 Ext.define('NU.controller.Vision', {
     extend: 'NU.controller.Display',
     config: {
+		cameraId: null,
         displayImage: false,
         displayClassifiedImage: false,
         displayFieldObjects: false,
@@ -10,6 +11,14 @@ Ext.define('NU.controller.Vision', {
 		bitsPerPixel: 4
     },
     control: {
+		'cameraSelector': {
+			listeners: {
+				selectCameraId: function (cameraId) {
+					this.setCameraId(cameraId);
+					//this.getView().fireEvent('selectCameraId', cameraId);
+				}
+			}
+		},
         'displaypicker': {
             change: function (obj, newValue, oldValue, e) {
 				var layeredCanvas = this.getLayeredCanvas();
@@ -84,6 +93,10 @@ Ext.define('NU.controller.Vision', {
         if (robotIP != this.robotIP || image === null) {
             return;
         }
+
+		if (image.getCameraId() !== this.getCameraId()) {
+			return;
+		}
 
 		var width = image.dimensions.x;
 		var height = image.dimensions.y;
