@@ -112,7 +112,8 @@ Ext.define('NU.controller.Vision', {
 				this.drawImageB64(image);
 				break;
 			case Format.YCbCr444:
-				this.drawImageYbCr444(image);
+				//this.drawImageYbCr444(image);
+				this.drawImageBayer(image);
 				break;
 			default:
 				throw 'Unsupported Format';
@@ -158,6 +159,75 @@ Ext.define('NU.controller.Vision', {
 			imageData.data[offset + 1] = rgb[1];
 			imageData.data[offset + 2] = rgb[2];
 			imageData.data[offset + 3] = 255;
+		}
+		ctx.putImageData(imageData, 0, 0);
+	},
+	drawImageBayer: function (image) {
+		var width = this.getWidth();
+		var height = this.getHeight();
+		var ctx = this.getContext('image');
+		var imageData = ctx.createImageData(width, height);
+		var data = new Uint8ClampedArray(image.data.toArrayBuffer());
+		var bitsPerPixel = this.getBitsPerPixel();
+		var bitsPerPixel2 = 3;
+		var total = width * height * bitsPerPixel2;
+		// BGGR
+		function get(x, y) {
+			if (x < 0 || x >= width || y < 0 || y >= height) {
+				return null;
+			}
+			return data[y * width + x];
+		}
+		function getAvg() {
+			var sum = 0;
+			var count = 0;
+			for (var i = 0; i < arguments.length; i++) {
+				var coord = arguments[i];
+				var color = get(coord[0], coord[1]);
+				if (color !== null) {
+					sum += color;
+					count++;
+				}
+			}
+			return sum / count;
+		}
+		// probably terrible, but conceptually makes sense
+		var r, g, b;
+		for (var y = 0; y < height; y++) {
+			for (var x = 0; x < width; x++) {
+				if (y % 2 === 0) {
+					// B G
+					if (x % 2 === 0) {
+						// B
+						r = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]); // 4 surrounding
+						g = getAvg([x, y - 1], [x + 1, y], [x, y + 1], [x - 1, y]); // 4 surrounding
+						b = get(x, y); // self
+					} else {
+						// G
+						r = getAvg([x, y - 1], [x, y + 1]); // 2 surrounding
+						g = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1], [x, y]); // 5 surrounding
+						b = getAvg([x - 1, y], [x + 1, y]); // 2 surrounding
+					}
+				} else {
+					// G R
+					if (x % 2 === 0) {
+						// G
+						r = getAvg([x - 1, y], [x + 1, y]); // 2 surrounding
+						g = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1], [x, y]); // 5 surrounding
+						b = getAvg([x, y - 1], [x, y + 1]); // 2 surrounding
+					} else {
+						// R
+						r = get([x, y]); // self
+						g = getAvg([x, y - 1], [x + 1, y], [x, y + 1], [x - 1, y]); // 4 surrounding
+						b = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]); // 4 surrounding
+					}
+				}
+				var offset = this.bitsPerPixel * (y * width + x);
+				imageData.data[offset + 0] = r;
+				imageData.data[offset + 1] = g;
+				imageData.data[offset + 2] = b;
+				imageData.data[offset + 3] = 255;
+			}
 		}
 		ctx.putImageData(imageData, 0, 0);
 	},
