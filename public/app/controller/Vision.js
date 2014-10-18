@@ -70,8 +70,12 @@ Ext.define('NU.controller.Vision', {
 
 		var view = this.getView();
         view.mon(NU.util.Network, 'image', this.onImage, this);
-		view.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
+//		view.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
 		view.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
+
+        view.mon(NU.util.Network, 'visual_horizon', this.onVisualHorizon, this);
+        view.mon(NU.util.Network, 'point_scan', this.onPointScan, this);
+//        view.mon(NU.util.Network, 'segment_scan', this.onSegmentScan, this);
 
         this.callParent(arguments);
 
@@ -89,7 +93,7 @@ Ext.define('NU.controller.Vision', {
 		this.getLayeredCanvas().setCanvasSize(width, height);
 	},
     onImage: function (robotIP, image) {
-
+        console.log("Got an image!");
         if (robotIP != this.robotIP || image === null) {
             return;
         }
@@ -150,14 +154,10 @@ Ext.define('NU.controller.Vision', {
 		for (var i = 0; i < data.length / bitsPerPixel2; i++) {
 			var offset = bitsPerPixel * i;
 			var offset2 = bitsPerPixel2 * i;
-			var rgb = this.YCbCrtoRGB([
-				data[offset2 + 0],
-				data[offset2 + 1],
-				data[offset2 + 2],
-			]);
-			imageData.data[offset + 0] = rgb[0];
-			imageData.data[offset + 1] = rgb[1];
-			imageData.data[offset + 2] = rgb[2];
+
+			imageData.data[offset + 0] = data[offset2 + 0];
+			imageData.data[offset + 1] = data[offset2 + 1];
+			imageData.data[offset + 2] = data[offset2 + 2];
 			imageData.data[offset + 3] = 255;
 		}
 		ctx.putImageData(imageData, 0, 0);
@@ -197,7 +197,7 @@ Ext.define('NU.controller.Vision', {
 			for (var x = 0; x < width; x++) {
 				if (y % 2 === 0) {
 					// B G
-					if (x % 2 === 0) {
+					if (x % 2 === 1) {
 						// B
 						r = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]); // 4 surrounding
 						g = getAvg([x, y - 1], [x + 1, y], [x, y + 1], [x - 1, y]); // 4 surrounding
@@ -210,7 +210,7 @@ Ext.define('NU.controller.Vision', {
 					}
 				} else {
 					// G R
-					if (x % 2 === 0) {
+					if (x % 2 === 1) {
 						// G
 						r = getAvg([x - 1, y], [x + 1, y]); // 2 surrounding
 						g = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1], [x, y]); // 5 surrounding
@@ -256,21 +256,21 @@ Ext.define('NU.controller.Vision', {
 		}
 		return window.btoa(binary);
 	},
-    onClassifiedImage: function (robotIP, image) {
-
-        if(robotIP != this.robotIP) {
-            return;
-        }
-
-		var width = image.dimensions.x;
-		var height = image.dimensions.y;
-		this.autoSize(width, height);
-
-        this.drawClassifiedImage(image);
-        this.drawVisualHorizon(image.getVisualHorizon());
-        this.drawHorizon(image.getHorizon());
-
-    },
+//    onClassifiedImage: function (robotIP, image) {
+//
+//        if(robotIP != this.robotIP) {
+//            return;
+//        }
+//
+//		var width = image.dimensions.x;
+//		var height = image.dimensions.y;
+//		this.autoSize(width, height);
+//
+//        this.drawClassifiedImage(image);
+//        this.drawVisualHorizon(image.getVisualHorizon());
+//        this.drawHorizon(image.getHorizon());
+//
+//    },
     drawClassifiedImage: function(image) {
 
         var width = this.getWidth();
@@ -332,27 +332,69 @@ Ext.define('NU.controller.Vision', {
         this.getContext('classified_image_search').putImageData(searchData, 0, 0);
         this.getContext('classified_image_refine').putImageData(refinedData, 0, 0);
     },
-    drawVisualHorizon: function(horizonPoints) {
+    onVisualHorizon: function(horizonPoints) {
 
-        var context = this.getContext('visual_horizon');
-        context.clearRect(0, 0, this.getWidth(), this.getHeight());
-        context.beginPath();
-        context.moveTo(horizonPoints[0].x, horizonPoints[0].y);
+        // Draw the visual horizon
 
-        for(var i = 1; i < horizonPoints.length; i++) {
-            var point = horizonPoints[i];
-            context.lineTo(point.x, point.y);
+        console.log("Got a visual horizon!");
+
+//        var context = this.getContext('visual_horizon');
+//        context.clearRect(0, 0, this.getWidth(), this.getHeight());
+//        context.beginPath();
+//        context.moveTo(horizonPoints[0].x, horizonPoints[0].y);
+//
+//        for(var i = 1; i < horizonPoints.length; i++) {
+//            var point = horizonPoints[i];
+//            context.lineTo(point.x, point.y);
+//        }
+//
+//        context.shadowColor = 'black';
+//        context.shadowBlur = 5;
+//        context.shadowOffsetX = 0;
+//        context.shadowOffsetY = 0;
+//
+//        context.strokeStyle = "rgba(0, 255, 0, 1)";
+//        context.lineWidth = 2;
+//
+//        context.stroke();
+    },
+    onPointScan: function(robotIP, points) {
+
+        if (robotIP != this.robotIP || points === null) {
+            return;
         }
 
-        context.shadowColor = 'black';
-        context.shadowBlur = 5;
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
+        if (points.getCameraId() !== this.getCameraId()) {
+            return;
+        }
 
-        context.strokeStyle = "rgba(0, 255, 0, 1)";
-        context.lineWidth = 2;
+        var data = this.getContext('classified_image_search').createImageData(1280, 960);
+        var pixels = data.data;
 
-        context.stroke();
+        var lens = points.lens;
+
+        for(var i = 0; i < points.points.length; ++i) {
+            var point = points.points[i];
+//
+//            var x = point.y;
+//            var y = -point.z;
+//            var rads = Math.acos(point.x);
+//
+//            var scale =  sin(rads)/lens.radial.pitch / Math.sqrt(imageX * imageX + imageY * imageY);
+//
+//            x *= scale;
+//            y *= scale;
+//
+//            x += lens.radial.centre.x;
+//            y += lens.radial.centre.y;
+
+            pixels[4 * (1280 * point.ray.y + point.ray.x) + 0] = 0xFF;
+            pixels[4 * (1280 * point.ray.y + point.ray.x) + 1] = 0xFF;
+            pixels[4 * (1280 * point.ray.y + point.ray.x) + 2] = 0xFF;
+            pixels[4 * (1280 * point.ray.y + point.ray.x) + 3] = 0xFF;
+        }
+
+        this.getContext('classified_image_search').putImageData(data, 0, 0);
     },
     drawHorizon: function(horizon) {
 

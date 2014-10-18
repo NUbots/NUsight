@@ -20,22 +20,18 @@
 package messages.vision.proto;
 
 import "messages/Vector.proto";
-import "messages/Geometry.proto";
+import "messages/vision/proto/Lens.proto";
 
-message ClassifiedImage {
+message PointScan {
 
-	message Segment {
-		required uint32 colour = 1;
-		required uint32 subsample = 2;
-		required ivec2 start = 3;
-		required ivec2 end = 4;
-	}
+    message Point {
+        required uint32 colour = 1;
+        required ivec2 ray = 2;
+    }
 
-	required uint32 camera_id = 6;
-	required uvec2 dimensions = 1;
-	required Line horizon = 2;
-	repeated uvec2 visual_horizon = 3;
-	repeated Segment segment = 4;
+    required uint32 camera_id = 1;
+
+    optional Lens lens = 2;
+    repeated Point points = 3;
 }
-
 
