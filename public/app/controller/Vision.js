@@ -217,7 +217,7 @@ Ext.define('NU.controller.Vision', {
 						b = getAvg([x, y - 1], [x, y + 1]); // 2 surrounding
 					} else {
 						// R
-						r = get([x, y]); // self
+						r = get(x, y); // self
 						g = getAvg([x, y - 1], [x + 1, y], [x, y + 1], [x - 1, y]); // 4 surrounding
 						b = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]); // 4 surrounding
 					}
