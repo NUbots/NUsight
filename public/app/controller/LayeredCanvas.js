@@ -40,7 +40,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 		}
 		return this;
 	},
-	add: function (name, group) {
+	add: function (name, group, contextName) {
 		var layers = this.getLayers();
 		if (this.get(name) === null) {
 			var canvas = new Ext.Element(document.createElement('canvas'));
@@ -60,7 +60,9 @@ Ext.define('NU.controller.LayeredCanvas', {
 				name: name,
 				group: group,
 				canvas: canvas,
-				context: canvas.dom.getContext('2d'),
+				context: contextName !== 'webgl'
+					? canvas.dom.getContext(contextName || '2d') // default to 2d
+					: canvas.dom.getContext(contextName, {preserveDrawingBuffer: true}) || canvas.dom.getContext('experimental-webgl', {preserveDrawingBuffer: true}), // special case for webgl
 				hidden: true,
 				clear: Ext.pass(this.clear, [name], this),
 				setOpacity: Ext.pass(this.setOpacity, [name], this)
@@ -180,6 +182,9 @@ Ext.define('NU.controller.LayeredCanvas', {
 			}
 		});
 		return result;
+	},
+	getCanvas: function (name) {
+		return this.get(name).canvas;
 	},
 	getContext: function (name) {
 		return this.get(name).context;

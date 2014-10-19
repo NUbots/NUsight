@@ -1,5 +1,6 @@
 Ext.define('NU.controller.Vision', {
     extend: 'NU.controller.Display',
+	bayerRenderer: null,
     config: {
 		cameraId: null,
         displayImage: false,
@@ -54,7 +55,7 @@ Ext.define('NU.controller.Vision', {
     },
     init: function () {
 		var layeredCanvas = this.getCanvas().getController();
-		layeredCanvas.add('image');
+		layeredCanvas.add('image', undefined, 'webgl');
         layeredCanvas.add('classified_image_search');
         layeredCanvas.add('classified_image_refine');
         layeredCanvas.add('visual_horizon');
@@ -62,6 +63,12 @@ Ext.define('NU.controller.Vision', {
 		layeredCanvas.add('goals', 'field_objects');
 		layeredCanvas.add('balls', 'field_objects');
 		this.setLayeredCanvas(layeredCanvas);
+
+		this.bayerRenderer = Ext.create('NU.util.BayerWebGL', {
+			shader: 'Bayer',
+			canvas: layeredCanvas.getCanvas('image'),
+			context: layeredCanvas.getContext('image')
+		});
 
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
@@ -117,7 +124,8 @@ Ext.define('NU.controller.Vision', {
 				break;
 			case Format.YCbCr444:
 				//this.drawImageYbCr444(image);
-				this.drawImageBayer(image);
+				//this.drawImageBayer(image);
+				this.drawImageBayerWebGL(image);
 				break;
 			default:
 				throw 'Unsupported Format';
@@ -169,8 +177,6 @@ Ext.define('NU.controller.Vision', {
 		var imageData = ctx.createImageData(width, height);
 		var data = new Uint8ClampedArray(image.data.toArrayBuffer());
 		var bitsPerPixel = this.getBitsPerPixel();
-		var bitsPerPixel2 = 3;
-		var total = width * height * bitsPerPixel2;
 		// BGGR
 		function get(x, y) {
 			if (x < 0 || x >= width || y < 0 || y >= height) {
@@ -222,7 +228,7 @@ Ext.define('NU.controller.Vision', {
 						b = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]); // 4 surrounding
 					}
 				}
-				var offset = this.bitsPerPixel * (y * width + x);
+				var offset = bitsPerPixel * (y * width + x);
 				imageData.data[offset + 0] = r;
 				imageData.data[offset + 1] = g;
 				imageData.data[offset + 2] = b;
@@ -230,6 +236,9 @@ Ext.define('NU.controller.Vision', {
 			}
 		}
 		ctx.putImageData(imageData, 0, 0);
+	},
+	drawImageBayerWebGL: function (image) {
+		this.bayerRenderer.updateImage(image);
 	},
     drawImageB64: function (image) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));

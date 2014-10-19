@@ -3,7 +3,8 @@ Ext.define('NU.view.window.Classifier', {
 	requires: [
 		'Ext.ux.plot.Scatter3D',
 		'NU.view.LayeredCanvas',
-		'Ext.form.field.Checkbox'
+		'Ext.form.field.Checkbox',
+		'NU.view.camera.Selector'
 	],
 	alias : ['widget.nu_classifier_window'],
 	controller: 'NU.controller.Classifier',
@@ -19,6 +20,8 @@ Ext.define('NU.view.window.Classifier', {
 		Ext.apply(this, {
 			tbar: [{
 				xtype: 'robot_selector'
+			}, {
+				xtype: 'camera_selector'
 			}, '->', {
 				text: 'Undo',
 				itemId: 'undo'

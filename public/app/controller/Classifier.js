@@ -3,6 +3,7 @@ Ext.define('NU.controller.Classifier', {
 	// GOD DAMN
 	extend: 'NU.controller.Display',
 	config: {
+		cameraId: null,
 		rawContext: null,
 		classifiedContext: null,
 		frozen: false,
@@ -17,6 +18,7 @@ Ext.define('NU.controller.Classifier', {
 		startPoint: null,
 		rawImageData: null,
 		rawImageComponents: null,
+		rawImagePixels: null,
 		classifiedImageData: null,
 		mouseX: 0,
 		mouseY: 0,
@@ -37,7 +39,8 @@ Ext.define('NU.controller.Classifier', {
 		renderCube: false,
 		rawLayeredCanvas: null,
 		classifiedLayeredCanvas: null,
-		imageFormat: null
+		imageFormat: null,
+		bayerRenderer: null
 	},
 	statics: {
 		Target: {
@@ -61,6 +64,14 @@ Ext.define('NU.controller.Classifier', {
 	control: {
 		'rawImage': true,
 		'classifiedImage': true,
+		'cameraSelector': {
+			listeners: {
+				selectCameraId: function (cameraId) {
+					this.setCameraId(cameraId);
+					//this.getView().fireEvent('selectCameraId', cameraId);
+				}
+			}
+		},
 		'undo': {
 			click: function () {
 				this.undoHistory();
@@ -288,9 +299,10 @@ Ext.define('NU.controller.Classifier', {
 		this.setPolygonPoints([]);
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
+		this.setRawImagePixels(new Uint8Array(1280 * 960 * 4)); // TODO: dynamic
 
 		var rawLayeredCanvas = this.getRawImage().getController();
-		var rawContext = rawLayeredCanvas.add('raw').context;
+		var rawContext = rawLayeredCanvas.add('raw', undefined, 'webgl').context;
 		rawLayeredCanvas.add('selection');
 		rawLayeredCanvas.add('zoom');
 		this.setRawContext(rawContext);
@@ -302,13 +314,19 @@ Ext.define('NU.controller.Classifier', {
 		this.callParent(arguments);
 
 		var classifiedLayeredCanvas = this.getClassifiedImage().getController();
-		classifiedLayeredCanvas.add('underlay').setOpacity(this.getRawUnderlayOpacity());
+		classifiedLayeredCanvas.add('underlay', undefined, 'webgl').setOpacity(this.getRawUnderlayOpacity());
 		var classifiedContext = classifiedLayeredCanvas.add('classified').context;
 		classifiedLayeredCanvas.add('selection');
 		classifiedLayeredCanvas.add('zoom');
 		this.setClassifiedLayeredCanvas(classifiedLayeredCanvas);
 		this.setClassifiedContext(classifiedContext);
 		this.setClassifiedImageData(classifiedContext.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
+
+		this.bayerRenderer = Ext.create('NU.util.BayerWebGL', {
+			shader: 'Bayer',
+			canvas: rawLayeredCanvas.getCanvas('raw'),
+			context: rawLayeredCanvas.getContext('raw')
+		});
 
 		function clickBind(callback, preventDefault) {
 			return function (e, element) {
@@ -357,7 +375,7 @@ Ext.define('NU.controller.Classifier', {
 			});
 		}, this);
 
-		this.testDrawImage();
+		//this.testDrawImage();
 	},
 	refreshScatter: function () {
 
@@ -534,6 +552,11 @@ Ext.define('NU.controller.Classifier', {
 
 		// TODO: remove
 		if (robotIP !== this.robotIP) {
+			return;
+		}
+
+		debugger;
+		if (image.getCameraId() !== this.getCameraId()) {
 			return;
 		}
 
@@ -1142,8 +1165,8 @@ Ext.define('NU.controller.Classifier', {
 		var rawLayeredCanvas = this.getRawLayeredCanvas();
 		var classifiedLayeredCanvas = this.getClassifiedLayeredCanvas();
 
-		var rawCanvas = rawLayeredCanvas.get('raw').canvas;
-		classifiedLayeredCanvas.get('underlay').context.drawImage(rawCanvas.dom, 0, 0);
+		// TODO: var rawCanvas = rawLayeredCanvas.get('raw').canvas;
+		// TODO: classifiedLayeredCanvas.get('underlay').context.drawImage(rawCanvas.dom, 0, 0);
 	},
 	renderPolygonOverlays: function () {
 		this.renderPolygonOverlay(this.getClassifiedContext());
@@ -1402,10 +1425,22 @@ Ext.define('NU.controller.Classifier', {
 				var cr = components[2].lines[y][Math.floor(x / 2)];
 				return [l, cb, cr];
 			case Format.YCbCr444:
-				var l = components[3 * (y * imageWidth + x) + 0];
+				/*var l = components[3 * (y * imageWidth + x) + 0];
 				var cb = components[3 * (y * imageWidth + x) + 1];
 				var cr = components[3 * (y * imageWidth + x) + 2];
-				return [l, cb, cr];
+				return [l, cb, cr];*/
+				/*var rgb = new Uint8Array(4);
+				var ctx = this.rawLayeredCanvas.get('raw').context;
+				ctx.readPixels(x, y, 1, 1, ctx.RGBA, ctx.UNSIGNED_BYTE, rgb);
+				return this.RGBtoYCbCr(rgb);*/
+				var pixels = this.getRawImagePixels();
+				y = imageHeight - y - 1;
+				var offset = y * imageWidth + x;
+				return this.RGBtoYCbCr([
+					pixels[4 * offset + 0],
+					pixels[4 * offset + 1],
+					pixels[4 * offset + 2]
+				]);
 			default:
 				throw 'Unsupported format';
 		}
@@ -1440,11 +1475,21 @@ Ext.define('NU.controller.Classifier', {
 				this.drawImageB64YUV(image, callback, thisArg);
 				break;
 			case Format.YCbCr444:
-				this.drawImageYbCr444(image, callback, thisArg);
+//				this.drawImageYbCr444(image, callback, thisArg);
+				this.drawImageBayerWebGL(image, callback, thisArg);
 				break;
 			default:
 				throw 'Unsupported Format';
 		}
+	},
+	RGBtoYCbCr: function (rgb) {
+		// from http://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion
+		return [
+
+			16 + 65.738 * rgb[0] / 256 + 129.057 * rgb[1] / 256 + 25.064 * rgb[2] / 256,
+			128 - 37.945 * rgb[0] / 256 - 74.494 * rgb[1] / 256 + 112.439 * rgb[2] / 256,
+			128 + 112.439 * rgb[0] / 256 - 94.154 * rgb[1] / 256 - 18.285 * rgb[2] / 256
+		];
 	},
 	YCbCrtoRGB: function (ycbcr) {
 		// from http://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion
@@ -1453,6 +1498,12 @@ Ext.define('NU.controller.Classifier', {
 				255 / 219 * (ycbcr[0] - 16) - 255 / 112 * 0.886 * 0.114 / 0.587 * (ycbcr[1] - 128) - 255 / 112 * 0.701 * 0.299 / 0.587 * (ycbcr[2] - 128),
 				255 / 219 * (ycbcr[0] - 16) + 255 / 112 * 0.886 * (ycbcr[1] - 128)
 		];
+	},
+	drawImageBayerWebGL: function (image, callback, thisArg) {
+		this.bayerRenderer.updateImage(image);
+		var ctx = this.rawLayeredCanvas.get('raw').context;
+		ctx.readPixels(0, 0, 1280, 960, ctx.RGBA, ctx.UNSIGNED_BYTE, this.getRawImagePixels());
+		//callback.call(thisArg);
 	},
 	drawImageYbCr444: function (image, callback, thisArg) {
 		var width = this.getImageWidth();
