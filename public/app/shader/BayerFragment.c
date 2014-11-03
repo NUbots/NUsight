@@ -21,8 +21,8 @@ void main(void) {
 		fetch(xCoord[1], yCoord[1]), // (-1,-1)
 		fetch(xCoord[1], yCoord[2]), // (-1, 1)
 		fetch(xCoord[2], yCoord[1]), // ( 1,-1)
-		fetch(xCoord[2], yCoord[2])
-	); // ( 1, 1)
+		fetch(xCoord[2], yCoord[2])  // ( 1, 1)
+	);
 
 	vec4 PATTERN = (kC.xyz * C).xyzz;
 
@@ -89,4 +89,12 @@ void main(void) {
 		: ((alternate.x == 0.0)
 			? vec3(PATTERN.w, C, PATTERN.z)
 			: vec3(PATTERN.yx, C));
+
+	/*gl_FragColor.rgb = alternate.y == 0.0
+		? alternate.x == 0.0
+			? vec3(C, 0, 0)
+			: vec3(0, C, 0)
+		: alternate.x == 0.0
+			? vec3(0, C, 0)
+			: vec3(0, 0, C);*/
 }

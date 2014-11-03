@@ -1,4 +1,4 @@
-Ext.define('NU.util.BayerWebGL', {
+Ext.define('NU.util.ClassifierWebGL', {
 	camera: null,
 	renderer: null,
 	vertexShaderText: null,
@@ -45,7 +45,7 @@ Ext.define('NU.util.BayerWebGL', {
 			this.scene.add(this.obj);
 			window.o = this.obj;
 
-//			this.animate();
+			this.animate();
 		});
 	},
 	createObj: function (width, height) {
@@ -54,9 +54,8 @@ Ext.define('NU.util.BayerWebGL', {
 		testImage.magFilter = THREE.NearestFilter;
 		var mat = this.mat = new THREE.ShaderMaterial({
 			uniforms: {
-				sourceSize: {type: '4f', value: [1280, 960, 1/1280, 1/960]},
-				firstRed: {type: '2f', value: [0, 0]},
-				image: {type: 't', value: testImage}
+				image: {type: 't', value: testImage},
+				lut: {type: 't'}
 			},
 			vertexShader: this.vertexShaderText,
 			fragmentShader: this.fragmentShaderText
@@ -64,15 +63,23 @@ Ext.define('NU.util.BayerWebGL', {
 
 		return new THREE.Mesh(g, mat);
 	},
-	updateImage: function (image) {
-		var width = image.dimensions.x;
-		var height = image.dimensions.y;
-		var data = new Uint8Array(image.data.toArrayBuffer(), 0, width * height);
-		var texture = new THREE.DataTexture(data, width, height, THREE.LuminanceFormat, THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+	updateImage: function (data) {
+		// TODO: unhack
+		var texture = new THREE.DataTexture(data, 1280, 960, THREE.RGBAFormat, THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
 		texture.generateMipmaps = false;
 		texture.needsUpdate = true;
 		this.mat.uniforms.image.value = texture;
-		this.mat.uniforms.sourceSize.value = [width, height, 1 / width, 1 / height];
+		this.mat.needsUpdate = true;
+
+		this.render();
+	},
+	updateLut: function (data) {
+		var width = Math.sqrt(data.length); // TODO: check valid
+		var height = width;
+		var texture = new THREE.DataTexture(new Uint8Array(data.buffer), width, height, THREE.LuminanceFormat, THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+		texture.generateMipmaps = false;
+		texture.needsUpdate = true;
+		this.mat.uniforms.lut.value = texture;
 		this.mat.needsUpdate = true;
 
 		this.render();
@@ -107,3 +114,4 @@ Ext.define('NU.util.BayerWebGL', {
 		});
 	}
 });
+

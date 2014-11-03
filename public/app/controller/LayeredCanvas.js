@@ -62,7 +62,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 				canvas: canvas,
 				context: contextName !== 'webgl'
 					? canvas.dom.getContext(contextName || '2d') // default to 2d
-					: canvas.dom.getContext(contextName, {preserveDrawingBuffer: true}) || canvas.dom.getContext('experimental-webgl', {preserveDrawingBuffer: true}), // special case for webgl
+					: canvas.dom.getContext(contextName, {preserveDrawingBuffer: true, antialias: false}) || canvas.dom.getContext('experimental-webgl', {preserveDrawingBuffer: true, antialias: false}), // special case for webgl
 				hidden: true,
 				clear: Ext.pass(this.clear, [name], this),
 				setOpacity: Ext.pass(this.setOpacity, [name], this)
