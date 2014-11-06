@@ -12,7 +12,7 @@ float getLutIndex(vec4 color) {
 	float bitsRemovedB = 8.0 - bitsB;
 
 	float index = 0.0;
-	// bitwise operators not available in GSGL
+	// bitwise operators not available in GLSL
 	// shift x left by N is equivalent to x = x * 2^N
 	// shift x right by N is equivalent to x = floor(x / 2^N)
 	index = index + floor(255.0 * color.r / exp2(bitsRemovedR));

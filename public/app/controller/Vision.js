@@ -100,7 +100,6 @@ Ext.define('NU.controller.Vision', {
 		this.getLayeredCanvas().setCanvasSize(width, height);
 	},
     onImage: function (robotIP, image) {
-        console.log("Got an image!");
         if (robotIP != this.robotIP || image === null) {
             return;
         }
