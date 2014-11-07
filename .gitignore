@@ -3,4 +3,4 @@ bower_components/
 logs/
 .idea/
 .vagrant/
-
+public/lib/

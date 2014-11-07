@@ -1,7 +1,7 @@
 Ext.define('NU.view.window.Classifier', {
 	extend : 'NU.view.window.Display',
 	requires: [
-		'Ext.ux.plot.Scatter3D',
+		'NU.view.plot.Scatter3D',
 		'NU.view.LayeredCanvas',
 		'Ext.form.field.Checkbox'
 	],

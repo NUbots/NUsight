@@ -11,7 +11,7 @@ Ext.Loader.setConfig({
     enabled : true,
     disableCaching : false,
     paths : {
-        'Ext': 'extjs/src',
+        'Ext': 'lib/extjs/src',
         'NU': './app'
     }
 });
