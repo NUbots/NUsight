@@ -1,0 +1,29 @@
+{
+  "name": "NUbugger",
+  "version": "1.0.0",
+  "homepage": "https://github.com/nubots/NUbugger",
+  "authors": [
+    "Brendan Annable <brendan.annable@uon.edu.au>",
+    "Trent Houliston <trent@houliston.me>"
+  ],
+  "main": "app.js",
+  "license": "GPL",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "threejs": "*",
+    "extjs": "~4.2",
+    "extjs-deft-bowerpackage": "*",
+    "protobuf": "~3.5.4",
+    "smoothie": "*",
+    "jpgjs": "notmasteryet/jpgjs",
+    "numericjs": "~1.2.6",
+    "operative": "~0.3.1"
+  }
+}

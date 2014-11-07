@@ -1,5 +1,6 @@
 node_modules/
+bower_components/
 logs/
-.idea/runConfigurations/app_js.xml
-.idea/workspace.xml
+.idea/
 .vagrant/
+public/lib/
