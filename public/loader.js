@@ -15,10 +15,3 @@ Ext.Loader.setConfig({
         'NU': './app'
     }
 });
-
-// Required for DeftJS
-Ext.syncRequire([
-	'Ext.Component',
-	'Ext.ComponentManager',
-	'Ext.ComponentQuery'
-]);
