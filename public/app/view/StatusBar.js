@@ -1,7 +1,8 @@
 Ext.define('NU.view.StatusBar', {
 	extend: 'Ext.toolbar.Toolbar',
 	alias: 'widget.nu_statusbar',
-	controller: 'NU.controller.StatusBar',
+	requires: 'NU.controller.StatusBar',
+	controller: 'StatusBar',
 	defaults: {
 //		flex: 1,
 		data: {
