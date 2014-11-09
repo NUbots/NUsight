@@ -1,22 +1,7 @@
 Ext.define('NU.controller.NUClear', {
     extend: 'NU.controller.Display',
     alias: 'controller.NUClear',
-    inject: 'reactionStatisticsTreeStore',
-    /*control: {
-        'display': true,
-        'robotSelector': {
-            robotIP: function () {
-                this.getDisplay().getRootNode().removeAll();
-            }
-        },
-        'updatespeed': {
-            change: function (field, newValue, oldValue, eOpts) {
-                this.setUpdateSpeed(newValue);
-            }
-        }
-    },*/
     config: {
-        reactionStatisticsTreeStore: null,
         lastUpdated: null,
         lastDraw: 0,
         updateSpeed: 1000
@@ -35,6 +20,12 @@ Ext.define('NU.controller.NUClear', {
         this.callParent(arguments);
 
     },
+    onSelectRobot: function (combo, records, eOpts) {
+        this.getDisplay().getRootNode().removeAll();
+    },
+    onUpdateSpeedChange: function (field, newValue, oldValue, eOpts) {
+		this.setUpdateSpeed(newValue);
+	},
     onReactionStatistics: function (robotIP, reactionStatistics) {
 
         // TODO: remove
@@ -47,7 +38,7 @@ Ext.define('NU.controller.NUClear', {
         var now = Date.now();
 
         if (now - this.getLastUpdated(reactionId) > this.getUpdateSpeed()) {
-            var root = this.getReactionStatisticsTreeStore().getRootNode();
+            var root = this.lookupReference('display').getStore().getRootNode();
 
             var causeReactionId = reactionStatistics.causeReactionId.toNumber();
             var reactionNode = root.findChildBy(function (node) {

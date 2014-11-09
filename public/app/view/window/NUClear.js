@@ -24,7 +24,10 @@ Ext.define('NU.view.window.NUClear', {
         reference: 'updatespeed',
         fieldLabel: 'Update Speed (ms)',
         labelStyle: 'white-space: nowrap',
-        labelWidth: 120
+        labelWidth: 120,
+        listening: {
+            change: 'onUpdateSpeedChange'
+        }
     }],
     initComponent: function () {
         Ext.applyIf(this, {
@@ -51,7 +54,7 @@ Ext.define('NU.view.window.NUClear', {
                     dataIndex: 'duration'
                 }],
                 rootVisible: false,
-                itemId: 'display'
+                reference: 'display'
             }]
         });
 

@@ -23,7 +23,6 @@ Ext.define('NU.view.window.Chart', {
 		xtype: 'robot_selector'
 	}, {
 		xtype: 'numberfield',
-		itemId: 'min',
 		fieldLabel: 'Min',
 		labelStyle: 'white-space: nowrap',
 		labelWidth: 30,
@@ -33,7 +32,6 @@ Ext.define('NU.view.window.Chart', {
 		}
 	}, {
 		xtype: 'numberfield',
-		itemId: 'max',
 		fieldLabel: 'Max',
 		labelStyle: 'white-space: nowrap',
 		labelWidth: 30,

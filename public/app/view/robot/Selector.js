@@ -3,11 +3,6 @@ Ext.define('NU.view.robot.Selector', {
     alias: 'widget.robot_selector',
     requires: 'NU.controller.robot.Selector',
     controller: 'RobotSelector',
-    inject:  'robotsStore',
-    config: {
-        robotsStore: null
-    },
-    itemId: 'robotSelector',
 	fieldLabel: 'Robot',
 	labelWidth: 40,
 	queryMode: 'local',
@@ -16,5 +11,8 @@ Ext.define('NU.view.robot.Selector', {
 	displayField: 'name',
 	valueField: 'ipAddress',
 	emptyText: 'No Robot Selected',
-	store: 'Robots'
+	store: 'Robots',
+	listeners: {
+		select: 'onSelectRobot'
+	}
 });
