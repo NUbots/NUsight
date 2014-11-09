@@ -11,7 +11,7 @@ Ext.define('NU.controller.Vision', {
 		height: 240,
 		bitsPerPixel: 4
     },
-    afterRender: function () {
+    onAfterRender: function () {
 		var layeredCanvas = this.lookupReference('canvas').getController();
 		layeredCanvas.add('image');
         layeredCanvas.add('classified_image_search');
@@ -31,8 +31,6 @@ Ext.define('NU.controller.Vision', {
         view.mon(NU.util.Network, 'image', this.onImage, this);
 		view.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
 		view.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
-
-        this.callParent(arguments);
     },
 	onLayerSelect: function (obj, newValue, oldValue, e) {
 		var layeredCanvas = this.getLayeredCanvas();

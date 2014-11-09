@@ -16,6 +16,9 @@ Ext.define('NU.view.window.Vision', {
 //        preserveRatio: true
 //    },
     layout: 'border',
+    listeners: {
+        afterrender: 'onAfterRender'
+    },
 	tbar: [{
 		xtype: 'robot_selector'
 	}, {

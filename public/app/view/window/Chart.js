@@ -8,13 +8,17 @@ Ext.define('NU.view.window.Chart', {
         'NU.store.Streams'
 	],
     controller: 'Chart',
-	width: 320,
+	width: 640,
 	height: 240,
 	title: 'Chart Display',
 	resizable: {
 		preserveRatio: false
 	},
 	layout: 'border',
+	listeners: {
+		afterrender: 'onAfterRender',
+		resize: 'onResize'
+	},
 	tbar: [{
 		xtype: 'robot_selector'
 	}, {
@@ -23,14 +27,20 @@ Ext.define('NU.view.window.Chart', {
 		fieldLabel: 'Min',
 		labelStyle: 'white-space: nowrap',
 		labelWidth: 30,
-		width: 120
+		width: 120,
+		listeners: {
+			change: 'onMinChange'
+		}
 	}, {
 		xtype: 'numberfield',
 		itemId: 'max',
 		fieldLabel: 'Max',
 		labelStyle: 'white-space: nowrap',
 		labelWidth: 30,
-		width: 120
+		width: 120,
+		listeners: {
+			change: 'onMaxChange'
+		}
 	}],
 	initComponent: function () {
 		Ext.applyIf(this, {
@@ -53,8 +63,10 @@ Ext.define('NU.view.window.Chart', {
 					xtype: 'multiselect',
 					width: 148,
 					displayField: 'label',
-					itemId: 'streampicker',
-					store: Ext.create('NU.store.Streams')
+					store: Ext.create('NU.store.Streams'),
+					listeners: {
+						change: 'onStreamSelect'
+					}
 				}]
 			}]
 		});

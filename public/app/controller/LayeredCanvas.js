@@ -23,7 +23,7 @@ Ext.define('NU.controller.LayeredCanvas', {
 		this.setLayers([]);
 //		this.add('default');
 	},
-	afterRender: function () {
+	onAfterRender: function () {
 		this.setContainer(this.getView().getEl());
 	},
 	autoSize: function (width, height) {

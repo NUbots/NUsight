@@ -21,30 +21,11 @@ Ext.define('NU.controller.Chart', {
         lastDraw: 0,
         streams: null
     },
-    /*control: {
-        'streampicker': {
-            change: 'onStreamSelect'
-        },
-        'min': {
-            change: function (field, newValue, oldValue, eOpts) {
-                var smoothie = this.getSmoothie();
-                smoothie.options.minValue = newValue;
-            }
-        },
-        'max': {
-            change: function (field, newValue, oldValue, eOpts) {
-                var smoothie = this.getSmoothie();
-                smoothie.options.maxValue = newValue;
-            }
-        },
-        'canvas': true
-    },*/
     init: function () {
         // init array
         this.setStreams([]);
     },
-    afterRender: function () {
-
+    onAfterRender: function () {
         // setup canvas
         var canvas = this.lookupReference('canvas');
         var canvasDom = canvas.getEl().dom;
@@ -60,10 +41,16 @@ Ext.define('NU.controller.Chart', {
         view.mon(NU.util.Network, 'data_point', this.onDataPoint, this);
         view.mon(NU.util.Network, 'sensor_data', this.onSensorData, this);
 
-        this.callParent(arguments);
-
         this.onResize(view, view.getWidth(), view.getHeight());
 
+    },
+    onMinChange: function (field, newValue, oldValue, eOpts) {
+		var smoothie = this.getSmoothie();
+		smoothie.options.minValue = newValue;
+	},
+    onMaxChange: function (field, newValue, oldValue, eOpts) {
+        var smoothie = this.getSmoothie();
+        smoothie.options.maxValue = newValue;
     },
     onStreamSelect: function (obj, newValue, oldValue, e) {
         var colours = this.getColours();
@@ -102,7 +89,7 @@ Ext.define('NU.controller.Chart', {
     onResize: function (obj, width, height) {
 
         // TODO: fix onload size
-        var canvas = this.getCanvas();
+        var canvas = this.lookupReference('canvas');
         var canvasEl = canvas.getEl();
         var canvasDom = canvasEl.dom;
 
