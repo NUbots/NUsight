@@ -1,7 +1,8 @@
 Ext.define('NU.controller.NUClear', {
     extend: 'NU.controller.Display',
+    alias: 'controller.NUClear',
     inject: 'reactionStatisticsTreeStore',
-    control: {
+    /*control: {
         'display': true,
         'robotSelector': {
             robotIP: function () {
@@ -13,7 +14,7 @@ Ext.define('NU.controller.NUClear', {
                 this.setUpdateSpeed(newValue);
             }
         }
-    },
+    },*/
     config: {
         reactionStatisticsTreeStore: null,
         lastUpdated: null,
@@ -26,7 +27,7 @@ Ext.define('NU.controller.NUClear', {
         this.lastUpdated = {};
 
         // update default
-        this.getUpdatespeed().setRawValue(this.getUpdateSpeed());
+        this.lookupReference('updatespeed').setRawValue(this.getUpdateSpeed());
 
 		var view = this.getView();
         view.mon(NU.util.Network, 'reaction_statistics', this.onReactionStatistics, this);

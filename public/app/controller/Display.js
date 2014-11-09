@@ -1,5 +1,5 @@
 Ext.define('NU.controller.Display', {
-    extend: 'Deft.mvc.ViewController',
+    extend: 'Ext.app.ViewController',
     requires: 'NU.util.Network',
     mixins: {
         observable: 'Ext.util.Observable'
@@ -7,7 +7,7 @@ Ext.define('NU.controller.Display', {
     config: {
         'robotIP': null
     },
-    control: {
+    /*control: {
         'robotSelector': {
             live: true,
             listeners: {
@@ -21,7 +21,7 @@ Ext.define('NU.controller.Display', {
             boxready: 'onResize',
             resize: 'onResize'
         }
-    },
+    },*/
     constructor: function() {
 
         // needed to merge controls
@@ -32,7 +32,7 @@ Ext.define('NU.controller.Display', {
         this.callParent(arguments);
 
     },
-    init: function () {
+    /*init: function () {
         // TODO: a bit too tightly coupled
         if (this.getRobotSelector() !== null) {
             var robotIP = this.getRobotSelector().getController().getRobotIP();
@@ -41,7 +41,7 @@ Ext.define('NU.controller.Display', {
         }
 
         return this.callParent(arguments);
-    },
+    },*/
     onResize: function (view, width, height) {
         // hack because ExtJS seems not to do this correctly! >_<
         if (view.maximized) {

@@ -2,6 +2,7 @@ Ext.define('NU.controller.Classifier', {
 	// TODO: COOOOOOMENT THIS MONSTER
 	// GOD DAMN
 	extend: 'NU.controller.Display',
+	alias: 'controller.Classifier',
 	config: {
 		rawContext: null,
 		classifiedContext: null,
@@ -288,8 +289,9 @@ Ext.define('NU.controller.Classifier', {
 		this.setPolygonPoints([]);
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
-
-		var rawLayeredCanvas = this.getRawImage().getController();
+	},
+	afterRender: function () {
+		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
 		var rawContext = rawLayeredCanvas.add('raw').context;
 		rawLayeredCanvas.add('selection');
 		rawLayeredCanvas.add('zoom');
@@ -301,7 +303,7 @@ Ext.define('NU.controller.Classifier', {
 		view.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
 		this.callParent(arguments);
 
-		var classifiedLayeredCanvas = this.getClassifiedImage().getController();
+		var classifiedLayeredCanvas = this.lookupReference('classifiedImage').getController();
 		classifiedLayeredCanvas.add('underlay').setOpacity(this.getRawUnderlayOpacity());
 		var classifiedContext = classifiedLayeredCanvas.add('classified').context;
 		classifiedLayeredCanvas.add('selection');

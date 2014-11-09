@@ -1,5 +1,6 @@
 Ext.define('NU.controller.GameState', {
 	extend: 'NU.controller.Display',
+	alias: 'controller.GameState',
 	config: {
 		store: null
 	},
@@ -25,7 +26,8 @@ Ext.define('NU.controller.GameState', {
 		var view = this.getView();
 		view.mon(NU.util.Network, 'game_state', this.onGameState, this);
 
-		this.setStore(this.getView().getGameStatesStore());
+		// TODO
+		//this.setStore(this.getView().getGameStatesStore());
 	},
 	onGameState: function (robotIP, gameState, timestamp) {
 		// TODO: remove

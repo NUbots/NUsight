@@ -1,7 +1,11 @@
 Ext.define('NU.view.window.NUClear', {
     extend : 'NU.view.window.Display',
     alias : ['widget.nu_nuclear_window'],
-    controller: 'NU.controller.NUClear',
+    requires: [
+        'NU.controller.NUClear',
+        'NU.store.ReactionStatisticsTree'
+	],
+    controller: 'NUClear',
     inject: 'reactionStatisticsTreeStore',
     config: {
         reactionStatisticsTreeStore: null
@@ -17,7 +21,7 @@ Ext.define('NU.view.window.NUClear', {
         xtype: 'robot_selector'
     }, {
         xtype: 'numberfield',
-        itemId: 'updatespeed',
+        reference: 'updatespeed',
         fieldLabel: 'Update Speed (ms)',
         labelStyle: 'white-space: nowrap',
         labelWidth: 120
@@ -27,7 +31,7 @@ Ext.define('NU.view.window.NUClear', {
             items: [{
                 xtype: 'treepanel',
                 region: 'center',
-                store: this.getReactionStatisticsTreeStore(),
+                store: Ext.create('NU.store.ReactionStatisticsTree'),
                 viewConfig: {
                     markDirty: false
                 },

@@ -1,5 +1,6 @@
 Ext.define('NU.controller.Vision', {
     extend: 'NU.controller.Display',
+	alias: 'controller.Vision',
     config: {
 		cameraId: null,
         displayImage: false,
@@ -10,50 +11,8 @@ Ext.define('NU.controller.Vision', {
 		height: 240,
 		bitsPerPixel: 4
     },
-    control: {
-		'cameraSelector': {
-			listeners: {
-				selectCameraId: function (cameraId) {
-					this.setCameraId(cameraId);
-					//this.getView().fireEvent('selectCameraId', cameraId);
-				}
-			}
-		},
-        'displaypicker': {
-            change: function (obj, newValue, oldValue, e) {
-				var layeredCanvas = this.getLayeredCanvas();
-				layeredCanvas.hideAll();
-                Ext.each(newValue, function (value) {
-                    switch (value) {
-						case 'all':
-							layeredCanvas.showAll();
-							break;
-                        case 'raw':
-							layeredCanvas.show('image');
-                            break;
-                        case 'classified_search':
-                            layeredCanvas.show('classified_image_search');
-                            break;
-                        case 'classified_refine':
-                            layeredCanvas.show('classified_image_refine');
-                            break;
-                        case 'visual_horizon':
-                            layeredCanvas.show('visual_horizon');
-                            break;
-                        case 'horizon':
-                            layeredCanvas.show('horizon');
-                            break;
-                        case 'objects':
-                            layeredCanvas.showGroup('field_objects');
-                            break;
-                    }
-                }, this);
-            }
-        },
-        'canvas': true
-    },
-    init: function () {
-		var layeredCanvas = this.getCanvas().getController();
+    afterRender: function () {
+		var layeredCanvas = this.lookupReference('canvas').getController();
 		layeredCanvas.add('image');
         layeredCanvas.add('classified_image_search');
         layeredCanvas.add('classified_image_refine');
@@ -74,8 +33,39 @@ Ext.define('NU.controller.Vision', {
 		view.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
 
         this.callParent(arguments);
-
     },
+	onLayerSelect: function (obj, newValue, oldValue, e) {
+		var layeredCanvas = this.getLayeredCanvas();
+		layeredCanvas.hideAll();
+		Ext.each(newValue, function (value) {
+			switch (value) {
+				case 'all':
+					layeredCanvas.showAll();
+					break;
+				case 'raw':
+					layeredCanvas.show('image');
+					break;
+				case 'classified_search':
+					layeredCanvas.show('classified_image_search');
+					break;
+				case 'classified_refine':
+					layeredCanvas.show('classified_image_refine');
+					break;
+				case 'visual_horizon':
+					layeredCanvas.show('visual_horizon');
+					break;
+				case 'horizon':
+					layeredCanvas.show('horizon');
+					break;
+				case 'objects':
+					layeredCanvas.showGroup('field_objects');
+					break;
+			}
+		}, this);
+	},
+	onSelectCamera: function (cameraId) {
+		this.setCameraId(cameraId);
+	},
 	getContext: function (name) {
 		return this.getLayeredCanvas().getContext(name);
 	},

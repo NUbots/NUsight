@@ -1,12 +1,13 @@
 Ext.define('NU.controller.robot.Selector', {
-    extend: 'Deft.mvc.ViewController',
+    extend: 'Ext.app.ViewController',
+    alias: 'controller.RobotSelector',
     requires: 'NU.util.Network',
     inject:  'robotsStore',
     config: {
         robotIP: null,
         robotsStore: null
     },
-    control: {
+    /*control: {
         'view': {
             select: function (combo, records, eOpts) {
                 var robotIP = records[0].get('ipAddress');
@@ -16,7 +17,7 @@ Ext.define('NU.controller.robot.Selector', {
 				}, 1);
             }
         }
-    },
+    },*/
     init: function () {
         // select first value by default
         var combo = this.getView();

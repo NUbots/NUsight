@@ -1,5 +1,6 @@
 Ext.define('NU.controller.Field', {
 	extend: 'NU.controller.Display',
+	alias: 'controller.Field',
 	config: {
 		mainScene: null,
 		robots: [],
@@ -34,7 +35,7 @@ Ext.define('NU.controller.Field', {
 			}
 		}
 	},
-	control: {
+	/*control: {
 		'mainscene': true,
 		'coordinates': true,
 		'crosshair': true,
@@ -64,7 +65,7 @@ Ext.define('NU.controller.Field', {
 		 controls.yawObject.rotation.set(0, Math.PI, 0);
 		 controls.pitchObject.rotation.set(-0.6, 0, 0);
 		 }
-		 },*/
+		 },*-/
 		'close_front': {
 			click: function () {
 				// These controls use Threejs coordinates not field coordinates
@@ -132,7 +133,7 @@ Ext.define('NU.controller.Field', {
 				});
 			}
 		}
-	},
+	},*/
 	init: function () {
 		this.mainScene = this.createMainScene();
 		this.getMainscene()

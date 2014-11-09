@@ -20,8 +20,8 @@ Ext.onReady(function() {
             'NU.util.Network'
         ],
         stores: [
-            'Robots'
-            //'Camera',
+            'Robots',
+            'Camera'
             //'Streams',
             //'ReactionStatisticsTree',
             //'classifier.Target',

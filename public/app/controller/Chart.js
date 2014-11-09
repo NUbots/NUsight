@@ -1,5 +1,6 @@
 Ext.define('NU.controller.Chart', {
     extend: 'NU.controller.Display',
+    alias: 'controller.Chart',
     config: {
         colours: [
             // 8 distinct colours from http://colorbrewer2.org/
@@ -20,7 +21,7 @@ Ext.define('NU.controller.Chart', {
         lastDraw: 0,
         streams: null
     },
-    control: {
+    /*control: {
         'streampicker': {
             change: 'onStreamSelect'
         },
@@ -37,14 +38,15 @@ Ext.define('NU.controller.Chart', {
             }
         },
         'canvas': true
-    },
+    },*/
     init: function () {
-
         // init array
         this.setStreams([]);
+    },
+    afterRender: function () {
 
         // setup canvas
-        var canvas = this.getCanvas();
+        var canvas = this.lookupReference('canvas');
         var canvasDom = canvas.getEl().dom;
         this.setContext(canvasDom.getContext('2d'));
 
@@ -60,7 +62,6 @@ Ext.define('NU.controller.Chart', {
 
         this.callParent(arguments);
 
-        var view = this.getView();
         this.onResize(view, view.getWidth(), view.getHeight());
 
     },

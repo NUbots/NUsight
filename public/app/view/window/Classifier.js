@@ -1,12 +1,13 @@
 Ext.define('NU.view.window.Classifier', {
 	extend : 'NU.view.window.Display',
 	requires: [
+		'NU.controller.Classifier',
 		'NU.view.plot.Scatter3D',
 		'NU.view.LayeredCanvas',
 		'Ext.form.field.Checkbox'
 	],
 	alias : ['widget.nu_classifier_window'],
-	controller: 'NU.controller.Classifier',
+	controller: 'Classifier',
 	title: 'Classifier',
 	width: 800,
 	height: 780,
@@ -163,7 +164,7 @@ Ext.define('NU.view.window.Classifier', {
 							},
 							items: {
 								xtype: 'nu_layered_canvas',
-								itemId: 'rawImage',
+								reference: 'rawImage',
 								width: 320,
 								height: 240,
 								style: {
@@ -185,7 +186,7 @@ Ext.define('NU.view.window.Classifier', {
 							},
 							items: {
 								xtype: 'nu_layered_canvas',
-								itemId: 'classifiedImage',
+								reference: 'classifiedImage',
 								width: 320,
 								height: 240,
 								style: {

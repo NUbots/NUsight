@@ -30,6 +30,7 @@ Ext.define('NU.controller.Toolbar', {
 	},
 	onVisualise: function () {
 		// calculations
+		var display = this.getDisplay();
 		var width = display.getWidth();
 		var height = display.getHeight();
 		var x = display.getX();

@@ -1,29 +1,29 @@
 Ext.define('NU.controller.camera.Selector', {
-	extend: 'Deft.mvc.ViewController',
-	requires: 'NU.util.Network',
-	inject:  'cameraStore',
+	extend: 'Ext.app.ViewController',
+	alias: 'controller.CameraSelector',
 	config: {
-		cameraId: null,
-		cameraStore: null
-	},
-	control: {
-		'view': {
-			select: function (combo, records, eOpts) {
-				var cameraId = records[0].get('id');
-				this.setCameraId(cameraId);
-				setTimeout(function () { // hack to allow live selectors to have attached
-					combo.fireEvent('selectCameraId', cameraId);
-				}, 1);
-			}
-		}
+		cameraId: null
 	},
 	init: function () {
 		// select first value by default
 		var combo = this.getView();
 		var recordSelected = combo.getStore().getAt(0);
-		if (recordSelected) {
+		// check if exists
+		if (recordSelected !== undefined) {
+			// select record
 			combo.select(recordSelected, true);
-			combo.fireEvent('select', combo, [recordSelected]);
 		}
+	},
+	onSelectCamera: function (combo, records, eOpts) {
+		// might not be an array, so make it an array
+		if (!Array.isArray(records)) {
+			records = [records];
+		}
+		// get the first camera id
+		var cameraId = records[0].get('id');
+		// set the camera id
+		this.setCameraId(cameraId);
+		// fire as event
+		combo.fireEvent('selectCameraId', cameraId);
 	}
 });

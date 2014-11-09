@@ -1,5 +1,6 @@
 Ext.define('NU.controller.Behaviour', {
 	extend: 'NU.controller.Display',
+	alias: 'controller.Behaviour',
 	inject: [
 		'registerActionTreeStore'
 	],

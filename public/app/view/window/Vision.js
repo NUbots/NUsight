@@ -2,11 +2,13 @@ Ext.define('NU.view.window.Vision', {
     extend : 'NU.view.window.Display',
     alias : ['widget.nu_vision_window'],
     requires: [
+        'NU.controller.Vision',
 		'Ext.ux.form.MultiSelect',
 		'NU.view.LayeredCanvas',
-		'NU.view.camera.Selector'
+		'NU.view.camera.Selector',
+        'Ext.layout.container.Anchor'
 	],
-    controller: 'NU.controller.Vision',
+    controller: 'Vision',
     title: 'Vision Display',
     width: 454,
     height: 295,
@@ -17,7 +19,10 @@ Ext.define('NU.view.window.Vision', {
 	tbar: [{
 		xtype: 'robot_selector'
 	}, {
-		xtype: 'camera_selector'
+		xtype: 'camera_selector',
+        listeners: {
+            selectCameraId: 'onSelectCamera'
+        }
 	}],
     items: [{
         xtype: 'nu_layered_canvas',
@@ -30,7 +35,7 @@ Ext.define('NU.view.window.Vision', {
 //            backgroundRepeat: 'no-repeat',
 //            backgroundPosition: 'center'
         },
-        itemId: 'canvas'
+        reference: 'canvas'
     }, {
         region: 'east',
         width: 150,
@@ -48,7 +53,9 @@ Ext.define('NU.view.window.Vision', {
                 ['objects', 'Field Objects']
             ],
             blankText: 'No items available',
-            itemId: 'displaypicker'
+            listeners: {
+                change: 'onLayerSelect'
+            }
         }]
     }]
 });

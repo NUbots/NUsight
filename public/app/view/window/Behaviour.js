@@ -1,15 +1,14 @@
 Ext.define('NU.view.window.Behaviour', {
 	extend : 'NU.view.window.Display',
-	inject: [
-		'actionStateChangeStore',
-		'registerActionTreeStore'
+	requires: [
+		'NU.controller.Behaviour',
+		'NU.store.RegisterActionTree',
+		'NU.store.ActionStateChange',
+		'Ext.grid.Panel',
+		'Ext.grid.column.Date'
 	],
-	config: {
-		actionStateChangeStore: null,
-		registerActionTreeStore: null
-	},
-	alias : ['widget.nu_behaviour_window'],
-	controller: 'NU.controller.Behaviour',
+	alias : 'widget.nu_behaviour_window',
+	controller: 'Behaviour',
 	title: 'Behaviour',
 	width: 800,
 	height: 750,
@@ -33,7 +32,7 @@ Ext.define('NU.view.window.Behaviour', {
 				xtype: 'treepanel',
 				title: 'Action Table',
 				flex: 1,
-				store: this.getRegisterActionTreeStore(),
+				store: Ext.create('NU.store.RegisterActionTree'),
 				columns: [
 					{text: 'Id', dataIndex: 'id'},
 					{text: 'Name', dataIndex: 'name', flex: 1},
@@ -46,7 +45,7 @@ Ext.define('NU.view.window.Behaviour', {
 				xtype: 'grid',
 				title: 'State log',
 				flex: 1,
-				store: this.getActionStateChangeStore(),
+				store: Ext.create('NU.store.ActionStateChange'),
 				/*viewConfig: {
 					getRowClass: function (record) {
 						if (record.get('state') === API.ActionStateChange.State.START) {

@@ -10,7 +10,7 @@ Ext.define('NU.model.Stream', {
         type: 'memory',
         reader: {
             type: 'json',
-            root: 'streams'
+            rootProperty: 'streams'
         }
     }
 });

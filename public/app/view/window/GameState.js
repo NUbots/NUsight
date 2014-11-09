@@ -1,13 +1,13 @@
 Ext.define('NU.view.window.GameState', {
 	extend : 'NU.view.window.Display',
 	alias : ['widget.nu_gamecontroller_window'],
-	controller: 'NU.controller.GameState',
-	inject: [
-		'gameStatesStore'
+	requires: [
+		'NU.controller.GameState',
+		'NU.store.GameStates',
+		'Ext.grid.Panel',
+		'Ext.grid.column.Date'
 	],
-	config: {
-		'gameStatesStore': null
-	},
+	controller: 'GameState',
 	title: 'GameState',
 	width: 600,
 	height: 400,
@@ -23,7 +23,7 @@ Ext.define('NU.view.window.GameState', {
 			items: [{
 				itemId: 'gameStates',
 				xtype: 'grid',
-				store: this.getGameStatesStore(),
+				store: Ext.create('NU.store.GameStates'),
 				columns: [
 					{text: 'Time', dataIndex: 'time', xtype: 'datecolumn', format: 'H:i:s', width: 75},
 					{text: 'Event', flex: 1, renderer: function(value, metaData, record) {
