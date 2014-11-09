@@ -21,14 +21,18 @@ Ext.define('NU.view.window.Behaviour', {
 			tbar: [{
 				xtype: 'robot_selector'
 			}, '->', {
-				itemId: 'clearActionTable',
-				text: 'Clear Action Table'
+				text: 'Clear Action Table',
+				listeners: {
+					click: 'onClearActionTable'
+				}
 			}, {
-				itemId: 'clearStateLog',
-				text: 'Clear State Log'
+				text: 'Clear State Log',
+				listeners: {
+					click: 'onClearStateLog'
+				}
 			}],
 			items: [{
-				itemId: 'actions',
+				reference: 'actions',
 				xtype: 'treepanel',
 				title: 'Action Table',
 				flex: 1,
@@ -41,7 +45,7 @@ Ext.define('NU.view.window.Behaviour', {
 			}, {
 				xtype: 'splitter'
 			}, {
-				itemId: 'logs',
+				reference: 'logs',
 				xtype: 'grid',
 				title: 'State log',
 				flex: 1,

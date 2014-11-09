@@ -11,17 +11,22 @@ Ext.define('NU.view.window.GameState', {
 	title: 'GameState',
 	width: 600,
 	height: 400,
+	listeners: {
+		afterrender: 'onAfterRender'
+	},
 	initComponent: function () {
 		var me = this;
 		Ext.apply(this, {
 			tbar: [{
 				xtype: 'robot_selector'
 			}, '->', {
-				itemId: 'clearStateLog',
-				text: 'Clear Log'
+				text: 'Clear Log',
+				listeners: {
+					click: 'onClearStateLog'
+				}
 			}],
 			items: [{
-				itemId: 'gameStates',
+				reference: 'gameStates',
 				xtype: 'grid',
 				store: Ext.create('NU.store.GameStates'),
 				columns: [

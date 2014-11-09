@@ -2,32 +2,25 @@ Ext.define('NU.controller.GameState', {
 	extend: 'NU.controller.Display',
 	alias: 'controller.GameState',
 	config: {
-		store: null
-	},
-	control: {
-		'gameStates': true,
-		'view': {
-			selectRobotIP: function (robotIP) {
-				var store = this.getStore();
-				store.clearFilter(true);
-				store.filter([{
-					property: 'robotIP', value: robotIP
-				}]);
-			}
-		},
-		'clearStateLog': {
-			click: function () {
-				var store = this.getView().getGameStatesStore();
-				store.remove(store.query('robotIP', this.robotIP).items);
-			}
-		}
+		gameStatesStore: null
 	},
 	init: function () {
 		var view = this.getView();
 		view.mon(NU.util.Network, 'game_state', this.onGameState, this);
-
-		// TODO
-		//this.setStore(this.getView().getGameStatesStore());
+	},
+	onAfterRender: function () {
+		this.setGameStatesStore(this.lookupReference('gameStates').getStore());
+	},
+	onSelectRobot: function (combo, records, eOpts) {
+		var store = this.getGameStatesStore();
+		store.clearFilter(true);
+		store.filter([{
+			property: 'robotIP', value: robotIP
+		}]);
+	},
+	onClearStateLog: function () {
+		var store = this.getGameStatesStore();
+		store.remove(store.query('robotIP', this.robotIP).items);
 	},
 	onGameState: function (robotIP, gameState, timestamp) {
 		// TODO: remove
@@ -35,7 +28,7 @@ Ext.define('NU.controller.GameState', {
 			return;
 		}
 
-		var store = this.getStore();
+		var store = this.getGameStatesStore();
 		store.add({
 			time: timestamp,
 			robotIP: robotIP,

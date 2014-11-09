@@ -1,33 +1,18 @@
 Ext.define('NU.controller.Behaviour', {
 	extend: 'NU.controller.Display',
 	alias: 'controller.Behaviour',
-	inject: [
-		'registerActionTreeStore'
-	],
-	config: {
-		'registerActionTreeStore': null
-	},
-	control: {
-		'actions': true,
-		'clearActionTable': {
-			click: function () {
-				this.getActions().getStore().removeAll();
-			}
-		},
-		'logs': true,
-		'clearStateLog': {
-			click: function () {
-				this.getLogs().getStore().removeAll();
-			}
-		}
-	},
 	init: function () {
 		var view = this.getView();
 		view.mon(NU.util.Network, 'behaviour', this.onBehaviour, this);
 	},
+	onClearActionTable: function () {
+		this.lookupReference('actions').getStore().removeAll();
+	},
+	onClearStateLog: function () {
+		this.lookupReference('logs').getStore().removeAll();
+	},
 	onBehaviour: function (robotIP, event, timestamp) {
 		// TODO: remove
-		debugger;
 		if (robotIP !== this.robotIP) {
 			return;
 		}
@@ -48,7 +33,7 @@ Ext.define('NU.controller.Behaviour', {
 		console.log(actionRegister);
 	},
 	onActionStateChange: function (robotIP, stateActionChange, timestamp) {
-		this.getLogs().getStore().add({
+		this.lookupReference('logs').getStore().add({
 			robotIP: robotIP,
 			time: timestamp,
 			name: stateActionChange.getName(),
