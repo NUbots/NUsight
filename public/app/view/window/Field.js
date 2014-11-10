@@ -12,6 +12,9 @@ Ext.define('NU.view.window.Field', {
 	width: 800,
 	height: 400,
 	layout: 'fit',
+	listeners: {
+		afterrender: 'onAfterRender'
+	},
 	tbar: [{
 		xtype: 'robot_selector'
 	}, {
@@ -67,7 +70,7 @@ Ext.define('NU.view.window.Field', {
 	}],
     bbar: [{
         xtype: 'component',
-        itemId: 'coordinates',
+        reference: 'coordinates',
         height: 15,
         tpl: 'X: {x}, Y: {y}, Z: {z}',
         data: {
@@ -78,6 +81,6 @@ Ext.define('NU.view.window.Field', {
     }],
 	items: [{
 		xtype: 'threejs',
-		itemId: 'mainscene'
+		reference: 'mainscene'
 	}]
 });

@@ -1,12 +1,12 @@
 Ext.define('NU.controller.Field', {
 	extend: 'NU.controller.Display',
 	alias: 'controller.Field',
+	mainScene: null,
+	objects: null,
+	robots : null,
 	config: {
-		mainScene: null,
-		robots: [],
 		closeDistance: 0.4,
 		closeHeight: 0.2,
-		objects: [],
 		// shape enum
 		Shape: {
 			ARROW: {
@@ -135,13 +135,18 @@ Ext.define('NU.controller.Field', {
 		}
 	},*/
 	init: function () {
+		this.robots = [];
+		this.objects = [];
+		this.callParent(arguments);
+	},
+	onAfterRender: function () {
 		this.mainScene = this.createMainScene();
-		this.getMainscene()
+		this.lookupReference('mainscene')
 			.setComponents(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera, this.mainScene.effect)
 			.enableControls({
 				movementSpeed: 2
-			}, this.objects, this.getCoordinates());
-		var controls = this.getMainscene().controls;
+			}, this.objects, this.lookupReference('coordinates'));
+		var controls = this.lookupReference('mainscene').controls;
 		controls.yawObject.position.set(0, 3.5, 0);
 		controls.yawObject.rotation.set(0, 0, 0);
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
@@ -157,7 +162,6 @@ Ext.define('NU.controller.Field', {
 		}, this);
 
 		this.on('selectRobotIP', Ext.bind(this.onSelectRobotIP, this));
-		this.callParent(arguments);
 	},
 	onSelectRobotIP: function (robotIP) {
 		this.robots.forEach(function (robot) {
@@ -212,10 +216,10 @@ Ext.define('NU.controller.Field', {
 				});
 			}
 			robot.darwinModels.forEach(function (model) {
-				this.getMainScene().scene.add(model);
+				this.mainScene.scene.add(model);
 			}, this);
 			robot.ballModels.forEach(function (model) {
-				this.getMainScene().scene.add(model);
+				this.mainScene.scene.add(model);
 			}, this);
 		}, this);
 
@@ -251,7 +255,7 @@ Ext.define('NU.controller.Field', {
 		 * Fires when a model is added onto a robot. This method adds the object into the scene and the objects array.
 		 */
 		robot.on('add-model', function (object) {
-			this.getMainScene().scene.add(object);
+			this.mainScene.scene.add(object);
 			this.objects.push(object);
 		}, this);
 
@@ -260,7 +264,7 @@ Ext.define('NU.controller.Field', {
 		 * the objects array.
 		 */
 		robot.on('remove-model', function (object) {
-			this.getMainScene().scene.remove(object);
+			this.mainScene.scene.remove(object);
 			Ext.Array.remove(this.objects, object);
 		}, this);
 //      robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();

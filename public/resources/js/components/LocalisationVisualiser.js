@@ -77,9 +77,9 @@
         newObject.object = object.object || object;
         newObject.add(object);
         // ensure the new object's position matches the position of the model that was passed in
-        newObject.position = object.position;
+        newObject.position.copy(object.position);
         // set the model's position to the default as it is now relative to the new object
-        object.position = new THREE.Vector3(0, 0, 0);
+        object.position.copy(new THREE.Vector3(0, 0, 0));
         return newObject;
     };
 

@@ -10,12 +10,6 @@ Ext.define('NU.view.field.Robot', {
 	fieldObjects: [],
 	constructor: function () {
 		this.callParent(arguments);
-		this.addEvents([
-			'loaded',
-			'model-list-resized',
-			'add-model',
-			'remove-model'
-		]);
 		var darwin = this.createDarwinModel();
 		this.darwinModels = [darwin];
 		return this;
