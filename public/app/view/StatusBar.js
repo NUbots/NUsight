@@ -15,7 +15,7 @@ Ext.define('NU.view.StatusBar', {
 	},
 	items: [{
 		xtype: 'panel',
-		itemId: 'packetCount',
+		reference: 'packetCount',
 		style: {
 			textAlign: 'right'
 		},

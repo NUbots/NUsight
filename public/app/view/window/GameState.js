@@ -11,9 +11,6 @@ Ext.define('NU.view.window.GameState', {
 	title: 'GameState',
 	width: 600,
 	height: 400,
-	listeners: {
-		afterrender: 'onAfterRender'
-	},
 	initComponent: function () {
 		var me = this;
 		Ext.apply(this, {
