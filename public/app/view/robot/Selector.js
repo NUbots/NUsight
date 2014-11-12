@@ -1,7 +1,7 @@
 Ext.define('NU.view.robot.Selector', {
     extend: 'Ext.form.field.ComboBox',
     alias: 'widget.robot_selector',
-    requires: 'NU.controller.robot.Selector',
+    requires: 'NU.view.robot.SelectorController',
     controller: 'RobotSelector',
 	fieldLabel: 'Robot',
 	labelWidth: 40,

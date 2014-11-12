@@ -1,7 +1,7 @@
 Ext.define('NU.view.camera.Selector', {
 	extend: 'Ext.form.field.ComboBox',
 	alias: 'widget.camera_selector',
-	requires: 'NU.controller.camera.Selector',
+	requires: 'NU.view.camera.SelectorController',
 	controller: 'CameraSelector',
 	itemId: 'cameraSelector',
 	fieldLabel: 'Camera',

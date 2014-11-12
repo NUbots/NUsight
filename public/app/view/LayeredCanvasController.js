@@ -1,4 +1,4 @@
-Ext.define('NU.controller.LayeredCanvas', {
+Ext.define('NU.view.LayeredCanvasController', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.LayeredCanvas',
 	config: {

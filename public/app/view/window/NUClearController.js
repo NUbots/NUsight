@@ -1,5 +1,5 @@
-Ext.define('NU.controller.NUClear', {
-    extend: 'NU.controller.Display',
+Ext.define('NU.view.window.NUClearController', {
+    extend: 'NU.view.window.DisplayController',
     alias: 'controller.NUClear',
     config: {
         lastUpdated: null,

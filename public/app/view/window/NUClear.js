@@ -2,7 +2,7 @@ Ext.define('NU.view.window.NUClear', {
     extend : 'NU.view.window.Display',
     alias : ['widget.nu_nuclear_window'],
     requires: [
-        'NU.controller.NUClear',
+        'NU.view.window.NUClearController',
         'NU.store.ReactionStatisticsTree'
 	],
     controller: 'NUClear',

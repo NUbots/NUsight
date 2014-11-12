@@ -1,4 +1,4 @@
-Ext.define('NU.controller.StatusBar', {
+Ext.define('NU.view.StatusBarController', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.StatusBar',
 	requires: [

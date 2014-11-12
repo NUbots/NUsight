@@ -1,12 +1,11 @@
 Ext.define('NU.view.robot.List', {
     extend: 'Ext.grid.Panel',
-    requires: 'Ext.grid.plugin.RowEditing',
-    controller: 'NU.controller.robot.List',
+    requires: [
+        'NU.view.robot.ListController',
+        'Ext.grid.plugin.RowEditing'
+	],
+    controller: 'List',
     alias: 'widget.robotlist',
-    inject: 'robotsStore',
-    config: {
-        robotsStore: null
-    },
     columns: [{
         header: 'Name',
         width: 170,
@@ -23,20 +22,16 @@ Ext.define('NU.view.robot.List', {
         pluginId: 'rowEditing'
     }],
     tbar: [{
-        itemId: 'addRobot',
         text: 'Add Robot',
-        iconCls: 'icon-add'
+        iconCls: 'icon-add',
+        listeners: {
+            click: 'onAddRobot'
+        }
     }, {
-        itemId: 'removeRobot',
         text: 'Remove Robot',
-        iconCls: 'icon-cross'
-    }],
-    initComponent: function () {
-
-        Ext.apply(this, {
-            store: this.getRobotsStore()
-        });
-
-        this.callParent(arguments);
-    }
+        iconCls: 'icon-cross',
+        listeners: {
+            click: 'onRemoveRobot'
+        }
+    }]
 });

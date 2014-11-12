@@ -1,5 +1,5 @@
-Ext.define('NU.controller.Vision', {
-    extend: 'NU.controller.Display',
+Ext.define('NU.view.window.VisionController', {
+    extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Vision',
     config: {
 		cameraId: null,

@@ -1,7 +1,7 @@
 Ext.define('NU.view.Toolbar', {
     extend: 'Ext.toolbar.Toolbar',
     alias: 'widget.nu_toolbar',
-    requires: 'NU.controller.Toolbar',
+    requires: 'NU.view.ToolbarController',
     controller: 'Toolbar',
     items: [{
         text: 'Localisation',

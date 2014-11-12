@@ -2,7 +2,7 @@ Ext.define('NU.view.window.Vision', {
     extend : 'NU.view.window.Display',
     alias : ['widget.nu_vision_window'],
     requires: [
-        'NU.controller.Vision',
+        'NU.view.window.VisionController',
 		'Ext.ux.form.MultiSelect',
 		'NU.view.LayeredCanvas',
 		'NU.view.camera.Selector',

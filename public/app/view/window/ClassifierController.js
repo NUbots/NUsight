@@ -1,7 +1,7 @@
-Ext.define('NU.controller.Classifier', {
+Ext.define('NU.view.window.ClassifierController', {
 	// TODO: COOOOOOMENT THIS MONSTER
 	// GOD DAMN
-	extend: 'NU.controller.Display',
+	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Classifier',
 	config: {
 		rawContext: null,

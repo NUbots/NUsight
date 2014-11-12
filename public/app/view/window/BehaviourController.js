@@ -1,5 +1,5 @@
-Ext.define('NU.controller.Behaviour', {
-	extend: 'NU.controller.Display',
+Ext.define('NU.view.window.BehaviourController', {
+	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Behaviour',
 	init: function () {
 		var view = this.getView();

@@ -1,5 +1,5 @@
-Ext.define('NU.controller.GameState', {
-	extend: 'NU.controller.Display',
+Ext.define('NU.view.window.GameStateController', {
+	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.GameState',
 	config: {
 		gameStatesStore: null

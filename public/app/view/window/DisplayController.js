@@ -1,4 +1,4 @@
-Ext.define('NU.controller.Display', {
+Ext.define('NU.view.window.DisplayController', {
     extend: 'Ext.app.ViewController',
 	config: {
 		robotIP: null

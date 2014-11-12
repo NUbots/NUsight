@@ -1,4 +1,4 @@
-Ext.define('NU.controller.Toolbar', {
+Ext.define('NU.view.ToolbarController', {
     extend: 'Ext.app.ViewController',
 	alias: 'controller.Toolbar',
 	create: function (name, config) {

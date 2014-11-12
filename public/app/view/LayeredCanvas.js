@@ -1,7 +1,7 @@
 Ext.define('NU.view.LayeredCanvas', {
 	extend: 'Ext.container.Container',
 	alias: 'widget.nu_layered_canvas',
-	requires: 'NU.controller.LayeredCanvas',
+	requires: 'NU.view.LayeredCanvasController',
 	controller: 'LayeredCanvas',
 	autoEl: {
 		tag: 'div'

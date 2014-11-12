@@ -2,7 +2,7 @@ Ext.define('NU.view.window.GameState', {
 	extend : 'NU.view.window.Display',
 	alias : ['widget.nu_gamecontroller_window'],
 	requires: [
-		'NU.controller.GameState',
+		'NU.view.window.GameStateController',
 		'NU.store.GameStates',
 		'Ext.grid.Panel',
 		'Ext.grid.column.Date'

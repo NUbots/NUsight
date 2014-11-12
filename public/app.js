@@ -21,14 +21,14 @@ Ext.onReady(function() {
         ],
         stores: [
             'Robots',
-            'Camera'
+            'Camera',
+            'ReactionHandles'
             //'Streams',
             //'ReactionStatisticsTree',
             //'classifier.Target',
             //'classifier.SelectionTool',
             //'ActionStateChange',
             //'RegisterActionTree',
-            //'ReactionHandles'
         ],
         autoCreateViewport: true,
 		launch: function () {

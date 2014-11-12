@@ -2,7 +2,7 @@ Ext.define('NU.view.window.Field', {
 	extend: 'NU.view.window.Display',
 	alias: 'widget.nu_field_window',
 	requires: [
-		'NU.controller.Field',
+		'NU.view.window.FieldController',
 		'NU.view.field.Robot',
 		'NU.view.robot.Selector',
 		'Ext.form.field.Checkbox'

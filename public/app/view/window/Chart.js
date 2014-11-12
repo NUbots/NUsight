@@ -2,7 +2,7 @@ Ext.define('NU.view.window.Chart', {
     extend : 'NU.view.window.Display',
     alias: 'widget.nu_chart_window',
     requires: [
-        'NU.controller.Chart',
+        'NU.view.window.ChartController',
         'Ext.ux.form.MultiSelect',
 		'Ext.layout.container.Anchor',
         'NU.store.Streams'

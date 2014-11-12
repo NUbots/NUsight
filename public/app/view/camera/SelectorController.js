@@ -1,4 +1,4 @@
-Ext.define('NU.controller.camera.Selector', {
+Ext.define('NU.view.camera.SelectorController', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.CameraSelector',
 	config: {

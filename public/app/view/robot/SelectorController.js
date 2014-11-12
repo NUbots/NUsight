@@ -1,4 +1,4 @@
-Ext.define('NU.controller.robot.Selector', {
+Ext.define('NU.view.robot.SelectorController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.RobotSelector',
     config: {

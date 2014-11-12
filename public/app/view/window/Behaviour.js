@@ -1,7 +1,7 @@
 Ext.define('NU.view.window.Behaviour', {
 	extend : 'NU.view.window.Display',
 	requires: [
-		'NU.controller.Behaviour',
+		'NU.view.window.BehaviourController',
 		'NU.store.RegisterActionTree',
 		'NU.store.ActionStateChange',
 		'Ext.grid.Panel',
