@@ -18,7 +18,10 @@ Ext.define('NU.view.window.GameState', {
 		var me = this;
 		Ext.apply(this, {
 			tbar: [{
-				xtype: 'robot_selector'
+				xtype: 'robot_selector',
+				listeners: {
+					selectRobot: 'onSelectRobot'
+				}
 			}, '->', {
 				text: 'Clear Log',
 				listeners: {

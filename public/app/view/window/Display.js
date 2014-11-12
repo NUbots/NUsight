@@ -10,7 +10,13 @@ Ext.define('NU.view.window.Display', {
     maximizable: true,
 	onEsc: Ext.emptyFn,
     tbar: [{
-        xtype: 'robot_selector'
+        xtype: 'robot_selector',
+        listeners: {
+            selectRobot: 'onSelectRobot'
+        }
     }],
-	layout: 'fit'
+	layout: 'fit',
+    listeners: {
+        maximize: 'onMaximize'
+    }
 });

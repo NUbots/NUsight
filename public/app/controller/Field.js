@@ -35,106 +35,63 @@ Ext.define('NU.controller.Field', {
 			}
 		}
 	},
-	/*control: {
-		'mainscene': true,
-		'coordinates': true,
-		'crosshair': true,
-		'hawkeye': {
-			click: function () {
-				// These controls use Threejs coordinates not field coordinates
-				var controls = this.getMainscene().controls;
-				controls.yawObject.position.set(0, 3.5, 0);
-				controls.yawObject.rotation.set(0, 0, 0);
-				controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
-			}
-		},
-		/*'perspective': {
-		 click: function () {
-		 // These controls use Threejs coordinates not field coordinates
-		 var controls = this.getMainscene().controls;
-		 controls.yawObject.position.set(-3, 1.6, 3);
-		 controls.yawObject.rotation.set(0, -6.9, 0);
-		 controls.pitchObject.rotation.set(-0.5, 0, 0);
-		 }
-		 },
-		 'side': {
-		 click: function () {
-		 // These controls use Threejs coordinates not field coordinates
-		 var controls = this.getMainscene().controls;
-		 controls.yawObject.position.set(0, 1.9, -4.5);
-		 controls.yawObject.rotation.set(0, Math.PI, 0);
-		 controls.pitchObject.rotation.set(-0.6, 0, 0);
-		 }
-		 },*-/
-		'close_front': {
-			click: function () {
-				// These controls use Threejs coordinates not field coordinates
-				var controls = this.getMainscene().controls;
-				controls.yawObject.position.set(this.getCloseDistance(), this.getCloseHeight(), 0);
-				controls.yawObject.rotation.set(0, Math.PI / 2, 0);
-				controls.pitchObject.rotation.set(0.05, 0, 0);
-			}
-		},
-		'close_angle': {
-			click: function () {
-				// These controls use Threejs coordinates not field coordinates
-				var controls = this.getMainscene().controls;
-				var dist = this.getCloseDistance() / Math.sqrt(2);
-				controls.yawObject.position.set(dist, this.getCloseHeight(), -dist);
-				controls.yawObject.rotation.set(0, 3 * Math.PI / 4, 0);
-				controls.pitchObject.rotation.set(0.05, 0, 0);
-			}
-		},
-		'close_side': {
-			click: function () {
-				// These controls use Threejs coordinates not field coordinates
-				var controls = this.getMainscene().controls;
-				controls.yawObject.position.set(0, this.getCloseHeight(), -this.getCloseDistance());
-				controls.yawObject.rotation.set(0, Math.PI, 0);
-				controls.pitchObject.rotation.set(0.05, 0, 0);
-			}
-		},
-		'anaglyph': {
-			change: function (obj, newValue, oldValue, eOpts) {
-				this.getMainscene().setRenderEffect(newValue);
-			}
-		},
-		'gamepad': {
-			change: function (obj, newValue, oldValue, eOpts) {
-				var controls = this.getMainscene().controls;
-				controls.gamepad = newValue;
-			}
-		},
-		'inverted': {
-			change: function (obj, newValue, oldValue, eOpts) {
-				var controls = this.getMainscene().controls;
-				controls.inverted = newValue;
-			}
-		},
-		'displayCrosshair': {
-			change: function (obj, newValue, oldValue, eOpt) {
-				var crosshair = this.getCrosshair();
-				crosshair.setVisible(crosshair.isHidden() ? true : false);
-			}
-		},
-		'orientation': {
-			change: function (obj, newValue, oldValue, eOpts) {
-				this.robots.forEach(function (robot) {
-					robot.setShowOrientation(newValue);
-				});
-			}
-		},
-		'resetOrientation': {
-			click: function () {
-				this.robots.forEach(function (robot) {
-					robot.darwinModels.forEach(function (model) {
-						model.object.rotation.set(0, 0, 0);
-					});
-				});
-			}
-		}
-	},*/
-	init: function () {
+	onHawkEye: function () {
+		// These controls use Threejs coordinates not field coordinates
+		var controls = this.lookupReference('mainscene').controls;
+		controls.yawObject.position.set(0, 4.5, 0);
+		controls.yawObject.rotation.set(0, 0, 0);
+		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
+	},
+	onCloseFront: function () {
+		// These controls use Threejs coordinates not field coordinates
+		var controls = this.lookupReference('mainscene').controls;
+		controls.yawObject.position.set(this.getCloseDistance(), this.getCloseHeight(), 0);
+		controls.yawObject.rotation.set(0, Math.PI / 2, 0);
+		controls.pitchObject.rotation.set(0.05, 0, 0);
+	},
+	onCloseAngle: function () {
+		// These controls use Threejs coordinates not field coordinates
+		var controls = this.lookupReference('mainscene').controls;
+		var dist = this.getCloseDistance() / Math.sqrt(2);
+		controls.yawObject.position.set(dist, this.getCloseHeight(), -dist);
+		controls.yawObject.rotation.set(0, 3 * Math.PI / 4, 0);
+		controls.pitchObject.rotation.set(0.05, 0, 0);
+	},
+	onCloseSide: function () {
+		// These controls use Threejs coordinates not field coordinates
+		var controls = this.lookupReference('mainscene').controls;
+		controls.yawObject.position.set(0, this.getCloseHeight(), -this.getCloseDistance());
+		controls.yawObject.rotation.set(0, Math.PI, 0);
+		controls.pitchObject.rotation.set(0.05, 0, 0);
+	},
+	onAnaglyph: function (obj, newValue, oldValue, eOpts) {
+		this.lookupReference('mainscene').setRenderEffect(newValue);
+	},
+	onGamepad: function (obj, newValue, oldValue, eOpts) {
+		var controls = this.lookupReference('mainscene').controls;
+		controls.gamepad = newValue;
+	},
+	onInverted: function (obj, newValue, oldValue, eOpts) {
+		var controls = this.lookupReference('mainscene').controls;
+		controls.inverted = newValue;
+	},
+	onDisplayCrosshair: function (obj, newValue, oldValue, eOpt) {
+		var crosshair = this.getCrosshair();
+		crosshair.setVisible(crosshair.isHidden() ? true : false);
+	},
+	onOrientation: function (obj, newValue, oldValue, eOpts) {
+		this.robots.forEach(function (robot) {
+			robot.setShowOrientation(newValue);
+		});
+	},
+	onResetOrientation: function () {
+		this.robots.forEach(function (robot) {
+			robot.darwinModels.forEach(function (model) {
+				model.object.rotation.set(0, 0, 0);
+			});
+		});
+	},
+	constructor: function () {
 		this.robots = [];
 		this.objects = [];
 		this.callParent(arguments);
@@ -147,7 +104,7 @@ Ext.define('NU.controller.Field', {
 				movementSpeed: 2
 			}, this.objects, this.lookupReference('coordinates'));
 		var controls = this.lookupReference('mainscene').controls;
-		controls.yawObject.position.set(0, 3.5, 0);
+		controls.yawObject.position.set(0, 4.5, 0);
 		controls.yawObject.rotation.set(0, 0, 0);
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 
@@ -160,10 +117,8 @@ Ext.define('NU.controller.Field', {
 		Ext.each(NU.util.Network.getRobotIPs(), function (robotIP) {
 			this.onAddRobot(robotIP);
 		}, this);
-
-		this.on('selectRobotIP', Ext.bind(this.onSelectRobotIP, this));
 	},
-	onSelectRobotIP: function (robotIP) {
+	onSelectRobot: function (robotIP) {
 		this.robots.forEach(function (robot) {
 			if (robot.robotIP !== robotIP) {
 				robot.darwinModels.forEach(function (model) {

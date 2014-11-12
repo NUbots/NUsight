@@ -20,7 +20,10 @@ Ext.define('NU.view.window.Classifier', {
 		afterrender: 'onAfterRender'
 	},
 	tbar: [{
-		xtype: 'robot_selector'
+		xtype: 'robot_selector',
+		listeners: {
+			selectRobot: 'onSelectRobot'
+		}
 	}, '->', {
 		text: 'Undo',
 		listeners: {

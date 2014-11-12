@@ -11,12 +11,14 @@ Ext.define('NU.controller.GameState', {
 	onAfterRender: function () {
 		this.setGameStatesStore(this.lookupReference('gameStates').getStore());
 	},
-	onSelectRobot: function (combo, records, eOpts) {
-		var store = this.getGameStatesStore();
+	onSelectRobot: function (robotIP) {
+		// TODO
+		/*var store = this.getGameStatesStore();
 		store.clearFilter(true);
 		store.filter([{
 			property: 'robotIP', value: robotIP
-		}]);
+		}]);*/
+		this.callParent(arguments);
 	},
 	onClearStateLog: function () {
 		var store = this.getGameStatesStore();

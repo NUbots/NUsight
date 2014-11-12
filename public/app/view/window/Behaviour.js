@@ -19,7 +19,10 @@ Ext.define('NU.view.window.Behaviour', {
 	initComponent: function () {
 		Ext.apply(this, {
 			tbar: [{
-				xtype: 'robot_selector'
+				xtype: 'robot_selector',
+				listeners: {
+					selectRobot: 'onSelectRobot'
+				}
 			}, '->', {
 				text: 'Clear Action Table',
 				listeners: {

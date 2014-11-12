@@ -16,55 +16,73 @@ Ext.define('NU.view.window.Field', {
 		afterrender: 'onAfterRender'
 	},
 	tbar: [{
-		xtype: 'robot_selector'
+		xtype: 'robot_selector',
+		listeners: {
+			selectRobot: 'onSelectRobot'
+		}
 	}, {
-		itemId: 'hawkeye',
-		text: 'HawkEye'
-	},/*, {
-	 itemId: 'perspective',
-	 text: 'Perspective'
-	 }, {
-	 itemId: 'side',
-	 text: 'Side'
-	 },*/ {
-		itemId: 'close_front',
-		text: 'Close Front'
+		text: 'HawkEye',
+		listeners: {
+			click: 'onHawkEye'
+		}
 	}, {
-		itemId: 'close_angle',
-		text: 'Close Angle'
+		text: 'Close Front',
+		listeners: {
+			click: 'onCloseFront'
+		}
 	}, {
-		itemId: 'close_side',
-		text: 'Close Side'
+		text: 'Close Angle',
+		listeners: {
+			click: 'onCloseAngle'
+		}
+	}, {
+		text: 'Close Side',
+		listeners: {
+			click: 'onCloseSide'
+		}
 	}, '->', {
 		text: 'Extra',
 		menu: {
 			items: [{
-				itemId: 'orientation',
 				xtype: 'checkbox',
 				fieldLabel: 'Orientation',
-				checked: false
+				checked: false,
+				listeners: {
+					change: 'onOrientation'
+				}
 			}, {
 				itemId: 'resetOrientation',
 				text: 'Reset Orientation',
-				ui: 'default-toolbar'
+				ui: 'default-toolbar',
+				listeners: {
+					click: 'onResetOrientation'
+				}
 			}, {
-				itemId: 'anaglyph',
 				xtype: 'checkbox',
-				fieldLabel: 'Anaglyph'
+				fieldLabel: 'Anaglyph',
+				listeners: {
+					change: 'onAnaglyph'
+				}
 			}, {
-				itemId: 'gamepad',
 				xtype: 'checkbox',
-				fieldLabel: 'Gamepad'
+				fieldLabel: 'Gamepad',
+				listeners: {
+					change: 'onGamepad'
+				}
 			}, {
-				itemId: 'inverted',
 				xtype: 'checkbox',
 				fieldLabel: 'Inverted',
-				checked: true
+				checked: true,
+				listeners: {
+					change: 'onInverted'
+				}
 			},  {
-				itemId: 'displayCrosshair',
 				xtype: 'checkbox',
 				fieldLabel: 'Crosshair',
-				checked: true
+				checked: true,
+				listeners: {
+					change: 'onDisplayCrosshair'
+				}
 			}]
 		}
 	}],

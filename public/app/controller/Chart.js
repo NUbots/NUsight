@@ -98,8 +98,6 @@ Ext.define('NU.controller.Chart', {
             canvasDom.height = canvasEl.getHeight();
         }
 
-        return this.callParent(arguments);
-
     },
     onSensorData: function (api_sensor_data) {
 

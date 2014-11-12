@@ -20,11 +20,14 @@ Ext.define('NU.view.window.Vision', {
         afterrender: 'onAfterRender'
     },
 	tbar: [{
-		xtype: 'robot_selector'
+		xtype: 'robot_selector',
+        listeners: {
+            selectRobot: 'onSelectRobot'
+        }
 	}, {
 		xtype: 'camera_selector',
         listeners: {
-            selectCameraId: 'onSelectCamera'
+            selectCamera: 'onSelectCamera'
         }
 	}],
     items: [{

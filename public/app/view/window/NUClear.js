@@ -18,7 +18,10 @@ Ext.define('NU.view.window.NUClear', {
     },
     layout: 'border',
     tbar: [{
-        xtype: 'robot_selector'
+        xtype: 'robot_selector',
+        listeners: {
+            selectRobot: 'onSelectRobot'
+        }
     }, {
         xtype: 'numberfield',
         reference: 'updatespeed',

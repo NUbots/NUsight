@@ -20,7 +20,10 @@ Ext.define('NU.view.window.Chart', {
 		resize: 'onResize'
 	},
 	tbar: [{
-		xtype: 'robot_selector'
+		xtype: 'robot_selector',
+		listeners: {
+			selectRobot: 'onSelectRobot'
+		}
 	}, {
 		xtype: 'numberfield',
 		fieldLabel: 'Min',

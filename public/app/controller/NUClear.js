@@ -20,8 +20,9 @@ Ext.define('NU.controller.NUClear', {
         this.callParent(arguments);
 
     },
-    onSelectRobot: function (combo, records, eOpts) {
-        this.getDisplay().getRootNode().removeAll();
+    onSelectRobot: function (robotIP) {
+        this.lookupReference('display').getRootNode().removeAll();
+        this.callParent(arguments);
     },
     onUpdateSpeedChange: function (field, newValue, oldValue, eOpts) {
 		this.setUpdateSpeed(newValue);

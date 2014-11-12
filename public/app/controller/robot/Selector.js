@@ -21,6 +21,8 @@ Ext.define('NU.controller.robot.Selector', {
 		var robotIP = records[0].get('ipAddress');
         // set the robot ip
 		this.setRobotIP(robotIP);
+        // fire an event
+        combo.fireEvent('selectRobot', robotIP);
 	}
 });
 

@@ -23,5 +23,7 @@ Ext.define('NU.controller.camera.Selector', {
 		var cameraId = records[0].get('id');
 		// set the camera id
 		this.setCameraId(cameraId);
+		// fire event
+		this.fireEvent('selectCamera', cameraId);
 	}
 });
