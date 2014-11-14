@@ -6,7 +6,7 @@ Ext.define('NU.view.window.GameStateController', {
 		view.mon(NU.util.Network, 'game_state', this.onGameState, this);
 	},
 	onSelectRobot: function (robotIP) {
-		var store = this.lookupReference('gameStates').getStore();
+		var store = this.getStore();
 		store.clearFilter(true);
 		store.addFilter({
 			property: 'robotIP', value: robotIP
@@ -14,7 +14,7 @@ Ext.define('NU.view.window.GameStateController', {
 		this.callParent(arguments);
 	},
 	onClearStateLog: function () {
-		var store = this.lookupReference('gameStates').getStore();
+		var store = this.getStore();
 		store.remove(store.query('robotIP', this.getRobotIP()).items);
 	},
 	onGameState: function (robotIP, gameState, timestamp) {
@@ -23,12 +23,15 @@ Ext.define('NU.view.window.GameStateController', {
 			return;
 		}
 
-		var store = this.getGameStatesStore();
+		var store = this.getStore();
 		store.add({
 			time: timestamp,
 			robotIP: robotIP,
 			eventName: gameState.getEvent(),
 			state: gameState.getData()
 		});
+	},
+	getStore: function () {
+		return this.lookupReference('gameStates').getStore();
 	}
 });

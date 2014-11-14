@@ -42,7 +42,6 @@ Ext.define('NU.view.window.ChartController', {
         view.mon(NU.util.Network, 'sensor_data', this.onSensorData, this);
 
         this.onResize(view, view.getWidth(), view.getHeight());
-
     },
     onMinChange: function (field, newValue, oldValue, eOpts) {
 		var smoothie = this.getSmoothie();
