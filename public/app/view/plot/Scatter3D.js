@@ -302,7 +302,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		function createText2D(text, color, font, size, segW, segH)
 		{
 			var canvas = createTextCanvas(text, color, font, size);
-			var plane = new THREE.PlaneGeometry(canvas.width, canvas.height, segW, segH);
+			var plane = new THREE.PlaneBufferGeometry(canvas.width, canvas.height, segW, segH);
 			var tex = new THREE.Texture(canvas);
 			tex.needsUpdate = true;
 			var planeMat = new THREE.MeshBasicMaterial({

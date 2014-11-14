@@ -52,10 +52,10 @@
 			var rightLine = buildVerticalLine(y, y + h, x + w, lw);
 
 			var rect = new THREE.Geometry();
-			THREE.GeometryUtils.merge(rect, topLine);
-			THREE.GeometryUtils.merge(rect, bottomLine);
-			THREE.GeometryUtils.merge(rect, leftLine);
-			THREE.GeometryUtils.merge(rect, rightLine);
+			rect.merge(topLine);
+			rect.merge(bottomLine);
+			rect.merge(leftLine);
+			rect.merge(rightLine);
 			return rect;
 		}
 
@@ -84,15 +84,15 @@
 
 		// Merge all field lines into a single geometry for performance
 		var fieldLines = new THREE.Geometry();
-		THREE.GeometryUtils.merge(fieldLines, centerCircle);
-		THREE.GeometryUtils.merge(fieldLines, blueHalf);
-		THREE.GeometryUtils.merge(fieldLines, yellowHalf);
-		THREE.GeometryUtils.merge(fieldLines, blueGoalArea);
-		THREE.GeometryUtils.merge(fieldLines, yellowGoalArea);
-		THREE.GeometryUtils.merge(fieldLines, blueMarkVLine);
-		THREE.GeometryUtils.merge(fieldLines, blueMarkHLine);
-		THREE.GeometryUtils.merge(fieldLines, yellowMarkVLine);
-		THREE.GeometryUtils.merge(fieldLines, yellowMarkHLine);
+		fieldLines.merge(centerCircle);
+		fieldLines.merge(blueHalf);
+		fieldLines.merge(yellowHalf);
+		fieldLines.merge(blueGoalArea);
+		fieldLines.merge(yellowGoalArea);
+		fieldLines.merge(blueMarkVLine);
+		fieldLines.merge(blueMarkHLine);
+		fieldLines.merge(yellowMarkVLine);
+		fieldLines.merge(yellowMarkHLine);
 
 
 		// Goal convenience variables
@@ -120,7 +120,7 @@
 		//var yellowRightGoalPost = buildCircle(goalPostX, goalY, goalPostRadius);
 
 		var blueGoal = new THREE.Geometry();
-		THREE.GeometryUtils.merge(blueGoal, blueGoalBox);
+		blueGoal.merge(blueGoalBox);
 		//THREE.GeometryUtils.merge(blueGoal, blueLeftGoalPost);
 		//THREE.GeometryUtils.merge(blueGoal, blueRightGoalPost);
 		var blueGoalMesh = new THREE.Mesh(blueGoal, new THREE.MeshBasicMaterial({
@@ -129,7 +129,7 @@
 		blueGoalMesh.position.z = 0.001;
 
 		var yellowGoal = new THREE.Geometry();
-		THREE.GeometryUtils.merge(yellowGoal, yellowGoalBox);
+		yellowGoal.merge(yellowGoalBox);
 		//THREE.GeometryUtils.merge(yellowGoal, yellowLeftGoalPost);
 		//THREE.GeometryUtils.merge(yellowGoal, yellowRightGoalPost);
 		var yellowGoalMesh = new THREE.Mesh(yellowGoal, new THREE.MeshBasicMaterial({

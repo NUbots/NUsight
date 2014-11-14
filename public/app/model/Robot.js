@@ -4,10 +4,10 @@ Ext.define('NU.model.Robot', {
         {name: 'id', type: 'int'},
         {name: 'ipAddress', type: 'string'},
         {name: 'name', type: 'string'},
-        {name: 'enabled', type: 'boolean', defaultValue: true},
+        {name: 'enabled', type: 'boolean', defaultValue: true}
     ],
-    idgen: 'sequential',
-    validations: [
+    identifier: 'sequential',
+    validators: [
         {type: 'presence', name: 'ipAddress'},
         {type: 'format', name: 'ipAddress', matcher: /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/}
     ],
@@ -15,7 +15,7 @@ Ext.define('NU.model.Robot', {
         type: 'memory',
         reader: {
             type: 'json',
-            root: 'robots'
+            rootProperty: 'robots'
         }
     }
 });

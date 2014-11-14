@@ -1,15 +1,14 @@
 Ext.define('NU.view.window.Behaviour', {
 	extend : 'NU.view.window.Display',
-	inject: [
-		'actionStateChangeStore',
-		'registerActionTreeStore'
+	requires: [
+		'NU.view.window.BehaviourController',
+		'NU.store.RegisterActionTree',
+		'NU.store.ActionStateChange',
+		'Ext.grid.Panel',
+		'Ext.grid.column.Date'
 	],
-	config: {
-		actionStateChangeStore: null,
-		registerActionTreeStore: null
-	},
-	alias : ['widget.nu_behaviour_window'],
-	controller: 'NU.controller.Behaviour',
+	alias : 'widget.nu_behaviour_window',
+	controller: 'Behaviour',
 	title: 'Behaviour',
 	width: 800,
 	height: 750,
@@ -20,20 +19,27 @@ Ext.define('NU.view.window.Behaviour', {
 	initComponent: function () {
 		Ext.apply(this, {
 			tbar: [{
-				xtype: 'robot_selector'
+				xtype: 'robot_selector',
+				listeners: {
+					selectRobot: 'onSelectRobot'
+				}
 			}, '->', {
-				itemId: 'clearActionTable',
-				text: 'Clear Action Table'
+				text: 'Clear Action Table',
+				listeners: {
+					click: 'onClearActionTable'
+				}
 			}, {
-				itemId: 'clearStateLog',
-				text: 'Clear State Log'
+				text: 'Clear State Log',
+				listeners: {
+					click: 'onClearStateLog'
+				}
 			}],
 			items: [{
-				itemId: 'actions',
+				reference: 'actions',
 				xtype: 'treepanel',
 				title: 'Action Table',
 				flex: 1,
-				store: this.getRegisterActionTreeStore(),
+				store: Ext.create('NU.store.RegisterActionTree'),
 				columns: [
 					{text: 'Id', dataIndex: 'id'},
 					{text: 'Name', dataIndex: 'name', flex: 1},
@@ -42,11 +48,11 @@ Ext.define('NU.view.window.Behaviour', {
 			}, {
 				xtype: 'splitter'
 			}, {
-				itemId: 'logs',
+				reference: 'logs',
 				xtype: 'grid',
 				title: 'State log',
 				flex: 1,
-				store: this.getActionStateChangeStore(),
+				store: Ext.create('NU.store.ActionStateChange'),
 				/*viewConfig: {
 					getRowClass: function (record) {
 						if (record.get('state') === API.ActionStateChange.State.START) {

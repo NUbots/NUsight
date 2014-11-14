@@ -30,11 +30,6 @@ Ext.define("Ext.ux.ThreeJS", {
 		this.setSize(this.getWidth(), this.getHeight());
 		this.startAnimation();
 
-		this.addEvents({
-			"animate": true,
-			"threejsready": true
-		});
-
 		return this;
 	},
 	enableControls: function (parameters, objects, coordinates) {

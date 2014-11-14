@@ -1,5 +1,6 @@
-Ext.define('NU.controller.LayeredCanvas', {
-	extend: 'Deft.mvc.ViewController',
+Ext.define('NU.view.LayeredCanvasController', {
+	extend: 'Ext.app.ViewController',
+	alias: 'controller.LayeredCanvas',
 	config: {
 		layers: null,
 		container: null,
@@ -20,8 +21,10 @@ Ext.define('NU.controller.LayeredCanvas', {
 	},
 	init: function () {
 		this.setLayers([]);
-		this.setContainer(this.getView().getEl());
 //		this.add('default');
+	},
+	onAfterRender: function () {
+		this.setContainer(this.getView().getEl());
 	},
 	autoSize: function (width, height) {
 		if (width === undefined) {

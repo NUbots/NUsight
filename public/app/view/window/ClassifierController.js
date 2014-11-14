@@ -1,7 +1,8 @@
-Ext.define('NU.controller.Classifier', {
+Ext.define('NU.view.window.ClassifierController', {
 	// TODO: COOOOOOMENT THIS MONSTER
 	// GOD DAMN
-	extend: 'NU.controller.Display',
+	extend: 'NU.view.window.DisplayController',
+	alias: 'controller.Classifier',
 	config: {
 		rawContext: null,
 		classifiedContext: null,
@@ -58,218 +59,151 @@ Ext.define('NU.controller.Classifier', {
 		LutBitsPerColorCb: 6,
 		LutBitsPerColorCr: 6
 	},
-	control: {
-		'rawImage': true,
-		'classifiedImage': true,
-		'undo': {
-			click: function () {
-				this.undoHistory();
-			}
-		},
-		'redo': {
-			click: function () {
-				this.redoHistory();
-			}
-		},
-		'toolPoint': {
-			click: function () {
-				this.setSelectionTool('point');
-			}
-		},
-		'toolMagicWand': {
-			toggle: function (btn, pressed) {
-				if (pressed) {
-					this.setSelectionTool('magic_wand');
-				} else {
-					this.setMagicWandPoints([]);
-					this.setMagicWandColours([]);
-					this.renderImages();
-				}
-			}
-		},
-		'toolPolygon': {
-			toggle: function (btn, pressed) {
-				if (pressed) {
-					this.setSelectionTool('polygon');
-				} else {
-					this.setPolygonPoints([]);
-					this.renderImages();
-				}
-			}
-		},
-		'toolRectangle': {
-			toggle: function (btn, pressed) {
-				if (pressed) {
-					this.setSelectionTool('rectangle');
-				} else {
-					this.setStartPoint(null);
-					this.renderImages();
-				}
-			}
-		},
-		'toolEllipse': {
-			toggle: function (btn, pressed) {
-				if (pressed) {
-					this.setSelectionTool('ellipse');
-				} else {
-					this.setStartPoint(null);
-					this.renderImages();
-				}
-			}
-		},
-		'toolZoom': {
-			toggle: function (btn, pressed) {
-				this.setRenderZoom(pressed);
-				if (!pressed) {
-					this.getRawLayeredCanvas().clear('zoom');
-					this.getClassifiedLayeredCanvas().clear('zoom');
-				}
-				this.renderImages();
-			}
-		},
-		'targetGreen': {
-			click: function () {
-				this.setTarget('Field');
-			}
-		},
-		'targetYellow': {
-			click: function () {
-				this.setTarget('Goal');
-			}
-		},
-		'targetCyan': {
-			click: function () {
-				this.setTarget('Cyan');
-			}
-		},
-		'targetMagenta': {
-			click: function () {
-				this.setTarget('Magenta');
-			}
-		},
-		'targetWhite': {
-			click: function () {
-				this.setTarget('Line');
-			}
-		},
-		'targetBlack': {
-			click: function () {
-				this.setTarget('Unclassified');
-			}
-		},
-		'targetOrange': {
-			click: function () {
-				this.setTarget('Ball');
-			}
-		},
-		'reset': {
-			click: function () {
-				this.addHistory();
-				this.resetLUT();
-				this.updateClassifiedData();
-				this.renderClassifiedImage();
-			}
-		},
-		'download': {
-			click: function () {
-				this.download();
-			}
-		},
-		'upload': {
-			click: function () {
-				this.upload();
-			}
-		},
-		'uploadSave': {
-			click: function () {
-				this.upload(true);
-			}
-		},
-		'refresh': {
-			click: function () {
-				this.updateClassifiedData();
-				this.renderClassifiedImage();
-			}
-		},
-		'snapshot': {
-			change: function (checkbox, newValue, oldValue, eOpts) {
-				this.setFrozen(newValue);
-			}
-		},
-		'toolOverwrite': {
-			toggle: function (btn, pressed) {
-				this.setOverwrite(pressed);
-			}
-		},
-		'rangeValue': {
-			change: function (checkbox, newValue, oldValue, eOpts) {
-				this.setRange(newValue);
-			}
-		},
-		'toleranceValue': {
-			change: function (checkbox, newValue, oldValue, eOpts) {
-				this.setTolerance(newValue);
-			}
-		},
-		'rawUnderlay': {
-			change: function (checkbox, newValue, oldValue, eOpts) {
-				this.setRenderRawUnderlay(newValue);
-				var layer = this.getClassifiedLayeredCanvas().get('underlay');
-				layer.clear();
-				this.renderClassifiedImage();
-			}
-		},
-		'rawUnderlayOpacity': {
-			change: function (checkbox, newValue, oldValue, eOpts) {
-				if (checkbox.isValid()) {
-					this.setRawUnderlayOpacity(newValue);
-					var layer = this.getClassifiedLayeredCanvas().get('underlay');
-					layer.clear();
-					layer.setOpacity(this.getRawUnderlayOpacity());
-					this.renderClassifiedImage();
-				}
-			}
-		},
-		'renderYUVBox': {
-			change: function (checkbox, newValue, oldValue, eOpts) {
-				if (checkbox.isValid()) {
-					this.setRenderYUV(newValue);
-					this.refreshScatter();
-				}
-			}
-		},
-		'renderCubeBox': {
-			change: function (checkbox, newValue, oldValue, eOpts) {
-				if (checkbox.isValid()) {
-					this.setRenderCube(newValue);
-					this.refreshScatter();
-				}
-			}
-		},
-		'scatter3d': true,
-		'ybits': {
-			change: function (field, newValue, oldValue, eOpts) {
-				if (field.isValid()) {
-					this.self.LutBitsPerColorY = newValue;
-					this.resetBits();
-				}
-			}
-		},
-		'cbbits': {
-			change: function (field, newValue, oldValue, eOpts) {
-				if (field.isValid()) {
-					this.self.LutBitsPerColorCb = newValue;
-					this.resetBits();
-				}
-			}
-		},
-		'crbits': {
-			change: function (field, newValue, oldValue, eOpts) {
-				if (field.isValid()) {
-					this.self.LutBitsPerColorCr = newValue;
-					this.resetBits();
-				}
-			}
+	onUndo: function () {
+		this.undoHistory();
+	},
+	onRedo: function () {
+		this.redoHistory();
+	},
+	onToolPoint: function () {
+		this.setSelectionTool('point');
+	},
+	onToolMagicWand: function (btn, pressed) {
+		if (pressed) {
+			this.setSelectionTool('magic_wand');
+		} else {
+			this.setMagicWandPoints([]);
+			this.setMagicWandColours([]);
+			this.renderImages();
+		}
+	},
+	onToolPolygon: function (btn, pressed) {
+		if (pressed) {
+			this.setSelectionTool('polygon');
+		} else {
+			this.setPolygonPoints([]);
+			this.renderImages();
+		}
+	},
+	onToolRectangle: function (btn, pressed) {
+		if (pressed) {
+			this.setSelectionTool('rectangle');
+		} else {
+			this.setStartPoint(null);
+			this.renderImages();
+		}
+	},
+	onToolEllipse: function (btn, pressed) {
+		if (pressed) {
+			this.setSelectionTool('ellipse');
+		} else {
+			this.setStartPoint(null);
+			this.renderImages();
+		}
+	},
+	onToolZoom: function (btn, pressed) {
+		this.setRenderZoom(pressed);
+		if (!pressed) {
+			this.getRawLayeredCanvas().clear('zoom');
+			this.getClassifiedLayeredCanvas().clear('zoom');
+		}
+		this.renderImages();
+	},
+	onTargetGreen: function () {
+		this.setTarget('Field');
+	},
+	onTargetYellow: function () {
+		this.setTarget('Goal');
+	},
+	onTargetCyan: function () {
+		this.setTarget('Cyan');
+	},
+	onTargetMagenta: function () {
+		this.setTarget('Magenta');
+	},
+	onTargetWhite: function () {
+		this.setTarget('Line');
+	},
+	onTargetBlack: function () {
+		this.setTarget('Unclassified');
+	},
+	onTargetOrange: function () {
+		this.setTarget('Ball');
+	},
+	onReset: function () {
+		this.addHistory();
+		this.resetLUT();
+		this.updateClassifiedData();
+		this.renderClassifiedImage();
+	},
+	onDownload: function () {
+		this.download();
+	},
+	onUpload: function () {
+		this.upload();
+	},
+	onUploadSave: function () {
+		this.upload(true);
+	},
+	onRefresh: function () {
+		this.updateClassifiedData();
+		this.renderClassifiedImage();
+	},
+	onChangeSnapshot: function (checkbox, newValue, oldValue, eOpts) {
+		this.setFrozen(newValue);
+	},
+	onToggleOverwrite: function (btn, pressed) {
+		this.setOverwrite(pressed);
+	},
+	onChangeRange: function (checkbox, newValue, oldValue, eOpts) {
+		this.setRange(newValue);
+	},
+	onChangeTolerance: function (checkbox, newValue, oldValue, eOpts) {
+		this.setTolerance(newValue);
+	},
+	onChangeRawUnderlay: function (checkbox, newValue, oldValue, eOpts) {
+		this.setRenderRawUnderlay(newValue);
+		var layer = this.getClassifiedLayeredCanvas().get('underlay');
+		layer.clear();
+		this.renderClassifiedImage();
+	},
+	onChangeRawUnderlayOpacity: function (checkbox, newValue, oldValue, eOpts) {
+		if (checkbox.isValid()) {
+			this.setRawUnderlayOpacity(newValue);
+			var layer = this.getClassifiedLayeredCanvas().get('underlay');
+			layer.clear();
+			layer.setOpacity(this.getRawUnderlayOpacity());
+			this.renderClassifiedImage();
+		}
+	},
+	onChangeRenderYUVBox: function (checkbox, newValue, oldValue, eOpts) {
+		if (checkbox.isValid()) {
+			this.setRenderYUV(newValue);
+			this.refreshScatter();
+		}
+	},
+	onChangeRenderCubeBox: function (checkbox, newValue, oldValue, eOpts) {
+		if (checkbox.isValid()) {
+			this.setRenderCube(newValue);
+			this.refreshScatter();
+		}
+	},
+	onChangeYBits: function (field, newValue, oldValue, eOpts) {
+		if (field.isValid()) {
+			this.self.LutBitsPerColorY = newValue;
+			this.resetBits();
+		}
+	},
+	onChangeCbBits: function (field, newValue, oldValue, eOpts) {
+		if (field.isValid()) {
+			this.self.LutBitsPerColorCb = newValue;
+			this.resetBits();
+		}
+	},
+	onChangeCrBits: function (field, newValue, oldValue, eOpts) {
+		if (field.isValid()) {
+			this.self.LutBitsPerColorCr = newValue;
+			this.resetBits();
 		}
 	},
 	resetBits: function () {
@@ -288,8 +222,9 @@ Ext.define('NU.controller.Classifier', {
 		this.setPolygonPoints([]);
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
-
-		var rawLayeredCanvas = this.getRawImage().getController();
+	},
+	onAfterRender: function () {
+		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
 		var rawContext = rawLayeredCanvas.add('raw').context;
 		rawLayeredCanvas.add('selection');
 		rawLayeredCanvas.add('zoom');
@@ -299,9 +234,8 @@ Ext.define('NU.controller.Classifier', {
 		var view = this.getView();
 		view.mon(NU.util.Network, 'image', this.onImage, this);
 		view.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
-		this.callParent(arguments);
 
-		var classifiedLayeredCanvas = this.getClassifiedImage().getController();
+		var classifiedLayeredCanvas = this.lookupReference('classifiedImage').getController();
 		classifiedLayeredCanvas.add('underlay').setOpacity(this.getRawUnderlayOpacity());
 		var classifiedContext = classifiedLayeredCanvas.add('classified').context;
 		classifiedLayeredCanvas.add('selection');
@@ -327,8 +261,8 @@ Ext.define('NU.controller.Classifier', {
 			};
 		}
 
-		var rawContainer = this.getRawImage().getEl();
-		var classifiedContainer = this.getClassifiedImage().getEl();
+		var rawContainer = this.lookupReference('rawImage').getEl();
+		var classifiedContainer = this.lookupReference('classifiedImage').getEl();
 
 		[rawContainer, classifiedContainer].forEach(function (element) {
 			this.mon(element, {
@@ -425,8 +359,9 @@ Ext.define('NU.controller.Classifier', {
 			}
 		}
 
-		this.getScatter3d().setData(data);
-		this.getScatter3d().updatePlot();
+		var scatter3d = this.lookupReference('scatter3d');
+		scatter3d.setData(data);
+		scatter3d.updatePlot();
 
 	},
 	resetLUT: function () {

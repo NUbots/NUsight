@@ -18,8 +18,7 @@
   ],
   "dependencies": {
     "threejs": "*",
-    "extjs": "~4.2",
-    "extjs-deft-bowerpackage": "*",
+    "extjs": "~5.0",
     "protobuf": "~3.5.4",
     "smoothie": "*",
     "jpgjs": "notmasteryet/jpgjs",
