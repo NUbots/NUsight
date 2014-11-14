@@ -17,6 +17,17 @@ Ext.define('NU.view.window.Behaviour', {
 		align: 'stretch'
 	},
 	initComponent: function () {
+		function getCellClass(value, state, index) {
+			if (value.indexOf(index) >= 0) {
+				if (state === API.ActionStateChange.State.START) {
+					return 'action-start';
+				} else {
+					return 'action-kill';
+				}
+			} else {
+				return '';
+			}
+		}
 		Ext.apply(this, {
 			tbar: [{
 				xtype: 'robot_selector',
@@ -53,15 +64,6 @@ Ext.define('NU.view.window.Behaviour', {
 				title: 'State log',
 				flex: 1,
 				store: Ext.create('NU.store.ActionStateChange'),
-				/*viewConfig: {
-					getRowClass: function (record) {
-						if (record.get('state') === API.ActionStateChange.State.START) {
-							return 'action-start';
-						} else {
-							return 'action-kill';
-						}
-					}
-				},*/
 				columns: [
 					{text: 'Time', dataIndex: 'time', xtype: 'datecolumn', format: 'H:i:s', width: 75},
 					{text: 'State', dataIndex: 'state', renderer: function (value, metaData, record) {
@@ -69,53 +71,23 @@ Ext.define('NU.view.window.Behaviour', {
 					}},
 					{text: 'Name', dataIndex: 'name'},
 					{text: 'Left Leg', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(0) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 0);
 						return '';
 					}},
 					{text: 'Right Leg', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(1) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 1);
 						return '';
 					}},
 					{text: 'Left Arm', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(2) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 2);
 						return '';
 					}},
 					{text: 'Right Arm', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(3) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 3);
 						return '';
 					}},
 					{text: 'Head', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(4) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 4);
 						return '';
 					}}
 				]
