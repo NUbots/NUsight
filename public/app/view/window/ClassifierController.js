@@ -392,31 +392,12 @@ Ext.define('NU.view.window.ClassifierController', {
 		var lut = this.getLookup();
 
 		function getColour(typeId) {
-//			var rgb = this.getRGBfromType(typeId);
-//			return new THREE.Color(rgb[0], rgb[1], rgb[2]);
-			switch (typeId) {
-				case this.self.Target.Unclassified:
-//					return new THREE.Color("#000000");
-					return null;
-				case this.self.Target.Line:
-					return new THREE.Color("#ffffff");
-				case this.self.Target.Field:
-					return new THREE.Color("#00ff00");
-				case this.self.Target.Goal:
-					return new THREE.Color("#ffff00");
-				case this.self.Target.Ball:
-					return new THREE.Color("#ff9000");
-				case this.self.Target.Cyan:
-					return new THREE.Color("#00ffff");
-				case this.self.Target.Magenta:
-					return new THREE.Color("#ff00ff");
-				default:
-					throw new Error('Unknown classification: ' + typeId);
-			}
+			var rgb = this.getRGBfromType(typeId);
+			return new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
 		}
 
 		function scale(value) {
-			// scale from [0, 255] to [-1, 1]
+			// scale from [0, 255] to [-50, 50]
 			return (100 * value) / 255 - 50;
 		}
 
@@ -453,7 +434,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		}
 
 		var scatter3d = this.lookupReference('scatter3d');
-		scatter3d.setData(data);
+		scatter3d.setPointData(data);
 		scatter3d.updatePlot();
 
 	},
