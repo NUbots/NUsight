@@ -370,7 +370,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		texture.needsUpdate = true; // important
 //		var texture = THREE.ImageUtils.loadTexture("resources/images/disc.png");
 
-		var mat = new THREE.ParticleSystemMaterial({
+		var mat = new THREE.PointCloudMaterial({
 			size: 8,
 //			sizeAttenuation: false,
 			map: texture,
@@ -382,7 +382,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 			vertexColors: true // optional
 		});
 
-		var points = new THREE.ParticleSystem(geo, mat);
+		var points = new THREE.PointCloud(geo, mat);
 		points.sortParticles = true;
 		scatterPlot.add(points);
 		this.setPoints(points);

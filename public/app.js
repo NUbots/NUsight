@@ -1,8 +1,8 @@
 // hack: http://halfpapstudios.com/blog/tag/html5-canvas/
 if (typeof Uint8ClampedArray !== 'undefined') {
-    Uint8ClampedArray.prototype.slice = Array.prototype.slice; //Firefox and Chrome
+    Object.defineProperty(Uint8ClampedArray.prototype, 'slice', Object.getOwnPropertyDescriptor(Array.prototype, 'slice')); // Chrome and Firefox
 } else if (typeof CanvasPixelArray!== 'undefined') {
-    CanvasPixelArray.prototype.slice = Array.prototype.slice; //IE10 and IE9
+    Object.defineProperty(CanvasPixelArray.prototype, 'slice', Object.getOwnPropertyDescriptor(Array.prototype, 'slice')); //IE10 and IE9
 }
 
 Ext.Loader.setConfig({
