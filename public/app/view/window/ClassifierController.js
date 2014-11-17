@@ -256,17 +256,16 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	onChangeRawUnderlay: function (checkbox, newValue, oldValue, eOpts) {
 		this.setRenderRawUnderlay(newValue);
-		var layer = this.getClassifiedLayeredCanvas().get('underlay');
-		layer.clear();
-		this.renderClassifiedImage();
+		if (!this.getRenderRawUnderlay()) {
+			this.classifiedRenderer.updateRawUnderlayOpacity(0.0);
+		} else {
+			this.classifiedRenderer.updateRawUnderlayOpacity(this.getRawUnderlayOpacity());
+		}
 	},
 	onChangeRawUnderlayOpacity: function (checkbox, newValue, oldValue, eOpts) {
 		if (checkbox.isValid()) {
 			this.setRawUnderlayOpacity(newValue);
-			var layer = this.getClassifiedLayeredCanvas().get('underlay');
-			layer.clear();
-			layer.setOpacity(this.getRawUnderlayOpacity());
-			this.renderClassifiedImage();
+			this.classifiedRenderer.updateRawUnderlayOpacity(this.getRawUnderlayOpacity());
 		}
 	},
 	onChangeRenderYUVBox: function (checkbox, newValue, oldValue, eOpts) {
@@ -281,22 +280,25 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.refreshScatter();
 		}
 	},
-	onChangeYBits: function (field, newValue, oldValue, eOpts) {
+	onChangeBitsR: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorY = newValue;
 			this.resetBits();
+			this.classifiedRenderer.updateBitsR(newValue);
 		}
 	},
-	onChangeCbBits: function (field, newValue, oldValue, eOpts) {
+	onChangeBitsG: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorCb = newValue;
 			this.resetBits();
+			this.classifiedRenderer.updateBitsG(newValue);
 		}
 	},
-	onChangeCrBits: function (field, newValue, oldValue, eOpts) {
+	onChangeBitsB: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorCr = newValue;
 			this.resetBits();
+			this.classifiedRenderer.updateBitsB(newValue);
 		}
 	},
 	resetBits: function () {
@@ -320,7 +322,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
 		var rawContext = rawLayeredCanvas.add('raw').context;
 		rawLayeredCanvas.add('selection');
-		rawLayeredCanvas.add('zoom');
 		this.setRawContext(rawContext);
 		this.setRawLayeredCanvas(rawLayeredCanvas);
 
@@ -329,13 +330,20 @@ Ext.define('NU.view.window.ClassifierController', {
 		view.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
 
 		var classifiedLayeredCanvas = this.lookupReference('classifiedImage').getController();
-		classifiedLayeredCanvas.add('underlay').setOpacity(this.getRawUnderlayOpacity());
-		var classifiedContext = classifiedLayeredCanvas.add('classified').context;
+		var classifiedLayer = classifiedLayeredCanvas.add('classified_webgl', { // TODO: rename back
+			webgl: true,
+			webglAttributes: {
+				antialias: false
+			}
+		});
 		classifiedLayeredCanvas.add('selection');
-		classifiedLayeredCanvas.add('zoom');
 		this.setClassifiedLayeredCanvas(classifiedLayeredCanvas);
-		this.setClassifiedContext(classifiedContext);
-		this.setClassifiedImageData(classifiedContext.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
+
+		this.classifiedRenderer = Ext.create('NU.view.webgl.Classifier', {
+			shader: 'Classifier',
+			canvas: classifiedLayer.canvas,
+			context: classifiedLayer.context
+		});
 
 		function clickBind(callback, preventDefault) {
 			return function (e, element) {
@@ -1093,8 +1101,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.renderClassifiedImage();
 	},
 	renderRawImage: function () {
-//		var ctx = this.getRawContext();
-//		ctx.putImageData(this.getRawImageData(), 0, 0);
 		var layeredCanvas = this.getRawLayeredCanvas();
 		var selectionLayer = layeredCanvas.get('selection');
 		selectionLayer.clear();
@@ -1103,18 +1109,9 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.renderRectangleOverlay(selectionContext);
 		this.renderPolygonOverlay(selectionContext);
 		this.renderMagicWandOverlay(selectionContext);
-		if (this.getRenderZoom()) {
-			var zoomContext = layeredCanvas.getContext('zoom');
-			this.renderZoomOverlay(zoomContext, this.getRawImageData());
-		}
 	},
 	renderClassifiedImage: function () {
-		var ctx = this.getClassifiedContext();
-		ctx.putImageData(this.getClassifiedImageData(), 0, 0);
 		var layeredCanvas = this.getClassifiedLayeredCanvas();
-		if (this.getRenderRawUnderlay()) {
-			this.renderImageUnderlay();
-		}
 		var selectionLayer = layeredCanvas.get('selection');
 		selectionLayer.clear();
 		var selectionContext = selectionLayer.context;
@@ -1122,17 +1119,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.renderRectangleOverlay(selectionContext);
 		this.renderPolygonOverlay(selectionContext);
 		this.renderMagicWandOverlay(selectionContext);
-		if (this.getRenderZoom()) {
-			var zoomContext = layeredCanvas.getContext('zoom');
-			this.renderZoomOverlay(zoomContext, this.getClassifiedImageData())
-		}
-	},
-	renderImageUnderlay: function () {
-		var rawLayeredCanvas = this.getRawLayeredCanvas();
-		var classifiedLayeredCanvas = this.getClassifiedLayeredCanvas();
-
-		var rawCanvas = rawLayeredCanvas.get('raw').canvas;
-		classifiedLayeredCanvas.get('underlay').context.drawImage(rawCanvas.dom, 0, 0);
 	},
 	renderPolygonOverlays: function () {
 		this.renderPolygonOverlay(this.getClassifiedContext());
@@ -1258,121 +1244,9 @@ Ext.define('NU.view.window.ClassifierController', {
 //		}
 		ctx.putImageData(data, 0, 0);
 	},
-	renderZoomOverlay: function (ctx, imageData) {
-		var imageWidth = this.getImageWidth();
-		var imageHeight = this.getImageHeight();
-		var bitsPerPixel = this.getBitsPerPixel();
-
-		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-		var originalData = imageData.data;
-		var mouseX = this.getMouseX();
-		var mouseY = this.getMouseY();
-		var zoom = 3; // must be an odd integer
-		var width = zoom * 43; // should be divisible by zoom and odd
-		var height = zoom * 21; // should be divisible by zoom and odd
-		var minX = 0;
-		var minY = 0;
-		var maxX = imageWidth;
-		var maxY = imageHeight;
-
-		var row = -Math.floor(height / 2 / zoom);
-		var col = -Math.floor(width / 2 / zoom);
-		var zoomDiff = Math.floor(zoom / 2);
-		// loop though pixels of zoomed image
-		for (var y = maxY - height + zoomDiff; y < maxY - zoomDiff; y += zoom) {
-			for (var x = maxX - width + zoomDiff; x < maxX - zoomDiff; x += zoom) {
-				// calculate the real coordinates
-				var realX = mouseX + col;
-				var realY = mouseY + row;
-				var realOffset = bitsPerPixel * (maxX * realY + realX);
-
-				for (var zy = -zoomDiff; zy <= zoomDiff; zy++) {
-					for (var zx = -zoomDiff; zx <= zoomDiff; zx++) {
-						var zoomX = x + zx;
-						var zoomY = y + zy;
-						var zoomOffset = bitsPerPixel * (maxX * zoomY + zoomX);
-						if (realX < minX || realX >= maxX || realY < minY || realY >= maxY) {
-							data.data[zoomOffset] = 0;
-							data.data[zoomOffset + 1] = 0;
-							data.data[zoomOffset + 2] = 0;
-							data.data[zoomOffset + 3] = 255;
-						} else {
-							data.data[zoomOffset] = originalData[realOffset];
-							data.data[zoomOffset + 1] = originalData[realOffset + 1];
-							data.data[zoomOffset + 2] = originalData[realOffset + 2];
-							data.data[zoomOffset + 3] = 255;
-						}
-					}
-				}
-
-				col++;
-			}
-			row++;
-			col = -Math.floor(width / 2 / zoom);
-		}
-		// draw border
-		var borderOpacity = 0.5;
-		for (var y = maxY - height - 1; y < maxY; y++) {
-			for (var x = maxX - width - 1; x < maxX; x++) {
-				if (y === maxY - height - 1 || x === maxX - width - 1) {
-					var offset = bitsPerPixel * maxX * y + bitsPerPixel * x;
-					data.data[offset] = Math.round(data.data[offset] * (1 - borderOpacity) + 255 * borderOpacity);
-					data.data[offset + 1] = Math.round(data.data[offset + 1] * (1 - borderOpacity) + 255 * borderOpacity);
-					data.data[offset + 2] = Math.round(data.data[offset + 2] * (1 - borderOpacity) + 255 * borderOpacity);
-					data.data[offset + 3] = 255;
-				}
-			}
-		}
-		// draw crosshair
-		var zoomCenterY = maxY - Math.floor(height / 2) - 1;
-		var zoomCenterX = maxX - Math.floor(width / 2) - 1;
-		for (var zy = -1; zy <= 1; zy++) {
-			for (var zx = -1; zx <= 1; zx++) {
-				if (zy !== 0 && zx !== 0) {
-					continue;
-				}
-				var offset = bitsPerPixel * (maxX * (zoomCenterY + zy) + (zoomCenterX + zx));
-				data.data[offset] = 255;
-				data.data[offset + 1] = 255;
-				data.data[offset + 2] = 255;
-				data.data[offset + 3] = 255;
-			}
-		}
-		ctx.putImageData(data, 0, 0);
-	},
 	updateClassifiedData: function () {
-		this.setClassifiedImageData(this.generateClassifiedData());
+		this.classifiedRenderer.updateLut(new Uint8Array(this.getLookup().buffer));
 		this.refreshScatter();
-	},
-	generateClassifiedData: function () {
-		var imageWidth = this.getImageWidth();
-		var imageHeight = this.getImageHeight();
-		var bitsPerPixel = this.getBitsPerPixel();
-
-		var classifiedCtx = this.getClassifiedContext();
-		var classifiedData = classifiedCtx.createImageData(imageWidth, imageHeight);
-
-		var lookup = this.getLookup();
-		for (var row = 0; row < imageHeight; row++) {
-			for (var col = 0; col < imageWidth; col++) {
-				var offset = bitsPerPixel * (row * imageWidth + col);
-				var ycbcr = this.getColour(col, row);
-				var index = this.getLUTIndex(ycbcr);
-				if (lookup[index] !== this.self.Target.Unclassified) {
-					var rgb = this.getRGBfromType(lookup[index]);
-					classifiedData.data[offset + 0] = rgb[0];
-					classifiedData.data[offset + 1] = rgb[1];
-					classifiedData.data[offset + 2] = rgb[2];
-					classifiedData.data[offset + 3] = 255;
-				} else {
-					classifiedData.data[offset + 0] = 0;
-					classifiedData.data[offset + 1] = 0;
-					classifiedData.data[offset + 2] = 0;
-					classifiedData.data[offset + 3] = 0;
-				}
-			}
-		}
-		return classifiedData;
 	},
 	getColour: function (x, y) {
 		var components = this.getRawImageComponents();
@@ -1475,13 +1349,12 @@ Ext.define('NU.view.window.ClassifierController', {
 		};
 	},
 	drawImageB64YUV: function (image, callback, thisArg) {
-		var me = this;
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
 		var d2 = new Uint8ClampedArray(image.data.toArrayBuffer());
 //        var uri = 'data:image/jpeg;base64,' + btoa(data);
 		var imageObj = new JpegImage();
 		imageObj.parse(d2);
-		var ctx = me.getRawContext();
+		var ctx = this.getRawContext();
 		var imageWidth = this.getImageWidth();
 		var imageHeight = this.getImageHeight();
 		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
@@ -1493,9 +1366,9 @@ Ext.define('NU.view.window.ClassifierController', {
 		ctx.drawImage(ctx.canvas, 0, 0, imageWidth, imageHeight);
 //		ctx.restore();
 		data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-		me.setRawImageData(data);
-		me.setRawImageComponents(imageObj.components);
-//		me.renderImages();
+		this.setRawImageData(data);
+		this.setRawImageComponents(imageObj.components);
+//		this.renderImages();
 		callback.call(thisArg, ctx);
 	},
 	testDrawImage: function () {
@@ -1506,15 +1379,14 @@ Ext.define('NU.view.window.ClassifierController', {
 //      imageObj.src = uri;
 //      imageObj.onload = function () {
 //          ctx.drawImage(imageObj, 0, 0, 320, 240);
-//          me.setRawImageData(ctx.getImageData(0, 0, 320, 240));
-//          me.renderImages();
-//      };
-		var me = this;
+//          this.setRawImageData(ctx.getImageData(0, 0, 320, 240));
+//          thisn.renderImages();
+//      }.bind(this);
 		var imageWidth = this.getImageWidth();
 		var imageHeight = this.getImageHeight();
 		var imageObj = new JpegImage();
 		imageObj.onload = function () {
-			var ctx = me.getRawContext();
+			var ctx = this.getRawContext();
 			var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
 			imageObj.copyToImageData(data);
 			ctx.putImageData(data, 0, 0);
@@ -1529,15 +1401,22 @@ Ext.define('NU.view.window.ClassifierController', {
 			}
 
 			data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-			me.setRawImageData(data);
+			this.setRawImageData(data);
 			imageObj.colorTransform = false; // keep in YCbCr
 			if (imageObj.adobe) {
 				imageObj.adobe.transformCode = false;
 			}
-			me.setRawImageComponents(imageObj.getData(imageWidth, imageHeight));
-			me.setImageFormat(API.Image.Format.JPEG);
-			me.renderImages();
-		};
+			var rawData = imageObj.getData(imageWidth, imageHeight);
+			this.setRawImageComponents(rawData);
+			this.setImageFormat(API.Image.Format.JPEG);
+			this.renderImages();
+
+			setTimeout(function () {
+				this.classifiedRenderer.updateLut(new Uint8Array(this.getLookup().buffer));
+				this.classifiedRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
+				this.classifiedRenderer.updateImage(new Uint8Array(data.data.buffer), imageWidth, imageHeight, THREE.RGBAFormat);
+			}.bind(this), 1000);
+		}.bind(this);
 		imageObj.load(uri);
 	}
 });

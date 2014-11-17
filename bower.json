@@ -23,6 +23,7 @@
     "smoothie": "*",
     "jpgjs": "notmasteryet/jpgjs",
     "numericjs": "~1.2.6",
-    "operative": "~0.3.1"
+    "operative": "~0.3.1",
+    "bluebird": "~2.3.11"
   }
 }

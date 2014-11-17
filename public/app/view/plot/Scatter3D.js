@@ -122,17 +122,16 @@ Ext.define('NU.view.plot.Scatter3D', {
 			scope: this
 		});
 
-		var me = this;
-		function update() {
+		function animate() {
 			renderer.clear();
 			camera.lookAt(scene.position);
-			Ext.each(me.getTexts(), function (text) {
+			Ext.each(this.getTexts(), function (text) {
 				text.lookAt(camera.position);
-			}, me);
+			}, this);
 			renderer.render(scene, camera);
-			requestAnimationFrame(update, renderer.domElement);
+			requestAnimationFrame(animate.bind(this));
 		}
-		requestAnimationFrame(update, renderer.domElement);
+		requestAnimationFrame(animate.bind(this));
 
 		this.setScatterPlot(scatterPlot);
 		this.setRenderer(renderer);

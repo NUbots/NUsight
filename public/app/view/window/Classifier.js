@@ -293,7 +293,7 @@ Ext.define('NU.view.window.Classifier', {
 						value: 6,
 						step: 1,
 						listeners: {
-							change: 'onChangeYBits'
+							change: 'onChangeBitsR'
 						}
 					}, {
 						xtype: 'numberfield',
@@ -302,7 +302,7 @@ Ext.define('NU.view.window.Classifier', {
 						value: 6,
 						step: 1,
 						listeners: {
-							change: 'onChangeCbBits'
+							change: 'onChangeBitsG'
 						}
 					}, {
 						xtype: 'numberfield',
@@ -311,7 +311,7 @@ Ext.define('NU.view.window.Classifier', {
 						value: 6,
 						step: 1,
 						listeners: {
-							change: 'onChangeCrBits'
+							change: 'onChangeBitsB'
 						}
 					}]
 				}/*, {

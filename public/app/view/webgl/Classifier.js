@@ -1,44 +1,42 @@
 Ext.define('NU.view.webgl.Classifier', {
 	extend: 'NU.view.webgl.WebGL',
 	constructor: function (config) {
-		Ext.applyIf({
+		Ext.applyIf(config, {
 			uniforms: {
+				rawImage: {type: 't'},
 				image: {type: 't'},
-				lut: {type: 't'}
+				lut: {type: 't'},
+				rawUnderlayOpacity: {type: 'f', value: 0.5},
+				bitsR: {type: '1i', value: 6},
+				bitsG: {type: '1i', value: 6},
+				bitsB: {type: '1i', value: 6}
 			}
-		}, config);
+		});
 
 		this.callParent(arguments);
 	},
-	updateImage: function (data) {
-		// TODO: unhack
-		var texture = new THREE.DataTexture(data, 1280, 960,
-			THREE.RGBAFormat, THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING,
-			THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter
-		);
-		texture.generateMipmaps = false;
-		texture.needsUpdate = true;
-
-		var material = this.plane.material;
-		material.uniforms.image.value = texture;
-		material.needsUpdate = true;
-
-		this.render();
+	updateRawImage: function (data, width, height, format) {
+		this.updateTexture('rawImage', data, width, height, format);
+	},
+	updateImage: function (data, width, height, format) {
+		this.updateTexture('image', data, width, height, format);
 	},
 	updateLut: function (data) {
-		var size = Math.ceil(Math.sqrt(data.length)); // TODO: check valid
-		var texture = new THREE.DataTexture(new Uint8Array(data.buffer), size, size,
-			THREE.LuminanceFormat, THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING,
-			THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter
-		);
-		texture.generateMipmaps = false;
-		texture.needsUpdate = true;
-
-		var material = this.plane.material;
-		material.uniforms.lut.value = texture;
-		material.needsUpdate = true;
-
-		this.render();
+		// create a square texture
+		var size = Math.ceil(Math.sqrt(data.length));
+		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat);
+	},
+	updateRawUnderlayOpacity: function (value) {
+		this.updateUniform('rawUnderlayOpacity', value);
+	},
+	updateBitsR: function (value) {
+		this.updateUniform('bitsR', value);
+	},
+	updateBitsG: function (value) {
+		this.updateUniform('bitsG', value);
+	},
+	updateBitsB: function (value) {
+		this.updateUniform('bitsB', value);
 	}
 });
 
