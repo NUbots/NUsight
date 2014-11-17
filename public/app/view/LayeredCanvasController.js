@@ -9,22 +9,15 @@ Ext.define('NU.view.LayeredCanvasController', {
 		imageWidth: 320,
 		imageHeight: 240
 	},
-	control: {
-		'view': {
-			boxready: function (view, width, height) {
-				this.autoSize(width, height);
-			},
-			resize: function (view, width, height) {
-				this.autoSize(width, height);
-			}
-		}
-	},
 	init: function () {
 		this.setLayers([]);
 //		this.add('default');
 	},
 	onAfterRender: function () {
 		this.setContainer(this.getView().getEl());
+	},
+	onResize: function (view, width, height) {
+		this.autoSize(width, height);
 	},
 	autoSize: function (width, height) {
 		if (width === undefined) {

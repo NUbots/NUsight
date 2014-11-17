@@ -12,6 +12,8 @@ Ext.define('NU.view.LayeredCanvas', {
 	},
 	layout: 'fit',
 	listeners: {
-		afterrender: 'onAfterRender'
+		afterrender: 'onAfterRender',
+		boxready: 'onResize',
+		resize: 'onResize'
 	}
 });
