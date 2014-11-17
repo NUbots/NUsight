@@ -126,7 +126,7 @@ Ext.define('NU.view.window.Classifier', {
 			tooltip: 'Field',
 			pressed: true,
 			listeners: {
-				toggle: 'onTargetGreen'
+				click: 'onTargetGreen'
 			}
 		}, {
 			iconCls: 'icon-toolbar-orange',
@@ -134,7 +134,7 @@ Ext.define('NU.view.window.Classifier', {
 			allowDepress: false,
 			tooltip: 'Ball',
 			listeners: {
-				toggle: 'onTargetOrange'
+				click: 'onTargetOrange'
 			}
 		}, {
 			iconCls: 'icon-toolbar-yellow',
@@ -142,7 +142,7 @@ Ext.define('NU.view.window.Classifier', {
 			allowDepress: false,
 			tooltip: 'Goal',
 			listeners: {
-				toggle: 'onTargetYellow'
+				click: 'onTargetYellow'
 			}
 		}, {
 			iconCls: 'icon-toolbar-cyan',
@@ -150,7 +150,7 @@ Ext.define('NU.view.window.Classifier', {
 			allowDepress: false,
 			tooltip: 'Cyan',
 			listeners: {
-				toggle: 'onTargetCyan'
+				click: 'onTargetCyan'
 			}
 		}, {
 			iconCls: 'icon-toolbar-magenta',
@@ -158,7 +158,7 @@ Ext.define('NU.view.window.Classifier', {
 			allowDepress: false,
 			tooltip: 'Magenta',
 			listeners: {
-				toggle: 'onTargetMagenta'
+				click: 'onTargetMagenta'
 			}
 		}, {
 			iconCls: 'icon-toolbar-white',
@@ -166,7 +166,7 @@ Ext.define('NU.view.window.Classifier', {
 			allowDepress: false,
 			tooltip: 'Line',
 			listeners: {
-				toggle: 'onTargetWhite'
+				click: 'onTargetWhite'
 			}
 		}, {
 			iconCls: 'icon-toolbar-black',
@@ -174,7 +174,7 @@ Ext.define('NU.view.window.Classifier', {
 			allowDepress: false,
 			tooltip: 'Unclassified',
 			listeners: {
-				toggle: 'onTargetBlack'
+				click: 'onTargetBlack'
 			}
 		}]
 	}],
@@ -293,7 +293,7 @@ Ext.define('NU.view.window.Classifier', {
 						value: 6,
 						step: 1,
 						listeners: {
-							change: 'onChangeYBits'
+							change: 'onChangeBitsR'
 						}
 					}, {
 						xtype: 'numberfield',
@@ -302,7 +302,7 @@ Ext.define('NU.view.window.Classifier', {
 						value: 6,
 						step: 1,
 						listeners: {
-							change: 'onChangeCbBits'
+							change: 'onChangeBitsG'
 						}
 					}, {
 						xtype: 'numberfield',
@@ -311,7 +311,7 @@ Ext.define('NU.view.window.Classifier', {
 						value: 6,
 						step: 1,
 						listeners: {
-							change: 'onChangeCrBits'
+							change: 'onChangeBitsB'
 						}
 					}]
 				}/*, {

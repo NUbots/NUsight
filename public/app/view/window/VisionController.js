@@ -18,8 +18,8 @@ Ext.define('NU.view.window.VisionController', {
         layeredCanvas.add('classified_image_refine');
         layeredCanvas.add('visual_horizon');
         layeredCanvas.add('horizon');
-		layeredCanvas.add('goals', 'field_objects');
-		layeredCanvas.add('balls', 'field_objects');
+		layeredCanvas.add('goals', {group: 'field_objects'});
+		layeredCanvas.add('balls', {group: 'field_objects'});
 		this.setLayeredCanvas(layeredCanvas);
 
         //WebGL2D.enable(this.canvas.el.dom);
