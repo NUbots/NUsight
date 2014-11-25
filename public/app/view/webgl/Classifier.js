@@ -6,10 +6,11 @@ Ext.define('NU.view.webgl.Classifier', {
 				rawImage: {type: 't'},
 				image: {type: 't'},
 				lut: {type: 't'},
+				lutSize: {type: 'f'},
 				rawUnderlayOpacity: {type: 'f', value: 0.5},
-				bitsR: {type: '1i', value: 6},
-				bitsG: {type: '1i', value: 6},
-				bitsB: {type: '1i', value: 6}
+				bitsR: {type: 'f', value: 6},
+				bitsG: {type: 'f', value: 6},
+				bitsB: {type: 'f', value: 6}
 			}
 		});
 
@@ -24,7 +25,15 @@ Ext.define('NU.view.webgl.Classifier', {
 	updateLut: function (data) {
 		// create a square texture
 		var size = Math.ceil(Math.sqrt(data.length));
+		var sizeSqr = size * size;
+		if (data.length != sizeSqr) {
+			// does not fit evenly, create new array with tail padding
+			var newData = new Uint8Array(sizeSqr);
+			newData.set(data);
+			data = newData;
+		}
 		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat);
+		this.updateUniform('lutSize', size);
 	},
 	updateRawUnderlayOpacity: function (value) {
 		this.updateUniform('rawUnderlayOpacity', value);
