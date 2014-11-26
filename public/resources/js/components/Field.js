@@ -207,7 +207,25 @@
 	
 	Field.prototype = Object.create(THREE.Object3D.prototype);
 
-	// field constants
+ //    // field constants (pre 2014)
+ //    Field.constants = {
+ //        LINE_WIDTH: 0.05,
+ //        MARK_WIDTH: 0.1,
+ //        FIELD_LENGTH: 6,
+ //        FIELD_WIDTH: 4,
+ //        GOAL_DEPTH: 0.5,
+ //        GOAL_WIDTH: 1.5,
+ //        GOAL_AREA_LENGTH: 0.6,
+ //        GOAL_AREA_WIDTH: 2.2,
+ //        GOAL_CROSSBAR_HEIGHT: 1.1,
+ //        GOAL_POST_DIAMETER: 0.1,
+ //        GOAL_NET_HEIGHT: 0.8,
+ //        PENALTY_MARK_DISTANCE: 1.80,
+ //        CENTER_CIRCLE_DIAMETER: 1.20,
+ //        BORDER_STRIP_MIN_WIDTH: 0.7
+ //    };
+
+    // field constants 2014 onward
     Field.constants = {
         LINE_WIDTH: 0.05,
         MARK_WIDTH: 0.05,
