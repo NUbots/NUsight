@@ -16,16 +16,46 @@ const float T_ORANGE = 111.0; // ball
 const float T_CYAN = 99.0;
 const float T_MAGENTA = 109.0;
 
+/**
+ * The width/height of the square lut texture
+ */
 uniform float lutSize;
+/**
+ * The square lut texture
+ */
 uniform sampler2D lut;
+/**
+ * The RGBA image
+ */
 uniform sampler2D image;
+/**
+ * The raw (e.g. YCbCr) image
+ */
 uniform sampler2D rawImage;
+/**
+ * The raw underlay opacity percentage ranging between 0-1
+ */
 uniform float rawUnderlayOpacity;
+/**
+ * The number of bits dedicated to the R colour channel
+ */
 uniform float bitsR;
+/**
+ * The number of bits dedicated to the G colour channel
+ */
 uniform float bitsG;
+/**
+ * The number of bits dedicated to the B colour channel
+ */
 uniform float bitsB;
-
+/**
+ * The coordinate of the current pixel, usually just maps to the current UV coordinate
+ */
 varying vec2 center;
+
+float getLutIndex(vec4 colour, float bitsR, float bitsG, float bitsB);
+vec4 getColour(float classification);
+float classify(vec4 colour, sampler2D lut, float size, float bitsR, float bitsG, float bitsB);
 
 void main() {
 	// sample from the raw (e.g. YCbCr) image

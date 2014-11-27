@@ -330,7 +330,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		view.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
 
 		var classifiedLayeredCanvas = this.lookupReference('classifiedImage').getController();
-		var classifiedLayer = classifiedLayeredCanvas.add('classified_webgl', { // TODO: rename back
+		var classifiedLayer = classifiedLayeredCanvas.add('classified', {
 			webgl: true,
 			webglAttributes: {
 				antialias: false
