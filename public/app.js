@@ -5,6 +5,11 @@ if (typeof Uint8ClampedArray !== 'undefined') {
     Object.defineProperty(CanvasPixelArray.prototype, 'slice', Object.getOwnPropertyDescriptor(Array.prototype, 'slice')); //IE10 and IE9
 }
 
+// http://stackoverflow.com/a/3561711/868679
+RegExp.escape = function (s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
 Ext.Loader.setConfig({
     disableCaching : false
 });

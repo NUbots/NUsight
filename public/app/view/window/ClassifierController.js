@@ -4,7 +4,10 @@ Ext.define('NU.view.window.ClassifierController', {
 	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Classifier',
 	requires: [
-		'NU.util.Vision'
+		'NU.util.Vision',
+		'NU.view.webgl.Classifier',
+		'NU.view.webgl.magicwand.Selection',
+		'NU.view.webgl.magicwand.Classify'
 	],
 	config: {
 		rawContext: null,
@@ -253,6 +256,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	onChangeTolerance: function (checkbox, newValue, oldValue, eOpts) {
 		this.setTolerance(newValue);
+		this.selectionRenderer.updateTolerance(this.getTolerance());
 	},
 	onChangeRawUnderlay: function (checkbox, newValue, oldValue, eOpts) {
 		this.setRenderRawUnderlay(newValue);
@@ -337,12 +341,28 @@ Ext.define('NU.view.window.ClassifierController', {
 			}
 		});
 		classifiedLayeredCanvas.add('selection');
+		var selectionLayer = classifiedLayeredCanvas.add('selection_webgl', {
+			webgl: true,
+			webglAttributes: {
+				antialias: false
+			}
+		});
 		this.setClassifiedLayeredCanvas(classifiedLayeredCanvas);
 
 		this.classifiedRenderer = Ext.create('NU.view.webgl.Classifier', {
 			shader: 'Classifier',
 			canvas: classifiedLayer.canvas,
 			context: classifiedLayer.context
+		});
+
+		this.selectionRenderer = Ext.create('NU.view.webgl.magicwand.Selection', {
+			shader: 'magicwand/Selection',
+			canvas: selectionLayer.canvas,
+			context: selectionLayer.context
+		});
+
+		this.selectionClassifier = Ext.create('NU.view.webgl.magicwand.Classify', {
+			shader: 'magicwand/Classify'
 		});
 
 		function clickBind(callback, preventDefault) {
@@ -683,72 +703,23 @@ Ext.define('NU.view.window.ClassifierController', {
 		}
 	},
 	magicWandSelect: function (x, y, tolerance) {
-		var points = [];
-		var colours = [];
-		var queue = [];
-		var checked = {};
-		var map = {};
 		if (tolerance === undefined) {
 			tolerance = this.getTolerance();
 		}
-		var imageWidth = this.getImageWidth();
-		var imageHeight = this.getImageHeight();
-
 		var colour = this.getColour(x, y);
-		colours.push(colour);
-
-		// perform a breadth-first search of neighbouring pixels that are within a distance of 'tolerance'
-		queue.push([x, y]);
-		checked[this.hashPoint([x, y])] = true;
-		while (queue.length > 0) {
-			var point = queue.shift();
-			// two nested loops for iterating over the surrounding 8 pixels
-			for (var dy = -1; dy <= 1; dy++) {
-				for (var dx = -1; dx <= 1; dx++) {
-					var newPoint = [point[0] + dx, point[1] + dy];
-					if ((dy === 0 && dx === 0) || newPoint[0] < 0 || newPoint[0] >= imageWidth || newPoint[1] < 0 || newPoint[1] >= imageHeight) {
-						// ignore self, and ignore coordinates that are out of the image bounds
-						continue;
-					}
-					// get the neighbour colour and hash the point
-					var neighbourColour = this.getColour(newPoint[0], newPoint[1]);
-					var hash = this.hashPoint(newPoint);
-
-					// check that neighbour is within the tolerance and has not already been checked
-					if (checked[hash] === undefined && NU.util.Vision.withinDistance(colour, neighbourColour, tolerance)) {
-						// add to queue of points to be checked
-						queue.push(newPoint);
-						points.push(newPoint);
-
-						var index = this.getLUTIndex(neighbourColour);
-						if (map[index] === undefined) {
-							colours.push(neighbourColour);
-							map[index] = true;
-						}
-					}
-					checked[hash] = true;
-				}
-			}
-		}
-		this.setMagicWandColours(colours);
-		this.setMagicWandPoints(points);
+		this.selectionRenderer.updateColour(colour);
+		this.selectionRenderer.updateTolerance(tolerance);
 	},
 	hashPoint: function (point) {
 		return point[0] + "," + point[1];
 	},
 	magicWandClassify: function (x, y) {
-		var points = this.getMagicWandPoints();
-		points.forEach(function (point) {
-			this.classifyPoint(point[0], point[1], undefined, false);
-		}, this);
+		var lut = this.getLookup();
+		var typeId = this.self.Target[this.getTarget()];
+		this.selectionClassifier.updateClassification(typeId);
+		this.selectionClassifier.getLut(lut);
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
-//		console.time("classify");
-//		var colours = this.getMagicWandColours();
-//		this.classifyPoints(colours);
-//		console.timeEnd("classify");
-		this.setMagicWandPoints([]);
-		this.setMagicWandColours([]);
 	},
 	classifyRectangle: function (x, y) {
 		var start = this.getStartPoint();
@@ -1412,8 +1383,12 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.renderImages();
 
 			setTimeout(function () {
-				this.classifiedRenderer.updateLut(new Uint8Array(this.getLookup().buffer));
+				var lut = new Uint8Array(this.getLookup().buffer);
+				this.classifiedRenderer.updateLut(lut);
+				this.selectionClassifier.updateLut(lut);
+				this.selectionClassifier.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
 				this.classifiedRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
+				this.selectionRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
 				this.classifiedRenderer.updateImage(new Uint8Array(data.data.buffer), imageWidth, imageHeight, THREE.RGBAFormat);
 			}.bind(this), 1000);
 		}.bind(this);

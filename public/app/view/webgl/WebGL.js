@@ -85,11 +85,17 @@ Ext.define('NU.view.webgl.WebGL', {
 	 *
 	 * @param width The width of the plane
 	 * @param height The height of the plane
+	 * @return {bool} true if resized, false if no changes made
 	 */
 	resize: function (width, height) {
+		if (width === this.getWidth() && height === this.getHeight() && this.plane) {
+			return false; // nothing changed
+		}
+
 		if (this.plane) {
 			this.scene.remove(this.plane);
 		}
+
 		this.plane = this.createPlane(width, height);
 		//this.plane.position.set(width / 2, height / 2, 0);
 		this.scene.add(this.plane);
@@ -104,6 +110,13 @@ Ext.define('NU.view.webgl.WebGL', {
 
 		this.setWidth(width);
 		this.setHeight(height);
+
+		this.getCanvas().set({
+			width: width,
+			height: height
+		});
+
+		return true;
 	},
 	/**
 	 * Render the scene
@@ -131,26 +144,56 @@ Ext.define('NU.view.webgl.WebGL', {
 	loadShaders: function (shader) {
 		var basePath = Ext.Loader.getPath('NU') + '/shader';
 		return Promise.all([
-			this.loadShader(basePath + '/' + shader + 'Vertex.c'),
-			this.loadShader(basePath + '/' + shader + 'Fragment.c')
+			this.loadShader(basePath, basePath + '/' + shader + 'Vertex.c'),
+			this.loadShader(basePath, basePath + '/' + shader + 'Fragment.c')
 		]);
 	},
 	/**
 	 * Load a shader given a url
 	 *
-	 * @param url The url to load
+	 * Supports a custom directive in the format of:
+	 *
+	 * #include "filename"
+	 *
+	 * This can be used recursively, where included files can include other files.
+	 * It acts like a C include in that it will fetch the source code from the included file and insert it directly
+	 * where included.
+	 * It uses asynchronous ajax calls along with bluebird promises to achieve parallelism.
+	 *
+	 * @param basePath The base part of the url excluding the filename
+	 * @param url The full url to load
 	 * @returns {Promise} A promise of the response
 	 */
-	loadShader: function (url) {
+	loadShader: function (basePath, url) {
+		var includeDirective = /#include[\t ]+"([^"]+)"/g;
+		var includeDirectiveFilename = '#include[\\t ]+"$filename"';
+
 		return new Promise(function (resolve) {
 			Ext.Ajax.request({
 				url: url,
 				success: function (response) {
-					resolve(response.responseText);
-				},
-				scope: this
-			});
-		});
+					var shaderText = response.responseText;
+					var matches;
+					var count = 0;
+					while ((matches = includeDirective.exec(shaderText)) !== null) {
+						count++;
+						var filename = matches[1];
+						var newUrl = basePath + '/' + filename;
+						this.loadShader(basePath, newUrl).then(function (subShaderText) {
+							count--;
+							var pattern = new RegExp(includeDirectiveFilename.replace('$filename', RegExp.escape(filename)));
+							shaderText = shaderText.replace(pattern, subShaderText);
+							if (count === 0) {
+								resolve(shaderText);
+							}
+						});
+					}
+					if (count === 0) {
+						resolve(shaderText);
+					}
+				}.bind(this)
+			})
+		}.bind(this));
 	},
 	/**
 	 * Update a texture's data
