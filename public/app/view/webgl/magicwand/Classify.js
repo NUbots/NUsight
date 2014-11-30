@@ -1,27 +1,48 @@
 Ext.define('NU.view.webgl.magicwand.Classify', {
 	extend: 'NU.view.webgl.WebGL',
 	buffer: null,
+	imagePointCloud: null,
 	constructor: function (config) {
 		var canvas = new Ext.Element(document.createElement('canvas'));
 		var webglAttributes = {antialias: false, preserveDrawingBuffer: true};
 		var context = canvas.dom.getContext('webgl', webglAttributes) || canvas.dom.getContext('experimental-webgl', webglAttributes);
 		Ext.applyIf(config, {
+			shader: 'magicwand/LookupTable',
 			canvas: canvas,
 			context: context,
+			autoRender: false,
 			uniforms: {
 				lut: {type: 't'},
-				lutSize: {type: 'f'},
-				bitsR: {type: 'f', value: 6},
-				bitsG: {type: 'f', value: 6},
-				bitsB: {type: 'f', value: 6},
-				rawImage: {type: 't'},
-				colour: {type: '3fv', value: [0, 0, 0]},
-				tolerance: {type: 'f', value: -1},
-				classification: {type: 'f', value: -1}
+				lutSize: {type: 'f'}
 			}
 		});
 
 		this.callParent(arguments);
+
+		this.loadShaders('magicwand/Classify').spread(function (vertexShaderText, fragmentShaderText) {
+			var geometry = new THREE.BufferGeometry();
+			var itemSize = 3;
+			var data = new Float32Array(this.getWidth() * this.getHeight() * itemSize); // TODO: unhack
+			geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
+			var material = new THREE.ShaderMaterial({
+				uniforms: {
+					bitsR: {type: 'f', value: 6},
+					bitsG: {type: 'f', value: 6},
+					bitsB: {type: 'f', value: 6},
+					colour: {type: '3fv', value: [0, 0, 0]},
+					tolerance: {type: 'f', value: -1},
+					classification: {type: 'f', value: -1}
+				},
+				vertexShader: vertexShaderText,
+				fragmentShader: fragmentShaderText,
+				transparent: true,
+				blending: THREE.CustomBlending,
+				blendSrc: THREE.SrcAlphaFactor,
+				blendDst: THREE.OneMinusSrcAlphaFactor
+			});
+			this.imagePointCloud = new THREE.PointCloud(geometry, material);
+			this.scene.add(this.imagePointCloud);
+		}.bind(this));
 	},
 	resize: function (width, height) {
 		if (width !== this.getWidth() || height !== this.getHeight() || !this.buffer) {
@@ -44,16 +65,22 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		this.updateUniform('lutSize', size);
 	},
 	updateRawImage: function (data, width, height, format) {
-		this.updateTexture('rawImage', data, width, height, format);
+		var positionAttr = this.imagePointCloud.geometry.getAttribute('position');
+		var itemSize = 3;
+		if (!positionAttr) {
+			this.imagePointCloud.geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(data), itemSize));
+		} else {
+			positionAttr.set(data);
+		}
 	},
 	updateColour: function (value) {
-		this.updateUniform('colour', value);
+		this.updateUniform('colour', value, this.imagePointCloud.material);
 	},
 	updateTolerance: function (value) {
-		this.updateUniform('tolerance', value);
+		this.updateUniform('tolerance', value, this.imagePointCloud.material);
 	},
 	updateClassification: function (value) {
-		this.updateUniform('classification', value);
+		this.updateUniform('classification', value, this.imagePointCloud.material);
 	},
 	/**
 	 * @param {ArrayBuffer} [lut]

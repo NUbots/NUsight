@@ -29,10 +29,33 @@ Ext.define('NU.view.webgl.WebGL', {
 		/**
 		 * The context to draw with
 		 */
-		context: null
+		context: null,
+		/**
+		 * Automatically render the scene after an update
+		 */
+		autoRender: true
 	},
 	constructor: function (config) {
 		this.initConfig(config);
+
+		var canvas = this.getCanvas();
+		var width = this.getWidth();
+		var height = this.getHeight();
+
+		this.scene = new THREE.Scene();
+		// these are dummy left/right/top/bottom values as they are updated in the resize method
+		this.camera = new THREE.OrthographicCamera(0, 1, 0, 1, 0.1, 1000);
+		this.scene.add(this.camera);
+		// move camera to center of image
+		//this.camera.position.set(width / 2, height / 2, 1);
+		this.camera.position.set(0, 0, 1);
+
+		this.renderer = new THREE.WebGLRenderer({
+			antialias: true,
+			canvas: canvas.el.dom,
+			context: this.getContext(),
+			alpha: true
+		});
 
 		// load the shaders
 		var shaders = this.loadShaders(this.getShader());
@@ -41,24 +64,6 @@ Ext.define('NU.view.webgl.WebGL', {
 		shaders.spread(function (vertexShaderText, fragmentShaderText) {
 			this.vertexShaderText = vertexShaderText;
 			this.fragmentShaderText = fragmentShaderText;
-
-			var canvas = this.getCanvas();
-			var width = this.getWidth();
-			var height = this.getHeight();
-
-			this.scene = new THREE.Scene();
-			// these are dummy left/right/top/bottom values as they are updated in the resize method
-			this.camera = new THREE.OrthographicCamera(0, 1, 0, 1, 0.1, 1000);
-			this.scene.add(this.camera);
-			// move camera to center of image
-			//this.camera.position.set(width / 2, height / 2, 1);
-			this.camera.position.set(0, 0, 1);
-
-			this.renderer = new THREE.WebGLRenderer({
-				antialias: true,
-				canvas: canvas.el.dom,
-				context: this.getContext()
-			});
 
 			this.resize(width, height);
 		}.bind(this));
@@ -228,7 +233,9 @@ Ext.define('NU.view.webgl.WebGL', {
 		texture.needsUpdate = true;
 		material.needsUpdate = true;
 
-		this.render();
+		if (this.getAutoRender()) {
+			this.render();
+		}
 	},
 	powerOf2: function (value) {
 		// http://www.skorks.com/2010/10/write-a-function-to-determine-if-a-number-is-a-power-of-2/
@@ -239,15 +246,15 @@ Ext.define('NU.view.webgl.WebGL', {
 	 *
 	 * @param name The name of the uniform
 	 * @param value The value of the uniform
-	 * @param [render] Whether to rerender, default true
+	 * @param [material] The material to update
 	 */
-	updateUniform: function (name, value, render) {
-		if (render === undefined) {
-			render = true;
+	updateUniform: function (name, value, material) {
+		if (material === undefined) {
+			material = this.plane.material;
 		}
-		this.plane.material.uniforms[name].value = value;
-		this.plane.material.needsUpdate = true;
-		if (render) {
+		material.uniforms[name].value = value;
+		material.needsUpdate = true;
+		if (this.getAutoRender()) {
 			this.render();
 		}
 	}

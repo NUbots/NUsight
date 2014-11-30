@@ -362,7 +362,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		});
 
 		this.selectionClassifier = Ext.create('NU.view.webgl.magicwand.Classify', {
-			shader: 'magicwand/Classify'
+
 		});
 
 		function clickBind(callback, preventDefault) {
@@ -709,6 +709,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		var colour = this.getColour(x, y);
 		this.selectionRenderer.updateColour(colour);
 		this.selectionRenderer.updateTolerance(tolerance);
+		this.selectionClassifier.updateColour(colour);
+		this.selectionClassifier.updateTolerance(tolerance);
 	},
 	hashPoint: function (point) {
 		return point[0] + "," + point[1];
@@ -717,7 +719,9 @@ Ext.define('NU.view.window.ClassifierController', {
 		var lut = this.getLookup();
 		var typeId = this.self.Target[this.getTarget()];
 		this.selectionClassifier.updateClassification(typeId);
+		this.selectionClassifier.render();
 		this.selectionClassifier.getLut(lut);
+		debugger;
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
@@ -1216,7 +1220,9 @@ Ext.define('NU.view.window.ClassifierController', {
 		ctx.putImageData(data, 0, 0);
 	},
 	updateClassifiedData: function () {
-		this.classifiedRenderer.updateLut(new Uint8Array(this.getLookup().buffer));
+		var lut = new Uint8Array(this.getLookup().buffer);
+		this.classifiedRenderer.updateLut(lut);
+		this.selectionClassifier.updateLut(lut);
 		this.refreshScatter();
 	},
 	getColour: function (x, y) {
@@ -1390,6 +1396,7 @@ Ext.define('NU.view.window.ClassifierController', {
 				this.classifiedRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
 				this.selectionRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
 				this.classifiedRenderer.updateImage(new Uint8Array(data.data.buffer), imageWidth, imageHeight, THREE.RGBAFormat);
+				this.selectionClassifier.render();
 			}.bind(this), 1000);
 		}.bind(this);
 		imageObj.load(uri);
