@@ -1,10 +1,6 @@
 #include "Vision.h"
 
 /**
- * The width/height of the square lut texture
- */
-uniform float lutSize;
-/**
  * The square lut texture
  */
 uniform sampler2D lut;
@@ -14,5 +10,5 @@ uniform sampler2D lut;
 varying vec2 center;
 
 void main() {
-	gl_FragColor = texture2D(lut, vec2(center.x, 1.0 - center.y) + 0.5 / lutSize);
+	gl_FragColor = texture2D(lut, vec2(center.x, 1.0 - center.y));
 }

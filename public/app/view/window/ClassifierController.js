@@ -723,6 +723,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.selectionClassifier.getLut(lut);
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
+		// clear selection layer
+		this.selectionRenderer.updateTolerance(-1);
 	},
 	classifyRectangle: function (x, y) {
 		var start = this.getStartPoint();

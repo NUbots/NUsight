@@ -12,8 +12,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 			context: context,
 			autoRender: false,
 			uniforms: {
-				lut: {type: 't'},
-				lutSize: {type: 'f'}
+				lut: {type: 't'}
 			}
 		});
 
@@ -62,7 +61,6 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		}
 		this.resize(size, size);
 		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat);
-		this.updateUniform('lutSize', size);
 	},
 	updateRawImage: function (data, width, height, format) {
 		var positionAttr = this.imagePointCloud.geometry.getAttribute('position');
