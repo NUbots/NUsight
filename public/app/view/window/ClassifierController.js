@@ -721,7 +721,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.selectionClassifier.updateClassification(typeId);
 		this.selectionClassifier.render();
 		this.selectionClassifier.getLut(lut);
-		debugger;
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},

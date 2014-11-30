@@ -53,8 +53,7 @@ Ext.define('NU.view.webgl.WebGL', {
 		this.renderer = new THREE.WebGLRenderer({
 			antialias: true,
 			canvas: canvas.el.dom,
-			context: this.getContext(),
-			alpha: true
+			context: this.getContext()
 		});
 
 		// load the shaders
