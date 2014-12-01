@@ -257,6 +257,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	onChangeTolerance: function (checkbox, newValue, oldValue, eOpts) {
 		this.setTolerance(newValue);
 		this.selectionRenderer.updateTolerance(this.getTolerance());
+		this.selectionClassifier.updateTolerance(this.getTolerance());
 	},
 	onChangeRawUnderlay: function (checkbox, newValue, oldValue, eOpts) {
 		this.setRenderRawUnderlay(newValue);
@@ -289,6 +290,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorY = newValue;
 			this.resetBits();
 			this.classifiedRenderer.updateBitsR(newValue);
+			this.selectionClassifier.updateBitsR(newValue);
 		}
 	},
 	onChangeBitsG: function (field, newValue, oldValue, eOpts) {
@@ -296,6 +298,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorCb = newValue;
 			this.resetBits();
 			this.classifiedRenderer.updateBitsG(newValue);
+			this.selectionClassifier.updateBitsG(newValue);
 		}
 	},
 	onChangeBitsB: function (field, newValue, oldValue, eOpts) {
@@ -303,6 +306,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorCr = newValue;
 			this.resetBits();
 			this.classifiedRenderer.updateBitsB(newValue);
+			this.selectionClassifier.updateBitsB(newValue);
 		}
 	},
 	resetBits: function () {

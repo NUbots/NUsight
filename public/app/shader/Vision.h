@@ -6,6 +6,11 @@ const float T_ORANGE = 111.0; // ball
 const float T_CYAN = 99.0;
 const float T_MAGENTA = 109.0;
 
+// The maximum tolerance value i.e. the euclidean distance from (0,0,0) to (255,255,255)
+const float MAX_TOLERANCE = 441.6730; // sqrt(255.0 * 255.0 * 3.0);
+// The maximum distance value i.e. the euclidean distance from (0,0,0) to (1,1,1)
+const float MAX_DISTANCE = 1.7321; // sqrt(1.0 * 3.0);
+
 /**
  * Get the lookup table index given an RGBA colour
  * @param {vec4} The RGBA colour

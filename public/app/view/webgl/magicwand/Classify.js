@@ -25,6 +25,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 			geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
 			var material = new THREE.ShaderMaterial({
 				uniforms: {
+					lutSize: {type: 'f', value: 512},
 					bitsR: {type: 'f', value: 6},
 					bitsG: {type: 'f', value: 6},
 					bitsB: {type: 'f', value: 6},
@@ -61,6 +62,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		}
 		this.resize(size, size);
 		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat);
+		this.updateUniform('lutSize', size, this.imagePointCloud.material);
 	},
 	updateRawImage: function (data, width, height, format) {
 		var positionAttr = this.imagePointCloud.geometry.getAttribute('position');
@@ -79,6 +81,15 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 	},
 	updateClassification: function (value) {
 		this.updateUniform('classification', value, this.imagePointCloud.material);
+	},
+	updateBitsR: function (value) {
+		this.updateUniform('bitsR', value, this.imagePointCloud.material);
+	},
+	updateBitsG: function (value) {
+		this.updateUniform('bitsG', value, this.imagePointCloud.material);
+	},
+	updateBitsB: function (value) {
+		this.updateUniform('bitsB', value, this.imagePointCloud.material);
 	},
 	/**
 	 * @param {ArrayBuffer} [lut]

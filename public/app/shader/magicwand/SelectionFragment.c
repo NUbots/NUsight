@@ -1,3 +1,5 @@
+#include "Vision.h"
+
 /**
  * The raw (e.g. YCbCr) image
  */
@@ -14,9 +16,6 @@ uniform float tolerance;
  * The coordinate of the current pixel, usually just maps to the current UV coordinate
  */
 varying vec2 center;
-
-const float MAX_TOLERANCE = 441.6730; // sqrt(255.0 * 255.0 * 3.0);
-const float MAX_DISTANCE = 1.7321; // sqrt(1.0 * 3.0);
 
 void main() {
 	vec4 rawColour = texture2D(rawImage, 1.0 - center);

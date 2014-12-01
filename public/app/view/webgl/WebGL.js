@@ -209,9 +209,12 @@ Ext.define('NU.view.webgl.WebGL', {
 	 * @param width The width of the texture
 	 * @param height The height of the texture
 	 * @param format The ThreeJS format of the data array, the default is THREE.LuminanceFormat
+	 * @param [material] The material to update
 	 */
-	updateTexture: function (name, data, width, height, format) {
-		var material = this.plane.material;
+	updateTexture: function (name, data, width, height, format, material) {
+		if (material === undefined) {
+			material = this.plane.material;
+		}
 		var texture = material.uniforms[name].value;
 		if (!texture) {
 			texture = new THREE.DataTexture(data, width, height,
