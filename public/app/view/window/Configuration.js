@@ -17,12 +17,18 @@ Ext.define('NU.view.window.Configuration', {
                 xtype: 'treepanel',
                 reference: 'configurations',
                 referenceHolder: true,
+                title: 'Robot Configurations',
                 store: Ext.create('NU.store.ConfigurationTree'),
                 autoLoad: true,
                 rootVisible: false,
                 layout: {
                     type: 'hbox',
                     align: 'stretch'
+                },
+                rowLines: true,
+                columnLines: true,
+                viewConfig: {
+                    stripeRows: true
                 },
                 columns: [{
                     xtype: 'treecolumn',
@@ -31,12 +37,9 @@ Ext.define('NU.view.window.Configuration', {
                     type: 'string',
                     flex: 1
                 }, {
-                    xtype: 'widgetcolumn',
+                    xtype: 'gridcolumn',
                     text: 'Name',
                     dataIndex: 'name',
-                    widget: {
-                        xtype: 'component'
-                    },
                     flex: 0.5
                 }, {
                     xtype: 'widgetcolumn',

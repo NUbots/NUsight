@@ -2,46 +2,55 @@ Ext.define('NU.view.factory.WidgetController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.Widget',
     widget: null,
+    attached: false,
     WIDGET: {
         TEXTBOX:    {value: 0, name: "Textbox",  type: "TEXT"},
         NUMBER:     {value: 1, name: "Number",   type: "NUMBER"},
         CHECKBOX:   {value: 2, name: "Checkbox", type: "BOOLEAN"},
         COMBOBOX:   {value: 3, name: "Combobox", type: "SELECT"},
-        SLIDER:     {value: 4, name: "Slider",   type: "SLIDER"}
+        SLIDER:     {value: 4, name: "Slider",   type: "SLIDER"},
+        ANGLE:      {value: 5, name: "Angle",    type: "ANGLE"}
     },
     requires: [
         'Ext.form.field.Text',
         'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.form.field.ComboBox',
-        'Ext.slider.Single'
+        'NU.view.factory.slider.Slider',
+        'NU.view.factory.angle.Angle'
     ],
     init: function () {
         this.widget = this.getView();
     },
     onWidgetAttach: function (record) {
-        var name = record.get('name');
-        var value = record.get('value');
-        var type = record.get('type');
-        function resolve (widget) {
-            return widget.type;
-        }
-        switch (type) {
-            case resolve(this.WIDGET.TEXTBOX):
-                this.addTextField(name, value);
-                break;
-            case resolve(this.WIDGET.NUMBER):
-                this.addNumberField(name, value);
-                break;
-            case resolve(this.WIDGET.CHECKBOX):
-                this.addCheckbox(name, value);
-                break;
-            case resolve(this.WIDGET.COMBOBOX):
-                this.addComboBox(name, value); // todo
-                break;
-            case resolve(this.WIDGET.SLIDER):
-                this.addSlider(name, value); // todo
-                break;
+        if (!this.attached) {
+            var name = record.get('name');
+            var value = record.get('value');
+            var type = record.get('type');
+            function resolve (widget) {
+                return widget.type;
+            }
+            switch (type) {
+                case resolve(this.WIDGET.TEXTBOX):
+                    this.addTextField(name, value);
+                    break;
+                case resolve(this.WIDGET.NUMBER):
+                    this.addNumberField(name, value);
+                    break;
+                case resolve(this.WIDGET.CHECKBOX):
+                    this.addCheckbox(name, value);
+                    break;
+                case resolve(this.WIDGET.COMBOBOX):
+                    this.addComboBox(name, value); // todo
+                    break;
+                case resolve(this.WIDGET.SLIDER):
+                    this.addSlider(name, value); // todo
+                    break;
+                case resolve(this.WIDGET.ANGLE):
+                    this.addAngle(name, value);
+                    break;
+            }
+            this.attached = true;
         }
     },
     /**
@@ -114,55 +123,37 @@ Ext.define('NU.view.factory.WidgetController', {
      * Adds a slider to the configuration for the robot.
      *
      * @param configuration The configuration name.
-     * @param [value] The value currently associated with the slider configuration.
+     * @param value The value currently associated with the slider configuration.
      * @param [minValue] The minimum value allowed for this configuration.
      * @param [maxValue] The maximum value allowed for this configuration.
      * @param [width] The width of the slider.
      * @param [increment] The amount to increment the slider by.
      */
     addSlider: function (configuration, value, minValue, maxValue, width, increment) {
-        // initialise the default values if there are no parameters passed to the function
-        minValue = minValue || 0;
-        maxValue = maxValue || 1;
-        increment = increment || 1;
-        // create a container for both the slider and text input
-        var container = Ext.create('Ext.container.Container', {
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            }
-        });
-        // create the slider control
-        var slider = Ext.create('Ext.slider.Single', {
+        this.widget.add(Ext.create('NU.view.factory.slider.Slider', {
             reference: this.transformReference(configuration),
-            width: width || 300,
+            sliderWidth: width,
             value: value,
             minValue: minValue,
             maxValue: maxValue,
-            increment: increment,
-            style: {
-                marginRight: '1em'
+            increment: increment
+        }));
+    },
+    /**
+     * Adds an angle to the configuration for the robot.
+     *
+     * @param configuration The configuration name.
+     * @param value The value currently associated with the angle configuration.
+     */
+    addAngle: function (configuration, value) {
+        var size = 100;
+        this.widget.add(Ext.create('NU.view.factory.angle.Angle', {
+            reference: this.transformReference(configuration),
+            dimensions: {
+                width: size,
+                height: size
             }
-        });
-        // create the text input control
-        var input = Ext.create('Ext.form.field.Text', {
-            value: value,
-            minValue: minValue,
-            maxValue: maxValue,
-            enableKeyEvents: true
-        });
-        // add a change listener to the slider so it updates the input control
-        slider.addListener('change', function (slider, value) {
-            input.setValue(value);
-        });
-        // add a change listener to the input control so it updates the slider
-        input.addListener('change', function (text, value) {
-            if (value % increment === 0) {
-                slider.setValue(value);
-            }
-        });
-        container.add([slider, input]);     // add the slider and input to the container
-        this.widget.add(container);         // add the container to the widget
+        }));
     },
     /**
      * Transforms the reference to ensure it is valid by replacing any spaces with underscores.

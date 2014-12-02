@@ -26,5 +26,17 @@ Ext.define('NU.store.ConfigurationTree', {
         type: 'NUMBER',
         value: 5,
         leaf: true
+    }, {
+        path: 'a path',
+        name: 'blah',
+        type: 'SLIDER',
+        value: 5,
+        leaf: true
+    }, {
+        path: 'fifth path',
+        name: 'blah',
+        type: 'ANGLE',
+        value: 5,
+        leaf: true
     }]
 });

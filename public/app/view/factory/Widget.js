@@ -4,5 +4,9 @@ Ext.define('NU.view.factory.Widget', {
     requires: [
         'NU.view.factory.WidgetController'
     ],
-    controller: 'Widget'
+    controller: 'Widget',
+    layout: {
+        type: 'vbox',
+        align: 'stretch'
+    }
 });
