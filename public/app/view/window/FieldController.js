@@ -143,7 +143,8 @@ Ext.define('NU.view.window.FieldController', {
 					});
 				});
 			}
-		})
+		});
+		this.setRobotIP(robotIP);
 	},
 	onAddRobot: function (robotIP) {
 		var robot;
@@ -248,7 +249,7 @@ Ext.define('NU.view.window.FieldController', {
 	},
 	onDrawObjects: function (robotIP, event, timestamp) {
 		// TODO: remove
-		if (robotIP !== this.robotIP) {
+		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
 		// get the robot from the IP sent from the network

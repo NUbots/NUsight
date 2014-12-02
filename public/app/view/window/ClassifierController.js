@@ -558,7 +558,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	onLookUpTable: function (robotIP, lookuptable) {
 
 		// TODO: remove
-		if (robotIP !== this.robotIP) {
+		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
 
@@ -574,7 +574,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	onImage: function (robotIP, image) {
 
 		// TODO: remove
-		if (robotIP !== this.robotIP) {
+		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
 

@@ -78,7 +78,7 @@ Ext.define('NU.view.window.VisionController', {
 	},
     onImage: function (robotIP, image) {
 
-        if (robotIP != this.robotIP || image === null) {
+        if (robotIP != this.getRobotIP() || image === null) {
             return;
         }
 
@@ -100,8 +100,8 @@ Ext.define('NU.view.window.VisionController', {
 				this.drawImageB64(image);
 				break;
 			case Format.YCbCr444:
-				//this.drawImageYbCr444(image);
-				this.drawImageBayer(image);
+				this.drawImageYbCr444(image);
+				//this.drawImageBayer(image);
 				break;
 			default:
 				throw 'Unsupported Format';
@@ -246,7 +246,7 @@ Ext.define('NU.view.window.VisionController', {
 	},
     onClassifiedImage: function (robotIP, image) {
 
-        if(robotIP != this.robotIP) {
+        if(robotIP != this.getRobotIP()) {
             return;
         }
 
@@ -384,7 +384,7 @@ Ext.define('NU.view.window.VisionController', {
     },
 	onVisionObjects: function (robotIP, visionObjects) {
 
-		if(robotIP !== this.robotIP) {
+		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
 
