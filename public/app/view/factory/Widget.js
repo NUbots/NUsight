@@ -1,9 +1,8 @@
 Ext.define('NU.view.factory.Widget', {
     extend: 'Ext.container.Container',
-    config: {
-        type: null
-    },
-    initComponent: function () {
-        debugger;
-    }
+    xtype: 'factoryWidget',
+    requires: [
+        'NU.view.factory.WidgetController'
+    ],
+    controller: 'Widget'
 });

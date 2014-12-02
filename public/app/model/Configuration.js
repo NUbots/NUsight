@@ -3,6 +3,7 @@ Ext.define('NU.model.Configuration', {
     fields: [
         'path',
         'name',
+        'type',
         'value'
     ]
 });

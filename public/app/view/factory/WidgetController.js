@@ -1,7 +1,48 @@
 Ext.define('NU.view.factory.WidgetController', {
     extend: 'Ext.app.ViewController',
+    alias: 'controller.Widget',
+    widget: null,
+    WIDGET: {
+        TEXTBOX:    {value: 0, name: "Textbox",  type: "TEXT"},
+        NUMBER:     {value: 1, name: "Number",   type: "NUMBER"},
+        CHECKBOX:   {value: 2, name: "Checkbox", type: "BOOLEAN"},
+        COMBOBOX:   {value: 3, name: "Combobox", type: "SELECT"},
+        SLIDER:     {value: 4, name: "Slider",   type: "SLIDER"}
+    },
+    requires: [
+        'Ext.form.field.Text',
+        'Ext.form.field.Number',
+        'Ext.form.field.Checkbox',
+        'Ext.form.field.ComboBox',
+        'Ext.slider.Single'
+    ],
     init: function () {
-
+        this.widget = this.getView();
+    },
+    onWidgetAttach: function (record) {
+        var name = record.get('name');
+        var value = record.get('value');
+        var type = record.get('type');
+        function resolve (widget) {
+            return widget.type;
+        }
+        switch (type) {
+            case resolve(this.WIDGET.TEXTBOX):
+                this.addTextField(name, value);
+                break;
+            case resolve(this.WIDGET.NUMBER):
+                this.addNumberField(name, value);
+                break;
+            case resolve(this.WIDGET.CHECKBOX):
+                this.addCheckbox(name, value);
+                break;
+            case resolve(this.WIDGET.COMBOBOX):
+                this.addComboBox(name, value); // todo
+                break;
+            case resolve(this.WIDGET.SLIDER):
+                this.addSlider(name, value); // todo
+                break;
+        }
     },
     /**
      * Adds a text field to the configuration for the robot.
@@ -10,9 +51,8 @@ Ext.define('NU.view.factory.WidgetController', {
      * @param [value] The value currently associated with the text field configuration.
      */
     addTextField: function (configuration, value) {
-        this.configurations.add(Ext.create('Ext.form.field.Text', {
+        this.widget.add(Ext.create('Ext.form.field.Text', {
             reference: this.transformReference(configuration),
-            fieldLabel: this.transformFieldLabel(configuration),
             value: value
         }));
     },
@@ -25,9 +65,8 @@ Ext.define('NU.view.factory.WidgetController', {
      * @param [maxValue] The maximum value allowed for this configuration.
      */
     addNumberField: function (configuration, value, minValue, maxValue) {
-        this.configurations.add(Ext.create('Ext.form.field.Number', {
+        this.widget.add(Ext.create('Ext.form.field.Number', {
             reference: this.transformReference(configuration),
-            fieldLabel: this.transformFieldLabel(configuration),
             value: value,
             minValue: minValue || 0,
             maxValue: maxValue || 100
@@ -37,11 +76,12 @@ Ext.define('NU.view.factory.WidgetController', {
      * Adds a check box to the configuration for the robot.
      *
      * @param configuration The configuration name.
+     * @param [checked] Whether the checkbox is checked or not.
      */
-    addCheckbox: function (configuration) {
-        this.configurations.add(Ext.create('Ext.form.field.Checkbox', {
+    addCheckbox: function (configuration, checked) {
+        this.widget.add(Ext.create('Ext.form.field.Checkbox', {
             reference: this.transformReference(configuration),
-            fieldLabel: this.transformFieldLabel(configuration)
+            checked: checked
         }));
     },
     /**
@@ -62,9 +102,8 @@ Ext.define('NU.view.factory.WidgetController', {
             fields: [key],                                      // the name of the field
             data: data                                          // the data array
         });
-        this.configurations.add(Ext.create('Ext.form.field.ComboBox', {
+        this.widget.add(Ext.create('Ext.form.field.ComboBox', {
             reference: this.transformReference(configuration),
-            fieldLabel: this.transformFieldLabel(configuration),
             store: store,
             queryMode: 'local',
             displayField: 'key',
@@ -92,9 +131,6 @@ Ext.define('NU.view.factory.WidgetController', {
                 type: 'vbox',
                 align: 'stretch'
             }
-        });
-        var label = Ext.create('Ext.Component', {
-            html: this.transformFieldLabel(configuration)
         });
         // create the slider control
         var slider = Ext.create('Ext.slider.Single', {
@@ -125,8 +161,8 @@ Ext.define('NU.view.factory.WidgetController', {
                 slider.setValue(value);
             }
         });
-        container.add([label, slider, input]);         // add the slider and input to the container
-        this.configurations.add(container);     // add the container to the configurations
+        container.add([slider, input]);     // add the slider and input to the container
+        this.widget.add(container);         // add the container to the widget
     },
     /**
      * Transforms the reference to ensure it is valid by replacing any spaces with underscores.
@@ -136,15 +172,5 @@ Ext.define('NU.view.factory.WidgetController', {
      */
     transformReference: function (configuration) {
         return configuration.replace(/ /g, '_');
-    },
-    /**
-     * Transforms the configuration to a standardised field label. It removes the underscores in the string and
-     * capitalises each word.
-     *
-     * @param configuration The name of the configuration to transform into a field label.
-     * @returns {*} The field label associated with the configuration.
-     */
-    transformFieldLabel: function (configuration) {
-        return configuration; // todo: remove underscores and upper case letters
     }
 });
