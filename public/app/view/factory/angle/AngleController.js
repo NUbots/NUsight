@@ -129,7 +129,8 @@ Ext.define('NU.view.factory.angle.AngleController', {
                 this.centre.x, this.centre.y,                               // centre
                 coordinates.x, coordinates.y,                               // endpoint coordinates
                 quadrant === 4 ? -diameter : coordinates.x, coordinates.y,  // move left if in quadrant 4 before going down
-                coordinates.x, quadrant === 1 ? coordinates.y : diameter,   // move down unless in quadrant 1
+                quadrant === 4 ? -diameter : coordinates.x,
+                    quadrant === 1 ? coordinates.y : diameter,              // move down unless in quadrant 1
                 diameter, quadrant === 1 ? coordinates.y : diameter,        // move right and up unless in quadrant 1
                 diameter, -diameter                                         // move up from bottom right
 
