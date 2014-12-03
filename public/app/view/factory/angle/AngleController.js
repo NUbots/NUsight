@@ -4,6 +4,7 @@ Ext.define('NU.view.factory.angle.AngleController', {
     draw: null,
     centre: null,
     radius: null,
+    line: null,
     widget: null,
     onAfterRender: function (container) {
         this.renderComponents(container);
@@ -53,29 +54,40 @@ Ext.define('NU.view.factory.angle.AngleController', {
      */
     drawLine: function (endpoint) {
         // create the line
-        var line = this.draw.path(Ext.String.format('M {0},{1} L {2},{3}', this.centre.x, this.centre.y,
-                endpoint.x + this.centre.x, -endpoint.y + this.centre.y)).stroke({
+        var line = this.draw.path(this.calculatePath(endpoint)).stroke({
             color: '#555',
             width: 2
         });
         this.widget.add(line);
         return line;
     },
+    /**
+     * Calculates the path of the line given the endpoint.
+     *
+     * @param endpoint The final point on the line.
+     */
+    calculatePath: function (endpoint) {
+        return Ext.String.format('M {0},{1} L {2},{3}', this.centre.x, this.centre.y,
+                endpoint.x + this.centre.x, -endpoint.y + this.centre.y);
+    },
     onClick: function (event) {
         var bound = this.widget.node.getBoundingClientRect();
         var x = event.x - bound.left - this.centre.x;
         var y = -(event.y - bound.top - this.centre.y);
-        console.log("(x, y) = " + x + ", " + y);
         var length = Math.sqrt(x * x + y * y);              // calculate the length of the vector
         var unit = {                                        // calculate the unit vector
             x: x / length,
             y: y / length
         };
-        //var angle = Math.atan2(unit.y, unit.x);
-        this.drawLine({
+        var endpoint = {
             x: unit.x * this.radius,
             y: unit.y * this.radius
-        });
-
+        };
+        //var angle = Math.atan2(unit.y, unit.x);
+        if (this.line === null) {
+            this.line = this.drawLine(endpoint);            // create the path if it does not exist
+        } else {
+            this.line.plot(this.calculatePath(endpoint));   // update the path
+        }
     }
 });
