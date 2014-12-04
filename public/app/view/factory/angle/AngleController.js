@@ -29,10 +29,7 @@ Ext.define('NU.view.factory.angle.AngleController', {
         // set the radius of the circle
         this.radius = width * 0.5;
         // calculate the centre of the circle
-        this.centre =  {
-            x: this.radius,
-            y: this.radius
-        };
+        this.centre =  vec2.fromValues(this.radius, this.radius);
         // create the SVG drawing context
         this.draw = SVG(view.id).size(width, height).viewbox(0, 0, width, height);
         // create the drawing group
@@ -40,11 +37,13 @@ Ext.define('NU.view.factory.angle.AngleController', {
         // draw the default and fill circle and attach the click events to both
         this.drawCircle('#ddd', 1).click(this.onClick.bind(this));
         this.fill = this.drawCircle('#3ebdd6', 0.5).click(this.onClick.bind(this));
+        // set the default coordinates of the line
+        var coordinates = vec2.fromValues(0, this.radius);
         // draw the default line
-        this.defaultLine = this.drawLine({
-            x: 0,
-            y: this.radius
-        });
+        this.defaultLine = {
+            line: this.drawLine(coordinates),
+            coordinates: coordinates
+        };
         // update the fill circle
         this.updateFillCircle();
     },
@@ -83,23 +82,21 @@ Ext.define('NU.view.factory.angle.AngleController', {
      * offset of the centre of the circle.
      *
      * @param endpoint The endpoint of the line that lies on the circle and touches its border.
-     * @returns {{x: *, y: *}} The new x, y coordinates.
+     * @returns {vec2} The new vec2 coordinates.
      */
     calculateCoordinates: function (endpoint) {
-        return {
-            x: endpoint.x + this.centre.x,
-            y: -endpoint.y + this.centre.y
-        };
+        return vec2.fromValues(endpoint[0] + this.centre[0], -endpoint[1] + this.centre[1]);
     },
     /**
      * Calculates the path of the line given an endpoint. The path begins from the centre of the circle and extends to
      * the endpoint.
      *
      * @param endpoint The final point on the line.
+     * @returns {*} The line path for the SVG.
      */
     calculateLinePath: function (endpoint) {
         var coordinates = this.calculateCoordinates(endpoint);
-        return Ext.String.format('M {0},{1} L {2},{3}', this.centre.x, this.centre.y, coordinates.x, coordinates.y);
+        return Ext.String.format('M {0},{1} L {2},{3}', this.centre[0], this.centre[1], coordinates[0], coordinates[1]);
     },
     /**
      * Updates the fill circle display by calculating the appropriate mask polygon.
@@ -115,9 +112,9 @@ Ext.define('NU.view.factory.angle.AngleController', {
             // remove the current fill mask
             this.fill.unmask();
             // determine the quadrant using the endpoint
-            var quadrant = endpoint.x > 0 ? (endpoint.y > 0 ? 1 : 2) : (endpoint.y < 0 ? 3 : 4);
+            var quadrant = this.calculateQuadrant(endpoint);
             // calculate the actual coordinates of the line
-            var defaultLineCoordinates = this.calculateCoordinates({x: 0, y: this.radius});
+            var defaultLineCoordinates = this.calculateCoordinates(this.defaultLine.coordinates);
             // calculate the actual coordinates of the endpoint
             var coordinates = this.calculateCoordinates(endpoint);
             // calculate the diameter of the circle
@@ -125,20 +122,46 @@ Ext.define('NU.view.factory.angle.AngleController', {
             // create the mask for the fill
             var mask = this.draw.polygon(Ext.String.format('{0},{1} {2},{3} {4},{5} {6},{7} {8},{9} {10},{11} {12},{13}',
 
-                defaultLineCoordinates.x, defaultLineCoordinates.y,         // top centre
-                this.centre.x, this.centre.y,                               // centre
-                coordinates.x, coordinates.y,                               // endpoint coordinates
-                quadrant === 4 ? -diameter : coordinates.x, coordinates.y,  // move left if in quadrant 4 before going down
-                quadrant === 4 ? -diameter : coordinates.x,
-                    quadrant === 1 ? coordinates.y : diameter,              // move down unless in quadrant 1
-                diameter, quadrant === 1 ? coordinates.y : diameter,        // move right and up unless in quadrant 1
-                diameter, -diameter                                         // move up from bottom right
+                defaultLineCoordinates[0], defaultLineCoordinates[1],           // top centre
+                this.centre[0], this.centre[1],                                 // centre
+                coordinates[0], coordinates[1],                                 // endpoint coordinates
+                quadrant === 4 ? -diameter : coordinates[0], coordinates[1],    // move left if in quadrant 4 before going down
+                quadrant === 4 ? -diameter : coordinates[0],
+                quadrant === 1 ? coordinates[1] : diameter,                     // move down unless in quadrant 1
+                diameter, quadrant === 1 ? coordinates[1] : diameter,           // move right and up unless in quadrant 1
+                diameter, -diameter                                             // move up from bottom right
 
-            )).fill({                                                       // apply a fill colour to the mask
+            )).fill({                                                           // apply a fill colour to the mask
                 color: '#fff'
             });
-            this.fill.maskWith(mask);                                       // apply the mask to the fill
+            this.fill.maskWith(mask);                                           // apply the mask to the fill
         }
+    },
+    /**
+     * Calculates the quadrant that the vector lies in.
+     *
+     * @param vector The vector being checked against.
+     * @returns {number} The quadrant.
+     */
+    calculateQuadrant: function (vector) {
+        return vector[0] > 0 ? (vector[1] > 0 ? 1 : 2) : (vector[1] < 0 ? 3 : 4);
+    },
+    /**
+     * Calculates the angle between two vectors.
+     *
+     * @param u The first vector. This is typically the vector created by the user.
+     * @param v The second vector. This is typically the coordinates of the default line.
+     * @returns {number} The angle between u and v in degrees.
+     */
+    calculateAngle: function (u, v) {
+        // calculate the angle using the dot product
+        var angle = Math.acos(vec2.dot(vec2.normalize(vec2.create(), u), vec2.normalize(vec2.create(), v)));
+        // calculate the quadrant of the first vector
+        var quadrant = this.calculateQuadrant(u);
+        if (quadrant === 3 || quadrant === 4) {                 // check if the quadrant lies on the left
+            angle = 2 * Math.PI - angle;                        // make the angle reflexive
+        }
+        return angle * 180 / Math.PI;                           // return the angle in degrees
     },
     /**
      * An event fired when the circle is clicked on. It updates where the line sits and the fill display. The calculated
@@ -148,19 +171,18 @@ Ext.define('NU.view.factory.angle.AngleController', {
      */
     onClick: function (event) {
         var bound = this.widget.node.getBoundingClientRect();   // get the absolute coordinates of the widget
-        var x = event.x - bound.left - this.centre.x;           // calculate the local x value
-        var y = -(event.y - bound.top - this.centre.y);         // calculate the local y value and ensure that positive y is up
-        var length = Math.sqrt(x * x + y * y);                  // calculate the length of the vector
-        var unit = {                                            // calculate the unit vector
-            x: x / length,
-            y: y / length
-        };
-        var endpoint = {                                        // calculate the endpoint to draw the line at
-            x: unit.x * this.radius,
-            y: unit.y * this.radius
-        };
-        //var angle = Math.atan2(unit.y, unit.x);
-        if (this.line === null) {                               // check if the line exists
+        var vector = vec2.fromValues(
+            event.x - bound.left - this.centre[0],              // calculate the local x value
+            -(event.y - bound.top - this.centre[1])             // calculate the local y value and ensure that positive y is up
+        );
+        var u = vec2.normalize(vec2.create(), vector);          // calculate the unit vector of where the user clicked
+        // calculate the endpoint to draw the line at
+        var endpoint = vec2.fromValues(u[0] * this.radius, u[1] * this.radius);
+        // calculate the new angle
+        var angle = this.calculateAngle(vector, this.defaultLine.coordinates);
+        console.log(angle);
+        // check if the line exists
+        if (this.line === null) {
             this.line = this.drawLine(endpoint);                // create the path if it does not exist
         } else {
             this.line.plot(this.calculateLinePath(endpoint));   // update the line path instead of creating a new one
