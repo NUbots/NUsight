@@ -7,12 +7,20 @@ Ext.define('NU.view.factory.angle.Angle', {
     config: {
         dimensions: null
     },
-    layout: 'fit',
-    autoEl: {
-        tag: 'svg',
-        preserveAspectRatio: 'xMidYMid meet'
-    },
-    listeners: {
-        afterrender: 'onAfterRender'
-    }
+    layout: 'hbox',
+    items: [{
+        xtype: 'container',
+        layout: 'fit',
+        autoEl: {
+            tag: 'svg',
+            preserveAspectRatio: 'xMidYMid meet'
+        },
+        listeners: {
+            afterrender: 'onAfterRender'
+        }
+    },  {
+        xtype: 'numberfield',
+        reference: 'input',
+        value: '90'
+    }]
 });

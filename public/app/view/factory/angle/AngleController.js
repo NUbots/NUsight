@@ -8,22 +8,30 @@ Ext.define('NU.view.factory.angle.AngleController', {
     line: null,                     // the line that is drawn via an event
     fill: null,                     // the fill colour denoting how large the angle is
     widget: null,                   // the widget group containing the circle and lines
+    mouseDown: null,                // whether the mouse has been pressed or not
     /**
      * An event fired when the Angle view has finished rendering.
      *
-     * @param container The view that is rendered.
+     * @param svg The rendered SVG view.
      */
-    onAfterRender: function (container) {
-        this.renderComponents(container);
+    onAfterRender: function (svg) {
+        this.mouseDown = false;
+        svg.getEl().on({
+            mousedown: this.onMouseDown,
+            mouseup: this.onMouseUp,
+            mousemove: this.onMouseMove,
+            scope: this
+        });
+        this.renderComponents(svg);
     },
     /**
      * Renders the circle and line for the angle view.
      *
-     * @param view The angle view.
+     * @param svg The SVG view.
      */
-    renderComponents: function (view) {
+    renderComponents: function (svg) {
         // get the dimensions from the view
-        var dimensions = view.getDimensions();
+        var dimensions = this.getView().getDimensions();
         var width =  dimensions.width;
         var height = dimensions.height;
         // set the radius of the circle
@@ -31,12 +39,12 @@ Ext.define('NU.view.factory.angle.AngleController', {
         // calculate the centre of the circle
         this.centre =  vec2.fromValues(this.radius, this.radius);
         // create the SVG drawing context
-        this.draw = SVG(view.id).size(width, height).viewbox(0, 0, width, height);
+        this.draw = SVG(svg.id).size(width, height).viewbox(0, 0, width, height);
         // create the drawing group
         this.widget = this.draw.group();
         // draw the default and fill circle and attach the click events to both
-        this.drawCircle('#ddd', 1).click(this.onClick.bind(this));
-        this.fill = this.drawCircle('#3ebdd6', 0.5).click(this.onClick.bind(this));
+        this.drawCircle('#ddd', 1);
+        this.fill = this.drawCircle('#3ebdd6', 0.5);
         // set the default coordinates of the line
         var coordinates = vec2.fromValues(0, this.radius);
         // draw the default line
@@ -59,8 +67,10 @@ Ext.define('NU.view.factory.angle.AngleController', {
             color: color,
             opacity: opacity
         });
-        this.widget.add(circle);    // add the circle to the group
-        return circle;              // return the circle
+        // add the circle to the group
+        this.widget.add(circle);
+        // return the circle
+        return circle;
     },
     /**
      * Draws a line in the default position of the circle.
@@ -144,7 +154,7 @@ Ext.define('NU.view.factory.angle.AngleController', {
      * @returns {number} The quadrant.
      */
     calculateQuadrant: function (vector) {
-        return vector[0] > 0 ? (vector[1] > 0 ? 1 : 2) : (vector[1] < 0 ? 3 : 4);
+        return vector[0] >= 0 ? (vector[1] >= 0 ? 1 : 2) : (vector[1] < 0 ? 3 : 4);
     },
     /**
      * Calculates the angle between two vectors.
@@ -164,23 +174,50 @@ Ext.define('NU.view.factory.angle.AngleController', {
         return angle * 180 / Math.PI;                           // return the angle in degrees
     },
     /**
-     * An event fired when the circle is clicked on. It updates where the line sits and the fill display. The calculated
-     * x and y values ensure that the origin is at the centre of the circle.
+     * An event that is triggered when the user presses their mouse on the SVG context. The widget display is updated
+     * and the flag is set to true.
+     *
+     * @param event The mousedown event.
+     */
+    onMouseDown: function (event) {
+        this.mouseDown = true;
+        this.update(event);
+    },
+    /**
+     * Triggered when the mouse button is released on the SVG context. It sets the flag to false to signify the user
+     * is no longer pressing a mouse button.
+     */
+    onMouseUp: function () {
+        this.mouseDown = false;
+    },
+    /**
+     * An event that is triggered when the user moves their mouse on the SVG context. The widget display is updated
+     * only when the mouse has been pressed to simulate a drag event.
+     *
+     * @param event The mousemove event.
+     */
+    onMouseMove: function (event) {
+        if (this.mouseDown) {
+            this.update(event);
+        }
+    },
+    /**
+     * An event fired when the circle needs to be updated by the user. It updates where the line sits and the fill
+     * display. The calculated x and y values ensure that the origin is at the centre of the circle.
      *
      * @param event The mouse click event.
      */
-    onClick: function (event) {
+    update: function (event) {
         var bound = this.widget.node.getBoundingClientRect();   // get the absolute coordinates of the widget
         var vector = vec2.fromValues(
-            event.x - bound.left - this.centre[0],              // calculate the local x value
-            -(event.y - bound.top - this.centre[1])             // calculate the local y value and ensure that positive y is up
+            event.getX() - bound.left - this.centre[0],         // calculate the local x value
+            -(event.getY() - bound.top - this.centre[1])        // calculate the local y value and ensure that positive y is up
         );
         var u = vec2.normalize(vec2.create(), vector);          // calculate the unit vector of where the user clicked
         // calculate the endpoint to draw the line at
         var endpoint = vec2.fromValues(u[0] * this.radius, u[1] * this.radius);
         // calculate the new angle
         var angle = this.calculateAngle(vector, this.defaultLine.coordinates);
-        console.log(angle);
         // check if the line exists
         if (this.line === null) {
             this.line = this.drawLine(endpoint);                // create the path if it does not exist
