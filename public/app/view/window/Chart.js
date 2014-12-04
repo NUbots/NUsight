@@ -62,6 +62,7 @@ Ext.define('NU.view.window.Chart', {
 				width: 150,
 				items: [{
 					xtype: 'multiselect',
+					reference: 'streampicker',
 					width: 148,
 					displayField: 'label',
 					store: Ext.create('NU.store.Streams'),

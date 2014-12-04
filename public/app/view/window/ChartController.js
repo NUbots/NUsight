@@ -55,6 +55,7 @@ Ext.define('NU.view.window.ChartController', {
         var colours = this.getColours();
         var numColours = colours.length;
         var colourIndex = 0;
+        var smoothie = this.getSmoothie();
         Ext.each(this.getStreams(), function (stream) {
             var found = false;
             Ext.each(newValue, function (value) {
@@ -76,10 +77,10 @@ Ext.define('NU.view.window.ChartController', {
                             var b = Math.round(Math.random() * 255);
                             colour = 'rgb(' + r + ', ' + g + ', ' + b + ')';
                         }
-                        this.smoothie.addTimeSeries(ts, {strokeStyle: colour, lineWidth: 2});
+                        smoothie.addTimeSeries(ts, {strokeStyle: colour, lineWidth: 2});
                     }
                 } else {
-                    this.smoothie.removeTimeSeries(ts);
+                    smoothie.removeTimeSeries(ts);
                 }
             }, this);
             stream.enabled = found;
@@ -164,7 +165,7 @@ Ext.define('NU.view.window.ChartController', {
             enabled: false
         };
         this.getStreams().push(value);
-        this.getStreampicker().getStore().add(value);
+        this.lookupReference('streampicker').getStore().add(value);
         return value;
     }
 });
