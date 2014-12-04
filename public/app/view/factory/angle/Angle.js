@@ -29,6 +29,9 @@ Ext.define('NU.view.factory.angle.Angle', {
         listeners: {
             blur: 'onInputUpdate'
         },
+        style: {
+            marginRight: '1em'
+        },
         flex: 1
     }]
 });

@@ -45,9 +45,10 @@ Ext.define('NU.view.factory.angle.AngleController', {
         this.draw = SVG(svg.id).size(width, height).viewbox(0, 0, width, height);
         // create the drawing group
         this.widget = this.draw.group();
-        // draw the default and fill circle and attach the click events to both
-        this.drawCircle('#ddd', 1);
-        this.fill = this.drawCircle('#3ebdd6', 0.5);
+        // draw the default circle
+        this.drawCircle('#8ec3e8', 1);
+        // draw the fill circle
+        this.fill = this.drawCircle('#3892d3', 1).hide();
         // set the default coordinates of the line
         var coordinates = vec2.fromValues(0, this.radius);
         // draw the default line
@@ -55,8 +56,6 @@ Ext.define('NU.view.factory.angle.AngleController', {
             line: this.drawLine(coordinates),
             coordinates: coordinates
         };
-        // update the fill circle
-        this.updateFillCircle();
     },
     /**
      * Draws a circle in the default position.
@@ -83,7 +82,7 @@ Ext.define('NU.view.factory.angle.AngleController', {
     drawLine: function (endpoint) {
         // create the line by calculating its path and adding a stroke to it
         var line = this.draw.path(this.calculateLinePath(endpoint)).stroke({
-            color: '#555',
+            color: '#105282',
             width: 2
         });
         this.widget.add(line);      // add the line to the group
@@ -129,38 +128,36 @@ Ext.define('NU.view.factory.angle.AngleController', {
      * @param endpoint The final point on the line within the circle.
      */
     updateFillCircle: function (endpoint) {
-        // check if a line exists
-        if (this.line === null) {
-            // hide the fill completely
-            this.fill.maskWith(this.fill.clone());
-        } else {
-            // remove the current fill mask
-            this.fill.unmask();
-            // determine the quadrant using the endpoint
-            var quadrant = this.calculateQuadrant(endpoint);
-            // calculate the actual coordinates of the line
-            var defaultLineCoordinates = this.calculateCoordinates(this.defaultLine.coordinates);
-            // calculate the actual coordinates of the endpoint
-            var coordinates = this.calculateCoordinates(endpoint);
-            // calculate the diameter of the circle
-            var diameter = this.radius * 2;
-            // create the mask for the fill
-            var mask = this.draw.polygon(Ext.String.format('{0},{1} {2},{3} {4},{5} {6},{7} {8},{9} {10},{11} {12},{13}',
-
-                defaultLineCoordinates[0], defaultLineCoordinates[1],           // top centre
-                this.centre[0], this.centre[1],                                 // centre
-                coordinates[0], coordinates[1],                                 // endpoint coordinates
-                quadrant === 4 ? -diameter : coordinates[0], coordinates[1],    // move left if in quadrant 4 before going down
-                quadrant === 4 ? -diameter : coordinates[0],
-                quadrant === 1 ? coordinates[1] : diameter,                     // move down unless in quadrant 1
-                diameter, quadrant === 1 ? coordinates[1] : diameter,           // move right and up unless in quadrant 1
-                diameter, -diameter                                             // move up from bottom right
-
-            )).fill({                                                           // apply a fill colour to the mask
-                color: '#fff'
-            });
-            this.fill.maskWith(mask);                                           // apply the mask to the fill
+        // show the fill circle if it is hidden
+        if (!this.fill.visible()) {
+            this.fill.show();
         }
+        // unmask the fill
+        this.fill.unmask();
+        // determine the quadrant using the endpoint
+        var quadrant = this.calculateQuadrant(endpoint);
+        // calculate the actual coordinates of the line
+        var defaultLineCoordinates = this.calculateCoordinates(this.defaultLine.coordinates);
+        // calculate the actual coordinates of the endpoint
+        var coordinates = this.calculateCoordinates(endpoint);
+        // calculate the diameter of the circle
+        var diameter = this.radius * 2;
+        // create the mask for the fill
+        var mask = this.draw.polygon(Ext.String.format('{0},{1} {2},{3} {4},{5} {6},{7} {8},{9} {10},{11} {12},{13}',
+
+            defaultLineCoordinates[0], defaultLineCoordinates[1],           // top centre
+            this.centre[0], this.centre[1],                                 // centre
+            coordinates[0], coordinates[1],                                 // endpoint coordinates
+            quadrant === 4 ? -diameter : coordinates[0], coordinates[1],    // move left if in quadrant 4 before going down
+            quadrant === 4 ? -diameter : coordinates[0],
+            quadrant === 1 ? coordinates[1] : diameter,                     // move down unless in quadrant 1
+            diameter, quadrant === 1 ? coordinates[1] : diameter,           // move right and up unless in quadrant 1
+            diameter, -diameter                                             // move up from bottom right
+
+        )).fill({                                                           // apply a fill colour to the mask
+            color: '#fff'
+        });
+        this.fill.maskWith(mask);                                           // apply the mask to the fill
     },
     /**
      * Calculates the quadrant that the vector lies in.
