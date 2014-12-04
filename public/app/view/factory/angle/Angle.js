@@ -7,7 +7,10 @@ Ext.define('NU.view.factory.angle.Angle', {
     config: {
         dimensions: null
     },
-    layout: 'hbox',
+    layout: {
+        type: 'hbox',
+        align: 'middle'
+    },
     items: [{
         xtype: 'container',
         layout: 'fit',
@@ -17,10 +20,15 @@ Ext.define('NU.view.factory.angle.Angle', {
         },
         listeners: {
             afterrender: 'onAfterRender'
-        }
+        },
+        flex: 1
     },  {
         xtype: 'numberfield',
         reference: 'input',
-        value: '90'
+        value: 0,
+        listeners: {
+            blur: 'onInputUpdate'
+        },
+        flex: 1
     }]
 });

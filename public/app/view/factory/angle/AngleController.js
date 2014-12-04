@@ -2,27 +2,30 @@ Ext.define('NU.view.factory.angle.AngleController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.Angle',
     draw: null,                     // the SVG drawing context
+    input: null,                    // the user angle input
     centre: null,                   // the centre of the circle
     radius: null,                   // the radius of the circle
     defaultLine: null,              // the line pointing up in the circle
     line: null,                     // the line that is drawn via an event
     fill: null,                     // the fill colour denoting how large the angle is
     widget: null,                   // the widget group containing the circle and lines
-    mouseDown: null,                // whether the mouse has been pressed or not
+    needsUpdate: null,              // whether the angle widget needs to be updated or not
     /**
      * An event fired when the Angle view has finished rendering.
      *
      * @param svg The rendered SVG view.
      */
     onAfterRender: function (svg) {
-        this.mouseDown = false;
-        svg.getEl().on({
-            mousedown: this.onMouseDown,
-            mouseup: this.onMouseUp,
+        this.needsUpdate = false;                               // initialise the flag to false
+        this.input = this.getView().lookupReference('input');   // get the input angle
+        svg.getEl().on({                                        // add the mouse events to the svg
+            mousedown: this.onEnableUpdate,
+            mouseup: this.onDisableUpdate,
+            //mouseout: this.onDisableUpdate,
             mousemove: this.onMouseMove,
             scope: this
         });
-        this.renderComponents(svg);
+        this.renderComponents(svg);                             // render all the svg components
     },
     /**
      * Renders the circle and line for the angle view.
@@ -109,6 +112,18 @@ Ext.define('NU.view.factory.angle.AngleController', {
         return Ext.String.format('M {0},{1} L {2},{3}', this.centre[0], this.centre[1], coordinates[0], coordinates[1]);
     },
     /**
+     * Updates the line so it begins from the centre and reaches out to the endpoint.
+     *
+     * @param endpoint The final point on the line within the circle.
+     */
+    updateLine: function (endpoint) {
+        if (this.line === null) {                               // check if the line exists
+            this.line = this.drawLine(endpoint);                // create the path if it does not exist
+        } else {
+            this.line.plot(this.calculateLinePath(endpoint));   // update the line path instead of creating a new one
+        }
+    },
+    /**
      * Updates the fill circle display by calculating the appropriate mask polygon.
      *
      * @param endpoint The final point on the line within the circle.
@@ -179,16 +194,16 @@ Ext.define('NU.view.factory.angle.AngleController', {
      *
      * @param event The mousedown event.
      */
-    onMouseDown: function (event) {
-        this.mouseDown = true;
+    onEnableUpdate: function (event) {
+        this.needsUpdate = true;
         this.update(event);
     },
     /**
-     * Triggered when the mouse button is released on the SVG context. It sets the flag to false to signify the user
-     * is no longer pressing a mouse button.
+     * Triggered when the mouse button is released or moved outside of the SVG context. It sets the flag to false to
+     * signify the user is no longer pressing a mouse button or within the context.
      */
-    onMouseUp: function () {
-        this.mouseDown = false;
+    onDisableUpdate: function () {
+        this.needsUpdate = false;
     },
     /**
      * An event that is triggered when the user moves their mouse on the SVG context. The widget display is updated
@@ -197,15 +212,32 @@ Ext.define('NU.view.factory.angle.AngleController', {
      * @param event The mousemove event.
      */
     onMouseMove: function (event) {
-        if (this.mouseDown) {
+        if (this.needsUpdate) {
             this.update(event);
         }
+    },
+    /**
+     * An event that is triggered when the input needs to updated the angle widget.
+     *
+     * @param input The input box.
+     */
+    onInputUpdate: function (input) {
+        // calculates the angle by first negating it to ensure positive is clockwise
+        // the angle is then converted to radians and offsets the angle so the origin is up as opposed to on the x-axis
+        var theta = (-input.getValue() / 180 * Math.PI) + Math.PI / 2;
+        // calculates the endpoint of the line that lies on the circle
+        var endpoint = vec2.fromValues(
+            this.radius * Math.cos(theta),
+            this.radius * Math.sin(theta)
+        );
+        this.updateLine(endpoint);          // updates the line display
+        this.updateFillCircle(endpoint);    // updates the fill circle display
     },
     /**
      * An event fired when the circle needs to be updated by the user. It updates where the line sits and the fill
      * display. The calculated x and y values ensure that the origin is at the centre of the circle.
      *
-     * @param event The mouse click event.
+     * @param event The mouse event.
      */
     update: function (event) {
         var bound = this.widget.node.getBoundingClientRect();   // get the absolute coordinates of the widget
@@ -218,12 +250,9 @@ Ext.define('NU.view.factory.angle.AngleController', {
         var endpoint = vec2.fromValues(u[0] * this.radius, u[1] * this.radius);
         // calculate the new angle
         var angle = this.calculateAngle(vector, this.defaultLine.coordinates);
-        // check if the line exists
-        if (this.line === null) {
-            this.line = this.drawLine(endpoint);                // create the path if it does not exist
-        } else {
-            this.line.plot(this.calculateLinePath(endpoint));   // update the line path instead of creating a new one
-        }
-        this.updateFillCircle(endpoint);                        // update the fill circle
+        // set the angle to the input
+        this.input.setValue(angle);
+        this.updateLine(endpoint);          // update the line display
+        this.updateFillCircle(endpoint);    // update the fill circle display
     }
 });
