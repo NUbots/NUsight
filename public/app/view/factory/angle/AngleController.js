@@ -18,10 +18,12 @@ Ext.define('NU.view.factory.angle.AngleController', {
     onAfterRender: function (svg) {
         this.needsUpdate = false;                               // initialise the flag to false
         this.input = this.getView().lookupReference('input');   // get the input angle
-        svg.getEl().on({                                        // add the mouse events to the svg
+        this.mon(svg.getEl(), { // add the mouse events to the svg
             mousedown: this.onEnableUpdate,
-            mouseup: this.onDisableUpdate,
-            //mouseout: this.onDisableUpdate,
+            scope: this
+        });
+        // add mouse move event to the body so that the widget works even when the mouse it outside the widget
+        this.mon(Ext.getBody(), {
             mousemove: this.onMouseMove,
             scope: this
         });
@@ -210,7 +212,13 @@ Ext.define('NU.view.factory.angle.AngleController', {
      */
     onMouseMove: function (event) {
         if (this.needsUpdate) {
+            if (event.event.which !== 1) {
+                // if the left mouse button isn't pressed, cancel and disable the update
+                this.onDisableUpdate();
+                return;
+            }
             this.update(event);
+            event.stopEvent();
         }
     },
     /**
