@@ -30,7 +30,7 @@ Ext.define('NU.view.window.NUClearController', {
     onReactionStatistics: function (robotIP, reactionStatistics) {
 
         // TODO: remove
-        if (robotIP !== this.robotIP) {
+        if (robotIP !== this.getRobotIP()) {
             return;
         }
 

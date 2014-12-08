@@ -13,7 +13,7 @@ Ext.define('NU.view.window.BehaviourController', {
 	},
 	onBehaviour: function (robotIP, event, timestamp) {
 		// TODO: remove
-		if (robotIP !== this.robotIP) {
+		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
 

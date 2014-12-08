@@ -105,8 +105,8 @@ Ext.define('NU.view.webgl.WebGL', {
 		this.scene.add(this.plane);
 
 		this.camera.left = 0;
-		this.camera.right = width;// * 2;
-		this.camera.top = height;// * 2;
+		this.camera.right = width;
+		this.camera.top = height;
 		this.camera.bottom = 0;
 		this.camera.updateProjectionMatrix();
 

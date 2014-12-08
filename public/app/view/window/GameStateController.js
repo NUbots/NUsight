@@ -19,7 +19,7 @@ Ext.define('NU.view.window.GameStateController', {
 	},
 	onGameState: function (robotIP, gameState, timestamp) {
 		// TODO: remove
-		if (robotIP !== this.robotIP) {
+		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
 
