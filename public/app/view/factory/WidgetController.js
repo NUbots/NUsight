@@ -61,7 +61,7 @@ Ext.define('NU.view.factory.WidgetController', {
      */
     addTextField: function (configuration, value) {
         this.widget.add(Ext.create('Ext.form.field.Text', {
-            reference: this.transformReference(configuration),
+            reference: configuration,
             value: value
         }));
     },
@@ -75,7 +75,7 @@ Ext.define('NU.view.factory.WidgetController', {
      */
     addNumberField: function (configuration, value, minValue, maxValue) {
         this.widget.add(Ext.create('Ext.form.field.Number', {
-            reference: this.transformReference(configuration),
+            reference: configuration,
             value: value,
             minValue: minValue || 0,
             maxValue: maxValue || 100
@@ -89,7 +89,7 @@ Ext.define('NU.view.factory.WidgetController', {
      */
     addCheckbox: function (configuration, checked) {
         this.widget.add(Ext.create('Ext.form.field.Checkbox', {
-            reference: this.transformReference(configuration),
+            reference: configuration,
             checked: checked
         }));
     },
@@ -112,7 +112,7 @@ Ext.define('NU.view.factory.WidgetController', {
             data: data                                          // the data array
         });
         this.widget.add(Ext.create('Ext.form.field.ComboBox', {
-            reference: this.transformReference(configuration),
+            reference: configuration,
             store: store,
             queryMode: 'local',
             displayField: 'key',
@@ -131,7 +131,7 @@ Ext.define('NU.view.factory.WidgetController', {
      */
     addSlider: function (configuration, value, minValue, maxValue, width, increment) {
         this.widget.add(Ext.create('NU.view.factory.slider.Slider', {
-            reference: this.transformReference(configuration),
+            reference: configuration,
             sliderWidth: width,
             value: value,
             minValue: minValue,
@@ -148,20 +148,11 @@ Ext.define('NU.view.factory.WidgetController', {
     addAngle: function (configuration, value) {
         var size = 100;
         this.widget.add(Ext.create('NU.view.factory.angle.Angle', {
-            reference: this.transformReference(configuration),
+            reference: configuration,
             dimensions: {
                 width: size,
                 height: size
             }
         }));
-    },
-    /**
-     * Transforms the reference to ensure it is valid by replacing any spaces with underscores.
-     *
-     * @param configuration The name of the configuration to transform so it is valid.
-     * @returns {*} The new reference name of the configuration.
-     */
-    transformReference: function (configuration) {
-        return configuration.replace(/ /g, '_');
     }
 });

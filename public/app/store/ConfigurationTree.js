@@ -7,7 +7,7 @@ Ext.define('NU.store.ConfigurationTree', {
         reader: {
             type: 'json'
         }
-    },
+    }/*,
     data: [{
         path: 'somepath',
         name: 'blah',
@@ -38,5 +38,5 @@ Ext.define('NU.store.ConfigurationTree', {
         type: 'ANGLE',
         value: 5,
         leaf: true
-    }]
+    }]*/
 });

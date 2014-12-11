@@ -37,11 +37,6 @@ Ext.define('NU.view.window.Configuration', {
                     type: 'string',
                     flex: 1
                 }, {
-                    xtype: 'gridcolumn',
-                    text: 'Name',
-                    dataIndex: 'name',
-                    flex: 0.5
-                }, {
                     xtype: 'widgetcolumn',
                     text: 'Configurations',
                     widget: {
