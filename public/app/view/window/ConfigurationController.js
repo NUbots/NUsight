@@ -64,7 +64,7 @@ Ext.define('NU.view.window.ConfigurationController', {
                 this.processMap(node, message.map_value);
                 break;
             case "ANGLE":
-                debugger;
+                this.processAngle(node, message.double_value || message.long_value);
                 break;
             case "SLIDER":
                 this.processSlider(node, message.double_value || message.long_value, tag.params);
@@ -169,13 +169,31 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param map The map message.
      */
     processMap: function (node, map) {
+        // iterates through every map item
         Ext.each(map, function (item) {
+            // gets the name of the item
             var path = item.name;
+            // processes the message and its map value
             this.processMessage(node.appendChild({
                 path: path,
                 name: this.transformName(path)
             }), item.value);
         }, this);
+    },
+    /**
+     * Processes an angle tag.
+     *
+     * @param node The node that is to be replaced.
+     * @param value The current value of the angle in radians.
+     */
+    processAngle: function (node, value) {
+        // convert the value from radians to degrees
+        value = value * 180 / Math.PI;
+        this.processCurrentNode(node, {
+            type: 'ANGLE',
+            value: value,
+            leaf: true
+        });
     },
     /**
      * Processes a slider tag.
@@ -185,9 +203,11 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param params The parameters associated with the slider.
      */
     processSlider: function (node, value, params) {
+        // get the values from the slider params
         var minValue = params[0];
         var maxValue = params[1];
         var increment = params[2];
+        // process the current node using the new child object
         this.processCurrentNode(node, {
             type: 'SLIDER',
             value: {
@@ -198,25 +218,6 @@ Ext.define('NU.view.window.ConfigurationController', {
             },
             leaf: true
         });
-    },
-    /**
-     * Returns the name of the type from the protocol buffer enumeration.
-     *
-     * @param type The integer type of the protocol node.
-     * @returns {string} The name of the type from the enumeration.
-     */
-    getConfigurationType: function (type) {
-        // default the result to unknown
-        var result = 'UNKNOWN';
-        // loop through each configuration protocol buffer enumeration
-        Ext.Object.each(this.type, function (name, value) {
-            // compare if the type being checked against is equivalent to the current enumeration
-            if (type === value) {
-                result = name;      // set the result to the name of the enumeration
-                return false;       // exit the loop
-            }
-        }, this);
-        return result;              // return the type of the configuration node
     },
     /**
      * Transforms the name to ensure it is valid by replacing any spaces with underscores.

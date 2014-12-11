@@ -8,6 +8,7 @@ Ext.define('NU.view.factory.angle.Angle', {
     ],
     controller: 'Angle',
     config: {
+        value: null,
         dimensions: null
     },
     layout: {
@@ -30,7 +31,7 @@ Ext.define('NU.view.factory.angle.Angle', {
         reference: 'input',
         value: 0,
         listeners: {
-            blur: 'onInputUpdate'
+            change: 'onInputUpdate'
         },
         style: {
             marginRight: '1em'

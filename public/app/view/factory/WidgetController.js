@@ -153,6 +153,7 @@ Ext.define('NU.view.factory.WidgetController', {
         var size = 100;
         this.widget.add(Ext.create('NU.view.factory.angle.Angle', {
             reference: configuration,
+            value: value,
             dimensions: {
                 width: size,
                 height: size

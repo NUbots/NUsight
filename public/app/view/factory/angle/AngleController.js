@@ -21,7 +21,7 @@ Ext.define('NU.view.factory.angle.AngleController', {
     onAfterRender: function (svg) {
         this.needsUpdate = false;                               // initialise the flag to false
         this.input = this.getView().lookupReference('input');   // get the input angle
-        this.mon(svg.getEl(), { // add the mouse events to the svg
+        this.mon(svg.getEl(), {                                 // add the mouse events to the svg
             mousedown: this.onEnableUpdate,
             scope: this
         });
@@ -61,6 +61,11 @@ Ext.define('NU.view.factory.angle.AngleController', {
             line: this.drawLine(coordinates),
             coordinates: coordinates
         };
+        // get the value from the view and check if it was set
+        var value = this.getView().getValue();
+        if (value !== null) {
+            this.updateAngle(value);
+        }
     },
     /**
      * Draws a circle in the default position.
@@ -230,13 +235,23 @@ Ext.define('NU.view.factory.angle.AngleController', {
      * @param input The input box.
      */
     onInputUpdate: function (input) {
+        this.updateAngle(input.getValue());
+    },
+    /**
+     * Updates the angle given a value.
+     *
+     * @param angle The new angle on the widget.
+     */
+    updateAngle: function (angle) {
+        // update the input box
+        this.input.setValue(angle);
         // calculates the angle by first negating it to ensure positive is clockwise
         // the angle is then converted to radians and offsets the angle so the origin is up as opposed to on the x-axis
-        var theta = (-input.getValue() / 180 * Math.PI) + Math.PI / 2;
+        var theta = (-angle / 180 * Math.PI) + Math.PI / 2;
         // calculates the endpoint of the line that lies on the circle
         var endpoint = vec2.fromValues(
-            this.radius * Math.cos(theta),
-            this.radius * Math.sin(theta)
+                this.radius * Math.cos(theta),
+                this.radius * Math.sin(theta)
         );
         this.updateLine(endpoint);          // updates the line display
         this.updateFillCircle(endpoint);    // updates the fill circle display
