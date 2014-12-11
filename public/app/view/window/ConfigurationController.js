@@ -34,9 +34,11 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param message The message node being processed.
      */
     processMessage: function (node, message) {
+        // retrieve the type and tag of the message
         var type = message.type;
-        // TODO: tag
-        switch (type) {
+        var tag = this.parseTag(message.tag);
+        // evaluate the message type
+        switch ((tag && tag.name) || type) {
             case this.type.DIRECTORY:
                 this.processDirectory(node, message.map_value);
                 break;
@@ -61,7 +63,45 @@ Ext.define('NU.view.window.ConfigurationController', {
             case this.type.MAP:
                 this.processMap(node, message.map_value);
                 break;
+            case "ANGLE":
+                debugger;
+                break;
+            case "SLIDER":
+                debugger;
+                break;
+            case "COMBO":
+                debugger;
+                break;
         }
+    },
+    /**
+     * Parses a YAML tag to conform to the format "!<NAME(optional,params)> value".
+     *
+     * @param tag The tag to parse.
+     * @returns {*} The parsed tag in JSON.
+     */
+    parseTag: function (tag) {
+        // checks if the tag exists
+        if (tag !== null) {
+            // create a regex that splits the YAML tag into two components <NAME><PARAMS>
+            var regex = /(\w+)(?:\((.+)\))?/;
+            // executes the regex on the tag
+            var matches = regex.exec(tag);
+            // assigns the name and params of the tag
+            var name = matches[1].toUpperCase();
+            var params = matches[2];
+            // checks if the params exist
+            if (params !== undefined) {
+                // replaces any "(" and ")" with "{" and "}" respectively and stringifies the params
+                params = params.replace(/\(/g, "{").replace(/\)/g, "}").replace(/([A-Za-z]\w*)/g, '"$1"');
+            }
+            // returns the tag with its respective name and params which are converted to JSON
+            return {
+                name: name,
+                params: JSON.parse(Ext.String.format('[{0}]', params))
+            };
+        }
+        return null;
     },
     /**
      * TODO: Remove?
