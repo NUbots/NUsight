@@ -23,15 +23,15 @@ Ext.define('NU.view.factory.slider.Slider', {
     initComponent: function () {
         // initialise the default values
         var value = this.getValue();
-        var minValue = this.getMinValue() || Math.floor(value - value * 0.5);
-        var maxValue = this.getMaxValue() || Math.ceil(value + value * 0.5);
-        var increment = this.getIncrement() || 0;
+        var minValue = this.getMinValue() === undefined ? Math.floor(value - value * 0.5) : this.getMinValue();
+        var maxValue = this.getMaxValue() === undefined ? Math.ceil(value + value * 0.5) : this.getMaxValue();
+        var increment = this.getIncrement() === undefined ? 0 : this.getIncrement();
         Ext.apply(this, {
             items: [{
                 xtype: 'slider',
                 reference: 'slider',
-                decimalPrecision: false,
-                width: this.getSliderWidth() || 300,
+                decimalPrecision: increment === undefined ? false : increment < 1 ? false : 0,
+                width: this.getSliderWidth() === undefined ? 300 : this.getSliderWidth(),
                 value: value,
                 minValue: minValue,
                 maxValue: maxValue,

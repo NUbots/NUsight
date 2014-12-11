@@ -67,7 +67,7 @@ Ext.define('NU.view.window.ConfigurationController', {
                 debugger;
                 break;
             case "SLIDER":
-                debugger;
+                this.processSlider(node, message.double_value || message.long_value, tag.params);
                 break;
             case "COMBO":
                 debugger;
@@ -120,23 +120,32 @@ Ext.define('NU.view.window.ConfigurationController', {
         }, this);
     },
     /**
-     * Processes a leaf node by retrieving its parent and appending a child with all of the relevant information for
-     * the new child node. The original child node is then removed as it does not store all of the necessary
-     * information.
+     * Processes a leaf node by creating a new child node with all of the relevant information.
      *
      * @param node The node that is to be replaced.
      * @param type The type of the leaf node. This can be a textfield, numberfield or checkbox.
      * @param value The value of the leaf node.
      */
     processLeafNode: function (node, type, value) {
-        var parent = node.parentNode;
-        parent.appendChild({
+        this.processCurrentNode(node, {
             path: node.get('path'),
             name: node.get('name'),
             type: type,
             value: value,
             leaf: true
         });
+    },
+    /**
+     * Processes the current node by retrieving its parent and appending a child with all of the relevant information
+     * for the new child node. The original child node is then removed as it does not store all of the necessary
+     * information.
+     *
+     * @param node The node that is to be replaced.
+     * @param child The new child node.
+     */
+    processCurrentNode: function (node, child) {
+        var parent = node.parentNode;
+        parent.appendChild(child);
         parent.removeChild(node);
     },
     /**
@@ -167,6 +176,28 @@ Ext.define('NU.view.window.ConfigurationController', {
                 name: this.transformName(path)
             }), item.value);
         }, this);
+    },
+    /**
+     * Processes a slider tag.
+     *
+     * @param node The node that is to be replaced.
+     * @param value The current value of the slider.
+     * @param params The parameters associated with the slider.
+     */
+    processSlider: function (node, value, params) {
+        var minValue = params[0];
+        var maxValue = params[1];
+        var increment = params[2];
+        this.processCurrentNode(node, {
+            type: 'SLIDER',
+            value: {
+                value: value,
+                minValue: minValue,
+                maxValue: maxValue,
+                increment: increment
+            },
+            leaf: true
+        });
     },
     /**
      * Returns the name of the type from the protocol buffer enumeration.

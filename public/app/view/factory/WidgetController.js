@@ -131,20 +131,16 @@ Ext.define('NU.view.factory.WidgetController', {
      * Adds a slider to the configuration for the robot.
      *
      * @param configuration The configuration name.
-     * @param value The value currently associated with the slider configuration.
-     * @param [minValue] The minimum value allowed for this configuration.
-     * @param [maxValue] The maximum value allowed for this configuration.
-     * @param [width] The width of the slider.
-     * @param [increment] The amount to increment the slider by.
+     * @param slider The values currently associated with the slider configuration.
      */
-    addSlider: function (configuration, value, minValue, maxValue, width, increment) {
+    addSlider: function (configuration, slider) {
         this.widget.add(Ext.create('NU.view.factory.slider.Slider', {
             reference: configuration,
-            sliderWidth: width,
-            value: value,
-            minValue: minValue,
-            maxValue: maxValue,
-            increment: increment
+            sliderWidth: slider.width,
+            value: slider.value,
+            minValue: slider.minValue,
+            maxValue: slider.maxValue,
+            increment: slider.increment
         }));
     },
     /**
