@@ -1,3 +1,6 @@
+/**
+ * @author: Monica Olejniczak
+ */
 Ext.define('NU.view.factory.slider.Slider', {
     extend: 'Ext.container.Container',
     requires: [

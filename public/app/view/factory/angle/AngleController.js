@@ -1,3 +1,6 @@
+/**
+ * @author: Monica Olejniczak
+ */
 Ext.define('NU.view.factory.angle.AngleController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.Angle',

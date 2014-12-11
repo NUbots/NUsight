@@ -1,3 +1,6 @@
+/**
+ * @author: Monica Olejniczak
+ */
 Ext.define('NU.view.factory.slider.SliderController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.Slider',

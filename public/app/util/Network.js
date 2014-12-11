@@ -30,7 +30,6 @@ Ext.define('NU.util.Network', {
 		window.API.ActionStateChange = this.builder.build("messages.behaviour.proto.ActionStateChange");
 		window.API.Image = this.builder.build("messages.input.proto.Image");
         window.API.Configuration = this.builder.build("messages.support.nubugger.proto.ConfigurationState");
-
 		var typeMap = {};
 		Ext.iterate(API.Message.Type, function (key, type) {
 			typeMap[type] = key.toLowerCase();

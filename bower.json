@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "threejs": "*",
-    "extjs": "~5.0",
+    "extjs": "~5",
     "protobuf": "~3.5.4",
     "smoothie": "*",
     "jpgjs": "notmasteryet/jpgjs",

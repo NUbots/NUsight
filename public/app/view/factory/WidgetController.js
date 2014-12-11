@@ -1,15 +1,19 @@
+/**
+ * @author: Monica Olejniczak
+ */
 Ext.define('NU.view.factory.WidgetController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.Widget',
     widget: null,
     attached: false,
     WIDGET: {
-        TEXTBOX:    {value: 0, name: "Textbox",  type: "TEXT"},
-        NUMBER:     {value: 1, name: "Number",   type: "NUMBER"},
-        CHECKBOX:   {value: 2, name: "Checkbox", type: "BOOLEAN"},
-        COMBOBOX:   {value: 3, name: "Combobox", type: "SELECT"},
-        SLIDER:     {value: 4, name: "Slider",   type: "SLIDER"},
-        ANGLE:      {value: 5, name: "Angle",    type: "ANGLE"}
+        BLANK:      {type: "BLANK"},
+        TEXTBOX:    {type: "TEXT"},
+        NUMBER:     {type: "NUMBER"},
+        CHECKBOX:   {type: "BOOLEAN"},
+        COMBOBOX:   {type: "SELECT"},
+        SLIDER:     {type: "SLIDER"},
+        ANGLE:      {type: "ANGLE"}
     },
     requires: [
         'Ext.form.field.Text',
@@ -31,6 +35,9 @@ Ext.define('NU.view.factory.WidgetController', {
                 return widget.type;
             }
             switch (type) {
+                case resolve(this.WIDGET.BLANK):
+                    this.widget.add(Ext.create('Ext.container.Container'));
+                    break;
                 case resolve(this.WIDGET.TEXTBOX):
                     this.addTextField(name, value);
                     break;
@@ -49,6 +56,7 @@ Ext.define('NU.view.factory.WidgetController', {
                 case resolve(this.WIDGET.ANGLE):
                     this.addAngle(name, value);
                     break;
+
             }
             this.attached = true;
         }

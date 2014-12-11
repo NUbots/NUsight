@@ -1,3 +1,6 @@
+/**
+ * @author: Monica Olejniczak
+ */
 Ext.define('NU.view.factory.angle.Angle', {
     extend: 'Ext.container.Container',
     requires: [

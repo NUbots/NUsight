@@ -1,3 +1,6 @@
+/**
+ * @author: Monica Olejniczak
+ */
 Ext.define('NU.view.window.Configuration', {
     extend : 'NU.view.window.Display',
     requires: [

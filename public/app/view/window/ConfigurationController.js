@@ -1,71 +1,132 @@
+/**
+ * @author: Monica Olejniczak
+ */
 Ext.define('NU.view.window.ConfigurationController', {
     extend: 'NU.view.window.DisplayController',
     alias: 'controller.Configuration',
     configurations: null,               // The view that contains the configurations
-    store: null,
     type: null,                         // The protocol buffer enumeration
     requires: [
         'Ext.slider.Single'
     ],
     init: function () {
         this.configurations = this.getView().lookupReference('configurations');
-        this.store = this.configurations.getStore();
         this.type = API.Configuration.Node.Type;
         this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
         this.getConfigurationState();
     },
+    /**
+     * An event fired when the network has received the configuration state message.
+     *
+     * @param robotIP The robot IP address.
+     * @param configurationState The configuration state protocol buffer.
+     */
     onConfigurationState: function (robotIP, configurationState) {
+        // retrieves the root from the buffer
         var root = configurationState.getRoot();
-        this.processMessage(robotIP, root);
+        // processes the message using the store's root as the initial node
+        this.processMessage(this.configurations.getStore().getRoot(), root);
     },
     /**
-     * Processes a message node.
+     * Processes a message node based on its message type.
      *
-     * @param robotIP The IP address of the robot.
+     * @param node The node to append children to.
      * @param message The message node being processed.
      */
-    processMessage: function (robotIP, message) {
+    processMessage: function (node, message) {
         var type = message.type;
+        // TODO: tag
         switch (type) {
             case this.type.DIRECTORY:
-                this.processDirectory(message.map_value);
+                this.processDirectory(node, message.map_value);
                 break;
             case this.type.NULL_VALUE:
+                this.processLeafNode(node, 'TEXT', message.null_value);
                 break;
             case this.type.STRING:
+                this.processLeafNode(node, 'TEXT', message.string_value);
                 break;
             case this.type.BOOLEAN:
+                this.processLeafNode(node, 'BOOLEAN', message.boolean_value);
                 break;
             case this.type.LONG:
+                this.processLeafNode(node, 'NUMBER', message.long_value);
                 break;
             case this.type.DOUBLE:
+                this.processLeafNode(node, 'NUMBER', message.double_value);
                 break;
             case this.type.SEQUENCE:
+                this.processSequence(node, message.sequence_value);
                 break;
             case this.type.MAP:
+                this.processMap(node, message.map_value);
                 break;
         }
     },
     /**
+     * TODO: Remove?
      * Processes a directory message.
      *
+     * @param node The node to append children to.
      * @param directory The message contents of the directory.
      */
-    processDirectory: function (directory) {
-        Ext.each(directory, function (file) {
-            this.processFile(file);
+    processDirectory: function (node, directory) {
+        Ext.each(directory, function (item) {
+            var path = item.name;
+            this.processMessage(node.appendChild({
+                path: path,
+                name: this.transformName(path)
+            }), item.value);
         }, this);
     },
-    processFile: function (file) {
-        debugger;
-        var path = file.name;
-        this.store.add({
-            path: path,
-            name: this.transformName(path),
-            type: 'TEXT',
-            value: 'test',
+    /**
+     * Processes a leaf node by retrieving its parent and appending a child with all of the relevant information for
+     * the new child node. The original child node is then removed as it does not store all of the necessary
+     * information.
+     *
+     * @param node The node that is to be replaced.
+     * @param type The type of the leaf node. This can be a textfield, numberfield or checkbox.
+     * @param value The value of the leaf node.
+     */
+    processLeafNode: function (node, type, value) {
+        var parent = node.parentNode;
+        parent.appendChild({
+            path: node.get('path'),
+            name: node.get('name'),
+            type: type,
+            value: value,
             leaf: true
         });
+        parent.removeChild(node);
+    },
+    /**
+     * Processes a sequence message.
+     *
+     * @param node The node to append the child to.
+     * @param sequence The sequence message.
+     */
+    processSequence: function (node, sequence) {
+        // iterates through every sequence message
+        Ext.each(sequence, function (item) {
+            // TODO add unique name
+            // processes the sequence message
+            this.processMessage(node.appendChild({}), item);
+        }, this);
+    },
+    /**
+     * Processes a map message.
+     *
+     * @param node The node to append the child to.
+     * @param map The map message.
+     */
+    processMap: function (node, map) {
+        Ext.each(map, function (item) {
+            var path = item.name;
+            this.processMessage(node.appendChild({
+                path: path,
+                name: this.transformName(path)
+            }), item.value);
+        }, this);
     },
     /**
      * Returns the name of the type from the protocol buffer enumeration.
@@ -115,5 +176,5 @@ Ext.define('NU.view.window.ConfigurationController', {
         message.setCommand(command);
         NU.util.Network.send(this.getRobotIP(), message);
     }
-    // todo: vectors
+    // TODO: vectors
 });
