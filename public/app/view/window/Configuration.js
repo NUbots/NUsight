@@ -24,10 +24,6 @@ Ext.define('NU.view.window.Configuration', {
                 store: Ext.create('NU.store.ConfigurationTree'),
                 autoLoad: true,
                 rootVisible: false,
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
                 rowLines: true,
                 columnLines: true,
                 viewConfig: {
@@ -37,7 +33,6 @@ Ext.define('NU.view.window.Configuration', {
                     xtype: 'treecolumn',
                     text: 'Path',
                     dataIndex: 'path',
-                    type: 'string',
                     flex: 1
                 }, {
                     xtype: 'widgetcolumn',
@@ -56,8 +51,8 @@ Ext.define('NU.view.window.Configuration', {
                     onWidgetAttach: function (column, widget, record) {
                         widget.getController().onWidgetAttach(record); // todo fix badness
                     },
-                    scope: this,
-                    flex: 1
+                    flex: 1,
+                    scope: this
                 }]
             }]
         });
