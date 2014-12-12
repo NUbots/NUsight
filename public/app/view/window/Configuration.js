@@ -49,10 +49,11 @@ Ext.define('NU.view.window.Configuration', {
                      * The greatest UNDOCUMENTED method of ALL TIME. An event called when the widget is attached to the
                      * view.
                      *
+                     * @param column The column of the panel.
                      * @param widget The widget associated with the column.
                      * @param record The record associated with the widget.
                      */
-                    onWidgetAttach: function (widget, record) {
+                    onWidgetAttach: function (column, widget, record) {
                         widget.getController().onWidgetAttach(record); // todo fix badness
                     },
                     scope: this,

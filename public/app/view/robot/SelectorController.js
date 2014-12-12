@@ -9,16 +9,13 @@ Ext.define('NU.view.robot.SelectorController', {
         var combo = this.getView();
         var recordSelected = combo.getStore().getAt(0);
         if (recordSelected !== undefined) {
-            combo.select(recordSelected, true);
+            combo.select(recordSelected);
+            combo.fireEvent('select', combo, recordSelected);
         }
     },
-    onSelectRobot: function (combo, records, eOpts) {
-        // might not be an array, so make it an array
-        if (!Array.isArray(records)) {
-            records = [records];
-        }
+    onSelectRobot: function (combo, records) {
         // get the first robot ip
-		var robotIP = records[0].get('ipAddress');
+		var robotIP = records.get('ipAddress');
         // set the robot ip
 		this.setRobotIP(robotIP);
         // fire an event
