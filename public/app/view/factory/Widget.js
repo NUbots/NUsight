@@ -8,8 +8,8 @@ Ext.define('NU.view.factory.Widget', {
         'NU.view.factory.WidgetController'
     ],
     controller: 'Widget',
-    layout: {
-        type: 'vbox',
-        align: 'stretch'
-    }
+    config: {
+        record: null
+    },
+    layout: 'fit'
 });

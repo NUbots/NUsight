@@ -6,6 +6,7 @@ Ext.define('NU.view.window.Configuration', {
     requires: [
         'NU.store.ConfigurationTree',
         'Ext.grid.column.Widget',
+        'NU.view.column.Widget',
         'NU.view.factory.Widget',
         'NU.view.window.ConfigurationController'
     ],
@@ -33,24 +34,15 @@ Ext.define('NU.view.window.Configuration', {
                     xtype: 'treecolumn',
                     text: 'Path',
                     dataIndex: 'path',
+                    sortable: false,
                     flex: 1
                 }, {
-                    xtype: 'widgetcolumn',
+                    xtype: 'widgetColumn',
                     text: 'Configurations',
                     widget: {
                         xtype: 'factoryWidget'
                     },
-                    /**
-                     * The greatest UNDOCUMENTED method of ALL TIME. An event called when the widget is attached to the
-                     * view.
-                     *
-                     * @param column The column of the panel.
-                     * @param widget The widget associated with the column.
-                     * @param record The record associated with the widget.
-                     */
-                    onWidgetAttach: function (column, widget, record) {
-                        widget.getController().onWidgetAttach(record); // todo fix badness
-                    },
+                    sortable: false,
                     flex: 1,
                     scope: this
                 }]

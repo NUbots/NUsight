@@ -20,21 +20,21 @@ Ext.define('NU.view.factory.angle.Angle', {
         layout: 'fit',
         autoEl: {
             tag: 'svg',
-            preserveAspectRatio: 'xMidYMid meet'
+            preserveAspectRatio: 'xMaxYMid meet'
         },
         listeners: {
             afterrender: 'onAfterRender'
         },
-        flex: 1
+        style: {
+            marginRight: '1em'
+        },
+        flex: 0.5
     },  {
         xtype: 'numberfield',
         reference: 'input',
         value: 0,
         listeners: {
             change: 'onInputUpdate'
-        },
-        style: {
-            marginRight: '1em'
         },
         flex: 1
     }]

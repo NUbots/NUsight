@@ -13,6 +13,33 @@ Ext.define('NU.view.window.ConfigurationController', {
         this.configurations = this.getView().lookupReference('configurations');
         this.type = API.Configuration.Node.Type;
         this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
+        // TODO: remove test data
+        var root = this.configurations.getStore().getRoot();
+        var node = root.appendChild({
+            path: '1',
+            name: 'somename1'
+        });
+        node.appendChild({
+            path: '1.1',
+            name: 'somename2',
+            type: 'TEXT',
+            value: 1,
+            leaf: true
+        });
+        root.appendChild({
+            path: '2',
+            name: 'somename3',
+            type: 'TEXT',
+            value: 2,
+            leaf: true
+        });
+        root.appendChild({
+            path: '3',
+            name: 'somename4',
+            type: 'ANGLE',
+            value: 0.5,
+            leaf: true
+        });
         this.getConfigurationState();
     },
     /**
@@ -70,7 +97,6 @@ Ext.define('NU.view.window.ConfigurationController', {
                 this.processSlider(node, message.double_value || message.long_value, tag.params);
                 break;
             case "COMBO":
-                debugger;
                 break;
         }
     },

@@ -61,10 +61,10 @@ Ext.define('NU.view.factory.angle.AngleController', {
             line: this.drawLine(coordinates),
             coordinates: coordinates
         };
-        // get the value from the view and check if it was set
-        var value = this.getView().getValue();
-        if (value !== null) {
-            this.updateAngle(value);
+        var value = this.getView().getValue();      // get the value of the angle from the view
+        if (value !== null) {                       // check if the angle was set
+            var degrees = value * 180 / Math.PI;    // convert the value to degrees
+            this.updateAngle(Math.round(degrees));  // update the angle
         }
     },
     /**

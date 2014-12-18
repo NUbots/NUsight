@@ -25,8 +25,9 @@ Ext.define('NU.view.factory.WidgetController', {
     ],
     init: function () {
         this.widget = this.getView();
+        this.render(this.widget.getRecord());
     },
-    onWidgetAttach: function (record) {
+    render: function (record) {
         if (!this.attached) {
             var name = record.get('name');
             var value = record.get('value');
