@@ -5,7 +5,6 @@ Ext.define('NU.view.factory.WidgetController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.Widget',
     widget: null,
-    attached: false,
     WIDGET: {
         TEXTBOX:    {type: "TEXT"},
         NUMBER:     {type: "NUMBER"},
@@ -27,35 +26,32 @@ Ext.define('NU.view.factory.WidgetController', {
         this.render(this.widget.getRecord());
     },
     render: function (record) {
-        if (!this.attached) {
-            var name = record.get('name');
-            var value = record.get('value');
-            var type = record.get('type');
-            function resolve (widget) {
-                return widget.type;
-            }
-            switch (type) {
-                case resolve(this.WIDGET.TEXTBOX):
-                    this.addTextField(name, value);
-                    break;
-                case resolve(this.WIDGET.NUMBER):
-                    this.addNumberField(name, value);
-                    break;
-                case resolve(this.WIDGET.CHECKBOX):
-                    this.addCheckbox(name, value);
-                    break;
-                case resolve(this.WIDGET.COMBOBOX):
-                    this.addComboBox(name, value); // todo
-                    break;
-                case resolve(this.WIDGET.SLIDER):
-                    this.addSlider(name, value); // todo
-                    break;
-                case resolve(this.WIDGET.ANGLE):
-                    this.addAngle(name, value);
-                    break;
+        var name = record.get('name');
+        var value = record.get('value');
+        var type = record.get('type');
+        function resolve (widget) {
+            return widget.type;
+        }
+        switch (type) {
+            case resolve(this.WIDGET.TEXTBOX):
+                this.addTextField(name, value);
+                break;
+            case resolve(this.WIDGET.NUMBER):
+                this.addNumberField(name, value);
+                break;
+            case resolve(this.WIDGET.CHECKBOX):
+                this.addCheckbox(name, value);
+                break;
+            case resolve(this.WIDGET.COMBOBOX):
+                this.addComboBox(name, value); // todo
+                break;
+            case resolve(this.WIDGET.SLIDER):
+                this.addSlider(name, value); // todo
+                break;
+            case resolve(this.WIDGET.ANGLE):
+                this.addAngle(name, value);
+                break;
 
-            }
-            this.attached = true;
         }
     },
     /**
