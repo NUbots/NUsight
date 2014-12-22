@@ -7,7 +7,6 @@ Ext.define('NU.view.factory.WidgetController', {
     widget: null,
     attached: false,
     WIDGET: {
-        BLANK:      {type: "BLANK"},
         TEXTBOX:    {type: "TEXT"},
         NUMBER:     {type: "NUMBER"},
         CHECKBOX:   {type: "BOOLEAN"},
@@ -36,9 +35,6 @@ Ext.define('NU.view.factory.WidgetController', {
                 return widget.type;
             }
             switch (type) {
-                case resolve(this.WIDGET.BLANK):
-                    this.widget.add(Ext.create('Ext.container.Container'));
-                    break;
                 case resolve(this.WIDGET.TEXTBOX):
                     this.addTextField(name, value);
                     break;

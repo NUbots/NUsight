@@ -24,8 +24,10 @@ Ext.define('NU.view.window.ConfigurationController', {
     onConfigurationState: function (robotIP, configurationState) {
         // retrieves the root from the buffer
         var root = configurationState.getRoot();
+        // retrieve the store from the view
+        var store = this.configurations.getStore();
         // processes the message using the store's root as the initial node
-        this.processMessage(this.configurations.getStore().getRoot(), root);
+        this.processMessage(store.getRoot(), root);
     },
     /**
      * Processes a message node based on its message type.
@@ -40,6 +42,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         // evaluate the message type
         switch ((tag && tag.name) || type) {
             case this.type.DIRECTORY:
+            case this.type.FILE:
                 this.processDirectory(node, message.map_value);
                 break;
             case this.type.NULL_VALUE:
