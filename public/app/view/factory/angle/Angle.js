@@ -16,15 +16,16 @@ Ext.define('NU.view.factory.angle.Angle', {
         pack: 'center',
         align: 'middle'
     },
+    listeners: {
+        afterrender: 'onAfterRender'
+    },
     items: [{
         xtype: 'container',
+        reference: 'svg',
         layout: 'fit',
         autoEl: {
             tag: 'svg',
             preserveAspectRatio: 'xMidYMid meet'
-        },
-        listeners: {
-            afterrender: 'onAfterRender'
         },
         style: {
             marginLeft: '1em'
@@ -32,7 +33,6 @@ Ext.define('NU.view.factory.angle.Angle', {
     },  {
         xtype: 'numberfield',
         reference: 'input',
-        value: 0,
         listeners: {
             change: 'onInputUpdate'
         },
@@ -40,6 +40,6 @@ Ext.define('NU.view.factory.angle.Angle', {
             marginLeft: '1em',
             marginRight: '1em'
         },
-        flex: 0.5
+        flex: 1
     }]
 });

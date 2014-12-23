@@ -16,11 +16,12 @@ Ext.define('NU.view.factory.angle.AngleController', {
     /**
      * An event fired when the Angle view has finished rendering.
      *
-     * @param svg The rendered SVG view.
+     * @param view The rendered angle view.
      */
-    onAfterRender: function (svg) {
+    onAfterRender: function (view) {
+        var svg = view.lookupReference('svg');                  // get the svg from the view
         this.needsUpdate = false;                               // initialise the flag to false
-        this.input = this.getView().lookupReference('input');   // get the input angle
+        this.input = view.lookupReference('input');             // get the input angle
         this.mon(svg.getEl(), {                                 // add the mouse events to the svg
             mousedown: this.onEnableUpdate,
             scope: this
@@ -63,8 +64,7 @@ Ext.define('NU.view.factory.angle.AngleController', {
         };
         var value = this.getView().getValue();      // get the value of the angle from the view
         if (value !== null) {                       // check if the angle was set
-            var degrees = value * 180 / Math.PI;    // convert the value to degrees
-            this.updateAngle(Math.round(degrees));  // update the angle
+            this.updateAngle(value);                // update the angle
         }
     },
     /**
