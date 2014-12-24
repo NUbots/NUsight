@@ -39,25 +39,11 @@ Ext.define('NU.view.column.WidgetController', {
      * items that are not in view have been removed and are visible again.
      *
      * @param records The records being added to the view.
-     * @param index The index at which the record was inserted.
-     * @param items The node items that were updated.
      */
-    onItemAdd: function (records, index, items) {
-        // get the column and tree views
-        var view = this.getView();
-        var treeView = view.getView();
-        // iterate through every record
-        Ext.each(records, function (record, i) {
-            // get the corresponding row
-            var row = treeView.getRowFromItem(items[i]);
-            // check the row is not a placeholder
-            if (row) {
-                // get the cell given the current record at the appropriate column
-                var cell = row.cells[view.getVisibleIndex()];
-                // update the cell given its record and cell
-                this.updateCell(record, cell);
-            }
-        }, this);
+    onItemAdd: function (records) {
+        var view = this.getView();                      // get the column view
+        var treeView = view.getView();                  // get the tree view from the column view
+        this.updateRecords(view, treeView, records);    // update the records
     },
     /**
      * An event triggered when the view is refreshed. This occurs when the window is initialised and when any item is
@@ -67,28 +53,46 @@ Ext.define('NU.view.column.WidgetController', {
      * @param records The records associated with the store.
      */
     onViewRefresh: function (treeView, records) {
-        var view = this.getView();
+        this.updateRecords(this.getView(), treeView, records);
+    },
+    /**
+     * This method is called when the widgets associated with a record need to be updated.
+     *
+     * @param column The widget column view.
+     * @param treeView The tree view.
+     * @param records The records being updated.
+     */
+    updateRecords: function (column, treeView, records) {
         // iterate through every record
         Ext.each(records, function (record) {
             // get the cell given the current record at the appropriate column
-            var cell = treeView.getRow(record).cells[view.getVisibleIndex()];
+            var cell = treeView.getRow(record).cells[column.getVisibleIndex()];
             // update the cell given its record and cell
-            this.updateCell(record, cell);
+            this.updateCell(column, treeView, record, cell);
         }, this);
     },
     /**
      * Updates the cell display by displaying the widget with its respective record data.
      *
+     * @param column The widget column view.
+     * @param treeView The tree view.
      * @param record The record that corresponds to the cell view.
      * @param cell The cell that contains the widget.
      */
-    updateCell: function (record, cell) {
-        var view = this.getView();                                  // get the column view
+    updateCell: function (column, treeView, record, cell) {
         var widget = this.widgets[record.internalId];               // get the widget from the map
         Ext.fly(cell).empty();                                      // remove the current contents of the cell
         if (widget === undefined) {                                 // create the widget if it hasn't been created
-            var component = Ext.widget(view.getWidget().xtype, {    // create the widget
-                record: record
+            var component = Ext.widget(column.getWidget().xtype, {  // create the widget
+                record: record,
+                listeners: {
+                    afterRender: function (widget) {                // wait for the widget to finish rendering
+                        widget.getEl().on({                         // add a click event listener to the widget
+                            click: this.onClick
+                        });
+                    },
+                    scope: this
+                }
             });
             this.widgets[record.internalId] = component;            // add the component to the map
             component.render(cell);                                 // render the component to the cell
@@ -98,5 +102,14 @@ Ext.define('NU.view.column.WidgetController', {
                 cell.appendChild(widget.getEl().dom);               // append the existing dom to the cell
             }
         }
+    },
+    /**
+     * An event triggered when a widget is clicked on. The event is stopped to prevent the grid base structure from
+     * taking focus.
+     *
+     * @param event The click event object.
+     */
+    onClick: function (event) {
+        event.stopEvent();
     }
 });

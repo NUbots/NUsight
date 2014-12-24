@@ -15,39 +15,33 @@ Ext.define('NU.view.window.Configuration', {
     title: 'Configuration',
     width: 1000,
     height: 550,
-    initComponent: function () {
-        Ext.apply(this, {
-            items: [{
-                xtype: 'treepanel',
-                reference: 'configurations',
-                referenceHolder: true,
-                title: 'Robot Configurations',
-                store: Ext.create('NU.store.ConfigurationTree'),
-                autoLoad: true,
-                rootVisible: false,
-                rowLines: true,
-                columnLines: true,
-                viewConfig: {
-                    stripeRows: true
-                },
-                columns: [{
-                    xtype: 'treecolumn',
-                    text: 'Path',
-                    dataIndex: 'path',
-                    sortable: false,
-                    flex: 1
-                }, {
-                    xtype: 'widgetColumn',
-                    text: 'Configurations',
-                    widget: {
-                        xtype: 'factoryWidget'
-                    },
-                    sortable: false,
-                    flex: 1,
-                    scope: this
-                }]
-            }]
-        });
-        return this.callParent(arguments);
-    }
+    items: [{
+        xtype: 'treepanel',
+        reference: 'configurations',
+        referenceHolder: true,
+        title: 'Robot Configurations',
+        store: Ext.create('NU.store.ConfigurationTree'),
+        autoLoad: true,
+        rootVisible: false,
+        rowLines: true,
+        columnLines: true,
+        viewConfig: {
+            stripeRows: true
+        },
+        columns: [{
+            xtype: 'treecolumn',
+            text: 'Path',
+            dataIndex: 'path',
+            sortable: false,
+            flex: 1
+        }, {
+            xtype: 'widgetColumn',
+            text: 'Configurations',
+            widget: {
+                xtype: 'factoryWidget'
+            },
+            sortable: false,
+            flex: 1
+        }]
+    }]
 });
