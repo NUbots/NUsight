@@ -22,16 +22,23 @@ Ext.define('NU.view.factory.WidgetController', {
         'NU.view.factory.angle.Angle'
     ],
     init: function () {
-        this.widget = this.getView();
-        this.render(this.widget.getRecord());
+        var view = this.getView();
+        this.widget = view;
+        this.render(view.getRecord());
     },
+    /**
+     * Renders the widget based on the record data.
+     *
+     * @param record The record associated with the widget.
+     */
     render: function (record) {
-        var name = record.get('name');
-        var value = record.get('value');
-        var type = record.get('type');
-        function resolve (widget) {
+        var name = record.get('name');      // get the name from the record
+        var value = record.get('value');    // get the value of the widget from the record
+        var type = record.get('type');      // get the type of widget from the record
+        function resolve (widget) {         // a private function that resolves the enumeration so it can be evaluated
             return widget.type;
         }
+        // evaluates the widget based on its type
         switch (type) {
             case resolve(this.WIDGET.TEXTBOX):
                 this.addTextField(name, value);
@@ -46,13 +53,22 @@ Ext.define('NU.view.factory.WidgetController', {
                 this.addComboBox(name, value); // todo
                 break;
             case resolve(this.WIDGET.SLIDER):
-                this.addSlider(name, value); // todo
+                this.addSlider(name, value);
                 break;
             case resolve(this.WIDGET.ANGLE):
                 this.addAngle(name, value);
                 break;
-
         }
+    },
+    /**
+     * A method that gets called when a widget is updated to update the respective configuration that is associated
+     * with the widget and its record.
+     *
+     * @param value The new value of the widget.
+     */
+    update: function (value) {
+        var record = this.getView().getRecord();        // get the record from the view
+        this.fireViewEvent('update', record, value);    // fire an event that updates the configuration file
     },
     /**
      * Adds a text field to the configuration for the robot.
@@ -63,7 +79,13 @@ Ext.define('NU.view.factory.WidgetController', {
     addTextField: function (configuration, value) {
         this.widget.add(Ext.create('Ext.form.field.Text', {
             reference: configuration,
-            value: value
+            value: value,
+            listeners: {
+                change: function (widget, value) {
+                    this.update(value);
+                },
+                scope: this
+            }
         }));
     },
     /**
@@ -79,7 +101,13 @@ Ext.define('NU.view.factory.WidgetController', {
             reference: configuration,
             value: value,
             minValue: minValue || 0,
-            maxValue: maxValue || 100
+            maxValue: maxValue || 100,
+            listeners: {
+                change: function (widget, value) {
+                    this.update(value);
+                },
+                scope: this
+            }
         }));
     },
     /**
@@ -91,7 +119,13 @@ Ext.define('NU.view.factory.WidgetController', {
     addCheckbox: function (configuration, checked) {
         this.widget.add(Ext.create('Ext.form.field.Checkbox', {
             reference: configuration,
-            checked: checked
+            checked: checked,
+            listeners: {
+                change: function (widget, value) {
+                    this.update(value);
+                },
+                scope: this
+            }
         }));
     },
     /**
@@ -108,13 +142,12 @@ Ext.define('NU.view.factory.WidgetController', {
                 key: values[i]
             });
         }
-        var store = Ext.create('Ext.data.Store', {              // create the store
-            fields: [key],                                      // the name of the field
-            data: data                                          // the data array
-        });
         this.widget.add(Ext.create('Ext.form.field.ComboBox', {
             reference: configuration,
-            store: store,
+            store: Ext.create('Ext.data.Store', {              // create the store
+                fields: [key],                                 // the name of the field
+                data: data                                     // the data array
+            }),
             queryMode: 'local',
             displayField: 'key',
             valueField: 'key'
@@ -133,7 +166,11 @@ Ext.define('NU.view.factory.WidgetController', {
             value: slider.value,
             minValue: slider.minValue,
             maxValue: slider.maxValue,
-            increment: slider.increment
+            increment: slider.increment,
+            listeners: {
+                update: this.update, // TODO
+                scope: this
+            }
         }));
     },
     /**
@@ -150,6 +187,10 @@ Ext.define('NU.view.factory.WidgetController', {
             dimensions: {
                 width: size,
                 height: size
+            },
+            listeners: {
+                update: this.update, // TODO
+                scope: this
             }
         }));
     }

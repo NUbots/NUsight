@@ -10,7 +10,8 @@ Ext.define('NU.view.window.ConfigurationController', {
         'Ext.slider.Single'
     ],
     init: function () {
-        this.configurations = this.getView().lookupReference('configurations');
+        var view = this.getView();
+        this.configurations = view.lookupReference('configurations');
         this.type = API.Configuration.Node.Type;
         this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
         this.getConfigurationState();
@@ -36,9 +37,12 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param message The message node being processed.
      */
     processMessage: function (node, message) {
-        // retrieve the type and tag of the message
+        // retrieve the path, type and tag of the message
+        var path = message.path;
         var type = message.type;
         var tag = this.parseTag(message.tag);
+        // get the name from the node
+        var name = node.get('name');
         // evaluate the message type
         switch ((tag && tag.name) || type) {
             case this.type.DIRECTORY:
@@ -46,19 +50,19 @@ Ext.define('NU.view.window.ConfigurationController', {
                 this.processDirectory(node, message.map_value);
                 break;
             case this.type.NULL_VALUE:
-                this.processLeafNode(node, 'TEXT', message.null_value);
+                this.processLeafNode(node, path, name, 'TEXT', message.null_value);
                 break;
             case this.type.STRING:
-                this.processLeafNode(node, 'TEXT', message.string_value);
+                this.processLeafNode(node, path, name, 'TEXT', message.string_value);
                 break;
             case this.type.BOOLEAN:
-                this.processLeafNode(node, 'BOOLEAN', message.boolean_value);
+                this.processLeafNode(node, path, name, 'BOOLEAN', message.boolean_value);
                 break;
             case this.type.LONG:
-                this.processLeafNode(node, 'NUMBER', message.long_value);
+                this.processLeafNode(node, path, name, 'NUMBER', message.long_value);
                 break;
             case this.type.DOUBLE:
-                this.processLeafNode(node, 'NUMBER', message.double_value);
+                this.processLeafNode(node, path, name, 'NUMBER', message.double_value);
                 break;
             case this.type.SEQUENCE:
                 this.processSequence(node, message.sequence_value);
@@ -67,10 +71,10 @@ Ext.define('NU.view.window.ConfigurationController', {
                 this.processMap(node, message.map_value);
                 break;
             case "ANGLE":
-                this.processAngle(node, message.double_value || message.long_value);
+                this.processAngle(node, path, name, message.double_value || message.long_value);
                 break;
             case "SLIDER":
-                this.processSlider(node, message.double_value || message.long_value, tag.params);
+                this.processSlider(node, path, name, message.double_value || message.long_value, tag.params);
                 break;
             case "COMBO":
                 break;
@@ -114,10 +118,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     processDirectory: function (node, directory) {
         Ext.each(directory, function (item) {
-            var path = item.name;
             this.processMessage(node.appendChild({
-                path: path,
-                name: this.transformName(path)
+                name: this.transformName(item.name)
             }), item.value);
         }, this);
     },
@@ -125,13 +127,15 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Processes a leaf node by creating a new child node with all of the relevant information.
      *
      * @param node The node that is to be replaced.
+     * @param path The path to the configuration file.
+     * @param name The name of the configuration.
      * @param type The type of the leaf node. This can be a textfield, numberfield or checkbox.
      * @param value The value of the leaf node.
      */
-    processLeafNode: function (node, type, value) {
+    processLeafNode: function (node, path, name, type, value) {
         this.processCurrentNode(node, {
-            path: node.get('path'),
-            name: node.get('name'),
+            path: path,
+            name: name,
             type: type,
             value: value,
             leaf: true
@@ -162,7 +166,7 @@ Ext.define('NU.view.window.ConfigurationController', {
             // TODO add unique name
             // processes the sequence message
             this.processMessage(node.appendChild({
-                path: i
+                name: i
             }), item);
         }, this);
     },
@@ -175,12 +179,9 @@ Ext.define('NU.view.window.ConfigurationController', {
     processMap: function (node, map) {
         // iterates through every map item
         Ext.each(map, function (item) {
-            // gets the name of the item
-            var path = item.name;
             // processes the message and its map value
             this.processMessage(node.appendChild({
-                path: path,
-                name: this.transformName(path)
+                name: this.transformName(item.name)
             }), item.value);
         }, this);
     },
@@ -188,12 +189,16 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Processes an angle tag.
      *
      * @param node The node that is to be replaced.
+     * @param path The path to the configuration file.
+     * @param name The name of the configuration.
      * @param value The current value of the angle in radians.
      */
-    processAngle: function (node, value) {
+    processAngle: function (node, path, name, value) {
         // convert the value from radians to degrees
         value = value * 180 / Math.PI;
         this.processCurrentNode(node, {
+            path: path,
+            name: name,
             type: 'ANGLE',
             value: value,
             leaf: true
@@ -203,16 +208,20 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Processes a slider tag.
      *
      * @param node The node that is to be replaced.
+     * @param path The path to the configuration file.
+     * @param name The name of the configuration.
      * @param value The current value of the slider.
      * @param params The parameters associated with the slider.
      */
-    processSlider: function (node, value, params) {
+    processSlider: function (node, path, name, value, params) {
         // get the values from the slider params
         var minValue = params[0];
         var maxValue = params[1];
         var increment = params[2];
         // process the current node using the new child object
         this.processCurrentNode(node, {
+            path: path,
+            name: name,
             type: 'SLIDER',
             value: {
                 value: value,
@@ -231,6 +240,15 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     transformName: function (configuration) {
         return configuration.replace(/[./\- ]/g, '_');
+    },
+    /**
+     * Updates a configuration file with a new value based off the information found in the record.
+     *
+     * @param record The record associated with a particular widget that was updated.
+     * @param value The new value of the widget.
+     */
+    onUpdateWidget: function (record, value) {
+        debugger;
     },
     /**
      * Removes a configuration for a particular robot.

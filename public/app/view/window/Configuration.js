@@ -31,7 +31,7 @@ Ext.define('NU.view.window.Configuration', {
         columns: [{
             xtype: 'treecolumn',
             text: 'Path',
-            dataIndex: 'path',
+            dataIndex: 'name',
             sortable: false,
             flex: 1
         }, {
@@ -41,6 +41,9 @@ Ext.define('NU.view.window.Configuration', {
                 xtype: 'factoryWidget'
             },
             sortable: false,
+            listeners: {
+                updateWidget: 'onUpdateWidget'
+            },
             flex: 1
         }]
     }]

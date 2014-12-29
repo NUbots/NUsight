@@ -19,36 +19,21 @@
 
 package messages.support.nubugger.proto;
 
-message ConfigurationState {
+message ConfigurationMessage {
 
-    message KeyPair {
-        required string name = 1;
-        required Node value = 2;
+    enum Type {
+        NULL_VALUE = 3;
+        STRING = 4;
+        BOOLEAN = 5;
+        LONG = 6;
+        DOUBLE = 7;
     }
 
-    message Node {
-        enum Type {
-            DIRECTORY = 1;
-            FILE = 2;
-            NULL_VALUE = 3;
-            STRING = 4;
-            BOOLEAN = 5;
-            LONG = 6;
-            DOUBLE = 7;
-            SEQUENCE = 8;
-            MAP = 9;
-        }
+    required string path = 1;
+    required Type type = 2;
+    optional string string_value = 3;
+    optional double boolean_value = 4;
+    optional double long_value = 5;
+    optional double double_value = 6;
 
-        required string path = 1;
-        required Type type = 2;
-        optional string tag = 3;
-        optional string string_value = 4;
-        optional double boolean_value = 5;
-        optional double long_value = 6;
-        optional double double_value = 7;
-        repeated Node sequence_value = 8;
-        repeated KeyPair map_value = 9;
-    }
-
-    required Node root = 1;
 }

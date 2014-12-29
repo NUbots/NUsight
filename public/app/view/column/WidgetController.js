@@ -80,26 +80,29 @@ Ext.define('NU.view.column.WidgetController', {
      * @param cell The cell that contains the widget.
      */
     updateCell: function (column, treeView, record, cell) {
-        var widget = this.widgets[record.internalId];               // get the widget from the map
-        Ext.fly(cell).empty();                                      // remove the current contents of the cell
-        if (widget === undefined) {                                 // create the widget if it hasn't been created
-            var component = Ext.widget(column.getWidget().xtype, {  // create the widget
+        var widget = this.widgets[record.internalId];                       // get the widget from the map
+        Ext.fly(cell).empty();                                              // remove the current contents of the cell
+        if (widget === undefined) {                                         // create the widget if it hasn't been created
+            var component = Ext.widget(column.getWidget().xtype, {          // create the widget
                 record: record,
                 listeners: {
-                    afterRender: function (widget) {                // wait for the widget to finish rendering
-                        widget.getEl().on({                         // add a click event listener to the widget
+                    afterRender: function (widget) {                        // wait for the widget to finish rendering
+                        widget.getEl().on({                                 // add a click event listener to the widget
                             click: this.onClick
                         });
+                    },
+                    update: function (record, value) {                      // listen for an update to the widget
+                        this.fireViewEvent('updateWidget', record, value);  // fire an update event from the view
                     },
                     scope: this
                 }
             });
-            this.widgets[record.internalId] = component;            // add the component to the map
-            component.render(cell);                                 // render the component to the cell
+            this.widgets[record.internalId] = component;                    // add the component to the map
+            component.render(cell);                                         // render the component to the cell
         } else {
-            var dom = widget.getEl().dom;                           // get the dom from the widget
-            if (dom !== null) {                                     // check the dom exists
-                cell.appendChild(widget.getEl().dom);               // append the existing dom to the cell
+            var dom = widget.getEl().dom;                                   // get the dom from the widget
+            if (dom !== null) {                                             // check the dom exists
+                cell.appendChild(widget.getEl().dom);                       // append the existing dom to the cell
             }
         }
     },
