@@ -32,8 +32,10 @@ Ext.define('NU.view.factory.WidgetController', {
      * @param record The record associated with the widget.
      */
     render: function (record) {
-        var name = record.get('name');      // get the name from the record
-        var value = record.get('value');    // get the value of the widget from the record
+        // get the name from the record and ensure it is a valid identifier
+        var name = this.transformName(record.get('name'));
+        // get the value of the widget from the record
+        var value = record.get('value');
         var type = record.get('type');      // get the type of widget from the record
         function resolve (widget) {         // a private function that resolves the enumeration so it can be evaluated
             return widget.type;
@@ -193,5 +195,14 @@ Ext.define('NU.view.factory.WidgetController', {
                 scope: this
             }
         }));
+    },
+    /**
+     * Transforms the name to ensure it is valid by replacing any spaces with underscores.
+     *
+     * @param configuration The name of the configuration to transform so it is valid.
+     * @returns {*} The new name of the configuration.
+     */
+    transformName: function (configuration) {
+        return configuration.replace(/[./\- ]/g, '_');
     }
 });

@@ -119,7 +119,7 @@ Ext.define('NU.view.window.ConfigurationController', {
     processDirectory: function (node, directory) {
         Ext.each(directory, function (item) {
             this.processMessage(node.appendChild({
-                name: this.transformName(item.name)
+                name: item.name
             }), item.value);
         }, this);
     },
@@ -181,7 +181,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         Ext.each(map, function (item) {
             // processes the message and its map value
             this.processMessage(node.appendChild({
-                name: this.transformName(item.name)
+                name: item.name
             }), item.value);
         }, this);
     },
@@ -231,15 +231,6 @@ Ext.define('NU.view.window.ConfigurationController', {
             },
             leaf: true
         });
-    },
-    /**
-     * Transforms the name to ensure it is valid by replacing any spaces with underscores.
-     *
-     * @param configuration The name of the configuration to transform so it is valid.
-     * @returns {*} The new name of the configuration.
-     */
-    transformName: function (configuration) {
-        return configuration.replace(/[./\- ]/g, '_');
     },
     /**
      * Updates a configuration file with a new value based off the information found in the record.
