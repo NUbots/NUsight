@@ -240,6 +240,17 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     onUpdateWidget: function (record, value) {
         debugger;
+        var path = record.get('path');                      // get the path of the configuration file to update
+        var name = record.get('name');                      // get the name of the configuration being updated
+        var message = new API.Message();
+        message.setType(API.Message.Type.COMMAND);
+        message.setFilterId(0);
+        message.setUtcTimestamp(Date.now() / 1000);
+        var command = new API.Message.Command();
+        command.setCommand("get_configuration_state");
+        message.setCommand(command);
+        NU.util.Network.send(this.getRobotIP(), message);
+
     },
     /**
      * Removes a configuration for a particular robot.

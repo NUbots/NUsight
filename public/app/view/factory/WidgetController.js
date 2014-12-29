@@ -66,11 +66,14 @@ Ext.define('NU.view.factory.WidgetController', {
      * A method that gets called when a widget is updated to update the respective configuration that is associated
      * with the widget and its record.
      *
+     * @param widget The widget being updated.
      * @param value The new value of the widget.
      */
-    update: function (value) {
-        var record = this.getView().getRecord();        // get the record from the view
-        this.fireViewEvent('update', record, value);    // fire an event that updates the configuration file
+    update: function (widget, value) {
+        if (widget.isValid()) {                             // check if the widget is valid before updating it
+            var record = this.getView().getRecord();        // get the record from the view
+            this.fireViewEvent('update', record, value);    // fire an event that updates the configuration file
+        }
     },
     /**
      * Adds a text field to the configuration for the robot.
@@ -84,7 +87,7 @@ Ext.define('NU.view.factory.WidgetController', {
             value: value,
             listeners: {
                 change: function (widget, value) {
-                    this.update(value);
+                    this.update(widget, value);
                 },
                 scope: this
             }
@@ -106,7 +109,7 @@ Ext.define('NU.view.factory.WidgetController', {
             maxValue: maxValue || 100,
             listeners: {
                 change: function (widget, value) {
-                    this.update(value);
+                    this.update(widget, value);
                 },
                 scope: this
             }
@@ -124,7 +127,7 @@ Ext.define('NU.view.factory.WidgetController', {
             checked: checked,
             listeners: {
                 change: function (widget, value) {
-                    this.update(value);
+                    this.update(widget, value);
                 },
                 scope: this
             }
