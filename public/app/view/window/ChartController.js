@@ -124,7 +124,7 @@ Ext.define('NU.view.window.ChartController', {
         api_motor_data[ServoID.HEAD_PAN].present_position
         api_motor_data[ServoID.HEAD_TILT].present_position*/
     },
-    onDataPoint: function (robotIP, dataPoint) {
+    onDataPoint: function (robotIP, dataPoint, timestamp) {
 
         // TODO: remove
         if (robotIP !== this.getRobotIP()) {
@@ -138,7 +138,7 @@ Ext.define('NU.view.window.ChartController', {
         var stream = this.getStream(label, values);
 
         Ext.each(values, function (value, i) {
-            stream.series[i].append(Date.now(), value);
+            stream.series[i].append(timestamp, value);
         }, this);
     },
     getStream: function(label, values) {
