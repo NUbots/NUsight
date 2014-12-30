@@ -50,12 +50,14 @@ Ext.define('NU.util.Network', {
 		var me = this;
 
 		Ext.Object.each(this.cache, function (hash, event) {
-			var api_message = API.Message.decode(event.message);
-			var api_event = api_message[event.name];
-			var time = new Date(api_message.getUtcTimestamp().toNumber());
-			delete this.cache[hash];
-			this.fireEvent(event.name, event.robotIP, api_event, time);
-//			console.log(event.robotIP, event.name);
+			if (this.hasListener(event.name)) {
+				var api_message = API.Message.decode(event.message);
+				var api_event = api_message[event.name];
+				var time = new Date(api_message.getUtcTimestamp().toNumber());
+				delete this.cache[hash];
+				this.fireEvent(event.name, event.robotIP, api_event, time);
+				//console.log(event.robotIP, event.name);
+			}
 		}, this);
 
 		requestAnimationFrame(function () {
@@ -79,11 +81,13 @@ Ext.define('NU.util.Network', {
 			hash = eventName + ':' + filterId + ':' + robotIP;
 			this.cache[hash] = event;
 		} else {
-			var api_message = API.Message.decode(event.message);
-			var api_event = api_message[event.name];
-			var time = new Date(api_message.getUtcTimestamp().toNumber());
-			this.fireEvent(event.name, event.robotIP, api_event, time);
-//			console.log(event.robotIP, event.name);
+			if (this.hasListener(event.name)) {
+				var api_message = API.Message.decode(event.message);
+				var api_event = api_message[event.name];
+				var time = new Date(api_message.getUtcTimestamp().toNumber());
+				this.fireEvent(event.name, event.robotIP, api_event, time);
+				//console.log(event.robotIP, event.name);
+			}
 		}
 
 		this.fireEvent('packet', robotIP, packet);
