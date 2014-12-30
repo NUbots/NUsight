@@ -1,7 +1,8 @@
 Ext.define('NU.view.StatusBar', {
 	extend: 'Ext.toolbar.Toolbar',
 	alias: 'widget.nu_statusbar',
-	controller: 'NU.controller.StatusBar',
+	requires: 'NU.view.StatusBarController',
+	controller: 'StatusBar',
 	defaults: {
 //		flex: 1,
 		data: {
@@ -14,7 +15,7 @@ Ext.define('NU.view.StatusBar', {
 	},
 	items: [{
 		xtype: 'panel',
-		itemId: 'packetCount',
+		reference: 'packetCount',
 		style: {
 			textAlign: 'right'
 		},

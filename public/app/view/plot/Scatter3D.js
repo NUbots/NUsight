@@ -19,7 +19,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		mouseX: 0,
 		mouseY: 0,
 		down: false,
-		data: null,
+		pointData: null,
 		scene: null,
 		camera: null,
 		renderer: null,
@@ -41,8 +41,8 @@ Ext.define('NU.view.plot.Scatter3D', {
 		}
 	},
 	initComponent: function () {
-		if (this.getData() === null) {
-			this.setData([]);
+		if (this.getPointData() === null) {
+			this.setPointData([]);
 		}
 		if (this.getTexts() === null) {
 			this.setTexts([]);
@@ -122,17 +122,16 @@ Ext.define('NU.view.plot.Scatter3D', {
 			scope: this
 		});
 
-		var me = this;
-		function update() {
+		function animate() {
 			renderer.clear();
 			camera.lookAt(scene.position);
-			Ext.each(me.getTexts(), function (text) {
+			Ext.each(this.getTexts(), function (text) {
 				text.lookAt(camera.position);
-			}, me);
+			}, this);
 			renderer.render(scene, camera);
-			requestAnimationFrame(update, renderer.domElement);
+			requestAnimationFrame(animate.bind(this));
 		}
-		requestAnimationFrame(update, renderer.domElement);
+		requestAnimationFrame(animate.bind(this));
 
 		this.setScatterPlot(scatterPlot);
 		this.setRenderer(renderer);
@@ -302,7 +301,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		function createText2D(text, color, font, size, segW, segH)
 		{
 			var canvas = createTextCanvas(text, color, font, size);
-			var plane = new THREE.PlaneGeometry(canvas.width, canvas.height, segW, segH);
+			var plane = new THREE.PlaneBufferGeometry(canvas.width, canvas.height, segW, segH);
 			var tex = new THREE.Texture(canvas);
 			tex.needsUpdate = true;
 			var planeMat = new THREE.MeshBasicMaterial({
@@ -354,13 +353,13 @@ Ext.define('NU.view.plot.Scatter3D', {
 		var points = this.getPoints();
 		scatterPlot.remove(points);
 
-		var geo = new THREE.Geometry();
+		var geometry = new THREE.Geometry();
 
-		Ext.each(this.getData(), function (row) {
+		Ext.each(this.getPointData(), function (row) {
 			var position = new THREE.Vector3(row[0], row[1], row[2]);
 			//var radius = 0.4;
-			geo.vertices.push(position);
-			geo.colors.push(row[3]);
+			geometry.vertices.push(position);
+			geometry.colors.push(row[3]);
 			//var sphere = new Sphere(radius, row[3]);
 			//sphere.position = position;
 			//this.objects.push(sphere);
@@ -370,7 +369,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		texture.needsUpdate = true; // important
 //		var texture = THREE.ImageUtils.loadTexture("resources/images/disc.png");
 
-		var mat = new THREE.ParticleSystemMaterial({
+		var material = new THREE.PointCloudMaterial({
 			size: 8,
 //			sizeAttenuation: false,
 			map: texture,
@@ -382,7 +381,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 			vertexColors: true // optional
 		});
 
-		var points = new THREE.ParticleSystem(geo, mat);
+		var points = new THREE.PointCloud(geometry, material);
 		points.sortParticles = true;
 		scatterPlot.add(points);
 		this.setPoints(points);

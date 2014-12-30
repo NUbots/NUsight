@@ -1,15 +1,14 @@
 Ext.define('NU.view.window.Behaviour', {
 	extend : 'NU.view.window.Display',
-	inject: [
-		'actionStateChangeStore',
-		'registerActionTreeStore'
+	requires: [
+		'NU.view.window.BehaviourController',
+		'NU.store.RegisterActionTree',
+		'NU.store.ActionStateChange',
+		'Ext.grid.Panel',
+		'Ext.grid.column.Date'
 	],
-	config: {
-		actionStateChangeStore: null,
-		registerActionTreeStore: null
-	},
-	alias : ['widget.nu_behaviour_window'],
-	controller: 'NU.controller.Behaviour',
+	alias : 'widget.nu_behaviour_window',
+	controller: 'Behaviour',
 	title: 'Behaviour',
 	width: 800,
 	height: 750,
@@ -18,22 +17,40 @@ Ext.define('NU.view.window.Behaviour', {
 		align: 'stretch'
 	},
 	initComponent: function () {
+		function getCellClass(value, state, index) {
+			if (value.indexOf(index) >= 0) {
+				if (state === API.ActionStateChange.State.START) {
+					return 'action-start';
+				} else {
+					return 'action-kill';
+				}
+			} else {
+				return '';
+			}
+		}
 		Ext.apply(this, {
 			tbar: [{
-				xtype: 'robot_selector'
+				xtype: 'robot_selector',
+				listeners: {
+					selectRobot: 'onSelectRobot'
+				}
 			}, '->', {
-				itemId: 'clearActionTable',
-				text: 'Clear Action Table'
+				text: 'Clear Action Table',
+				listeners: {
+					click: 'onClearActionTable'
+				}
 			}, {
-				itemId: 'clearStateLog',
-				text: 'Clear State Log'
+				text: 'Clear State Log',
+				listeners: {
+					click: 'onClearStateLog'
+				}
 			}],
 			items: [{
-				itemId: 'actions',
+				reference: 'actions',
 				xtype: 'treepanel',
 				title: 'Action Table',
 				flex: 1,
-				store: this.getRegisterActionTreeStore(),
+				store: Ext.create('NU.store.RegisterActionTree'),
 				columns: [
 					{text: 'Id', dataIndex: 'id'},
 					{text: 'Name', dataIndex: 'name', flex: 1},
@@ -42,20 +59,11 @@ Ext.define('NU.view.window.Behaviour', {
 			}, {
 				xtype: 'splitter'
 			}, {
-				itemId: 'logs',
+				reference: 'logs',
 				xtype: 'grid',
 				title: 'State log',
 				flex: 1,
-				store: this.getActionStateChangeStore(),
-				/*viewConfig: {
-					getRowClass: function (record) {
-						if (record.get('state') === API.ActionStateChange.State.START) {
-							return 'action-start';
-						} else {
-							return 'action-kill';
-						}
-					}
-				},*/
+				store: Ext.create('NU.store.ActionStateChange'),
 				columns: [
 					{text: 'Time', dataIndex: 'time', xtype: 'datecolumn', format: 'H:i:s', width: 75},
 					{text: 'State', dataIndex: 'state', renderer: function (value, metaData, record) {
@@ -63,53 +71,23 @@ Ext.define('NU.view.window.Behaviour', {
 					}},
 					{text: 'Name', dataIndex: 'name'},
 					{text: 'Left Leg', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(0) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 0);
 						return '';
 					}},
 					{text: 'Right Leg', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(1) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 1);
 						return '';
 					}},
 					{text: 'Left Arm', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(2) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 2);
 						return '';
 					}},
 					{text: 'Right Arm', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(3) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 3);
 						return '';
 					}},
 					{text: 'Head', dataIndex: 'limbs', renderer: function (value, metaData, record) {
-						if (value.indexOf(4) >= 0) {
-							if (record.get('state') === API.ActionStateChange.State.START) {
-								metaData.tdCls = metaData.tdCls + " action-start";
-							} else {
-								metaData.tdCls = metaData.tdCls + " action-kill";
-							}
-						}
+						metaData.tdCls = metaData.tdCls + ' ' + getCellClass(value, record.get('state'), 4);
 						return '';
 					}}
 				]

@@ -1,7 +1,8 @@
 Ext.define('NU.view.LayeredCanvas', {
 	extend: 'Ext.container.Container',
 	alias: 'widget.nu_layered_canvas',
-	controller: 'NU.controller.LayeredCanvas',
+	requires: 'NU.view.LayeredCanvasController',
+	controller: 'LayeredCanvas',
 	autoEl: {
 		tag: 'div'
 	},
@@ -9,5 +10,10 @@ Ext.define('NU.view.LayeredCanvas', {
 		position: 'relative',
 		display: 'block'
 	},
-	layout: 'fit'
+	layout: 'fit',
+	listeners: {
+		afterrender: 'onAfterRender',
+		boxready: 'onResize',
+		resize: 'onResize'
+	}
 });

@@ -1,5 +1,6 @@
-Ext.define('NU.controller.LayeredCanvas', {
-	extend: 'Deft.mvc.ViewController',
+Ext.define('NU.view.LayeredCanvasController', {
+	extend: 'Ext.app.ViewController',
+	alias: 'controller.LayeredCanvas',
 	config: {
 		layers: null,
 		container: null,
@@ -8,20 +9,15 @@ Ext.define('NU.controller.LayeredCanvas', {
 		imageWidth: 320,
 		imageHeight: 240
 	},
-	control: {
-		'view': {
-			boxready: function (view, width, height) {
-				this.autoSize(width, height);
-			},
-			resize: function (view, width, height) {
-				this.autoSize(width, height);
-			}
-		}
-	},
 	init: function () {
 		this.setLayers([]);
-		this.setContainer(this.getView().getEl());
 //		this.add('default');
+	},
+	onAfterRender: function () {
+		this.setContainer(this.getView().getEl());
+	},
+	onResize: function (view, width, height) {
+		this.autoSize(width, height);
 	},
 	autoSize: function (width, height) {
 		if (width === undefined) {
@@ -40,10 +36,15 @@ Ext.define('NU.controller.LayeredCanvas', {
 		}
 		return this;
 	},
-	add: function (name, group) {
+	add: function (name, settings) {
 		var layers = this.getLayers();
+		settings = settings || {};
 		if (this.get(name) === null) {
-			var canvas = new Ext.Element(document.createElement('canvas'));
+			var canvas = settings.canvas || new Ext.Element(document.createElement('canvas'));
+			if (settings.webgl && !settings.context) {
+				var webglAttributes = settings.webglAttributes || {antialias: true};
+				settings.context = canvas.dom.getContext('webgl', webglAttributes) || canvas.dom.getContext('experimental-webgl', webglAttributes);
+			}
 			canvas.setStyle({
 				zIndex: layers.length,
 				position: 'absolute',
@@ -58,9 +59,9 @@ Ext.define('NU.controller.LayeredCanvas', {
 			container.appendChild(canvas);
 			var layer = {
 				name: name,
-				group: group,
+				group: settings.group,
 				canvas: canvas,
-				context: canvas.dom.getContext('2d'),
+				context: settings.context || canvas.dom.getContext('2d'),
 				hidden: true,
 				clear: Ext.pass(this.clear, [name], this),
 				setOpacity: Ext.pass(this.setOpacity, [name], this)

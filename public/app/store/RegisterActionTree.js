@@ -5,7 +5,7 @@ Ext.define('NU.store.RegisterActionTree', {
 		type: 'memory',
 		reader: {
 			type: 'json',
-			root: 'items'
+			rootProperty: 'items'
 		}
 	}
 });

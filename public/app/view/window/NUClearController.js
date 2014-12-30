@@ -1,21 +1,7 @@
-Ext.define('NU.controller.NUClear', {
-    extend: 'NU.controller.Display',
-    inject: 'reactionStatisticsTreeStore',
-    control: {
-        'display': true,
-        'robotSelector': {
-            robotIP: function () {
-                this.getDisplay().getRootNode().removeAll();
-            }
-        },
-        'updatespeed': {
-            change: function (field, newValue, oldValue, eOpts) {
-                this.setUpdateSpeed(newValue);
-            }
-        }
-    },
+Ext.define('NU.view.window.NUClearController', {
+    extend: 'NU.view.window.DisplayController',
+    alias: 'controller.NUClear',
     config: {
-        reactionStatisticsTreeStore: null,
         lastUpdated: null,
         lastDraw: 0,
         updateSpeed: 1000
@@ -26,7 +12,7 @@ Ext.define('NU.controller.NUClear', {
         this.lastUpdated = {};
 
         // update default
-        this.getUpdatespeed().setRawValue(this.getUpdateSpeed());
+        this.lookupReference('updatespeed').setRawValue(this.getUpdateSpeed());
 
 		var view = this.getView();
         view.mon(NU.util.Network, 'reaction_statistics', this.onReactionStatistics, this);
@@ -34,10 +20,17 @@ Ext.define('NU.controller.NUClear', {
         this.callParent(arguments);
 
     },
+    onSelectRobot: function (robotIP) {
+        this.lookupReference('display').getRootNode().removeAll();
+        this.callParent(arguments);
+    },
+    onUpdateSpeedChange: function (field, newValue, oldValue, eOpts) {
+		this.setUpdateSpeed(newValue);
+	},
     onReactionStatistics: function (robotIP, reactionStatistics) {
 
         // TODO: remove
-        if (robotIP !== this.robotIP) {
+        if (robotIP !== this.getRobotIP()) {
             return;
         }
 
@@ -46,7 +39,7 @@ Ext.define('NU.controller.NUClear', {
         var now = Date.now();
 
         if (now - this.getLastUpdated(reactionId) > this.getUpdateSpeed()) {
-            var root = this.getReactionStatisticsTreeStore().getRootNode();
+            var root = this.lookupReference('display').getStore().getRootNode();
 
             var causeReactionId = reactionStatistics.causeReactionId.toNumber();
             var reactionNode = root.findChildBy(function (node) {

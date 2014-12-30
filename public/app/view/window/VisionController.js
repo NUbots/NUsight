@@ -1,5 +1,6 @@
-Ext.define('NU.controller.Vision', {
-    extend: 'NU.controller.Display',
+Ext.define('NU.view.window.VisionController', {
+    extend: 'NU.view.window.DisplayController',
+	alias: 'controller.Vision',
     config: {
 		cameraId: null,
         displayImage: false,
@@ -10,57 +11,15 @@ Ext.define('NU.controller.Vision', {
 		height: 240,
 		bitsPerPixel: 4
     },
-    control: {
-		'cameraSelector': {
-			listeners: {
-				selectCameraId: function (cameraId) {
-					this.setCameraId(cameraId);
-					//this.getView().fireEvent('selectCameraId', cameraId);
-				}
-			}
-		},
-        'displaypicker': {
-            change: function (obj, newValue, oldValue, e) {
-				var layeredCanvas = this.getLayeredCanvas();
-				layeredCanvas.hideAll();
-                Ext.each(newValue, function (value) {
-                    switch (value) {
-						case 'all':
-							layeredCanvas.showAll();
-							break;
-                        case 'raw':
-							layeredCanvas.show('image');
-                            break;
-                        case 'classified_search':
-                            layeredCanvas.show('classified_image_search');
-                            break;
-                        case 'classified_refine':
-                            layeredCanvas.show('classified_image_refine');
-                            break;
-                        case 'visual_horizon':
-                            layeredCanvas.show('visual_horizon');
-                            break;
-                        case 'horizon':
-                            layeredCanvas.show('horizon');
-                            break;
-                        case 'objects':
-                            layeredCanvas.showGroup('field_objects');
-                            break;
-                    }
-                }, this);
-            }
-        },
-        'canvas': true
-    },
-    init: function () {
-		var layeredCanvas = this.getCanvas().getController();
+    onAfterRender: function () {
+		var layeredCanvas = this.lookupReference('canvas').getController();
 		layeredCanvas.add('image');
         layeredCanvas.add('classified_image_search');
         layeredCanvas.add('classified_image_refine');
         layeredCanvas.add('visual_horizon');
         layeredCanvas.add('horizon');
-		layeredCanvas.add('goals', 'field_objects');
-		layeredCanvas.add('balls', 'field_objects');
+		layeredCanvas.add('goals', {group: 'field_objects'});
+		layeredCanvas.add('balls', {group: 'field_objects'});
 		this.setLayeredCanvas(layeredCanvas);
 
         //WebGL2D.enable(this.canvas.el.dom);
@@ -72,10 +31,39 @@ Ext.define('NU.controller.Vision', {
         view.mon(NU.util.Network, 'image', this.onImage, this);
 		view.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
 		view.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
-
-        this.callParent(arguments);
-
     },
+	onLayerSelect: function (obj, newValue, oldValue, e) {
+		var layeredCanvas = this.getLayeredCanvas();
+		layeredCanvas.hideAll();
+		Ext.each(newValue, function (value) {
+			switch (value) {
+				case 'all':
+					layeredCanvas.showAll();
+					break;
+				case 'raw':
+					layeredCanvas.show('image');
+					break;
+				case 'classified_search':
+					layeredCanvas.show('classified_image_search');
+					break;
+				case 'classified_refine':
+					layeredCanvas.show('classified_image_refine');
+					break;
+				case 'visual_horizon':
+					layeredCanvas.show('visual_horizon');
+					break;
+				case 'horizon':
+					layeredCanvas.show('horizon');
+					break;
+				case 'objects':
+					layeredCanvas.showGroup('field_objects');
+					break;
+			}
+		}, this);
+	},
+	onSelectCamera: function (cameraId) {
+		this.setCameraId(cameraId);
+	},
 	getContext: function (name) {
 		return this.getLayeredCanvas().getContext(name);
 	},
@@ -90,7 +78,7 @@ Ext.define('NU.controller.Vision', {
 	},
     onImage: function (robotIP, image) {
 
-        if (robotIP != this.robotIP || image === null) {
+        if (robotIP != this.getRobotIP() || image === null) {
             return;
         }
 
@@ -112,8 +100,8 @@ Ext.define('NU.controller.Vision', {
 				this.drawImageB64(image);
 				break;
 			case Format.YCbCr444:
-				//this.drawImageYbCr444(image);
-				this.drawImageBayer(image);
+				this.drawImageYbCr444(image);
+				//this.drawImageBayer(image);
 				break;
 			default:
 				throw 'Unsupported Format';
@@ -258,7 +246,7 @@ Ext.define('NU.controller.Vision', {
 	},
     onClassifiedImage: function (robotIP, image) {
 
-        if(robotIP != this.robotIP) {
+        if(robotIP != this.getRobotIP()) {
             return;
         }
 
@@ -396,7 +384,7 @@ Ext.define('NU.controller.Vision', {
     },
 	onVisionObjects: function (robotIP, visionObjects) {
 
-		if(robotIP !== this.robotIP) {
+		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
 

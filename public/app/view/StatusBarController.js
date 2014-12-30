@@ -1,19 +1,16 @@
-Ext.define('NU.controller.StatusBar', {
-	extend: 'Deft.mvc.ViewController',
+Ext.define('NU.view.StatusBarController', {
+	extend: 'Ext.app.ViewController',
+	alias: 'controller.StatusBar',
 	requires: [
-		'NU.util.Display'
+		'NU.util.Display',
+		'NU.util.Network'
 	],
-	inject:  'robotsStore',
 	config: {
 		packetCounter: 0,
-		robotsStore: null,
 		insertIndex: 0,
 		updateRate: 600
 	},
 	robotMap: null,
-	control: {
-		'packetCount': true
-	},
 	init: function () {
 		this.robotMap = {};
 		var view = this.getView();
@@ -22,7 +19,7 @@ Ext.define('NU.controller.StatusBar', {
 	},
 	addRobots: function () {
 		var view = this.getView();
-		var store = this.getRobotsStore();
+		var store = Ext.getStore('Robots');
 		store.on('add', function (store, robots) {
 			Ext.each(robots, function(robot) {
 				var name = robot.get('name');
@@ -49,7 +46,7 @@ Ext.define('NU.controller.StatusBar', {
 		var robot = this.robotMap[robotIP];
 		robot.counter++;
 
-		NU.util.Display.updateDelayed(this.getPacketCount(), {
+		NU.util.Display.updateDelayed(this.lookupReference('packetCount'), {
 			count: this.getPacketCounter()
 		}, this.getUpdateRate());
 
