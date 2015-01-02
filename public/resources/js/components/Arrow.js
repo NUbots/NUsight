@@ -75,7 +75,7 @@
         // create the arrow mesh with its geometry and specified material
         this.mesh = new THREE.Mesh(geometry, material);
 		// set the position of the object
-		this.position = origin;
+		this.position.copy(origin);
 		// change the rotation order
         this.rotation.order = 'ZYX';
         // point the mesh in the direction vector

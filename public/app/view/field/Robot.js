@@ -1,6 +1,7 @@
 Ext.define('NU.view.field.Robot', {
 	extend: 'Ext.util.Observable',
 	alias: ['widget.nu_field_robot'],
+	requires: ['Ext.util.TaskManager'],
 	config: {
 		robotIP: null,
 		showOrientation: false
@@ -204,6 +205,7 @@ Ext.define('NU.view.field.Robot', {
 			}
 		}
 		// the task being executed
+		// TODO: check that this eventually stops
 		var task = Ext.TaskManager.start({
 			run: updateClock,
 			interval: time * 1000 / steps
