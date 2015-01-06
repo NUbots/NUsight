@@ -99,30 +99,152 @@ Ext.define('NU.view.window.ChartController', {
         }
 
     },
-    onSensorData: function (api_sensor_data) {
+    onSensorData: function (robotIP, sensorData, timestamp) {
 
-        var api_motor_data = api_sensor_data.servo;
-        // TODO
-        /*api_motor_data[ServoID.R_SHOULDER_PITCH].present_position
-        api_motor_data[ServoID.L_SHOULDER_PITCH].present_position
-        api_motor_data[ServoID.R_SHOULDER_ROLL].present_position
-        api_motor_data[ServoID.L_SHOULDER_ROLL].present_position
-        api_motor_data[ServoID.R_ELBOW].present_position
-        api_motor_data[ServoID.L_ELBOW].present_position
-        api_motor_data[ServoID.R_HIP_YAW].present_position
-        api_motor_data[ServoID.L_HIP_YAW].present_position
-        api_motor_data[ServoID.R_HIP_ROLL].present_position
-        api_motor_data[ServoID.L_HIP_ROLL].present_position
-        api_motor_data[ServoID.R_HIP_PITCH].present_position
-        api_motor_data[ServoID.L_HIP_PITCH].present_position
-        api_motor_data[ServoID.R_KNEE].present_position
-        api_motor_data[ServoID.L_KNEE].present_position
-        api_motor_data[ServoID.R_ANKLE_PITCH].present_position
-        api_motor_data[ServoID.L_ANKLE_PITCH].present_position
-        api_motor_data[ServoID.R_ANKLE_ROLL].present_position
-        api_motor_data[ServoID.L_ANKLE_ROLL].present_position
-        api_motor_data[ServoID.HEAD_PAN].present_position
-        api_motor_data[ServoID.HEAD_TILT].present_position*/
+        // Accelerometer
+        var accel = sensorData.getAccelerometer();
+        this.onDataPoint(robotIP, {
+            label: "Accelerometer",
+            value: [
+                accel.x,
+                accel.y,
+                accel.z
+            ]
+        }, timestamp);
+
+        // Gyroscope
+        var gyro = sensorData.getGyroscope();
+        this.onDataPoint(robotIP, {
+            label: "Gyroscope",
+            value: [
+                gyro.x,
+                gyro.y,
+                gyro.z
+            ]
+        }, timestamp);
+
+        // Orientation
+        var orientation = sensorData.getOrientation();
+        this.onDataPoint(robotIP, {
+            label: "Orientation",
+            value: [
+                orientation.xx,
+                orientation.yx,
+                orientation.zx,
+                orientation.xy,
+                orientation.yy,
+                orientation.zy,
+                orientation.xz,
+                orientation.yz,
+                orientation.zz
+            ]
+        }, timestamp);
+
+        // Left FSR
+        var lFSR = sensorData.getLeftFSR();
+        this.onDataPoint(robotIP, {
+            label: "Left FSR Position",
+            value: [
+                lFSR.x,
+                lFSR.y
+            ]
+        }, timestamp);
+        this.onDataPoint(robotIP, {
+            label: "Left FSR Force",
+            value: [
+                lFSR.z
+            ]
+        }, timestamp);
+
+        // Right FSR
+        var rFSR = sensorData.getRightFSR();
+        this.onDataPoint(robotIP, {
+            label: "Right FSR Position",
+            value: [
+                rFSR.x,
+                rFSR.y
+            ]
+        }, timestamp);
+        this.onDataPoint(robotIP, {
+            label: "Right FSR Force",
+            value: [
+                rFSR.z
+            ]
+        }, timestamp);
+
+        // Servos
+        Ext.each(sensorData.servo, function(servo) {
+
+            var id = servo.getId();
+            var name = id; // TODO use the ID to get a name from a cache
+
+            // PID gain
+            this.onDataPoint(robotIP, {
+                label: name + " Gain",
+                value: [
+                    servo.getPGain(),
+                    servo.getIGain(),
+                    servo.getDGain()
+                ]
+            }, timestamp);
+
+            // Goal position
+            this.onDataPoint(robotIP, {
+                label: name + " Goal Position",
+                value: [
+                    servo.getGoalPosition()
+                ]
+            }, timestamp);
+
+            // Goal Velocity
+            this.onDataPoint(robotIP, {
+                label: name + " Goal Velocity",
+                value: [
+                    servo.getGoalVelocity()
+                ]
+            }, timestamp);
+
+            // Present position
+            this.onDataPoint(robotIP, {
+                label: name + " Present Position",
+                value: [
+                    servo.getPresentPosition()
+                ]
+            }, timestamp);
+
+            // Present Velocity
+            this.onDataPoint(robotIP, {
+                label: name + " Present Velocity",
+                value: [
+                    servo.getPresentVelocity()
+                ]
+            }, timestamp);
+
+            // Load
+            this.onDataPoint(robotIP, {
+                label: name + " Load",
+                value: [
+                    servo.getLoad()
+                ]
+            }, timestamp);
+
+            // Voltage
+            this.onDataPoint(robotIP, {
+                label: name + " Voltage",
+                value: [
+                    servo.getVoltage()
+                ]
+            }, timestamp);
+
+            // Temperature
+            this.onDataPoint(robotIP, {
+                label: name + " Temperature",
+                value: [
+                    servo.getTemperature()
+                ]
+            }, timestamp);
+
+        }, this);
     },
     onDataPoint: function (robotIP, dataPoint, timestamp) {
 
