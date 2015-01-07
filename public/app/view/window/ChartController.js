@@ -77,20 +77,20 @@ Ext.define('NU.view.window.ChartController', {
             }).axis({
                 id: 'x-axis',
                 axis: 0,
-                color: 0xff0000,
-                size: .05,
+                color: 0xaa0000,
+                size: .02,
                 labels: false
             }).axis({
 				id: 'y-axis',
 				axis: 1,
-				color: 0x00ff00,
-				size: .05,
+				color: 0x00aa00,
+				size: .02,
 				labels: false
 			}).axis({
 				id: 'z-axis',
 				axis: 2,
-				color: 0x0000ff,
-				size: .05,
+				color: 0x0000aa,
+				size: .02,
 				labels: false
 			})/*.grid({
 				id: 'my-grid',
@@ -180,6 +180,8 @@ Ext.define('NU.view.window.ChartController', {
 
     },
     onSensorData: function (robotIP, sensorData, timestamp) {
+
+        return;
 
         var Type = API.DataPoint.Type;
 
@@ -291,7 +293,7 @@ Ext.define('NU.view.window.ChartController', {
             this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Goal Velocity",
                 value: [
-                    servo.getGoalVelocity()
+                    servo.getGoalSpeed()
                 ],
                 type: Type.FLOAT_LIST
             }), timestamp);
@@ -309,7 +311,7 @@ Ext.define('NU.view.window.ChartController', {
             this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Present Velocity",
                 value: [
-                    servo.getPresentVelocity()
+                    servo.getPresentSpeed()
                 ],
                 type: Type.FLOAT_LIST
             }), timestamp);
@@ -368,8 +370,7 @@ Ext.define('NU.view.window.ChartController', {
                 break;
             case Type.ROTATION_3D:
                 if (this.mathbox) {
-                    // TODO: a 3D thing
-                    var rot = new THREE.Matrix3().fromArray(values).transpose();
+                    var rot = new THREE.Matrix3().fromArray(values);
                     var rotArray = rot.toArray();
                     this.mathbox.set('#vecX', {data: [[0, 0, 0], rotArray.slice(0,3)]});
 					this.mathbox.set('#vecY', {data: [[0, 0, 0], rotArray.slice(3,6)]});
