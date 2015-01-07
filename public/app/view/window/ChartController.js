@@ -71,7 +71,7 @@ Ext.define('NU.view.window.ChartController', {
             mathbox.viewport({
                 type: 'cartesian',
                 range: [[-1, 1], [-1, 1], [-1, 1]], // Range in X, Y, Z
-                scale: [1, 1, 1],                   // Scale in X, Y, Z
+                scale: [0.5, 0.5, 0.5],                   // Scale in X, Y, Z
                 rotation: [-Math.PI / 2, 0, Math.PI / 2], // Convert to robot coordinates: x forward, y left, z up
                 position: [0, 0, 0]                 // Viewport position in XYZ
             }).axis({
@@ -98,7 +98,16 @@ Ext.define('NU.view.window.ChartController', {
 				color: 0xc0c0c0,
 				lineWidth: 1
 			})*/.vector({
-                id: "vec",
+                id: "vecX",
+				color: 0xff0000,
+                n: 1
+            }).vector({
+                id: "vecY",
+				color: 0x00ff00,
+                n: 1
+            }).vector({
+                id: "vecZ",
+				color: 0x0000ff,
                 n: 1
             }).start();
         }.bind(this));
@@ -361,9 +370,10 @@ Ext.define('NU.view.window.ChartController', {
                 if (this.mathbox) {
                     // TODO: a 3D thing
                     var rot = new THREE.Matrix3().fromArray(values).transpose();
-                    var vec = new THREE.Vector3(1, 0, 0);
-                    vec.applyMatrix3(rot);
-                    this.mathbox.set('#vec', {data: [[0, 0, 0], vec.toArray()]});
+                    var rotArray = rot.toArray();
+                    this.mathbox.set('#vecX', {data: [[0, 0, 0], rotArray.slice(0,3)]});
+					this.mathbox.set('#vecY', {data: [[0, 0, 0], rotArray.slice(3,6)]});
+					this.mathbox.set('#vecZ', {data: [[0, 0, 0], rotArray.slice(6,9)]});
                 }
                 break;
             default:
