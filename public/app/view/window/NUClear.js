@@ -17,21 +17,27 @@ Ext.define('NU.view.window.NUClear', {
         preserveRatio: false
     },
     layout: 'border',
-    tbar: [{
-        xtype: 'robot_selector',
-        listeners: {
-            selectRobot: 'onSelectRobot'
-        }
-    }, {
-        xtype: 'numberfield',
-        reference: 'updatespeed',
-        fieldLabel: 'Update Speed (ms)',
-        labelStyle: 'white-space: nowrap',
-        labelWidth: 120,
-        listening: {
-            change: 'onUpdateSpeedChange'
-        }
-    }],
+    tbar: {
+        xtype: 'toolbar',
+        layout: {
+            overflowHandler: 'Menu'
+        },
+        items: [{
+            xtype: 'robot_selector',
+            listeners: {
+                selectRobot: 'onSelectRobot'
+            }
+        }, {
+            xtype: 'numberfield',
+            reference: 'updatespeed',
+            fieldLabel: 'Update Speed (ms)',
+            labelStyle: 'white-space: nowrap',
+            labelWidth: 120,
+            listening: {
+                change: 'onUpdateSpeedChange'
+            }
+        }]
+    },
     initComponent: function () {
         Ext.applyIf(this, {
             items: [{

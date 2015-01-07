@@ -19,51 +19,74 @@ Ext.define('NU.view.window.Chart', {
 		afterrender: 'onAfterRender',
 		resize: 'onResize'
 	},
-	tbar: [{
-		xtype: 'robot_selector',
-		listeners: {
-			selectRobot: 'onSelectRobot'
-		}
-	}, {
-		xtype: 'numberfield',
-		fieldLabel: 'Min',
-		labelStyle: 'white-space: nowrap',
-		labelWidth: 30,
-		width: 120,
-		listeners: {
-			change: 'onMinChange'
-		}
-	}, {
-		xtype: 'numberfield',
-		fieldLabel: 'Max',
-		labelStyle: 'white-space: nowrap',
-		labelWidth: 30,
-		width: 120,
-		listeners: {
-			change: 'onMaxChange'
-		}
-	}],
+	tbar: {
+		xtype: 'toolbar',
+		layout: {
+			overflowHandler: 'Menu'
+		},
+		items: [{
+			xtype: 'robot_selector',
+			listeners: {
+				selectRobot: 'onSelectRobot'
+			}
+		}, {
+			xtype: 'numberfield',
+			fieldLabel: 'Min',
+			labelStyle: 'white-space: nowrap',
+			labelWidth: 30,
+			width: 120,
+			listeners: {
+				change: 'onMinChange'
+			}
+		}, {
+			xtype: 'numberfield',
+			fieldLabel: 'Max',
+			labelStyle: 'white-space: nowrap',
+			labelWidth: 30,
+			width: 120,
+			listeners: {
+				change: 'onMaxChange'
+			}
+		}]
+	},
 	initComponent: function () {
 		Ext.applyIf(this, {
 			items: [{
-				xtype: 'component',
+				xtype: 'tabpanel',
 				region: 'center',
-				width: 320,
-				height: 240,
-				autoEl: {
-					tag: 'canvas',
+				items: [{
+					title: 'Streaming Line Chart',
+					xtype: 'component',
 					width: 320,
-					height: 240
-				},
-				reference: 'canvas',
-				layout: 'fit'
+					height: 240,
+					autoEl: {
+						tag: 'canvas',
+						width: 320,
+						height: 240
+					},
+					reference: 'canvas',
+					layout: 'fit'
+				}, {
+					title: '3D Rotation',
+					xtype: 'component',
+					width: 320,
+					height: 240,
+					reference: 'canvas3dContainer',
+					layout: 'fit',
+					listeners: {
+						afterrender: 'onCanvas3dAfterRender'
+					}
+				}]
 			}, {
 				region: 'east',
+				layout: 'fit',
 				width: 150,
 				items: [{
 					xtype: 'multiselect',
 					reference: 'streampicker',
+					layout: 'fit',
 					width: 148,
+					scrollable: true,
 					displayField: 'label',
 					store: Ext.create('NU.store.Streams'),
 					listeners: {

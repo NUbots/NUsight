@@ -29,22 +29,28 @@ Ext.define('NU.view.window.Behaviour', {
 			}
 		}
 		Ext.apply(this, {
-			tbar: [{
-				xtype: 'robot_selector',
-				listeners: {
-					selectRobot: 'onSelectRobot'
-				}
-			}, '->', {
-				text: 'Clear Action Table',
-				listeners: {
-					click: 'onClearActionTable'
-				}
-			}, {
-				text: 'Clear State Log',
-				listeners: {
-					click: 'onClearStateLog'
-				}
-			}],
+			tbar: {
+				xtype: 'toolbar',
+				layout: {
+					overflowHandler: 'Menu'
+				},
+				items: [{
+					xtype: 'robot_selector',
+					listeners: {
+						selectRobot: 'onSelectRobot'
+					}
+				}, '->', {
+					text: 'Clear Action Table',
+					listeners: {
+						click: 'onClearActionTable'
+					}
+				}, {
+					text: 'Clear State Log',
+					listeners: {
+						click: 'onClearStateLog'
+					}
+				}]
+			},
 			items: [{
 				reference: 'actions',
 				xtype: 'treepanel',

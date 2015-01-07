@@ -19,17 +19,23 @@ Ext.define('NU.view.window.Vision', {
     listeners: {
         afterrender: 'onAfterRender'
     },
-	tbar: [{
-		xtype: 'robot_selector',
-        listeners: {
-            selectRobot: 'onSelectRobot'
-        }
-	}, {
-		xtype: 'camera_selector',
-        listeners: {
-            selectCamera: 'onSelectCamera'
-        }
-	}],
+    tbar: {
+        xtype: 'toolbar',
+        layout: {
+            overflowHandler: 'Menu'
+        },
+        items: [{
+            xtype: 'robot_selector',
+            listeners: {
+                selectRobot: 'onSelectRobot'
+            }
+        }, {
+            xtype: 'camera_selector',
+            listeners: {
+                selectCamera: 'onSelectCamera'
+            }
+        }]
+    },
     items: [{
         xtype: 'nu_layered_canvas',
         region: 'center',
@@ -44,11 +50,14 @@ Ext.define('NU.view.window.Vision', {
         reference: 'canvas'
     }, {
         region: 'east',
+        layout: 'fit',
         width: 150,
         items: [{
             anchor: '100%',
             xtype: 'multiselect',
+            layout: 'fit',
             width: 148,
+            scrollable: true,
             store: [
                 ['all', 'All'],
 				['raw', 'Raw Image'],

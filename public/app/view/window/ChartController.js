@@ -1,6 +1,8 @@
 Ext.define('NU.view.window.ChartController', {
     extend: 'NU.view.window.DisplayController',
     alias: 'controller.Chart',
+    canvas3d: null,
+    mathbox: null,
     config: {
         colours: [
             // 8 distinct colours from http://colorbrewer2.org/
@@ -19,11 +21,19 @@ Ext.define('NU.view.window.ChartController', {
         ty: null,
         tz: null,
         lastDraw: 0,
-        streams: null
+        streams: null,
+        displayMode: null
+    },
+    statics: {
+        DisplayMode: {
+            StreamingLineChart: 0,
+            Rotation3D: 1
+        }
     },
     init: function () {
         // init array
         this.setStreams([]);
+        this.setDisplayMode(this.self.DisplayMode.StreamingLineChart);
     },
     onAfterRender: function () {
         // setup canvas
@@ -42,6 +52,62 @@ Ext.define('NU.view.window.ChartController', {
         view.mon(NU.util.Network, 'sensor_data', this.onSensorData, this);
 
         this.onResize(view, view.getWidth(), view.getHeight());
+    },
+    onCanvas3dAfterRender: function () {
+        ThreeBox.preload([
+            '/lib/mathbox/build/MathBox.glsl.html'
+        ], function () {
+            // Do stuff with MathBox here
+            var canvas3dContainer = this.lookupReference('canvas3dContainer');
+            var mathbox = this.mathbox = mathBox(canvas3dContainer.getEl().dom, {
+                cameraControls: true,
+                controlClass: ThreeBox.OrbitControls,
+                stats: false
+            });
+
+            // HACK, this is needed as mathbox/tquery does not support supplying a canvas element
+            this.canvas3d = Ext.get(canvas3dContainer.getEl().dom.children[0]);
+
+            mathbox.viewport({
+                type: 'cartesian',
+                range: [[-1, 1], [-1, 1], [-1, 1]], // Range in X, Y, Z
+                scale: [1, 1, 1],                   // Scale in X, Y, Z
+                rotation: [-Math.PI / 2, 0, Math.PI / 2], // Convert to robot coordinates: x forward, y left, z up
+                position: [0, 0, 0]                 // Viewport position in XYZ
+            }).axis({
+                id: 'x-axis',
+                axis: 0,
+                color: 0xff0000,
+                size: .05,
+                labels: false
+            }).axis({
+				id: 'y-axis',
+				axis: 1,
+				color: 0x00ff00,
+				size: .05,
+				labels: false
+			}).axis({
+				id: 'z-axis',
+				axis: 2,
+				color: 0x0000ff,
+				size: .05,
+				labels: false
+			})/*.grid({
+				id: 'my-grid',
+				axis: [0, 1],
+				color: 0xc0c0c0,
+				lineWidth: 1
+			})*/.vector({
+                id: "vec",
+                n: 1
+            }).start();
+        }.bind(this));
+    },
+    onStreamingLineChartClick: function () {
+        this.setDisplayMode(this.self.DisplayMode.StreamingLineChart);
+    },
+    onRotation3DModeClick: function () {
+        this.setDisplayMode(this.self.DisplayMode.Rotation3D);
     },
     onMinChange: function (field, newValue, oldValue, eOpts) {
 		var smoothie = this.getSmoothie();
@@ -98,6 +164,11 @@ Ext.define('NU.view.window.ChartController', {
             canvasDom.height = canvasEl.getHeight();
         }
 
+        if (this.canvas3d !== null) {
+            // TODO: This is a horrible horrible hack, please figure out how to replace me with reasonableness
+            this.mathbox._world._tqData._threeBoxContext.elementResize.callback();
+        }
+
     },
     onSensorData: function (api_sensor_data) {
 
@@ -132,14 +203,33 @@ Ext.define('NU.view.window.ChartController', {
         }
 
         //console.log(api_message);
-        var label = dataPoint.label;
-        var values = dataPoint.value;
+        var label = dataPoint.getLabel();
+        var values = dataPoint.getValue();
+        var type = dataPoint.getType();
+        var Type = API.DataPoint.Type;
 
-        var stream = this.getStream(label, values);
+        switch (type) {
+            case Type.FLOAT_LIST:
+                var stream = this.getStream(label, values);
 
-        Ext.each(values, function (value, i) {
-            stream.series[i].append(timestamp, value);
-        }, this);
+                Ext.each(values, function (value, i) {
+                    if (isFinite(value)) {
+                        stream.series[i].append(timestamp, value);
+                    }
+                }, this);
+                break;
+            case Type.ROTATION_3D:
+                if (this.mathbox) {
+                    // TODO: a 3D thing
+                    var rot = new THREE.Matrix3().fromArray(values).transpose();
+                    var vec = new THREE.Vector3(1, 0, 0);
+                    vec.applyMatrix3(rot);
+                    this.mathbox.set('#vec', {data: [[0, 0, 0], vec.toArray()]});
+                }
+                break;
+            default:
+                console.error("Unsupported data point type: ", type);
+        }
     },
     getStream: function(label, values) {
         var value = null;
