@@ -172,31 +172,35 @@ Ext.define('NU.view.window.ChartController', {
     },
     onSensorData: function (robotIP, sensorData, timestamp) {
 
+        var Type = API.DataPoint.Type;
+
         // Accelerometer
         var accel = sensorData.getAccelerometer();
-        this.onDataPoint(robotIP, {
+        this.onDataPoint(robotIP, new API.DataPoint({
             label: "Accelerometer",
             value: [
                 accel.x,
                 accel.y,
                 accel.z
-            ]
-        }, timestamp);
+            ],
+            type: Type.FLOAT_LIST
+        }), timestamp);
 
         // Gyroscope
         var gyro = sensorData.getGyroscope();
-        this.onDataPoint(robotIP, {
+        this.onDataPoint(robotIP, new API.DataPoint({
             label: "Gyroscope",
             value: [
                 gyro.x,
                 gyro.y,
                 gyro.z
-            ]
-        }, timestamp);
+            ],
+            type: Type.FLOAT_LIST
+        }), timestamp);
 
         // Orientation
         var orientation = sensorData.getOrientation();
-        this.onDataPoint(robotIP, {
+        this.onDataPoint(robotIP, new API.DataPoint({
             label: "Orientation",
             value: [
                 orientation.xx,
@@ -208,40 +212,45 @@ Ext.define('NU.view.window.ChartController', {
                 orientation.xz,
                 orientation.yz,
                 orientation.zz
-            ]
-        }, timestamp);
+            ],
+            type: Type.ROTATION_3D
+        }), timestamp);
 
         // Left FSR
         var lFSR = sensorData.getLeftFSR();
-        this.onDataPoint(robotIP, {
+        this.onDataPoint(robotIP, new API.DataPoint({
             label: "Left FSR Position",
             value: [
                 lFSR.x,
                 lFSR.y
-            ]
-        }, timestamp);
-        this.onDataPoint(robotIP, {
+            ],
+            type: Type.FLOAT_LIST
+        }), timestamp);
+        this.onDataPoint(robotIP, new API.DataPoint({
             label: "Left FSR Force",
             value: [
                 lFSR.z
-            ]
-        }, timestamp);
+            ],
+            type: Type.FLOAT_LIST
+        }), timestamp);
 
         // Right FSR
         var rFSR = sensorData.getRightFSR();
-        this.onDataPoint(robotIP, {
+        this.onDataPoint(robotIP, new API.DataPoint({
             label: "Right FSR Position",
             value: [
                 rFSR.x,
                 rFSR.y
-            ]
-        }, timestamp);
-        this.onDataPoint(robotIP, {
+            ],
+            type: Type.FLOAT_LIST
+        }), timestamp);
+        this.onDataPoint(robotIP, new API.DataPoint({
             label: "Right FSR Force",
             value: [
                 rFSR.z
-            ]
-        }, timestamp);
+            ],
+            type: Type.FLOAT_LIST
+        }), timestamp);
 
         // Servos
         Ext.each(sensorData.servo, function(servo) {
@@ -250,70 +259,78 @@ Ext.define('NU.view.window.ChartController', {
             var name = id; // TODO use the ID to get a name from a cache
 
             // PID gain
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Gain",
                 value: [
                     servo.getPGain(),
                     servo.getIGain(),
                     servo.getDGain()
-                ]
-            }, timestamp);
+                ],
+                type: Type.FLOAT_LIST
+            }), timestamp);
 
             // Goal position
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Goal Position",
                 value: [
                     servo.getGoalPosition()
-                ]
-            }, timestamp);
+                ],
+                type: Type.FLOAT_LIST
+            }), timestamp);
 
             // Goal Velocity
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Goal Velocity",
                 value: [
                     servo.getGoalVelocity()
-                ]
-            }, timestamp);
+                ],
+                type: Type.FLOAT_LIST
+            }), timestamp);
 
             // Present position
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Present Position",
                 value: [
                     servo.getPresentPosition()
-                ]
-            }, timestamp);
+                ],
+                type: Type.FLOAT_LIST
+            }), timestamp);
 
             // Present Velocity
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Present Velocity",
                 value: [
                     servo.getPresentVelocity()
-                ]
-            }, timestamp);
+                ],
+                type: Type.FLOAT_LIST
+            }), timestamp);
 
             // Load
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Load",
                 value: [
                     servo.getLoad()
-                ]
-            }, timestamp);
+                ],
+                type: Type.FLOAT_LIST
+            }), timestamp);
 
             // Voltage
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Voltage",
                 value: [
                     servo.getVoltage()
-                ]
-            }, timestamp);
+                ],
+                type: Type.FLOAT_LIST
+            }), timestamp);
 
             // Temperature
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotIP, new API.DataPoint({
                 label: name + " Temperature",
                 value: [
                     servo.getTemperature()
-                ]
-            }, timestamp);
+                ],
+                type: Type.FLOAT_LIST
+            }), timestamp);
 
         }, this);
     },
