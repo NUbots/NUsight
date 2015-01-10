@@ -17,6 +17,13 @@ Ext.define('NU.view.window.ConfigurationController', {
         this.getConfigurationState();
     },
     /**
+     * A function called when the configuration window is initialised. It sends a message over the network requesting
+     * the data for each configuration.
+     */
+    getConfigurationState: function () {
+        NU.util.Network.sendCommand(this.getRobotIP(), "get_configuration_state");
+    },
+    /**
      * An event fired when the network has received the configuration state message.
      *
      * @param robotIP The robot IP address.
@@ -37,46 +44,42 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param message The message node being processed.
      */
     processMessage: function (node, message) {
-        // retrieve the path, type and tag of the message
-        var path = message.path;
+        // retrieve the type and tag of the message
         var type = message.type;
         var tag = this.parseTag(message.tag);
-        // get the name from the node
-        var name = node.get('name');
         // evaluate the message type
         switch ((tag && tag.name) || type) {
             case this.type.DIRECTORY:
             case this.type.FILE:
-                this.processDirectory(node, message.map_value);
-                break;
-            case this.type.NULL_VALUE:
-                this.processLeafNode(node, path, name, 'TEXT', message.null_value);
-                break;
-            case this.type.STRING:
-                this.processLeafNode(node, path, name, 'TEXT', message.string_value);
-                break;
-            case this.type.BOOLEAN:
-                this.processLeafNode(node, path, name, 'BOOLEAN', message.boolean_value);
+            case this.type.MAP:
+                this.processMap(node, message.map_value);
                 break;
             case this.type.LONG:
-                this.processLeafNode(node, path, name, 'NUMBER', message.long_value);
+                this.processLeafNode(node, 'NUMBER', message.long_value);
                 break;
             case this.type.DOUBLE:
-                this.processLeafNode(node, path, name, 'NUMBER', message.double_value);
+                this.processLeafNode(node, 'NUMBER', message.double_value);
+                break;
+            case this.type.BOOLEAN:
+                this.processLeafNode(node, 'BOOLEAN', message.boolean_value);
+                break;
+            case this.type.STRING:
+                this.processLeafNode(node, 'TEXT', message.string_value);
                 break;
             case this.type.SEQUENCE:
                 this.processSequence(node, message.sequence_value);
                 break;
-            case this.type.MAP:
-                this.processMap(node, message.map_value);
+            case this.type.NULL_VALUE:
+                this.processLeafNode(node, 'TEXT', message.null_value);
                 break;
             case "ANGLE":
-                this.processAngle(node, path, name, message.double_value || message.long_value);
+                this.processAngle(node, message.double_value || message.long_value);
                 break;
             case "SLIDER":
-                this.processSlider(node, path, name, message.double_value || message.long_value, tag.params);
+                this.processSlider(node, message.double_value || message.long_value, tag.params);
                 break;
             case "COMBO":
+                // TODO
                 break;
         }
     },
@@ -110,32 +113,15 @@ Ext.define('NU.view.window.ConfigurationController', {
         return null;
     },
     /**
-     * TODO: Remove?
-     * Processes a directory message.
-     *
-     * @param node The node to append children to.
-     * @param directory The message contents of the directory.
-     */
-    processDirectory: function (node, directory) {
-        Ext.each(directory, function (item) {
-            this.processMessage(node.appendChild({
-                name: item.name
-            }), item.value);
-        }, this);
-    },
-    /**
      * Processes a leaf node by creating a new child node with all of the relevant information.
      *
      * @param node The node that is to be replaced.
-     * @param path The path to the configuration file.
-     * @param name The name of the configuration.
      * @param type The type of the leaf node. This can be a textfield, numberfield or checkbox.
      * @param value The value of the leaf node.
      */
-    processLeafNode: function (node, path, name, type, value) {
+    processLeafNode: function (node, type, value) {
         this.processCurrentNode(node, {
-            path: path,
-            name: name,
+            name: node.get('name'),
             type: type,
             value: value,
             leaf: true
@@ -181,7 +167,8 @@ Ext.define('NU.view.window.ConfigurationController', {
         Ext.each(map, function (item) {
             // processes the message and its map value
             this.processMessage(node.appendChild({
-                name: item.name
+                name: item.name,
+                path: item.path
             }), item.value);
         }, this);
     },
@@ -189,16 +176,13 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Processes an angle tag.
      *
      * @param node The node that is to be replaced.
-     * @param path The path to the configuration file.
-     * @param name The name of the configuration.
      * @param value The current value of the angle in radians.
      */
-    processAngle: function (node, path, name, value) {
+    processAngle: function (node, value) {
         // convert the value from radians to degrees
         value = value * 180 / Math.PI;
         this.processCurrentNode(node, {
-            path: path,
-            name: name,
+            name: node.get('name'),
             type: 'ANGLE',
             value: value,
             leaf: true
@@ -208,20 +192,17 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Processes a slider tag.
      *
      * @param node The node that is to be replaced.
-     * @param path The path to the configuration file.
-     * @param name The name of the configuration.
      * @param value The current value of the slider.
      * @param params The parameters associated with the slider.
      */
-    processSlider: function (node, path, name, value, params) {
+    processSlider: function (node, value, params) {
         // get the values from the slider params
         var minValue = params[0];
         var maxValue = params[1];
         var increment = params[2];
         // process the current node using the new child object
         this.processCurrentNode(node, {
-            path: path,
-            name: name,
+            name: node.get('name'),
             type: 'SLIDER',
             value: {
                 value: value,
@@ -239,18 +220,58 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param value The new value of the widget.
      */
     onUpdateWidget: function (record, value) {
-        debugger;
-        var path = record.get('path');                      // get the path of the configuration file to update
-        var name = record.get('name');                      // get the name of the configuration being updated
-        var message = new API.Message();
-        message.setType(API.Message.Type.COMMAND);
-        message.setFilterId(0);
-        message.setUtcTimestamp(Date.now() / 1000);
-        var command = new API.Message.Command();
-        command.setCommand("get_configuration_state");
-        message.setCommand(command);
+        // create the configuration state message
+        var message = NU.util.Network.createMessage(API.Message.Type.CONFIGURATION_STATE, 0);
+        // calculates the configuration given the record and value being updated
+        var configuration = this.getConfiguration(record, value);
+        // set the configuration of the message
+        message.setConfiguration(configuration);
+        // send the message over the network
         NU.util.Network.send(this.getRobotIP(), message);
-
+    },
+    getConfiguration: function (record, value) {
+        var configuration = new API.Configuration();        // create the configuration API
+        var records = [];                                   // create an empty array of records
+        record.bubble(function () {                         // loop through each parent of the record
+            var record = arguments[0];                      // get the current record
+            records.unshift(record);                        // add the record to the start of the array
+            if (record.get('path')) {                       // check if a path exists on the record
+                return false;                               // escape the bubble function as no more parents are needed
+            }
+        });
+        var root = this.createFileNode(records.shift());    // create the FILE Node using the first item in the records list
+        var node = root.getMapValue()[0].getValue();        // get the node being modified
+        configuration.setRoot(root);                        // set the root of the configuration buffer
+        debugger;
+        Ext.each(records, function (record, i) {
+            debugger;
+        });
+    },
+    /**
+     * Creates a Node given a particular type.
+     *
+     * @param type The type of node to create.
+     * @returns {spec.Node} A ConfigurationState Node.
+     */
+    createNode: function (type) {
+        var node = new API.Configuration.Node;              // create the Configuration Node
+        node.setType(type);                                 // set its type
+        return node;                                        // return the Node that was created
+    },
+    /**
+     * Creates a FILE type Node given the record data.
+     *
+     * @param record The record to obtain data from.
+     * @returns {spec.Node} A file ConfigurationState Node.
+     */
+    createFileNode: function (record) {
+        var node = this.createNode(this.type.FILE);         // create the FILE Node
+        var map = new API.Configuration.KeyPair;            // create the map associated with the Node
+        map.setName(record.get('name'));                    // set the name of the map to the file name
+        map.setValue(new API.Configuration.Node);           // set the value of the map to an initialised Node
+        map.setPath(record.get('path'));                    // set the path of the map to the configuration path
+        node.getMapValue().push(map);                       // append the map to the Node
+        return node;                                        // return the Node that was created
     },
     /**
      * Removes a configuration for a particular robot.
@@ -260,17 +281,6 @@ Ext.define('NU.view.window.ConfigurationController', {
     removeConfiguration: function (configuration) {
         configuration = this.transformReference(configuration);
         this.configurations.remove(this.configurations.lookupReference(configuration));
-    },
-    getConfigurationState: function () {
-        // TODO: put this in network
-        var message = new API.Message();
-        message.setType(API.Message.Type.COMMAND);
-        message.setFilterId(0);
-        message.setUtcTimestamp(Date.now() / 1000);
-        var command = new API.Message.Command();
-        command.setCommand("get_configuration_state");
-        message.setCommand(command);
-        NU.util.Network.send(this.getRobotIP(), message);
     }
     // TODO: vectors
 });

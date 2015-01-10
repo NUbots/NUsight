@@ -206,6 +206,6 @@ Ext.define('NU.view.factory.WidgetController', {
      * @returns {*} The new name of the configuration.
      */
     transformName: function (configuration) {
-        return configuration.replace(/[./\- ]/g, '_');
+        return configuration === undefined ? Ext.id() : configuration.replace(/[./\- ]/g, '_');
     }
 });
