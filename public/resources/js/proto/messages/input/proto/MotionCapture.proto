@@ -23,41 +23,41 @@ import "messages/Vector.proto";
 
 message MotionCapture {
 
-	message Point {
-		optional string identifier = 1;
-		optional double size = 2;
-		optional vec3 position = 3;
-	};
+    message Point {
+        optional uint32 identifier = 1;
+        optional double size = 2;
+        required vec3 position = 3;
+    };
 
-	message RigidBody {
-		optional uint32 identifier = 1;
-		optional double mean_error = 2;
+    message RigidBody {
+        optional uint32 identifier = 1;
+        optional double mean_error = 2;
 
-		required vec3 position = 3;
+        required vec3 position = 3;
 
-		// The rotation quaternion
-		required vec4 rotation = 4;
+        // The rotation quaternion
+        required vec4 rotation = 4;
 
-		repeated Point points = 5;
-	};
+        repeated Point points = 5;
+    };
 
-	message Bone {
-		optional uint32 parent = 1;
-		required RigidBody object = 2;
-	};
+    message Bone {
+        optional uint32 parent = 1;
+        required RigidBody object = 2;
+    };
 
-	message Skeleton {
-		required string identifier = 1;
-		repeated Bone bones = 3;
-	};
+    message Skeleton {
+        required string identifier = 1;
+        repeated Bone bones = 3;
+    };
 
-	message MarkerSet {
-		optional string name = 1;
-		repeated Point points = 2;
-	};
+    message MarkerSet {
+        optional string name = 1;
+        repeated Point points = 2;
+    };
 
-	repeated MarkerSet marker_sets = 1;
-	repeated Point unidentified_points = 2;
-	repeated RigidBody rigid_bodies = 3;
-	repeated Skeleton skeletons = 4;
+    repeated MarkerSet marker_sets = 1;
+    repeated Point unidentified_points = 2;
+    repeated RigidBody rigid_bodies = 3;
+    repeated Skeleton skeletons = 4;
 }
