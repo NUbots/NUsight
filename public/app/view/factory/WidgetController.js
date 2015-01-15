@@ -36,12 +36,12 @@ Ext.define('NU.view.factory.WidgetController', {
         var name = this.transformName(record.get('name'));
         // get the value of the widget from the record
         var value = record.get('value');
-        var type = record.get('type');      // get the type of widget from the record
+        var widget = record.get('widget');  // get the type of widget from the record
         function resolve (widget) {         // a private function that resolves the enumeration so it can be evaluated
             return widget.type;
         }
         // evaluates the widget based on its type
-        switch (type) {
+        switch (widget) {
             case resolve(this.WIDGET.TEXTBOX):
                 this.addTextField(name, value);
                 break;
@@ -206,6 +206,9 @@ Ext.define('NU.view.factory.WidgetController', {
      * @returns {*} The new name of the configuration.
      */
     transformName: function (configuration) {
-        return configuration === undefined ? Ext.id() : configuration.replace(/[./\- ]/g, '_');
+        if (configuration === undefined) {
+            configuration = Ext.id();
+        }
+        return configuration.replace(/[./\- ]/g, '_');
     }
 });
