@@ -71,7 +71,7 @@ Ext.define('NU.view.window.ChartController', {
             mathbox.viewport({
                 type: 'cartesian',
                 range: [[-1, 1], [-1, 1], [-1, 1]], // Range in X, Y, Z
-                scale: [0.5, 0.5, 0.5],                   // Scale in X, Y, Z
+                scale: [0.7, 0.7, 0.7],                   // Scale in X, Y, Z
                 rotation: [-Math.PI / 2, 0, Math.PI / 2], // Convert to robot coordinates: x forward, y left, z up
                 position: [0, 0, 0]                 // Viewport position in XYZ
             }).axis({
@@ -352,11 +352,11 @@ Ext.define('NU.view.window.ChartController', {
             return;
         }
 
-        //console.log(api_message);
         var label = dataPoint.getLabel();
         var values = dataPoint.getValue();
         var type = dataPoint.getType();
         var Type = API.DataPoint.Type;
+        //console.log(label, values);
 
         switch (type) {
             case Type.FLOAT_LIST:

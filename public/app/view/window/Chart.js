@@ -5,7 +5,8 @@ Ext.define('NU.view.window.Chart', {
         'NU.view.window.ChartController',
         'Ext.ux.form.MultiSelect',
 		'Ext.layout.container.Anchor',
-        'NU.store.Streams'
+        'NU.store.Streams',
+		'Ext.tab.Panel'
 	],
     controller: 'Chart',
 	width: 640,
