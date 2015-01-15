@@ -1,6 +1,10 @@
 Ext.define('NU.view.window.VisionController', {
     extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Vision',
+	requires: [
+		'NU.view.webgl.Vision'
+	],
+	imageRenderer: null,
     config: {
 		cameraId: null,
         displayImage: false,
@@ -13,14 +17,27 @@ Ext.define('NU.view.window.VisionController', {
     },
     onAfterRender: function () {
 		var layeredCanvas = this.lookupReference('canvas').getController();
-		layeredCanvas.add('image');
-        layeredCanvas.add('classified_image_search');
-        layeredCanvas.add('classified_image_refine');
-        layeredCanvas.add('visual_horizon');
-        layeredCanvas.add('horizon');
+		this.setLayeredCanvas(layeredCanvas);
+
+		var imageLayer = layeredCanvas.add('image', {
+			webgl: true,
+			webglAttributes: {
+				antialias: false
+			}
+		});
+
+		this.imageRenderer = Ext.create('NU.view.webgl.Vision', {
+			shader: 'Vision',
+			canvas: imageLayer.canvas,
+			context: imageLayer.context
+		});
+
+		layeredCanvas.add('classified_image_search');
+		layeredCanvas.add('classified_image_refine');
+		layeredCanvas.add('visual_horizon');
+		layeredCanvas.add('horizon');
 		layeredCanvas.add('goals', {group: 'field_objects'});
 		layeredCanvas.add('balls', {group: 'field_objects'});
-		this.setLayeredCanvas(layeredCanvas);
 
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
@@ -100,7 +117,8 @@ Ext.define('NU.view.window.VisionController', {
 				this.drawImageB64(image);
 				break;
 			case Format.YCbCr444:
-				this.drawImageYbCr444(image);
+				this.drawImageYbCr444WebGL(image);
+				//this.drawImageYbCr444(image);
 				//this.drawImageBayer(image);
 				break;
 			default:
@@ -149,6 +167,12 @@ Ext.define('NU.view.window.VisionController', {
 			imageData.data[offset + 3] = 255;
 		}
 		ctx.putImageData(imageData, 0, 0);
+	},
+	drawImageYbCr444WebGL: function (image) {
+		var width = this.getWidth();
+		var height = this.getHeight();
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
 	},
 	drawImageBayer: function (image) {
 		var width = this.getWidth();

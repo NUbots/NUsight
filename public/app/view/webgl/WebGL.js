@@ -110,7 +110,7 @@ Ext.define('NU.view.webgl.WebGL', {
 		this.camera.bottom = 0;
 		this.camera.updateProjectionMatrix();
 
-		this.renderer.setViewport(0, 0, width, height);
+		this.renderer.setViewport(0, 0, width / 2 , height / 2);
 
 		this.setWidth(width);
 		this.setHeight(height);

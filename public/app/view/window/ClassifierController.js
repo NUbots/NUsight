@@ -9,6 +9,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		'NU.view.webgl.magicwand.Selection',
 		'NU.view.webgl.magicwand.Classify'
 	],
+	rawImageRenderer: null,
 	config: {
 		rawContext: null,
 		classifiedContext: null,
@@ -328,14 +329,21 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	onAfterRender: function () {
 		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
-		var rawContext = rawLayeredCanvas.add('raw').context;
-		rawLayeredCanvas.add('selection');
-		this.setRawContext(rawContext);
-		this.setRawLayeredCanvas(rawLayeredCanvas);
+		var rawImageLayer = rawLayeredCanvas.add('raw', {
+			webgl: true,
+			webglAttributes: {
+				antialias: false
+			}
+		});
+		this.rawImageRenderer = Ext.create('NU.view.webgl.Vision', {
+			shader: 'Vision',
+			canvas: rawImageLayer.canvas,
+			context: rawImageLayer.context
+		});
 
-		var view = this.getView();
-		view.mon(NU.util.Network, 'image', this.onImage, this);
-		view.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
+		rawLayeredCanvas.add('selection');
+		this.setRawContext(rawImageLayer.context);
+		this.setRawLayeredCanvas(rawLayeredCanvas);
 
 		var classifiedLayeredCanvas = this.lookupReference('classifiedImage').getController();
 		var classifiedLayer = classifiedLayeredCanvas.add('classified', {
@@ -415,6 +423,9 @@ Ext.define('NU.view.window.ClassifierController', {
 				scope: this
 			});
 		}, this);
+
+		this.mon(NU.util.Network, 'image', this.onImage, this);
+		this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
 
 		this.testDrawImage();
 	},
@@ -1235,8 +1246,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		var imageWidth = this.getImageWidth();
 		var imageHeight = this.getImageHeight();
 
-		x = imageWidth - x - 1;
-		y = imageHeight - y - 1;
+		//x = imageWidth - x - 1;
+		//y = imageHeight - y - 1;
 
 		var Format = API.Image.Format;
 		switch (this.getImageFormat()) {
@@ -1287,7 +1298,8 @@ Ext.define('NU.view.window.ClassifierController', {
 				this.drawImageB64YUV(image, callback, thisArg);
 				break;
 			case Format.YCbCr444:
-				this.drawImageYbCr444(image, callback, thisArg);
+				//this.drawImageYbCr444(image, callback, thisArg);
+				this.drawImageYbCr444WebGL(image, callback, thisArg);
 				break;
 			default:
 				throw 'Unsupported Format';
@@ -1318,6 +1330,16 @@ Ext.define('NU.view.window.ClassifierController', {
 		ctx.putImageData(imageData, 0, 0);
 		this.setRawImageComponents(data);
 		callback.call(thisArg, ctx);
+	},
+	drawImageYbCr444WebGL: function (image) {
+		var width = this.getImageWidth();
+		var height = this.getImageHeight();
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		this.rawImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.selectionClassifier.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.classifiedRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.selectionRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.setRawImageComponents(data);
 	},
 	drawImageB64: function (image, callback, thisArg) {
 		var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
@@ -1354,6 +1376,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		callback.call(thisArg, ctx);
 	},
 	testDrawImage: function () {
+		return;
 		var uri = 'resources/images/test_image2.jpg';
 		var rotated = true;
 //      var imageObj = new Image();
@@ -1400,7 +1423,7 @@ Ext.define('NU.view.window.ClassifierController', {
 				this.selectionClassifier.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
 				this.classifiedRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
 				this.selectionRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
-				this.classifiedRenderer.updateImage(new Uint8Array(data.data.buffer), imageWidth, imageHeight, THREE.RGBAFormat);
+				//this.classifiedRenderer.updateImage(new Uint8Array(data.data.buffer), imageWidth, imageHeight, THREE.RGBAFormat);
 				this.selectionClassifier.render();
 			}.bind(this), 1000);
 		}.bind(this);
