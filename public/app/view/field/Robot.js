@@ -49,9 +49,9 @@ Ext.define('NU.view.field.Robot', {
 
 			if (this.getShowOrientation()) {
 				var rotation = new THREE.Matrix4(
-					api_sensor_data.orientation.xx, api_sensor_data.orientation.xy, api_sensor_data.orientation.xz, 0,
-					api_sensor_data.orientation.yx, api_sensor_data.orientation.yy, api_sensor_data.orientation.yz, 0,
-					api_sensor_data.orientation.zx, api_sensor_data.orientation.zy, api_sensor_data.orientation.zz, 0,
+					api_sensor_data.orientation.x.x, api_sensor_data.orientation.x.y, api_sensor_data.orientation.x.z, 0,
+					api_sensor_data.orientation.y.x, api_sensor_data.orientation.y.y, api_sensor_data.orientation.y.z, 0,
+					api_sensor_data.orientation.z.x, api_sensor_data.orientation.z.y, api_sensor_data.orientation.z.z, 0,
 					0, 0, 0, 1
 				);
 				darwin.object.quaternion.setFromRotationMatrix(rotation.transpose());

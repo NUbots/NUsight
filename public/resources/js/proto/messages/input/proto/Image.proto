@@ -23,14 +23,14 @@ import "messages/Vector.proto";
 
 message Image {
 
-	enum Format {
-		YCbCr422 = 1;
-		YCbCr444 = 2;
-		JPEG = 3;
-	};
+    enum Format {
+        YCbCr422 = 1;
+        YCbCr444 = 2;
+        JPEG = 3;
+    };
 
-	required uint32 camera_id = 4;
-	required Format format = 1;
-	required uvec2 dimensions = 2;
-	required bytes data = 3;
+    required uint32 camera_id = 4;
+    required Format format = 1;
+    required uvec2 dimensions = 2;
+    required bytes data = 3;
 }
