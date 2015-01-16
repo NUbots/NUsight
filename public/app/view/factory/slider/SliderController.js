@@ -19,7 +19,8 @@ Ext.define('NU.view.factory.slider.SliderController', {
      */
     onSliderChange: function (slider, value) {
         this.input.setValue(value);
-        this.getView().fireEvent('change', value);
+        this.fireViewEvent('change', value);
+        this.fireViewEvent('update', slider, value);
     },
     /**
      * An event that is called when the user inputs values for the associated slider. It updates the slider value

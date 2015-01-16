@@ -163,9 +163,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         // iterates through every sequence message
         Ext.each(sequence, function (item, i) {
             // processes the sequence message
-            this.processMessage(node.appendChild({
-                //name: i
-            }), item);
+            this.processMessage(node.appendChild({}), item);
         }, this);
     },
     /**
@@ -176,22 +174,18 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param map The map message.
      */
     processMap: function (node, type, map) {
-        node = this.processCurrentNode(node, {
-            name: node.get('name'),
-            path: node.get('path'),
-            type: type
-        });
         // iterates through every map item
         Ext.each(map, function (item) {
             // processes the message and its map value
             this.processMessage(node.appendChild({
                 name: item.name,
-                path: item.path
+                path: item.path,
+                type: type
             }), item.value);
         }, this);
     },
     /**
-     * Processes an angle tag.
+     * Processes an angle tag of the format !<ANGLE>
      *
      * @param node The node that is to be replaced.
      * @param type The YAML node type.
@@ -209,7 +203,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         });
     },
     /**
-     * Processes a slider tag.
+     * Processes a slider tag of the format <!SLIDER(MIN,MAX,STEP)>.
      *
      * @param node The node that is to be replaced.
      * @param type The YAML node type.
@@ -260,9 +254,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     getConfiguration: function (record, value) {
         var configuration = new API.Configuration();        // create the configuration API
-        var tree = this.buildTree(record);                  // build the tree using the initial record
-        // TODO update value
-        debugger;
+        var tree = this.buildTree(record, value);           // build the tree using the initial record
         configuration.setRoot(tree.root);                   // set the root of the configuration message
         return configuration;                               // return the configuration message
     },
@@ -271,9 +263,10 @@ Ext.define('NU.view.window.ConfigurationController', {
      * path exists) and then creates a node using the current data and appends it to the current value of the tree.
      *
      * @param node The current node being processed.
+     * @param value The new value for the configuration.
      * @returns {*} The ConfigurationState message tree.
      */
-    buildTree: function (node) {
+    buildTree: function (node, value) {
         if (node.get('path')) {                             // check if the node contains a path
             var root = this.createFileNode(node);           // create the file node
             return {                                        // return an object containing the root and the file as the current value
@@ -281,15 +274,15 @@ Ext.define('NU.view.window.ConfigurationController', {
                 current: root.file
             }
         }
-        var tree = this.buildTree(node.parentNode);         // build the tree recursively using the parent node until the file is found
-        var newNode = this.processNode(node);               // create the proto node
+        var tree = this.buildTree(node.parentNode, value);  // build the tree recursively using the parent node until the file is found
+        var newNode = this.processNode(node, value);        // create the proto node
         var current = tree.current;                         // get the current node in the tree
         var type = current.type;                            // get the type of the current node in the tree
         if (type === this.type.MAP) {                       // check if the type of the current node is a map
             var map = current.getMapValue()[0];             // get the first map from the current node in the tree
-            var value = map.getValue();                     // get the value of the map
-            if (value) {                                    // check if the value in the map exists
-                value.setSequenceValue(newNode);            // must be a sequence
+            var mapValue = map.getValue();                  // get the value of the map
+            if (mapValue ) {                                // check if the value in the map exists
+                mapValue.setSequenceValue(newNode);         // must be a sequence
             } else {
                 map.setValue(newNode);                      // must be another map
             }
@@ -306,12 +299,16 @@ Ext.define('NU.view.window.ConfigurationController', {
      * message Node or KeyPair.
      *
      * @param node The node being processed.
+     * @param configuration The new value for the configuration.
      * @returns {*} A ConfigurationState Node or KeyPair.
      */
-    processNode: function (node) {
+    processNode: function (node, configuration) {
         var name = node.get('name');                        // get the name of the record
         var value = node.get('value');                      // get the value of the record
         var type = node.get('type');                        // get the type of the record
+        if (!node.hasChildNodes()) {                        // check if at the widget node
+            value = configuration;                          // change the value to new configuration value
+        }
         switch (type) {                                     // evaluate the type of the record
             case this.type.MAP:
                 return this.createMapNode(this.createKeyPair(name));
@@ -326,7 +323,7 @@ Ext.define('NU.view.window.ConfigurationController', {
             case this.type.SEQUENCE:
                 return this.createSequenceNode(name);
             case this.type.NULL_VALUE:
-                return this.createNullNode(name, value);
+                return this.createNullNode(name);
         }
     },
     /**
@@ -394,10 +391,9 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Create a NULL type Node given its name and value.
      *
      * @param name The name of the null value.
-     * @param value The value of the null.
      * @returns {spec.Node} A null ConfigurationState Node.
      */
-    createNullNode: function (name, value) {
+    createNullNode: function (name) {
         var node = this.createNode(this.type.NULL_VALUE);   // create the NULL Node
         node.setNullValue(null);                            // set the value of the Node
         return this.processConfigurationNode(node, name);   // return the processed Node

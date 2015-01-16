@@ -173,7 +173,7 @@ Ext.define('NU.view.factory.WidgetController', {
             maxValue: slider.maxValue,
             increment: slider.increment,
             listeners: {
-                update: this.update, // TODO
+                update: this.update,
                 scope: this
             }
         }));
@@ -194,7 +194,7 @@ Ext.define('NU.view.factory.WidgetController', {
                 height: size
             },
             listeners: {
-                update: this.update, // TODO
+                update: this.update,
                 scope: this
             }
         }));
