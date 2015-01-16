@@ -5,6 +5,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	alias: 'controller.Classifier',
 	requires: [
 		'NU.util.Vision',
+		'NU.view.webgl.Vision',
 		'NU.view.webgl.Classifier',
 		'NU.view.webgl.magicwand.Selection',
 		'NU.view.webgl.magicwand.Classify'
@@ -424,8 +425,19 @@ Ext.define('NU.view.window.ClassifierController', {
 			});
 		}, this);
 
-		this.mon(NU.util.Network, 'image', this.onImage, this);
-		this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
+		Promise.all([
+			this.rawImageRenderer.onReady(),
+			this.classifiedRenderer.onReady(),
+			this.selectionRenderer.onReady(),
+			this.selectionClassifier.onReady()
+		]).then(function () {
+			var lut = new Uint8Array(this.getLookup().buffer);
+			this.classifiedRenderer.updateLut(lut);
+			this.selectionClassifier.updateLut(lut);
+
+			this.mon(NU.util.Network, 'image', this.onImage, this);
+			this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
+		}.bind(this));
 
 		this.testDrawImage();
 	},
