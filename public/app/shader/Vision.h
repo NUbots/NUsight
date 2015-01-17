@@ -95,8 +95,8 @@ float classify(vec4 colour, sampler2D lut, float size, float bitsR, float bitsG,
  * A function for converting a YCbCr colour to RGBA
  * Based from http://en.wikipedia.org/wiki/YCbCr#JPEG_conversion
  *
- * @param {vec4} ycbcr A 4-component YCbCr array (includes alpha for convenience
- * @returns {vec4} A converted RGBA colour
+ * @param {vec4} ycbcr A 4-component YCbCr array (includes alpha for convenience)
+ * @returns {vec4} A converted RGBA colour (alpha untouched)
  */
 vec4 YCbCrToRGB(vec4 ycbcr) {
 	// conversion numbers have been modified to account for the colour being in the 0-1 range instead of 0-255
