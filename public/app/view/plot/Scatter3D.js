@@ -242,24 +242,21 @@ Ext.define('NU.view.plot.Scatter3D', {
 			color: 0xeeeeee, //0xff0000,
 			lineWidth: 1
 		});
-		var xAxis = new THREE.Line(xAxisGeo, xAxisMat);
-		xAxis.type = THREE.Lines;
+		var xAxis = new THREE.Line(xAxisGeo, xAxisMat, THREE.LinePieces);
 		scatterPlot.add(xAxis);
 
 		var yAxisMat = new THREE.LineBasicMaterial({
 			color: 0xeeeeee, //0x0000ff,
 			lineWidth: 1
 		});
-		var yAxis = new THREE.Line(yAxisGeo, yAxisMat);
-		yAxis.type = THREE.Lines;
+		var yAxis = new THREE.Line(yAxisGeo, yAxisMat, THREE.LinePieces);
 		scatterPlot.add(yAxis);
 
 		var zAxisMat = new THREE.LineBasicMaterial({
 			color: 0xeeeeee, //0x00ff00,
 			lineWidth: 1
 		});
-		var zAxis = new THREE.Line(zAxisGeo, zAxisMat);
-		zAxis.type = THREE.Lines;
+		var zAxis = new THREE.Line(zAxisGeo, zAxisMat, THREE.LinePieces);
 		scatterPlot.add(zAxis);
 
 		var midLinesMat = new THREE.LineBasicMaterial({
@@ -267,8 +264,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 			lineWidth: 1,
 			transparent: true
 		});
-		var midLines = new THREE.Line(midLinesGeo, midLinesMat);
-		midLines.type = THREE.Lines;
+		var midLines = new THREE.Line(midLinesGeo, midLinesMat, THREE.LinePieces);
 		scatterPlot.add(midLines);
 
 		var boundaryMat = new THREE.LineBasicMaterial({
@@ -276,8 +272,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 			lineWidth: 1,
 			transparent: true
 		});
-		var boundary = new THREE.Line(boundaryGeo, boundaryMat);
-		boundary.type = THREE.Lines;
+		var boundary = new THREE.Line(boundaryGeo, boundaryMat, THREE.LinePieces);
 		scatterPlot.add(boundary);
 //		this.updatePlot();
 

@@ -18,7 +18,7 @@ uniform float tolerance;
 varying vec2 center;
 
 void main() {
-	vec4 rawColour = texture2D(rawImage, 1.0 - center);
+	vec4 rawColour = texture2D(rawImage, center);
 	// check euclidean distance between rawColour and colour
 	// makes sure to keep units in range 0-1
 	if (distance(rawColour.xyz, colour / 255.0) / MAX_DISTANCE <= tolerance / MAX_TOLERANCE) {

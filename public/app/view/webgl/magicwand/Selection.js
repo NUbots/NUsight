@@ -12,6 +12,7 @@ Ext.define('NU.view.webgl.magicwand.Selection', {
 		this.callParent(arguments);
 	},
 	updateRawImage: function (data, width, height, format) {
+		this.resize(width, height);
 		this.updateTexture('rawImage', data, width, height, format);
 	},
 	updateColour: function (value) {

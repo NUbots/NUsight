@@ -1,6 +1,6 @@
 Ext.define('NU.util.Network', {
 	mixins: {
-		observable: 'Ext.util.Observable'
+		observable: 'Ext.mixin.Observable'
 	},
 	socket: null,
 	cache: null,
@@ -36,9 +36,9 @@ Ext.define('NU.util.Network', {
 		}, this);
 		this.typeMap = typeMap;
 
-		this.mon(robotsStore, 'add', this.onAddRobot, this);
-		this.mon(robotsStore, 'update', this.onUpdateRobot, this);
-		this.mon(robotsStore, 'remove', this.onRemoveRobot, this);
+		robotsStore.on('add', this.onAddRobot, this);
+		robotsStore.on('update', this.onUpdateRobot, this);
+		robotsStore.on('remove', this.onRemoveRobot, this);
 
 		var me = this;
 		requestAnimationFrame(function () {
@@ -95,8 +95,8 @@ Ext.define('NU.util.Network', {
 	setupSocket: function () {
 
 		var socket = io.connect(document.location.origin);
-		socket.on('robotIP', Ext.bind(this.onRobotIP, this));
-		socket.on('message', Ext.bind(this.onMessage, this));
+		socket.on('robotIP', this.onRobotIP.bind(this));
+		socket.on('message', this.onMessage.bind(this));
 		this.socket = socket;
 	},
 	onAddRobot: function (store, records, index, eOpts) {
@@ -132,13 +132,16 @@ Ext.define('NU.util.Network', {
 			});
 		}
 	},
-	onMessage: function (robotIP, message) {
+	onMessage: function (robotIP, message, callback) {
 		var packet = {
 			robotIP: robotIP,
 			message: message
 		};
 
 		this.processPacket(packet);
+		if (callback) {
+			callback();
+		}
 	},
 	send: function (robotIP, message) {
 		this.socket.emit('message', robotIP, message.encode().toArrayBuffer());

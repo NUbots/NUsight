@@ -1,6 +1,10 @@
 Ext.define('NU.view.window.VisionController', {
     extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Vision',
+	requires: [
+		'NU.view.webgl.Vision'
+	],
+	imageRenderer: null,
     config: {
 		cameraId: null,
         displayImage: false,
@@ -13,24 +17,38 @@ Ext.define('NU.view.window.VisionController', {
     },
     onAfterRender: function () {
 		var layeredCanvas = this.lookupReference('canvas').getController();
-		layeredCanvas.add('image');
-        layeredCanvas.add('classified_image_search');
-        layeredCanvas.add('classified_image_refine');
-        layeredCanvas.add('visual_horizon');
-        layeredCanvas.add('horizon');
+		this.setLayeredCanvas(layeredCanvas);
+
+		var imageLayer = layeredCanvas.add('image', {
+			webgl: true,
+			webglAttributes: {
+				antialias: false
+			}
+		});
+
+		this.imageRenderer = Ext.create('NU.view.webgl.Vision', {
+			shader: 'Vision',
+			canvas: imageLayer.canvas,
+			context: imageLayer.context
+		});
+
+		layeredCanvas.add('classified_image_search');
+		layeredCanvas.add('classified_image_refine');
+		layeredCanvas.add('visual_horizon');
+		layeredCanvas.add('horizon');
 		layeredCanvas.add('goals', {group: 'field_objects'});
 		layeredCanvas.add('balls', {group: 'field_objects'});
-		this.setLayeredCanvas(layeredCanvas);
 
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
 //        this.setContext(this.getCanvas().el.dom.getContext('2d'));
         //this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
 
-		var view = this.getView();
-        view.mon(NU.util.Network, 'image', this.onImage, this);
-		view.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
-		view.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
+		this.imageRenderer.onReady().then(function () {
+			this.mon(NU.util.Network, 'image', this.onImage, this);
+			this.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
+			this.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
+		}.bind(this));
     },
 	onLayerSelect: function (obj, newValue, oldValue, e) {
 		var layeredCanvas = this.getLayeredCanvas();
@@ -118,106 +136,11 @@ Ext.define('NU.view.window.VisionController', {
             URL.revokeObjectURL(url);
         };
     },
-	YCbCrtoRGB: function (ycbcr) {
-		// from http://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion
-		return [
-			255 / 219 * (ycbcr[0] - 16) + 255 / 112 * 0.701 * (ycbcr[2] - 128),
-			255 / 219 * (ycbcr[0] - 16) - 255 / 112 * 0.886 * 0.114 / 0.587 * (ycbcr[1] - 128) - 255 / 112 * 0.701 * 0.299 / 0.587 * (ycbcr[2] - 128),
-			255 / 219 * (ycbcr[0] - 16) + 255 / 112 * 0.886 * (ycbcr[1] - 128)
-		];
-	},
 	drawImageYbCr444: function (image) {
 		var width = this.getWidth();
 		var height = this.getHeight();
-		var ctx = this.getContext('image');
-		var imageData = ctx.createImageData(width, height);
-		var data = new Uint8ClampedArray(image.data.toArrayBuffer());
-		var bitsPerPixel = this.getBitsPerPixel();
-		var bitsPerPixel2 = 3;
-		var total = width * height * bitsPerPixel2;
-		for (var i = 0; i < data.length / bitsPerPixel2; i++) {
-			var offset = bitsPerPixel * i;
-			var offset2 = bitsPerPixel2 * i;
-			var rgb = this.YCbCrtoRGB([
-				data[offset2 + 0],
-				data[offset2 + 1],
-				data[offset2 + 2],
-			]);
-			imageData.data[offset + 0] = rgb[0];
-			imageData.data[offset + 1] = rgb[1];
-			imageData.data[offset + 2] = rgb[2];
-			imageData.data[offset + 3] = 255;
-		}
-		ctx.putImageData(imageData, 0, 0);
-	},
-	drawImageBayer: function (image) {
-		var width = this.getWidth();
-		var height = this.getHeight();
-		var ctx = this.getContext('image');
-		var imageData = ctx.createImageData(width, height);
-		var data = new Uint8ClampedArray(image.data.toArrayBuffer());
-		var bitsPerPixel = this.getBitsPerPixel();
-		var bitsPerPixel2 = 3;
-		var total = width * height * bitsPerPixel2;
-		// BGGR
-		function get(x, y) {
-			if (x < 0 || x >= width || y < 0 || y >= height) {
-				return null;
-			}
-			return data[y * width + x];
-		}
-		function getAvg() {
-			var sum = 0;
-			var count = 0;
-			for (var i = 0; i < arguments.length; i++) {
-				var coord = arguments[i];
-				var color = get(coord[0], coord[1]);
-				if (color !== null) {
-					sum += color;
-					count++;
-				}
-			}
-			return sum / count;
-		}
-		// probably terrible, but conceptually makes sense
-		var r, g, b;
-		for (var y = 0; y < height; y++) {
-			for (var x = 0; x < width; x++) {
-				if (y % 2 === 0) {
-					// B G
-					if (x % 2 === 0) {
-						// B
-						r = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]); // 4 surrounding
-						g = getAvg([x, y - 1], [x + 1, y], [x, y + 1], [x - 1, y]); // 4 surrounding
-						b = get(x, y); // self
-					} else {
-						// G
-						r = getAvg([x, y - 1], [x, y + 1]); // 2 surrounding
-						g = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1], [x, y]); // 5 surrounding
-						b = getAvg([x - 1, y], [x + 1, y]); // 2 surrounding
-					}
-				} else {
-					// G R
-					if (x % 2 === 0) {
-						// G
-						r = getAvg([x - 1, y], [x + 1, y]); // 2 surrounding
-						g = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1], [x, y]); // 5 surrounding
-						b = getAvg([x, y - 1], [x, y + 1]); // 2 surrounding
-					} else {
-						// R
-						r = get([x, y]); // self
-						g = getAvg([x, y - 1], [x + 1, y], [x, y + 1], [x - 1, y]); // 4 surrounding
-						b = getAvg([x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]); // 4 surrounding
-					}
-				}
-				var offset = this.bitsPerPixel * (y * width + x);
-				imageData.data[offset + 0] = r;
-				imageData.data[offset + 1] = g;
-				imageData.data[offset + 2] = b;
-				imageData.data[offset + 3] = 255;
-			}
-		}
-		ctx.putImageData(imageData, 0, 0);
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
 	},
     drawImageB64: function (image) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
