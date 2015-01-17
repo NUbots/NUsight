@@ -18,5 +18,4 @@ void main() {
 	vec4 rawColour = texture2D(rawImage, center);
 	// convert into RGBA colour
 	gl_FragColor = YCbCrToRGB(rawColour);
-//	gl_FragColor = rawColour;
 }

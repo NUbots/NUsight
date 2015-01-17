@@ -86,7 +86,9 @@ Ext.define('NU.view.webgl.WebGL', {
 			vertexShader: this.vertexShaderText,
 			fragmentShader: this.fragmentShaderText
 		});
-		return new THREE.Mesh(geometry, material);
+		var mesh = new THREE.Mesh(geometry, material);
+		mesh.frustumCulling = false;
+		return mesh;
 	},
 	/**
 	 * Resize the plane/camera/viewport to account for different sized images
@@ -112,7 +114,7 @@ Ext.define('NU.view.webgl.WebGL', {
 		this.camera.bottom = 0;
 		this.camera.updateProjectionMatrix();
 
-		this.renderer.setViewport(0, 0, width / 2, height / 2);
+		this.renderer.setViewport(0, 0, width, height);
 
 		this.setWidth(width);
 		this.setHeight(height);
