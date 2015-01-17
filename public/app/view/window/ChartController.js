@@ -93,22 +93,35 @@ Ext.define('NU.view.window.ChartController', {
 				size: .02,
 				labels: false
 			})/*.grid({
-				id: 'my-grid',
+				axis: [1, 2],
+                offset: [1, 0, 0],
+				color: 0xc0c0c0,
+				lineWidth: 1
+			}).grid({
+				axis: [0, 2],
+                offset: [0, 1, 0],
+				color: 0xc0c0c0,
+				lineWidth: 1
+			}).grid({
 				axis: [0, 1],
+                offset: [0, 0, -1],
 				color: 0xc0c0c0,
 				lineWidth: 1
 			})*/.vector({
                 id: "vecX",
 				color: 0xff0000,
-                n: 1
+                n: 1,
+                data: [[0,0,0],[1,0,0]]
             }).vector({
                 id: "vecY",
 				color: 0x00ff00,
-                n: 1
+                n: 1,
+                data: [[0,0,0],[0,1,0]]
             }).vector({
                 id: "vecZ",
 				color: 0x0000ff,
-                n: 1
+                n: 1,
+                data: [[0,0,0],[0,0,1]]
             }).start();
         }.bind(this));
     },
