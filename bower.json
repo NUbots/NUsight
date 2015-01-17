@@ -17,7 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "threejs": "*",
+    "threejs": "r70",
     "extjs": "~5.0",
     "protobuf": "~3.5.4",
     "smoothie": "*",

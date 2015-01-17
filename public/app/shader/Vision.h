@@ -90,3 +90,20 @@ float classify(vec4 colour, sampler2D lut, float size, float bitsR, float bitsG,
 	coordinate.y = 1.0 - coordinate.y;
 	return floor(texture2D(lut, coordinate).r * 255.0 + 0.5);
 }
+
+/**
+ * A function for converting a YCbCr colour to RGBA
+ * Based from http://en.wikipedia.org/wiki/YCbCr#JPEG_conversion
+ *
+ * @param {vec4} ycbcr A 4-component YCbCr array (includes alpha for convenience)
+ * @returns {vec4} A converted RGBA colour (alpha untouched)
+ */
+vec4 YCbCrToRGB(vec4 ycbcr) {
+	// conversion numbers have been modified to account for the colour being in the 0-1 range instead of 0-255
+	return clamp(vec4(
+		ycbcr.r + 1.402 * (ycbcr.b - 128.0 / 255.0),
+		ycbcr.r - 0.34414 * (ycbcr.g - 128.0 / 255.0) - 0.71414 * (ycbcr.b - 128.0 / 255.0),
+		ycbcr.r + 1.772 * (ycbcr.g - 128.0 / 255.0),
+		ycbcr.a
+	), 0.0, 1.0);
+}

@@ -307,7 +307,6 @@ Ext.define('NU.util.Math', {
 				var cr_min = bounds.cr.min;
 				var cr_max = cr;
 
-//				debugger;
 				while (cr_max >= cr_min) {
 					var cr_mid = Math.round((cr_max + cr_min) / 2);
 					var point = [y, cb, cr_mid];

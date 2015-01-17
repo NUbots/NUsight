@@ -5,10 +5,12 @@ Ext.define('NU.view.window.ClassifierController', {
 	alias: 'controller.Classifier',
 	requires: [
 		'NU.util.Vision',
+		'NU.view.webgl.Vision',
 		'NU.view.webgl.Classifier',
 		'NU.view.webgl.magicwand.Selection',
 		'NU.view.webgl.magicwand.Classify'
 	],
+	rawImageRenderer: null,
 	config: {
 		rawContext: null,
 		classifiedContext: null,
@@ -22,7 +24,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		selectionTool: 'magic_wand',
 		polygonPoints: null,
 		startPoint: null,
-		rawImageData: null,
 		rawImageComponents: null,
 		classifiedImageData: null,
 		mouseX: 0,
@@ -328,14 +329,21 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	onAfterRender: function () {
 		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
-		var rawContext = rawLayeredCanvas.add('raw').context;
-		rawLayeredCanvas.add('selection');
-		this.setRawContext(rawContext);
-		this.setRawLayeredCanvas(rawLayeredCanvas);
+		var rawImageLayer = rawLayeredCanvas.add('raw', {
+			webgl: true,
+			webglAttributes: {
+				antialias: false
+			}
+		});
+		this.rawImageRenderer = Ext.create('NU.view.webgl.Vision', {
+			shader: 'Vision',
+			canvas: rawImageLayer.canvas,
+			context: rawImageLayer.context
+		});
 
-		var view = this.getView();
-		view.mon(NU.util.Network, 'image', this.onImage, this);
-		view.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
+		rawLayeredCanvas.add('selection');
+		this.setRawContext(rawImageLayer.context);
+		this.setRawLayeredCanvas(rawLayeredCanvas);
 
 		var classifiedLayeredCanvas = this.lookupReference('classifiedImage').getController();
 		var classifiedLayer = classifiedLayeredCanvas.add('classified', {
@@ -416,7 +424,21 @@ Ext.define('NU.view.window.ClassifierController', {
 			});
 		}, this);
 
-		this.testDrawImage();
+		Promise.all([
+			this.rawImageRenderer.onReady(),
+			this.classifiedRenderer.onReady(),
+			this.selectionRenderer.onReady(),
+			this.selectionClassifier.onReady()
+		]).then(function () {
+			var lut = new Uint8Array(this.getLookup().buffer);
+			this.classifiedRenderer.updateLut(lut);
+			this.selectionClassifier.updateLut(lut);
+
+			this.mon(NU.util.Network, 'image', this.onImage, this);
+			this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
+
+			this.testDrawImage();
+		}.bind(this));
 	},
 	refreshScatter: function () {
 
@@ -580,11 +602,8 @@ Ext.define('NU.view.window.ClassifierController', {
 
 		if (image) { // TODO: is this needed?
 			if (!this.getFrozen()) {
-				var Format = API.Image.Format;
-
 				this.autoSize(image.dimensions.x, image.dimensions.y);
 				this.drawImage(image, function (ctx) {
-					this.setRawImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
 					this.updateClassifiedData();
 					this.renderImages();
 				}, this);
@@ -1027,14 +1046,6 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.renderClassifiedImage();
 		}
 	},
-	getPointRGBA: function (x, y, data) {
-		var bitsPerPixel = this.getBitsPerPixel();
-		var offset = bitsPerPixel * (y * this.getImageWidth() + x);
-		if (data === undefined) {
-			data = this.getRawImageData().data;
-		}
-		return data.slice(offset, offset + bitsPerPixel);
-	},
 	addLookupColour: function (ycbcr, type, range) {
 		var lookup = this.getLookup();
 		if (range === undefined) {
@@ -1235,8 +1246,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		var imageWidth = this.getImageWidth();
 		var imageHeight = this.getImageHeight();
 
-		x = imageWidth - x - 1;
-		y = imageHeight - y - 1;
+		//x = imageWidth - x - 1;
+		//y = imageHeight - y - 1;
 
 		var Format = API.Image.Format;
 		switch (this.getImageFormat()) {
@@ -1287,7 +1298,8 @@ Ext.define('NU.view.window.ClassifierController', {
 				this.drawImageB64YUV(image, callback, thisArg);
 				break;
 			case Format.YCbCr444:
-				this.drawImageYbCr444(image, callback, thisArg);
+				//this.drawImageYbCr444(image, callback, thisArg);
+				this.drawImageYbCr444WebGL(image, callback, thisArg);
 				break;
 			default:
 				throw 'Unsupported Format';
@@ -1319,6 +1331,16 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setRawImageComponents(data);
 		callback.call(thisArg, ctx);
 	},
+	drawImageYbCr444WebGL: function (image) {
+		var width = this.getImageWidth();
+		var height = this.getImageHeight();
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		this.rawImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.selectionClassifier.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.classifiedRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.selectionRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.setRawImageComponents(data);
+	},
 	drawImageB64: function (image, callback, thisArg) {
 		var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
 		var uri = 'data:image/jpeg;base64,' + btoa(data);
@@ -1348,61 +1370,28 @@ Ext.define('NU.view.window.ClassifierController', {
 		ctx.drawImage(ctx.canvas, 0, 0, imageWidth, imageHeight);
 //		ctx.restore();
 		data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-		this.setRawImageData(data);
 		this.setRawImageComponents(imageObj.components);
 //		this.renderImages();
 		callback.call(thisArg, ctx);
 	},
 	testDrawImage: function () {
 		var uri = 'resources/images/test_image2.jpg';
-		var rotated = true;
-//      var imageObj = new Image();
-//      var ctx = this.getRawContext();
-//      imageObj.src = uri;
-//      imageObj.onload = function () {
-//          ctx.drawImage(imageObj, 0, 0, 320, 240);
-//          this.setRawImageData(ctx.getImageData(0, 0, 320, 240));
-//          thisn.renderImages();
-//      }.bind(this);
-		var imageWidth = this.getImageWidth();
-		var imageHeight = this.getImageHeight();
 		var imageObj = new JpegImage();
 		imageObj.onload = function () {
-			var ctx = this.getRawContext();
-			var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-			imageObj.copyToImageData(data);
-			ctx.putImageData(data, 0, 0);
-
-			if (rotated) {
-				ctx.save();
-				ctx.scale(-1, -1);
-				ctx.drawImage(ctx.canvas, -imageWidth, -imageHeight, imageWidth, imageHeight);
-				ctx.restore();
-			} else {
-				ctx.drawImage(ctx.canvas, 0, 0, imageWidth, imageHeight);
-			}
-
-			data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-			this.setRawImageData(data);
 			imageObj.colorTransform = false; // keep in YCbCr
 			if (imageObj.adobe) {
 				imageObj.adobe.transformCode = false;
 			}
-			var rawData = imageObj.getData(imageWidth, imageHeight);
-			this.setRawImageComponents(rawData);
-			this.setImageFormat(API.Image.Format.JPEG);
-			this.renderImages();
-
-			setTimeout(function () {
-				var lut = new Uint8Array(this.getLookup().buffer);
-				this.classifiedRenderer.updateLut(lut);
-				this.selectionClassifier.updateLut(lut);
-				this.selectionClassifier.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
-				this.classifiedRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
-				this.selectionRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
-				this.classifiedRenderer.updateImage(new Uint8Array(data.data.buffer), imageWidth, imageHeight, THREE.RGBAFormat);
-				this.selectionClassifier.render();
-			}.bind(this), 1000);
+			var rawData = imageObj.getData(imageObj.width, imageObj.height);
+			var image = new API.Image();
+			image.setData(rawData);
+			image.setCameraId(0);
+			image.setDimensions({
+				x: imageObj.width,
+				y: imageObj.height
+			});
+			image.setFormat(API.Image.Format.YCbCr444);
+			this.onImage(this.getRobotIP(), image);
 		}.bind(this);
 		imageObj.load(uri);
 	}

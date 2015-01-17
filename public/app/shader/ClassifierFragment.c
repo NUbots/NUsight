@@ -19,10 +19,6 @@ uniform float lutSize;
  */
 uniform sampler2D lut;
 /**
- * The RGBA image
- */
-uniform sampler2D image;
-/**
  * The raw (e.g. YCbCr) image
  */
 uniform sampler2D rawImage;
@@ -49,14 +45,13 @@ varying vec2 center;
 
 void main() {
 	// sample from the raw (e.g. YCbCr) image
-	vec4 rawColour = texture2D(rawImage, vec2(1.0 - center.x, 1.0 - center.y));
+	vec4 rawColour = texture2D(rawImage, center);
 	// classify using the raw image
 	float classification = classify(rawColour, lut, lutSize, bitsR, bitsG, bitsB);
 
 	if (classification == T_UNCLASSIFIED) {
-		// if fragment is not classified, sample from the displayable RGBA image
-		vec4 colour = texture2D(image, center);
-		gl_FragColor = colour * rawUnderlayOpacity;
+		// if fragment is not classified, display image (in RGB)
+		gl_FragColor = YCbCrToRGB(rawColour) * rawUnderlayOpacity;
 	} else {
 		// convert classification into RGBA colour
 		gl_FragColor = getColour(classification);

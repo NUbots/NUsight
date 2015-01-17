@@ -4,7 +4,6 @@ Ext.define('NU.view.webgl.Classifier', {
 		Ext.applyIf(config, {
 			uniforms: {
 				rawImage: {type: 't'},
-				image: {type: 't'},
 				lut: {type: 't'},
 				lutSize: {type: 'f'},
 				rawUnderlayOpacity: {type: 'f', value: 0.5},
@@ -17,10 +16,8 @@ Ext.define('NU.view.webgl.Classifier', {
 		this.callParent(arguments);
 	},
 	updateRawImage: function (data, width, height, format) {
+		this.resize(width, height);
 		this.updateTexture('rawImage', data, width, height, format);
-	},
-	updateImage: function (data, width, height, format) {
-		this.updateTexture('image', data, width, height, format);
 	},
 	updateLut: function (data) {
 		// create a square texture

@@ -12,6 +12,7 @@ Ext.define('NU.view.webgl.Bayer', {
 		this.callParent(arguments);
 	},
 	updateImage: function (data, width, height, format) {
+		this.resize(width, height);
 		this.updateTexture('image', data, width, height, format);
 		this.updateUniform('sourceSize', [width, height, 1 / width, 1 / height]);
 	}

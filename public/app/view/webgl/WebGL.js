@@ -5,6 +5,9 @@ Ext.define('NU.view.webgl.WebGL', {
 	plane: null,
 	vertexShaderText: null,
 	fragmentShaderText: null,
+	mixins: {
+		ready: 'NU.mixin.Ready'
+	},
 	config: {
 		/**
 		 * The width of the plane
@@ -36,6 +39,7 @@ Ext.define('NU.view.webgl.WebGL', {
 		autoRender: true
 	},
 	constructor: function (config) {
+		this.mixins.ready.constructor.call(this, config);
 		this.initConfig(config);
 
 		var canvas = this.getCanvas();
@@ -46,12 +50,11 @@ Ext.define('NU.view.webgl.WebGL', {
 		// these are dummy left/right/top/bottom values as they are updated in the resize method
 		this.camera = new THREE.OrthographicCamera(0, 1, 0, 1, 0.1, 1000);
 		this.scene.add(this.camera);
-		// move camera to center of image
-		//this.camera.position.set(width / 2, height / 2, 1);
-		this.camera.position.set(0, 0, 1);
+		// move camera away from origin to see plane
+		this.camera.position.set(0, 0, 5);
 
 		this.renderer = new THREE.WebGLRenderer({
-			antialias: true,
+			antialias: false,
 			canvas: canvas.el.dom,
 			context: this.getContext()
 		});
@@ -63,8 +66,9 @@ Ext.define('NU.view.webgl.WebGL', {
 		shaders.spread(function (vertexShaderText, fragmentShaderText) {
 			this.vertexShaderText = vertexShaderText;
 			this.fragmentShaderText = fragmentShaderText;
-
 			this.resize(width, height);
+			// set component as ready
+			this.ready();
 		}.bind(this));
 	},
 	/**
@@ -82,7 +86,9 @@ Ext.define('NU.view.webgl.WebGL', {
 			vertexShader: this.vertexShaderText,
 			fragmentShader: this.fragmentShaderText
 		});
-		return new THREE.Mesh(geometry, material);
+		var mesh = new THREE.Mesh(geometry, material);
+		mesh.frustumCulling = false;
+		return mesh;
 	},
 	/**
 	 * Resize the plane/camera/viewport to account for different sized images
@@ -95,13 +101,11 @@ Ext.define('NU.view.webgl.WebGL', {
 		if (width === this.getWidth() && height === this.getHeight() && this.plane) {
 			return false; // nothing changed
 		}
-
 		if (this.plane) {
 			this.scene.remove(this.plane);
 		}
 
 		this.plane = this.createPlane(width, height);
-		//this.plane.position.set(width / 2, height / 2, 0);
 		this.scene.add(this.plane);
 
 		this.camera.left = 0;
@@ -196,7 +200,7 @@ Ext.define('NU.view.webgl.WebGL', {
 						resolve(shaderText);
 					}
 				}.bind(this)
-			})
+			});
 		}.bind(this));
 	},
 	/**
