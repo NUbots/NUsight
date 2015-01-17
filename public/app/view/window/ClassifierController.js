@@ -24,7 +24,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		selectionTool: 'magic_wand',
 		polygonPoints: null,
 		startPoint: null,
-		rawImageData: null,
 		rawImageComponents: null,
 		classifiedImageData: null,
 		mouseX: 0,
@@ -437,9 +436,9 @@ Ext.define('NU.view.window.ClassifierController', {
 
 			this.mon(NU.util.Network, 'image', this.onImage, this);
 			this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
-		}.bind(this));
 
-		this.testDrawImage();
+			this.testDrawImage();
+		}.bind(this));
 	},
 	refreshScatter: function () {
 
@@ -603,11 +602,8 @@ Ext.define('NU.view.window.ClassifierController', {
 
 		if (image) { // TODO: is this needed?
 			if (!this.getFrozen()) {
-				var Format = API.Image.Format;
-
 				this.autoSize(image.dimensions.x, image.dimensions.y);
 				this.drawImage(image, function (ctx) {
-					this.setRawImageData(ctx.getImageData(0, 0, this.getImageWidth(), this.getImageHeight()));
 					this.updateClassifiedData();
 					this.renderImages();
 				}, this);
@@ -1050,14 +1046,6 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.renderClassifiedImage();
 		}
 	},
-	getPointRGBA: function (x, y, data) {
-		var bitsPerPixel = this.getBitsPerPixel();
-		var offset = bitsPerPixel * (y * this.getImageWidth() + x);
-		if (data === undefined) {
-			data = this.getRawImageData().data;
-		}
-		return data.slice(offset, offset + bitsPerPixel);
-	},
 	addLookupColour: function (ycbcr, type, range) {
 		var lookup = this.getLookup();
 		if (range === undefined) {
@@ -1382,62 +1370,28 @@ Ext.define('NU.view.window.ClassifierController', {
 		ctx.drawImage(ctx.canvas, 0, 0, imageWidth, imageHeight);
 //		ctx.restore();
 		data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-		this.setRawImageData(data);
 		this.setRawImageComponents(imageObj.components);
 //		this.renderImages();
 		callback.call(thisArg, ctx);
 	},
 	testDrawImage: function () {
-		return;
 		var uri = 'resources/images/test_image2.jpg';
-		var rotated = true;
-//      var imageObj = new Image();
-//      var ctx = this.getRawContext();
-//      imageObj.src = uri;
-//      imageObj.onload = function () {
-//          ctx.drawImage(imageObj, 0, 0, 320, 240);
-//          this.setRawImageData(ctx.getImageData(0, 0, 320, 240));
-//          thisn.renderImages();
-//      }.bind(this);
-		var imageWidth = this.getImageWidth();
-		var imageHeight = this.getImageHeight();
 		var imageObj = new JpegImage();
 		imageObj.onload = function () {
-			var ctx = this.getRawContext();
-			var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-			imageObj.copyToImageData(data);
-			ctx.putImageData(data, 0, 0);
-
-			if (rotated) {
-				ctx.save();
-				ctx.scale(-1, -1);
-				ctx.drawImage(ctx.canvas, -imageWidth, -imageHeight, imageWidth, imageHeight);
-				ctx.restore();
-			} else {
-				ctx.drawImage(ctx.canvas, 0, 0, imageWidth, imageHeight);
-			}
-
-			data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-			this.setRawImageData(data);
 			imageObj.colorTransform = false; // keep in YCbCr
 			if (imageObj.adobe) {
 				imageObj.adobe.transformCode = false;
 			}
-			var rawData = imageObj.getData(imageWidth, imageHeight);
-			this.setRawImageComponents(rawData);
-			this.setImageFormat(API.Image.Format.JPEG);
-			this.renderImages();
-
-			setTimeout(function () {
-				var lut = new Uint8Array(this.getLookup().buffer);
-				this.classifiedRenderer.updateLut(lut);
-				this.selectionClassifier.updateLut(lut);
-				this.selectionClassifier.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
-				this.classifiedRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
-				this.selectionRenderer.updateRawImage(rawData, imageWidth, imageHeight, THREE.RGBFormat);
-				//this.classifiedRenderer.updateImage(new Uint8Array(data.data.buffer), imageWidth, imageHeight, THREE.RGBAFormat);
-				this.selectionClassifier.render();
-			}.bind(this), 1000);
+			var rawData = imageObj.getData(imageObj.width, imageObj.height);
+			var image = new API.Image();
+			image.setData(rawData);
+			image.setCameraId(0);
+			image.setDimensions({
+				x: imageObj.width,
+				y: imageObj.height
+			});
+			image.setFormat(API.Image.Format.YCbCr444);
+			this.onImage(this.getRobotIP(), image);
 		}.bind(this);
 		imageObj.load(uri);
 	}
