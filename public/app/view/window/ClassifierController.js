@@ -436,6 +436,7 @@ Ext.define('NU.view.window.ClassifierController', {
 
 			this.mon(NU.util.Network, 'image', this.onImage, this);
 			this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
+			this.mon(NU.util.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
 
 			this.testDrawImage();
 		}.bind(this));
@@ -590,6 +591,23 @@ Ext.define('NU.view.window.ClassifierController', {
 		var lut = new Uint8ClampedArray(table.toArrayBuffer());
 		this.addHistory();
 		this.setLookup(lut);
+		this.updateClassifiedData();
+		this.renderClassifiedImage();
+	},
+	onLookUpTableDiff: function (robotIP, tableDiff) {
+
+		// TODO: remove
+		if (robotIP !== this.getRobotIP()) {
+			return;
+		}
+
+		var lut = this.getLookup();
+		var diffs = tableDiff.getDiff();
+		for (var i = 0; i < diffs.length; i++) {
+			var diff = diffs[i];
+			lut[diff.getLutIndex()] = diff.getClassification();
+		}
+
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
