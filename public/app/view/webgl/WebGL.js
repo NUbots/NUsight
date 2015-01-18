@@ -48,7 +48,7 @@ Ext.define('NU.view.webgl.WebGL', {
 
 		this.scene = new THREE.Scene();
 		// these are dummy left/right/top/bottom values as they are updated in the resize method
-		this.camera = new THREE.OrthographicCamera(0, 1, 0, 1, 0.1, 1000);
+		this.camera = new THREE.OrthographicCamera(0, 1, 0, 1, 0.1, 10);
 		this.scene.add(this.camera);
 		// move camera away from origin to see plane
 		this.camera.position.set(0, 0, 5);

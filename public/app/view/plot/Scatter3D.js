@@ -13,6 +13,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 			marginLeft: '3px'
 		}
 	},
+	needsUpdate: true,
 	config: {
 		width: 400,
 		height: 487,
@@ -38,6 +39,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 			var camera = this.getCamera();
 			camera.aspect = width / height;
 			camera.updateProjectionMatrix();
+			this.needsUpdate = true;
 		}
 	},
 	initComponent: function () {
@@ -49,7 +51,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		}
 		this.callParent(arguments);
 	},
-	updateCameraPosition: function (camera, distance, elevation, azimuth) {
+	updateCameraPosition: function (scene, camera, distance, elevation, azimuth) {
 		// lock view from (0, PI) exclusive to avoid flipping over the Z axis
 		elevation = Math.max(0.1 * Math.PI / 180, Math.min(179.9 * Math.PI / 180, elevation));
 		// calculate x,y,z from spherical coordinates
@@ -59,6 +61,11 @@ Ext.define('NU.view.plot.Scatter3D', {
 		this.setCameraAzimuth(azimuth);
 		this.setCameraElevation(elevation);
 		this.setCameraDistance(distance);
+		camera.lookAt(scene.position);
+		Ext.each(this.getTexts(), function (text) {
+			text.lookAt(camera.position);
+		}, this);
+		this.needsUpdate = true;
 	},
 	afterRender: function () {
 		var renderer = new THREE.WebGLRenderer({
@@ -76,11 +83,12 @@ Ext.define('NU.view.plot.Scatter3D', {
 		var scene = new THREE.Scene();
 		scene.add(camera);
 		var cameraDistance = this.getCameraDistance();
-		this.updateCameraPosition(camera, cameraDistance, 19 * Math.PI / 32, 30 * Math.PI / 180);
 
 		var scatterPlot = new THREE.Object3D();
 		this.generateScene(scatterPlot);
 		scene.add(scatterPlot);
+
+		this.updateCameraPosition(scene, camera, cameraDistance, 19 * Math.PI / 32, 30 * Math.PI / 180);
 		this.getEl().on({
 			'mousedown': function (e) {
 				this.setDown(true);
@@ -98,13 +106,13 @@ Ext.define('NU.view.plot.Scatter3D', {
 					var newCameraElevation = this.getCameraElevation() + dy * Math.PI / 180;
 					this.setMouseX(e.getX());
 					this.setMouseY(e.getY());
-					this.updateCameraPosition(camera, this.getCameraDistance(), newCameraElevation, newCameraAzimuth);
+					this.updateCameraPosition(scene, camera, this.getCameraDistance(), newCameraElevation, newCameraAzimuth);
 				}
 			},
 			'mousewheel': function (event) {
 				var newCameraDistance = this.getCameraDistance() - event.getWheelDelta() * 16;
 				newCameraDistance = Math.max(0.01, newCameraDistance);
-				this.updateCameraPosition(camera, newCameraDistance, this.getCameraElevation(), this.getCameraAzimuth());
+				this.updateCameraPosition(scene, camera, newCameraDistance, this.getCameraElevation(), this.getCameraAzimuth());
 			},
 			'click': function (e) {
 				if (e.ctrlKey && this.getPoints() != null) {
@@ -122,16 +130,20 @@ Ext.define('NU.view.plot.Scatter3D', {
 			scope: this
 		});
 
-		function animate() {
-			renderer.clear();
-			camera.lookAt(scene.position);
-			Ext.each(this.getTexts(), function (text) {
-				text.lookAt(camera.position);
-			}, this);
+		var animate = function () {
+
+			if (!this.needsUpdate) {
+				requestAnimationFrame(animate);
+				return;
+			}
+
 			renderer.render(scene, camera);
-			requestAnimationFrame(animate.bind(this));
-		}
-		requestAnimationFrame(animate.bind(this));
+			this.needsUpdate = false;
+			requestAnimationFrame(animate);
+
+		}.bind(this);
+
+		requestAnimationFrame(animate);
 
 		this.setScatterPlot(scatterPlot);
 		this.setRenderer(renderer);
@@ -380,5 +392,6 @@ Ext.define('NU.view.plot.Scatter3D', {
 		points.sortParticles = true;
 		scatterPlot.add(points);
 		this.setPoints(points);
+		this.needsUpdate = true;
 	}
 });
