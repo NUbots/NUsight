@@ -21,7 +21,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		this.callParent(arguments);
 
 		this.addReadyPromise(new Promise(function (resolve) {
-			this.loadShaders('magicwand/Classify').spread(function (vertexShaderText, fragmentShaderText) {
+			NU.view.webgl.WebGL.loadShaders('magicwand/Classify').spread(function (vertexShaderText, fragmentShaderText) {
 				this.imageVertexShaderText = vertexShaderText;
 				this.imageFragmentShaderText = fragmentShaderText;
 				this.createPointCloud(this.getWidth(), this.getHeight());

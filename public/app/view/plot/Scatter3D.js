@@ -1,6 +1,9 @@
 Ext.define('NU.view.plot.Scatter3D', {
 	extend: 'Ext.container.Container',
 	alias: 'widget.scatter3d',
+	requires: [
+		'NU.view.webgl.WebGL'
+	],
 	autoEl: {
 		tag: 'canvas',
 		width: '400',
@@ -14,13 +17,13 @@ Ext.define('NU.view.plot.Scatter3D', {
 		}
 	},
 	needsUpdate: true,
+	positionBuffer: null,
 	config: {
 		width: 400,
 		height: 487,
 		mouseX: 0,
 		mouseY: 0,
 		down: false,
-		pointData: null,
 		scene: null,
 		camera: null,
 		renderer: null,
@@ -43,9 +46,6 @@ Ext.define('NU.view.plot.Scatter3D', {
 		}
 	},
 	initComponent: function () {
-		if (this.getPointData() === null) {
-			this.setPointData([]);
-		}
 		if (this.getTexts() === null) {
 			this.setTexts([]);
 		}
@@ -355,14 +355,16 @@ Ext.define('NU.view.plot.Scatter3D', {
 		texts.push(titleZ);
 
 	},
-	updatePlot: function () {
+	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB) {
 		var scatterPlot = this.getScatterPlot();
 		var points = this.getPoints();
 		scatterPlot.remove(points);
 
-		var geometry = new THREE.Geometry();
 
-		Ext.each(this.getPointData(), function (row) {
+		var geometry = new THREE.BufferGeometry();
+		geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+		/*Ext.each(this.getPointData(), function (row) {
 			var position = new THREE.Vector3(row[0], row[1], row[2]);
 			//var radius = 0.4;
 			geometry.vertices.push(position);
@@ -370,28 +372,56 @@ Ext.define('NU.view.plot.Scatter3D', {
 			//var sphere = new Sphere(radius, row[3]);
 			//sphere.position = position;
 			//this.objects.push(sphere);
-		}, this);
+		}, this);*/
 
-		var texture = new THREE.Texture(this.generateTexture());
-		texture.needsUpdate = true; // important
+		//var texture = new THREE.Texture(this.generateTexture());
+		//texture.needsUpdate = true; // important
 //		var texture = THREE.ImageUtils.loadTexture("resources/images/disc.png");
 
-		var material = new THREE.PointCloudMaterial({
+		/*var material = new THREE.PointCloudMaterial({
 			size: 8,
 //			sizeAttenuation: false,
-			map: texture,
+//			map: texture,
 //			blending: THREE.AdditiveBlending, // required
 //			depthTest: false, // required
 //			depthWrite: false,
-			transparent: true,
-			opacity: 0.9,
+//			transparent: true,
+//			opacity: 0.9,
 			vertexColors: true // optional
-		});
+		});*/
 
-		var points = new THREE.PointCloud(geometry, material);
-		points.sortParticles = true;
-		scatterPlot.add(points);
-		this.setPoints(points);
-		this.needsUpdate = true;
+		// create a square texture
+		var data = new Uint8Array(lut.buffer);
+		var size = Math.ceil(Math.sqrt(data.length));
+		var sizeSqr = size * size;
+		if (data.length != sizeSqr) {
+			// does not fit evenly, create new array with tail padding
+			var newData = new Uint8Array(sizeSqr);
+			newData.set(data);
+			data = newData;
+		}
+		NU.view.webgl.WebGL.loadShaders('LookUpTable3D') .spread(function (vertexShaderText, fragmentShaderText) {
+			var lutTexture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat,
+						THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping,
+						THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+			lutTexture.needsUpdate = true;
+			var material = new THREE.ShaderMaterial({
+				uniforms: {
+					'lut': {type: 't', value: lutTexture},
+					'lutSize': {type: 'f', value: size},
+					'bitsR': {type: 'f', value: bitsR},
+					'bitsG': {type: 'f', value: bitsG},
+					'bitsB': {type: 'f', value: bitsB}
+				},
+				vertexShader: vertexShaderText,
+				fragmentShader: fragmentShaderText
+			});
+
+			points = new THREE.PointCloud(geometry, material);
+			points.frustumCulled = false;
+			scatterPlot.add(points);
+			this.setPoints(points);
+			this.needsUpdate = true;
+		}.bind(this));
 	}
 });

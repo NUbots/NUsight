@@ -443,9 +443,30 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	refreshScatter: function () {
 
-		var data = [];
+		var scatter3d = this.lookupReference('scatter3d');
 		var lut = this.getLookup();
+		var bitsR = this.self.LutBitsPerColorY;
+		var bitsG = this.self.LutBitsPerColorCb;
+		var bitsB = this.self.LutBitsPerColorCr;
+		var maxR = Math.pow(2, bitsR);
+		var maxG = Math.pow(2, bitsG);
+		var maxB = Math.pow(2, bitsB);
+		var lutSize = lut.length;
+		var vertices = new Float32Array(lutSize * 3);
+		var index = 0;
+		for (var r = 0; r < maxR; r++) {
+			for (var g = 0; g < maxG; g++) {
+				for (var b = 0; b < maxB; b++) {
+					vertices[index    ] = r;
+					vertices[index + 1] = g;
+					vertices[index + 2] = b;
+					index += 3;
+				}
+			}
+		}
+		scatter3d.updatePlot(vertices, lut, bitsR, bitsG, bitsB);
 
+		/*var data = [];
 		function getColour(typeId) {
 			var rgb = this.getRGBfromType(typeId);
 			return new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
@@ -490,8 +511,7 @@ Ext.define('NU.view.window.ClassifierController', {
 
 		var scatter3d = this.lookupReference('scatter3d');
 		scatter3d.setPointData(data);
-		scatter3d.updatePlot();
-
+		scatter3d.updatePlot();*/
 	},
 	resetLUT: function () {
 		var lut = new Uint8ClampedArray(Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr));
