@@ -361,7 +361,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		scatterPlot.remove(points);
 
 		var geometry = new THREE.BufferGeometry();
-		//geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+		geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(0), 3));
 
 		return NU.view.webgl.WebGL.loadShaders('LookUpTable3D').spread(function (vertexShaderText, fragmentShaderText) {
 			var material = new THREE.ShaderMaterial({
