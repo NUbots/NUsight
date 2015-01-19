@@ -48,7 +48,7 @@ Ext.define('NU.view.webgl.WebGL', {
 
 		this.scene = new THREE.Scene();
 		// these are dummy left/right/top/bottom values as they are updated in the resize method
-		this.camera = new THREE.OrthographicCamera(0, 1, 0, 1, 0.1, 1000);
+		this.camera = new THREE.OrthographicCamera(0, 1, 0, 1, 0.1, 10);
 		this.scene.add(this.camera);
 		// move camera away from origin to see plane
 		this.camera.position.set(0, 0, 5);
@@ -60,7 +60,7 @@ Ext.define('NU.view.webgl.WebGL', {
 		});
 
 		// load the shaders
-		var shaders = this.loadShaders(this.getShader());
+		var shaders = NU.view.webgl.WebGL.loadShaders(this.getShader());
 
 		// once loaded, create the scene
 		shaders.spread(function (vertexShaderText, fragmentShaderText) {
@@ -143,67 +143,6 @@ Ext.define('NU.view.webgl.WebGL', {
 		}.bind(this));
 	},
 	/**
-	 * Load the vertex and fragment shaders given the name of the shader.
-	 * It will attempt to load shader/[name]Vertex.c and shader/[name]Fragment.c
-	 *
-	 * @param shader The name of the shader
-	 * @returns {Promise} A promise of the response of two shaders
-	 */
-	loadShaders: function (shader) {
-		var basePath = Ext.Loader.getPath('NU') + '/shader';
-		return Promise.all([
-			this.loadShader(basePath, basePath + '/' + shader + 'Vertex.c'),
-			this.loadShader(basePath, basePath + '/' + shader + 'Fragment.c')
-		]);
-	},
-	/**
-	 * Load a shader given a url
-	 *
-	 * Supports a custom directive in the format of:
-	 *
-	 * #include "filename"
-	 *
-	 * This can be used recursively, where included files can include other files.
-	 * It acts like a C include in that it will fetch the source code from the included file and insert it directly
-	 * where included.
-	 * It uses asynchronous ajax calls along with bluebird promises to achieve parallelism.
-	 *
-	 * @param basePath The base part of the url excluding the filename
-	 * @param url The full url to load
-	 * @returns {Promise} A promise of the response
-	 */
-	loadShader: function (basePath, url) {
-		var includeDirective = /#include[\t ]+"([^"]+)"/g;
-		var includeDirectiveFilename = '#include[\\t ]+"$filename"';
-
-		return new Promise(function (resolve) {
-			Ext.Ajax.request({
-				url: url,
-				success: function (response) {
-					var shaderText = response.responseText;
-					var matches;
-					var count = 0;
-					while ((matches = includeDirective.exec(shaderText)) !== null) {
-						count++;
-						var filename = matches[1];
-						var newUrl = basePath + '/' + filename;
-						this.loadShader(basePath, newUrl).then(function (subShaderText) {
-							count--;
-							var pattern = new RegExp(includeDirectiveFilename.replace('$filename', RegExp.escape(filename)));
-							shaderText = shaderText.replace(pattern, subShaderText);
-							if (count === 0) {
-								resolve(shaderText);
-							}
-						});
-					}
-					if (count === 0) {
-						resolve(shaderText);
-					}
-				}.bind(this)
-			});
-		}.bind(this));
-	},
-	/**
 	 * Update a texture's data
 	 *
 	 * See http://threejs.org/docs/#Reference/Textures/DataTexture for more information on possible formats
@@ -262,6 +201,69 @@ Ext.define('NU.view.webgl.WebGL', {
 		material.needsUpdate = true;
 		if (this.getAutoRender()) {
 			this.render();
+		}
+	},
+	statics: {
+		/**
+		 * Load the vertex and fragment shaders given the name of the shader.
+		 * It will attempt to load shader/[name]Vertex.c and shader/[name]Fragment.c
+		 *
+		 * @param shader The name of the shader
+		 * @returns {Promise} A promise of the response of two shaders
+		 */
+		loadShaders: function (shader) {
+			var basePath = Ext.Loader.getPath('NU') + '/shader';
+			return Promise.all([
+				NU.view.webgl.WebGL.loadShader(basePath, basePath + '/' + shader + 'Vertex.c'),
+				NU.view.webgl.WebGL.loadShader(basePath, basePath + '/' + shader + 'Fragment.c')
+			]);
+		},
+		/**
+		 * Load a shader given a url
+		 *
+		 * Supports a custom directive in the format of:
+		 *
+		 * #include "filename"
+		 *
+		 * This can be used recursively, where included files can include other files.
+		 * It acts like a C include in that it will fetch the source code from the included file and insert it directly
+		 * where included.
+		 * It uses asynchronous ajax calls along with bluebird promises to achieve parallelism.
+		 *
+		 * @param basePath The base part of the url excluding the filename
+		 * @param url The full url to load
+		 * @returns {Promise} A promise of the response
+		 */
+		loadShader: function (basePath, url) {
+			var includeDirective = /#include[\t ]+"([^"]+)"/g;
+			var includeDirectiveFilename = '#include[\\t ]+"$filename"';
+
+			return new Promise(function (resolve) {
+				Ext.Ajax.request({
+					url: url,
+					success: function (response) {
+						var shaderText = response.responseText;
+						var matches;
+						var count = 0;
+						while ((matches = includeDirective.exec(shaderText)) !== null) {
+							count++;
+							var filename = matches[1];
+							var newUrl = basePath + '/' + filename;
+							NU.view.webgl.WebGL.loadShader(basePath, newUrl).then(function (subShaderText) {
+								count--;
+								var pattern = new RegExp(includeDirectiveFilename.replace('$filename', RegExp.escape(filename)));
+								shaderText = shaderText.replace(pattern, subShaderText);
+								if (count === 0) {
+									resolve(shaderText);
+								}
+							});
+						}
+						if (count === 0) {
+							resolve(shaderText);
+						}
+					}.bind(this)
+				});
+			}.bind(this));
 		}
 	}
 });

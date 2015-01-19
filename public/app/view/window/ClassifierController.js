@@ -19,6 +19,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		lookupBackwardHistory: null,
 		lookupForwardHistory: null,
 		lookupHistoryLength: 15,
+		lookupVertexBuffer: null,
 		previewLookup: null,
 		overwrite: false,
 		selectionTool: 'magic_wand',
@@ -436,61 +437,22 @@ Ext.define('NU.view.window.ClassifierController', {
 
 			this.mon(NU.util.Network, 'image', this.onImage, this);
 			this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
+			this.mon(NU.util.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
 
 			this.testDrawImage();
 		}.bind(this));
 	},
 	refreshScatter: function () {
 
-		var data = [];
-		var lut = this.getLookup();
-
-		function getColour(typeId) {
-			var rgb = this.getRGBfromType(typeId);
-			return new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-		}
-
-		function scale(value) {
-			// scale from [0, 255] to [-50, 50]
-			return (100 * value) / 255 - 50;
-		}
-
-		var index;
-		var min = 0;
-		var max = 255;
-		var numSteps = Math.pow(2, Math.max(this.self.LutBitsPerColorY, this.self.LutBitsPerColorCb, this.self.LutBitsPerColorCr));
-		var step = (max - min) / numSteps;
-		for (var z = min; z <= max; z += step) {
-			for (var y = min; y <= max; y += step) {
-				for (var x = min; x <= max; x += step) {
-					if (this.getRenderCube() && (z === 0 || z === 255 || y === 0 || y === 255 || x === 0 || x === 255)) {
-						var colour = new THREE.Color();
-						var rgb = NU.util.Vision.YCbCrtoRGB([x, y, z]);
-						colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-						data.push([scale(z), scale(x), scale(y), colour]);
-					} else {
-						index = this.getLUTIndex([x, y, z]);
-						if (lut[index] !== this.self.Target.Unclassified) {
-							var colour;
-							if (this.getRenderYUV()) {
-								colour = new THREE.Color();
-								var rgb = NU.util.Vision.YCbCrtoRGB([x, y, z]);
-								colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-							} else {
-								colour = getColour.call(this, lut[index]);
-							}
-							// swap y/z since axes change in threejs
-							data.push([scale(z), scale(x), scale(y), colour]);
-						}
-					}
-				}
-			}
-		}
-
 		var scatter3d = this.lookupReference('scatter3d');
-		scatter3d.setPointData(data);
-		scatter3d.updatePlot();
-
+		scatter3d.updatePlot(
+			this.getLookupVertexBuffer(),
+			this.getLookup(),
+			this.self.LutBitsPerColorY,
+			this.self.LutBitsPerColorCb,
+			this.self.LutBitsPerColorCr,
+			this.getRenderYUV()
+		);
 	},
 	resetLUT: function () {
 		var lut = new Uint8ClampedArray(Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr));
@@ -498,6 +460,27 @@ Ext.define('NU.view.window.ClassifierController', {
 			lut[i] = this.self.Target.Unclassified;
 		}
 		this.setLookup(lut); // TODO: make constant or something
+
+		var bitsR = this.self.LutBitsPerColorY;
+		var bitsG = this.self.LutBitsPerColorCb;
+		var bitsB = this.self.LutBitsPerColorCr;
+		var maxR = Math.pow(2, bitsR);
+		var maxG = Math.pow(2, bitsG);
+		var maxB = Math.pow(2, bitsB);
+		var lutSize = lut.length;
+		var vertices = new Float32Array(lutSize * 3);
+		var index = 0;
+		for (var r = 0; r < maxR; r++) {
+			for (var g = 0; g < maxG; g++) {
+				for (var b = 0; b < maxB; b++) {
+					vertices[index    ] = r;
+					vertices[index + 1] = g;
+					vertices[index + 2] = b;
+					index += 3;
+				}
+			}
+		}
+		this.setLookupVertexBuffer(vertices);
 	},
 	download: function () {
 		var message = new API.Message();
@@ -590,6 +573,23 @@ Ext.define('NU.view.window.ClassifierController', {
 		var lut = new Uint8ClampedArray(table.toArrayBuffer());
 		this.addHistory();
 		this.setLookup(lut);
+		this.updateClassifiedData();
+		this.renderClassifiedImage();
+	},
+	onLookUpTableDiff: function (robotIP, tableDiff) {
+
+		// TODO: remove
+		if (robotIP !== this.getRobotIP()) {
+			return;
+		}
+
+		var lut = this.getLookup();
+		var diffs = tableDiff.getDiff();
+		for (var i = 0; i < diffs.length; i++) {
+			var diff = diffs[i];
+			lut[diff.getLutIndex()] = diff.getClassification();
+		}
+
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
