@@ -1337,9 +1337,9 @@ Ext.define('NU.view.window.ClassifierController', {
 		var height = this.getImageHeight();
 		var data = new Uint8Array(image.data.toArrayBuffer());
 		this.rawImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.selectionClassifier.updateRawImage(data, width, height, THREE.RGBFormat);
 		this.classifiedRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
 		this.selectionRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.selectionClassifier.updateRawImage(data, width, height, THREE.RGBFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageB64: function (image, callback, thisArg) {

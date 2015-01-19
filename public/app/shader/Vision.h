@@ -11,6 +11,10 @@ const float MAX_TOLERANCE = 441.6730; // sqrt(255.0 * 255.0 * 3.0);
 // The maximum distance value i.e. the euclidean distance from (0,0,0) to (1,1,1)
 const float MAX_DISTANCE = 1.7321; // sqrt(1.0 * 3.0);
 
+float round(float value) {
+	return floor(value + 0.5);
+}
+
 /**
  * Get the lookup table index given an RGBA colour
  * @param {vec4} The RGBA colour
@@ -32,7 +36,7 @@ float getLutIndex(vec4 colour, float bitsR, float bitsG, float bitsB) {
 	index = index * exp2(bitsB);
 	index = index + floor(255.0 * colour.b / exp2(bitsRemovedB));
 
-	return index;
+	return round(index);
 }
 
 /**
@@ -65,8 +69,8 @@ vec2 getCoordinate(float index, float size) {
 	// Calculates the x and y coordinates of the 2D texture given the 1D index.
 	// Adds 0.5 as we want the coordinates to go through the center of the pixel.
 	// e.g. Go go through the center of pixel (0, 0) you need to sample at (0.5, 0.5).
-	float x = (mod(index, size) + 0.5) / size;
-	float y = (floor(index / size) + 0.5) / size;
+	float x = (mod(index, size) + 0.5);
+	float y = (floor(index / size) + 0.5);
 	return vec2(x, y);
 }
 
@@ -74,9 +78,9 @@ float classify(sampler2D lut, vec2 coordinate) {
 	// Flip the y lookup using (1 - x) as the LUT has been flipped with UNPACK_FLIP_Y_WEBGL.
 	// Texture has only one channel, so only one component (texel.r) is needed.
 	// Normalize to 0 - 255 range.
-	// Round result using floor(x + 0.5) to remove any precision errors.
+	// Round result to remove any precision errors.
 	coordinate.y = 1.0 - coordinate.y;
-	return floor(texture2D(lut, coordinate).r * 255.0 + 0.5);
+	return round(texture2D(lut, coordinate).r * 255.0);
 }
 
 /**
@@ -91,7 +95,7 @@ float classify(vec4 colour, sampler2D lut, float size, float bitsR, float bitsG,
 	// Find the appropriate 1D lookup index given a colour
 	float index = getLutIndex(colour, bitsR, bitsG, bitsB);
 	// Get the texture coordinate given the 1D lut index
-	vec2 coordinate = getCoordinate(index, size);
+	vec2 coordinate = getCoordinate(index, size) / size;
 	// Get classification colour with the coordinate
 	return classify(lut, coordinate);
 }

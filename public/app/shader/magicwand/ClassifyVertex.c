@@ -51,11 +51,11 @@ void main() {
 	// Check if pixel colour is close to the reference colour
 	// Converts values to the range [0-1] before comparing
 	// Also assumes the LUT has been rendered 1st
-	if ((overwrite || classify(lut, coordinate) == T_UNCLASSIFIED) && distance(rawColour.xyz, colour / 255.0) / MAX_DISTANCE <= tolerance / MAX_TOLERANCE) {
+	if ((overwrite || classify(lut, coordinate / lutSize) == T_UNCLASSIFIED) && distance(rawColour.xyz, colour / 255.0) / MAX_DISTANCE <= tolerance / MAX_TOLERANCE) {
 		// classify the pixel by overwriting current value
 		classificationColour = vec4(classification, classification, classification, 255.0) / 255.0;
 		// Move the vertex to the given coordinate
-		gl_Position = projectionMatrix * modelViewMatrix * vec4(coordinate * lutSize, 0.0, 1.0);
+		gl_Position = projectionMatrix * modelViewMatrix * vec4(coordinate, 0.0, 1.0);
 	} else {
 		gl_Position = vec4(0, 0, 2, 1); // put the point behind the camera to discard it
 	}

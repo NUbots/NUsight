@@ -86,6 +86,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 			this.createPointCloud(width, height);
 			positionAttr = this.imagePointCloud.geometry.getAttribute('position');
 		}
+		positionAttr.needsUpdate = true;
 		positionAttr.set(data);
 	},
 	updateColour: function (value) {
