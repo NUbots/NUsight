@@ -48,11 +48,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 				classification: {type: 'f', value: -1}
 			},
 			vertexShader: this.imageVertexShaderText,
-			fragmentShader: this.imageFragmentShaderText,
-			transparent: true,
-			blending: THREE.CustomBlending,
-			blendSrc: THREE.SrcAlphaFactor,
-			blendDst: THREE.OneMinusSrcAlphaFactor
+			fragmentShader: this.imageFragmentShaderText
 		});
 		this.imagePointCloud = new THREE.PointCloud(geometry, material);
 		this.imagePointCloud.frustumCulled = false;
