@@ -5,6 +5,46 @@
 (function (THREE) {
 	"use strict";
 
+	/**
+	 * Until provided as a pull request, Drew's crease angle computeVertexNormals function for the darwin
+	 *
+	 * @author Drew Noakes http://drewnoakes.com
+	 */
+	function computeVertexNormals(geometry, maxSmoothAngle) {
+		var v, vl, f, fl, face, faceIndicesPerVertex = [];
+		for (v = 0, vl = geometry.vertices.length; v < vl; v++) {
+			faceIndicesPerVertex.push([]);
+		}
+		for (f = 0, fl = geometry.faces.length; f < fl; f++) {
+			face = geometry.faces[f];
+			faceIndicesPerVertex[face.a].push(f);
+			faceIndicesPerVertex[face.b].push(f);
+			faceIndicesPerVertex[face.c].push(f);
+		}
+		for (f = 0, fl = geometry.faces.length; f < fl; f++) {
+			face = geometry.faces[f];
+			for (var fv = 0; fv < 3; fv++) {
+				var vertexIndex = face['abcd'.charAt(fv)];
+				var vertexFaces = faceIndicesPerVertex[vertexIndex];
+				var vertexNormal = face.normal.clone();
+				for (var vf = 0; vf < vertexFaces.length; vf++) {
+					var neighbourFaceIndex = vertexFaces[vf];
+					var neighbourFace = geometry.faces[neighbourFaceIndex];
+					// disregard the face we're working with
+					if (neighbourFace === face)
+						continue;
+					// given both normals are unit vectors, the angle is just acos(a.dot(b))
+					var theta = Math.acos(face.normal.dot(neighbourFace.normal));
+					if (theta <= maxSmoothAngle) {
+						vertexNormal.add(neighbourFace.normal);
+					}
+				}
+				vertexNormal.normalize();
+				face.vertexNormals[fv] = vertexNormal;
+			}
+		}
+	}
+
 	var DarwinOP, DarwinComponent;
 
 	/**
@@ -273,7 +313,7 @@
 
 	/**
 	 * This constructs a new DarwinComponent which loads in the data for each
-	 * component and builds the hieracy of objects
+	 * component and builds the hierarchy of objects
 	 *
 	 * @param params an object containing the values
 	 *              url to load the component from,
@@ -296,8 +336,8 @@
 		new THREE.JSONLoader().load(params.url, function (geom, materials) {
 			var mesh;
 
-			//Merge the verticies
-			geom.mergeVertices();
+			// Compute vertex normals with a crease angle of 0.52
+			computeVertexNormals(geom, 0.52);
 
 			//Create a mesh from our geometry
 			mesh = new THREE.Mesh(geom, new THREE.MeshFaceMaterial(materials));
