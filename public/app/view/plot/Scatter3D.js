@@ -38,7 +38,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 	listeners: {
 		resize: function (el, width, height) {
 //			this.autoSize(width, height);
-			this.getRenderer().setSize(width, height)
+			this.getRenderer().setSize(width, height);
 			var camera = this.getCamera();
 			camera.aspect = width / height;
 			camera.updateProjectionMatrix();

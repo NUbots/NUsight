@@ -13,10 +13,6 @@ uniform bool renderRaw;
 
 varying vec4 colour;
 
-float scaleValue(float value) {
-	return 100.0 * value - 50.0;
-}
-
 void main() {
 	vec4 rawColour = vec4(
 		position.r / (exp2(bitsR) - 1.0),
@@ -25,17 +21,13 @@ void main() {
 		1.0
 	);
 
-	vec3 positionScaled = vec3(
-		scaleValue(position.r / (exp2(bitsR) - 1.0)),
-		scaleValue(position.g / (exp2(bitsG) - 1.0)),
-		scaleValue(position.b / (exp2(bitsB) - 1.0))
-	);
+	vec3 positionScaled = 100.0 * rawColour.brg - 50.0;
 
 	vec4 mvPosition = modelViewMatrix * vec4(positionScaled, 1.0);
 	gl_PointSize = size * (scale / length(mvPosition.xyz));
 
 	float classification = classify(rawColour, lut, lutSize, bitsR, bitsG, bitsB);
-	if (classification == T_UNCLASSIFIED || classification == 0.0) {
+	if (classification == T_UNCLASSIFIED) {
 		gl_Position = vec4(0, 0, 2, 1); // put the point behind the camera to discard it
 	}
 	else {
@@ -47,6 +39,5 @@ void main() {
 		}
 		gl_Position = projectionMatrix * mvPosition;
 	}
-
 }
 
