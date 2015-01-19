@@ -1,5 +1,3 @@
-#include "Vision.h"
-
 /**
  * The classification colour of the point
  */

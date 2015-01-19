@@ -30,11 +30,11 @@ float getLutIndex(vec4 colour, float bitsR, float bitsG, float bitsB) {
 	// shift x left by N is equivalent to x = x * 2^N
 	// shift x right by N is equivalent to x = floor(x / 2^N)
 	// also normalizes to from 0 - 1 to 0 - 255 range
-	index = index + floor(255.0 * colour.r / exp2(bitsRemovedR));
+	index = index + floor(colour.r / exp2(bitsRemovedR));
 	index = index * exp2(bitsG);
-	index = index + floor(255.0 * colour.g / exp2(bitsRemovedG));
+	index = index + floor(colour.g / exp2(bitsRemovedG));
 	index = index * exp2(bitsB);
-	index = index + floor(255.0 * colour.b / exp2(bitsRemovedB));
+	index = index + floor(colour.b / exp2(bitsRemovedB));
 
 	return round(index);
 }
@@ -93,7 +93,7 @@ float classify(sampler2D lut, vec2 coordinate) {
  */
 float classify(vec4 colour, sampler2D lut, float size, float bitsR, float bitsG, float bitsB) {
 	// Find the appropriate 1D lookup index given a colour
-	float index = getLutIndex(colour, bitsR, bitsG, bitsB);
+	float index = getLutIndex(colour * 255.0, bitsR, bitsG, bitsB);
 	// Get the texture coordinate given the 1D lut index
 	vec2 coordinate = getCoordinate(index, size) / size;
 	// Get classification colour with the coordinate

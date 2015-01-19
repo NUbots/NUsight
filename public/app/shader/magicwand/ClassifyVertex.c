@@ -42,16 +42,15 @@ void main() {
 	gl_PointSize = 1.0;
 	// The geometry is assumed to be the raw (e.g. YCbCr) colours of the image
 	// Normalize them to the range [0-1]
-	vec4 rawColour = vec4(position, 255.0) / 255.0;
+	vec4 rawColour = vec4(position, 1.0);
 	// Get the lut index of the colour
 	float index = getLutIndex(rawColour, bitsR, bitsG, bitsB);
-	// Convert the lut index into a 2D texture coordinate that ranges from [0-lutSize]
+	// Convert the lut index into a 2D texture coordinate
 	vec2 coordinate = getCoordinate(index, lutSize);
 
 	// Check if pixel colour is close to the reference colour
-	// Converts values to the range [0-1] before comparing
 	// Also assumes the LUT has been rendered 1st
-	if ((overwrite || classify(lut, coordinate / lutSize) == T_UNCLASSIFIED) && distance(rawColour.xyz, colour / 255.0) / MAX_DISTANCE <= tolerance / MAX_TOLERANCE) {
+	if ((overwrite || classify(lut, coordinate / lutSize) == T_UNCLASSIFIED) && distance(rawColour.xyz, colour) <= tolerance) {
 		// classify the pixel by overwriting current value
 		classificationColour = vec4(classification, classification, classification, 255.0) / 255.0;
 		// Move the vertex to the given coordinate
