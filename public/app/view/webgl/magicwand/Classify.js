@@ -39,19 +39,23 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
 		var material = new THREE.ShaderMaterial({
 			uniforms: {
+				lut: {type: 't'},
 				lutSize: {type: 'f', value: 512},
 				bitsR: {type: 'f', value: 6},
 				bitsG: {type: 'f', value: 6},
 				bitsB: {type: 'f', value: 6},
 				colour: {type: '3fv', value: [0, 0, 0]},
 				tolerance: {type: 'f', value: -1},
-				classification: {type: 'f', value: -1}
+				classification: {type: 'f', value: -1},
+				overwrite: {type: 'i', value: 0}
 			},
 			vertexShader: this.imageVertexShaderText,
 			fragmentShader: this.imageFragmentShaderText
 		});
 		this.imagePointCloud = new THREE.PointCloud(geometry, material);
 		this.imagePointCloud.frustumCulled = false;
+		this.imagePointCloud.depthTest = false;
+		this.imagePointCloud.depthWrite = false;
 		this.imagePointCloud.position.set(0, 0, 1);
 		this.scene.add(this.imagePointCloud);
 	},
@@ -73,6 +77,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		}
 		this.resize(size, size);
 		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat);
+		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat, this.imagePointCloud.material);
 		this.updateUniform('lutSize', size, this.imagePointCloud.material);
 	},
 	updateRawImage: function (data, width, height, format) {
@@ -100,6 +105,9 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 	},
 	updateBitsB: function (value) {
 		this.updateUniform('bitsB', value, this.imagePointCloud.material);
+	},
+	updateOverwrite: function (value) {
+		this.updateUniform('overwrite', value, this.imagePointCloud.material);
 	},
 	/**
 	 * @param {ArrayBuffer} [lut]

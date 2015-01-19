@@ -252,6 +252,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	onToggleOverwrite: function (btn, pressed) {
 		this.setOverwrite(pressed);
+		this.selectionClassifier.updateOverwrite(this.getOverwrite());
 	},
 	onChangeRange: function (checkbox, newValue, oldValue, eOpts) {
 		this.setRange(newValue);

@@ -88,6 +88,8 @@ Ext.define('NU.view.webgl.WebGL', {
 		});
 		var mesh = new THREE.Mesh(geometry, material);
 		mesh.frustumCulling = false;
+		mesh.depthTest = false;
+		mesh.depthWrite = false;
 		return mesh;
 	},
 	/**

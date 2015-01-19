@@ -70,6 +70,15 @@ vec2 getCoordinate(float index, float size) {
 	return vec2(x, y);
 }
 
+float classify(sampler2D lut, vec2 coordinate) {
+	// Flip the y lookup using (1 - x) as the LUT has been flipped with UNPACK_FLIP_Y_WEBGL.
+	// Texture has only one channel, so only one component (texel.r) is needed.
+	// Normalize to 0 - 255 range.
+	// Round result using floor(x + 0.5) to remove any precision errors.
+	coordinate.y = 1.0 - coordinate.y;
+	return floor(texture2D(lut, coordinate).r * 255.0 + 0.5);
+}
+
 /**
  * Classify a given colour with a given lookup table.
  *
@@ -83,12 +92,8 @@ float classify(vec4 colour, sampler2D lut, float size, float bitsR, float bitsG,
 	float index = getLutIndex(colour, bitsR, bitsG, bitsB);
 	// Get the texture coordinate given the 1D lut index
 	vec2 coordinate = getCoordinate(index, size);
-	// Flip the y lookup using (1 - x) as the LUT has been flipped with UNPACK_FLIP_Y_WEBGL.
-	// Texture has only one channel, so only one component (texel.r) is needed.
-	// Normalize to 0 - 255 range.
-	// Round result using floor(x + 0.5) to remove any precision errors.
-	coordinate.y = 1.0 - coordinate.y;
-	return floor(texture2D(lut, coordinate).r * 255.0 + 0.5);
+	// Get classification colour with the coordinate
+	return classify(lut, coordinate);
 }
 
 /**
