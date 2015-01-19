@@ -19,6 +19,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		lookupBackwardHistory: null,
 		lookupForwardHistory: null,
 		lookupHistoryLength: 15,
+		lookupVertexBuffer: null,
 		previewLookup: null,
 		overwrite: false,
 		selectionTool: 'magic_wand',
@@ -444,7 +445,22 @@ Ext.define('NU.view.window.ClassifierController', {
 	refreshScatter: function () {
 
 		var scatter3d = this.lookupReference('scatter3d');
-		var lut = this.getLookup();
+		scatter3d.updatePlot(
+			this.getLookupVertexBuffer(),
+			this.getLookup(),
+			this.self.LutBitsPerColorY,
+			this.self.LutBitsPerColorCb,
+			this.self.LutBitsPerColorCr,
+			this.getRenderYUV()
+		);
+	},
+	resetLUT: function () {
+		var lut = new Uint8ClampedArray(Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr));
+		for (var i = 0; i < lut.length; i++) {
+			lut[i] = this.self.Target.Unclassified;
+		}
+		this.setLookup(lut); // TODO: make constant or something
+
 		var bitsR = this.self.LutBitsPerColorY;
 		var bitsG = this.self.LutBitsPerColorCb;
 		var bitsB = this.self.LutBitsPerColorCr;
@@ -464,61 +480,7 @@ Ext.define('NU.view.window.ClassifierController', {
 				}
 			}
 		}
-		scatter3d.updatePlot(vertices, lut, bitsR, bitsG, bitsB, this.getRenderYUV());
-
-		/*var data = [];
-		function getColour(typeId) {
-			var rgb = this.getRGBfromType(typeId);
-			return new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-		}
-
-		function scale(value) {
-			// scale from [0, 255] to [-50, 50]
-			return (100 * value) / 255 - 50;
-		}
-
-		var index;
-		var min = 0;
-		var max = 255;
-		var numSteps = Math.pow(2, Math.max(this.self.LutBitsPerColorY, this.self.LutBitsPerColorCb, this.self.LutBitsPerColorCr));
-		var step = (max - min) / numSteps;
-		for (var z = min; z <= max; z += step) {
-			for (var y = min; y <= max; y += step) {
-				for (var x = min; x <= max; x += step) {
-					if (this.getRenderCube() && (z === 0 || z === 255 || y === 0 || y === 255 || x === 0 || x === 255)) {
-						var colour = new THREE.Color();
-						var rgb = NU.util.Vision.YCbCrtoRGB([x, y, z]);
-						colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-						data.push([scale(z), scale(x), scale(y), colour]);
-					} else {
-						index = this.getLUTIndex([x, y, z]);
-						if (lut[index] !== this.self.Target.Unclassified) {
-							var colour;
-							if (this.getRenderYUV()) {
-								colour = new THREE.Color();
-								var rgb = NU.util.Vision.YCbCrtoRGB([x, y, z]);
-								colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-							} else {
-								colour = getColour.call(this, lut[index]);
-							}
-							// swap y/z since axes change in threejs
-							data.push([scale(z), scale(x), scale(y), colour]);
-						}
-					}
-				}
-			}
-		}
-
-		var scatter3d = this.lookupReference('scatter3d');
-		scatter3d.setPointData(data);
-		scatter3d.updatePlot();*/
-	},
-	resetLUT: function () {
-		var lut = new Uint8ClampedArray(Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr));
-		for (var i = 0; i < lut.length; i++) {
-			lut[i] = this.self.Target.Unclassified;
-		}
-		this.setLookup(lut); // TODO: make constant or something
+		this.setLookupVertexBuffer(vertices);
 	},
 	download: function () {
 		var message = new API.Message();

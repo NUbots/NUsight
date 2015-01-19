@@ -70,7 +70,8 @@ Ext.define('NU.view.plot.Scatter3D', {
 	afterRender: function () {
 		var renderer = new THREE.WebGLRenderer({
 			antialias: true,
-			canvas: this.getEl().dom
+			canvas: this.getEl().dom,
+			alpha: true
 		});
 		renderer.setClearColor(0xf0f0f0, 1.0);
 		var camera = new THREE.PerspectiveCamera(
@@ -86,6 +87,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 
 		var scatterPlot = new THREE.Object3D();
 		this.generateScene(scatterPlot);
+		this.createPointCloud(scatterPlot);
 		scene.add(scatterPlot);
 
 		this.updateCameraPosition(scene, camera, cameraDistance, 19 * Math.PI / 32, 30 * Math.PI / 180);
@@ -286,7 +288,6 @@ Ext.define('NU.view.plot.Scatter3D', {
 		});
 		var boundary = new THREE.Line(boundaryGeo, boundaryMat, THREE.LinePieces);
 		scatterPlot.add(boundary);
-//		this.updatePlot();
 
 		function createTextCanvas(text, color, font, size)
 		{
@@ -355,66 +356,24 @@ Ext.define('NU.view.plot.Scatter3D', {
 		texts.push(titleZ);
 
 	},
-	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB, renderRaw) {
-		var scatterPlot = this.getScatterPlot();
+	createPointCloud: function (scatterPlot) {
 		var points = this.getPoints();
 		scatterPlot.remove(points);
 
-
 		var geometry = new THREE.BufferGeometry();
-		geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+		//geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
-		/*Ext.each(this.getPointData(), function (row) {
-			var position = new THREE.Vector3(row[0], row[1], row[2]);
-			//var radius = 0.4;
-			geometry.vertices.push(position);
-			geometry.colors.push(row[3]);
-			//var sphere = new Sphere(radius, row[3]);
-			//sphere.position = position;
-			//this.objects.push(sphere);
-		}, this);*/
-
-		//var texture = new THREE.Texture(this.generateTexture());
-		//texture.needsUpdate = true; // important
-//		var texture = THREE.ImageUtils.loadTexture("resources/images/disc.png");
-
-		/*var material = new THREE.PointCloudMaterial({
-			size: 8,
-//			sizeAttenuation: false,
-//			map: texture,
-//			blending: THREE.AdditiveBlending, // required
-//			depthTest: false, // required
-//			depthWrite: false,
-//			transparent: true,
-//			opacity: 0.9,
-			vertexColors: true // optional
-		});*/
-
-		// create a square texture
-		var data = new Uint8Array(lut.buffer);
-		var size = Math.ceil(Math.sqrt(data.length));
-		var sizeSqr = size * size;
-		if (data.length != sizeSqr) {
-			// does not fit evenly, create new array with tail padding
-			var newData = new Uint8Array(sizeSqr);
-			newData.set(data);
-			data = newData;
-		}
-		NU.view.webgl.WebGL.loadShaders('LookUpTable3D') .spread(function (vertexShaderText, fragmentShaderText) {
-			var lutTexture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat,
-						THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping,
-						THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
-			lutTexture.needsUpdate = true;
+		return NU.view.webgl.WebGL.loadShaders('LookUpTable3D').spread(function (vertexShaderText, fragmentShaderText) {
 			var material = new THREE.ShaderMaterial({
 				uniforms: {
-					'lut': {type: 't', value: lutTexture},
-					'lutSize': {type: 'f', value: size},
-					'bitsR': {type: 'f', value: bitsR},
-					'bitsG': {type: 'f', value: bitsG},
-					'bitsB': {type: 'f', value: bitsB},
+					'lut': {type: 't'},
+					'lutSize': {type: 'f'},
+					'bitsR': {type: 'f'},
+					'bitsG': {type: 'f'},
+					'bitsB': {type: 'f'},
 					scale: {type: 'f', value: this.getHeight() / 2}, // TODO
 					size: {type: 'f', value: 8},
-					renderRaw: {type: 'i', value: renderRaw}
+					renderRaw: {type: 'i'}
 				},
 				vertexShader: vertexShaderText,
 				fragmentShader: fragmentShaderText,
@@ -429,7 +388,38 @@ Ext.define('NU.view.plot.Scatter3D', {
 			points.frustumCulled = false;
 			scatterPlot.add(points);
 			this.setPoints(points);
-			this.needsUpdate = true;
 		}.bind(this));
+	},
+	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB, renderRaw) {
+		var points = this.getPoints();
+
+		var geometry = new THREE.BufferGeometry();
+		geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+		// create a square texture
+		var data = new Uint8Array(lut.buffer);
+		var size = Math.ceil(Math.sqrt(data.length));
+		var sizeSqr = size * size;
+		if (data.length != sizeSqr) {
+			// does not fit evenly, create new array with tail padding
+			var newData = new Uint8Array(sizeSqr);
+			newData.set(data);
+			data = newData;
+		}
+		var lutTexture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat,
+			THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping,
+			THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+		lutTexture.needsUpdate = true;
+
+		points.material.uniforms.lut.value = lutTexture;
+		points.material.uniforms.lutSize.value = size;
+		points.material.uniforms.bitsR.value = bitsR;
+		points.material.uniforms.bitsG.value = bitsG;
+		points.material.uniforms.bitsB.value = bitsB;
+		points.material.uniforms.renderRaw.value = renderRaw;
+
+		points.geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+		points.geometry.needsUpdate = true;
+		this.needsUpdate = true;
 	}
 });

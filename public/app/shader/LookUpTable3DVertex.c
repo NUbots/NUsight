@@ -18,8 +18,6 @@ float scaleValue(float value) {
 }
 
 void main() {
-//	gl_PointSize = 10.0; // TODO
-
 	vec4 rawColour = vec4(
 		position.r / (exp2(bitsR) - 1.0),
 		position.g / (exp2(bitsG) - 1.0),
