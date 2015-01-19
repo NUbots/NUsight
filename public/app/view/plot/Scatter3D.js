@@ -42,6 +42,10 @@ Ext.define('NU.view.plot.Scatter3D', {
 			var camera = this.getCamera();
 			camera.aspect = width / height;
 			camera.updateProjectionMatrix();
+			var points = this.getPoints();
+			if (points) {
+				points.material.uniforms.scale.value = height / 2;
+			}
 			this.needsUpdate = true;
 		}
 	},
@@ -212,7 +216,6 @@ Ext.define('NU.view.plot.Scatter3D', {
 		var yAxisGeo = new THREE.Geometry();
 		var zAxisGeo = new THREE.Geometry();
 		var midLinesGeo = new THREE.Geometry();
-		var boundaryGeo = new THREE.Geometry();
 
 		xAxisGeo.vertices.push(v(bounds.minx, 0, 0), v(bounds.maxx, 0, 0));
 		yAxisGeo.vertices.push(v(0, bounds.miny, 0), v(0, bounds.maxy, 0));
@@ -235,58 +238,35 @@ Ext.define('NU.view.plot.Scatter3D', {
 			v(0, bounds.miny, bounds.minz), v(0, bounds.miny, bounds.maxz)
 		);
 
-		boundaryGeo.vertices.push(
-			v(bounds.minx, bounds.maxy, bounds.minz), v(bounds.maxx, bounds.maxy, bounds.minz),
-			v(bounds.minx, bounds.miny, bounds.minz), v(bounds.maxx, bounds.miny, bounds.minz),
-			v(bounds.minx, bounds.maxy, bounds.maxz), v(bounds.maxx, bounds.maxy, bounds.maxz),
-			v(bounds.minx, bounds.miny, bounds.maxz), v(bounds.maxx, bounds.miny, bounds.maxz),
-
-			v(bounds.maxx, bounds.miny, bounds.minz), v(bounds.maxx, bounds.maxy, bounds.minz),
-			v(bounds.minx, bounds.miny, bounds.minz), v(bounds.minx, bounds.maxy, bounds.minz),
-			v(bounds.maxx, bounds.miny, bounds.maxz), v(bounds.maxx, bounds.maxy, bounds.maxz),
-			v(bounds.minx, bounds.miny, bounds.maxz), v(bounds.minx, bounds.maxy, bounds.maxz),
-
-			v(bounds.maxx, bounds.maxy, bounds.minz), v(bounds.maxx, bounds.maxy, bounds.maxz),
-			v(bounds.maxx, bounds.miny, bounds.minz), v(bounds.maxx, bounds.miny, bounds.maxz),
-			v(bounds.minx, bounds.maxy, bounds.minz), v(bounds.minx, bounds.maxy, bounds.maxz),
-			v(bounds.minx, bounds.miny, bounds.minz), v(bounds.minx, bounds.miny, bounds.maxz)
-		);
-
 		var xAxisMat = new THREE.LineBasicMaterial({
-			color: 0xeeeeee, //0xff0000,
-			lineWidth: 1
+			color: 0xeeeeee
 		});
 		var xAxis = new THREE.Line(xAxisGeo, xAxisMat, THREE.LinePieces);
 		scatterPlot.add(xAxis);
 
 		var yAxisMat = new THREE.LineBasicMaterial({
-			color: 0xeeeeee, //0x0000ff,
-			lineWidth: 1
+			color: 0xeeeeee
 		});
 		var yAxis = new THREE.Line(yAxisGeo, yAxisMat, THREE.LinePieces);
 		scatterPlot.add(yAxis);
 
 		var zAxisMat = new THREE.LineBasicMaterial({
-			color: 0xeeeeee, //0x00ff00,
-			lineWidth: 1
+			color: 0xeeeeee
 		});
 		var zAxis = new THREE.Line(zAxisGeo, zAxisMat, THREE.LinePieces);
 		scatterPlot.add(zAxis);
 
 		var midLinesMat = new THREE.LineBasicMaterial({
-			color: 0xdddddd,
-			lineWidth: 1,
-			transparent: true
+			color: 0xdddddd
 		});
 		var midLines = new THREE.Line(midLinesGeo, midLinesMat, THREE.LinePieces);
 		scatterPlot.add(midLines);
 
+		var boundaryGeo = new THREE.BoxGeometry(bounds.maxx - bounds.minx, bounds.maxy - bounds.miny, bounds.maxz - bounds.minz);
 		var boundaryMat = new THREE.LineBasicMaterial({
-			color: 0x090909,
-			lineWidth: 1,
-			transparent: true
+			color: 0x090909
 		});
-		var boundary = new THREE.Line(boundaryGeo, boundaryMat, THREE.LinePieces);
+		var boundary = new THREE.EdgesHelper(new THREE.Mesh(boundaryGeo, boundaryMat), 0x090909);
 		scatterPlot.add(boundary);
 
 		function createTextCanvas(text, color, font, size)
@@ -372,18 +352,20 @@ Ext.define('NU.view.plot.Scatter3D', {
 					'bitsG': {type: 'f'},
 					'bitsB': {type: 'f'},
 					scale: {type: 'f', value: this.getHeight() / 2}, // TODO
-					size: {type: 'f', value: 8},
+					size: {type: 'f', value: 7},
 					renderRaw: {type: 'i'},
 					renderCube: {type: 'i'}
 				},
 				vertexShader: vertexShaderText,
-				fragmentShader: fragmentShaderText,
-				transparent: true,
-				blending: THREE.CustomBlending,
-				blendSrc: THREE.SrcAlphaFactor,
-				blendDst: THREE.OneMinusSrcAlphaFactor
+				fragmentShader: fragmentShaderText
+				//transparent: true,
+				//blending: THREE.CustomBlending,
+				//blendSrc: THREE.SrcAlphaFactor,
+				//blendDst: THREE.OneMinusSrcAlphaFactor
 				//side: THREE.DoubleSide
 			});
+			material.obj = this;
+			window.mat = material;
 
 			points = new THREE.PointCloud(geometry, material);
 			points.frustumCulled = false;

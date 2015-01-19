@@ -14,5 +14,5 @@ void main() {
 	// Creates a nice smooth circular shading on the point
 	gl_FragColor.rgb = colour.rgb * (sin(M_PI * gl_PointCoord.y) * 0.5 + 0.5) * (sin(M_PI * gl_PointCoord.x) * 0.5 + 0.5);
 	// Smooth the alpha to 0 near the border of the circle to provide some anti-aliasing
-	gl_FragColor.a = max(-exp(50.0 * distFromCenter - 24.0) + 1.0, 0.0);
+	gl_FragColor.a = 1.0; //max(-exp(50.0 * distFromCenter - 24.0) + 1.0, 0.0);
 }
