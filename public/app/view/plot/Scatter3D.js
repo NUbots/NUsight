@@ -406,12 +406,20 @@ Ext.define('NU.view.plot.Scatter3D', {
 			newData.set(data);
 			data = newData;
 		}
-		var lutTexture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat,
-			THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping,
-			THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
-		lutTexture.needsUpdate = true;
+		var texture = points.material.uniforms.lut.value;
+		if (!texture) {
+			texture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat,
+				THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping,
+				THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+			points.material.uniforms.lut.value = texture;
+		}
+		else {
+			texture.image.data = data;
+			texture.image.width = size;
+			texture.image.height = size;
+		}
+		texture.needsUpdate = true;
 
-		points.material.uniforms.lut.value = lutTexture;
 		points.material.uniforms.lutSize.value = size;
 		points.material.uniforms.bitsR.value = bitsR;
 		points.material.uniforms.bitsG.value = bitsG;
