@@ -373,7 +373,8 @@ Ext.define('NU.view.plot.Scatter3D', {
 					'bitsB': {type: 'f'},
 					scale: {type: 'f', value: this.getHeight() / 2}, // TODO
 					size: {type: 'f', value: 8},
-					renderRaw: {type: 'i'}
+					renderRaw: {type: 'i'},
+					renderCube: {type: 'i'}
 				},
 				vertexShader: vertexShaderText,
 				fragmentShader: fragmentShaderText,
@@ -390,7 +391,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 			this.setPoints(points);
 		}.bind(this));
 	},
-	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB, renderRaw) {
+	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB, renderRaw, renderCube) {
 		var points = this.getPoints();
 
 		var geometry = new THREE.BufferGeometry();
@@ -425,6 +426,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		points.material.uniforms.bitsG.value = bitsG;
 		points.material.uniforms.bitsB.value = bitsB;
 		points.material.uniforms.renderRaw.value = renderRaw;
+		points.material.uniforms.renderCube.value = renderCube;
 
 		points.geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
 		points.geometry.needsUpdate = true;

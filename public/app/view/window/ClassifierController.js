@@ -452,7 +452,8 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorY,
 			this.self.LutBitsPerColorCb,
 			this.self.LutBitsPerColorCr,
-			this.getRenderYUV()
+			this.getRenderYUV(),
+			this.getRenderCube()
 		);
 	},
 	resetLUT: function () {
