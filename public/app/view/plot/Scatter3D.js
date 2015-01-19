@@ -355,7 +355,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 		texts.push(titleZ);
 
 	},
-	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB) {
+	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB, renderRaw) {
 		var scatterPlot = this.getScatterPlot();
 		var points = this.getPoints();
 		scatterPlot.remove(points);
@@ -411,10 +411,18 @@ Ext.define('NU.view.plot.Scatter3D', {
 					'lutSize': {type: 'f', value: size},
 					'bitsR': {type: 'f', value: bitsR},
 					'bitsG': {type: 'f', value: bitsG},
-					'bitsB': {type: 'f', value: bitsB}
+					'bitsB': {type: 'f', value: bitsB},
+					scale: {type: 'f', value: this.getHeight() / 2}, // TODO
+					size: {type: 'f', value: 8},
+					renderRaw: {type: 'i', value: renderRaw}
 				},
 				vertexShader: vertexShaderText,
-				fragmentShader: fragmentShaderText
+				fragmentShader: fragmentShaderText,
+				transparent: true,
+				blending: THREE.CustomBlending,
+				blendSrc: THREE.SrcAlphaFactor,
+				blendDst: THREE.OneMinusSrcAlphaFactor
+				//side: THREE.DoubleSide
 			});
 
 			points = new THREE.PointCloud(geometry, material);

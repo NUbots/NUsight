@@ -464,7 +464,7 @@ Ext.define('NU.view.window.ClassifierController', {
 				}
 			}
 		}
-		scatter3d.updatePlot(vertices, lut, bitsR, bitsG, bitsB);
+		scatter3d.updatePlot(vertices, lut, bitsR, bitsG, bitsB, this.getRenderYUV());
 
 		/*var data = [];
 		function getColour(typeId) {
