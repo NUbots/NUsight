@@ -12,7 +12,9 @@ uniform float bitsG;
  * The number of bits dedicated to the B colour channel
  */
 uniform float bitsB;
-
+/**
+ * The lookup table texture
+ */
 uniform sampler2D lut;
 /**
  * The width/height of the square lut texture
@@ -27,32 +29,23 @@ uniform vec3 colour;
  */
 uniform float tolerance;
 /**
- * The classification value to use when classifying new colours
+ * If false, shader will not override colours which have already been classified
  */
-uniform float classification;
-
 uniform bool overwrite;
-/**
- * The classification colour of the point
- */
-varying vec4 classificationColour;
 
+// Assumes the LUT has been rendered to the scene first
 void main() {
 	// Render a single pixel
 	gl_PointSize = 1.0;
 	// The geometry is assumed to be the raw (e.g. YCbCr) colours of the image
-	// Normalize them to the range [0-1]
 	vec4 rawColour = vec4(position, 1.0);
 	// Get the lut index of the colour
-	float index = getLutIndex(rawColour, bitsR, bitsG, bitsB);
+	float index = getLutIndex(rawColour.rgb, bitsR, bitsG, bitsB);
 	// Convert the lut index into a 2D texture coordinate
 	vec2 coordinate = getCoordinate(index, lutSize);
 
 	// Check if pixel colour is close to the reference colour
-	// Also assumes the LUT has been rendered 1st
 	if ((overwrite || classify(lut, coordinate / lutSize) == T_UNCLASSIFIED) && distance(rawColour.xyz, colour) <= tolerance) {
-		// classify the pixel by overwriting current value
-		classificationColour = vec4(classification, classification, classification, 255.0) / 255.0;
 		// Move the vertex to the given coordinate
 		gl_Position = projectionMatrix * modelViewMatrix * vec4(coordinate, 0.0, 1.0);
 	} else {

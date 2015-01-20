@@ -291,25 +291,25 @@ Ext.define('NU.view.window.ClassifierController', {
 	onChangeBitsR: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorY = newValue;
-			this.resetBits();
 			this.classifiedRenderer.updateBitsR(newValue);
 			this.selectionClassifier.updateBitsR(newValue);
+			this.resetBits();
 		}
 	},
 	onChangeBitsG: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorCb = newValue;
-			this.resetBits();
 			this.classifiedRenderer.updateBitsG(newValue);
 			this.selectionClassifier.updateBitsG(newValue);
+			this.resetBits();
 		}
 	},
 	onChangeBitsB: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorCr = newValue;
-			this.resetBits();
 			this.classifiedRenderer.updateBitsB(newValue);
 			this.selectionClassifier.updateBitsB(newValue);
+			this.resetBits();
 		}
 	},
 	resetBits: function () {
@@ -744,6 +744,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		var lut = this.getLookup();
 		var typeId = this.self.Target[this.getTarget()];
 		this.selectionClassifier.updateClassification(typeId);
+		this.selectionClassifier.updateTolerance(this.getTolerance());
 		this.selectionClassifier.render();
 		this.selectionClassifier.getLut(lut);
 		this.updateClassifiedData();

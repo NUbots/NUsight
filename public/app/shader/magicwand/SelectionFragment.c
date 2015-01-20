@@ -18,7 +18,7 @@ varying vec2 center;
 void main() {
 	vec4 rawColour = texture2D(rawImage, center);
 	// check euclidean distance between rawColour and colour
-	if (distance(rawColour.xyz * 255.0, colour) <= tolerance) {
+	if (distance(rawColour.rgb * 255.0, colour) <= tolerance) {
 		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 	} else {
 		discard;
