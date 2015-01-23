@@ -12,7 +12,7 @@ Ext.define('NU.view.window.ConfigurationController', {
     init: function () {
         var view = this.getView();
         this.configurations = view.lookupReference('configurations');
-        this.type = API.Configuration.Node.Type;
+        this.type = API.ConfigurationState.Node.Type;
         this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
         NU.util.Network.sendCommand(this.getRobotIP(), 'get_configuration_state');
     },
@@ -149,14 +149,13 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param sequence The sequence message.
      */
     processSequence: function (node, type, sequence) {
-        node = this.processCurrentNode(node, {
-            name: node.get('name'),
-            type: type
-        });
         // iterates through every sequence message
         Ext.each(sequence, function (item, i) {
             // processes the sequence message
-            this.processMessage(node.appendChild({}), item);
+            this.processMessage(node.appendChild({
+                type: type,
+                index: i
+            }), item);
         }, this);
     },
     /**
@@ -222,6 +221,12 @@ Ext.define('NU.view.window.ConfigurationController', {
             leaf: true
         });
     },
+    /**
+     * Retrieves the proper record value if the widget is of a special type.
+     *
+     * @param record The record that contains the value.
+     * @returns {*} The value of the record.
+     */
     getRecordValue: function (record) {
         var value = record.get('value');
         if (record.get('widget') === 'ANGLE') {
@@ -262,6 +267,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         var configuration = new API.Configuration();        // create the configuration API
         var tree = this.buildTree(record, newValue);        // build the tree using the initial record
         configuration.setRoot(tree.root);                   // set the root of the configuration message
+        debugger;
         return configuration;                               // return the configuration message
     },
     /**
@@ -284,17 +290,19 @@ Ext.define('NU.view.window.ConfigurationController', {
         var tree = this.buildTree(node.parentNode, newValue);
         // create the proto node
         var newNode = this.processNode(node, newValue);
+        if (newNode.getType() === this.type.SEQUENCE) {     // check if the type of the new node is a sequence
+            var index = node.get('index').toString();       // get the index of the sequence item
+            newNode.setTag(index);                          // set the tag of the new node
+        }
         var current = tree.current;                         // get the current node in the tree
         var type = current.type;                            // get the type of the current node in the tree
         if (type === this.type.MAP) {                       // check if the type of the current node is a map
             var map = current.getMapValue()[0];             // get the first map from the current node in the tree
-            var mapValue = map.getValue();                  // get the value of the map
-            if (mapValue ) {                                // check if the value in the map exists
-                mapValue.setSequenceValue(newNode);         // must be a sequence
-            } else {
-                map.setValue(newNode);                      // must be another map
-            }
+            map.setValue(newNode);                          // set the value on the map
         } else if (type === this.type.SEQUENCE) {           // check if the type of the current node is a sequence
+            var parent = node.parentNode;                   // get the parent of the node
+            var index = parent.get('index').toString();     // get the index of the sequence item
+            current.setTag(index);                          // set a tag on the sequence indicating the index
             current.setSequenceValue(newNode);              // set the sequence value of the current tree
         } else {
             current.setValue(newNode);                      // append the new node as a KeyPair value
@@ -393,6 +401,8 @@ Ext.define('NU.view.window.ConfigurationController', {
         if (name) {                                         // check if the name exists
             var keyPair = this.createKeyPair(name, node);   // create a KeyPair with the name and node as its value
             return this.createMapNode(keyPair);             // return a Map Node with the key pair as its value
+        } else if (node.getType() !== this.type.SEQUENCE) { // check if the type is not a sequence
+            return this.createSequenceNode(name, node);     // create a sequence node as it is missing from the tree
         }
         return node;                                        // return the node
     },
@@ -459,10 +469,14 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Creates a SEQUENCE type Node and adds a Node to its sequence value.
      *
      * @param name The name of the sequence.
+     * @param [value] An optional sequence value.
      * @returns {spec.Node} A sequence ConfigurationState Node.
      */
-    createSequenceNode: function (name) {
+    createSequenceNode: function (name, value) {
         var node = this.createNode(this.type.SEQUENCE);     // create a SEQUENCE Node
+        if (value) {                                        // check if the value exists
+            node.setSequenceValue(value);                   // set the value of the Node
+        }
         return this.processConfigurationNode(node, name);   // return the processed Node
     },
     /**

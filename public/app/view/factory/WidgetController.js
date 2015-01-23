@@ -73,6 +73,7 @@ Ext.define('NU.view.factory.WidgetController', {
         if (widget.isValid()) {                             // check if the widget is valid before updating it
             var record = this.getView().getRecord();        // get the record from the view
             this.fireViewEvent('update', record, value);    // fire an event that updates the configuration file
+            record.set('value', value);                     // set the value of the record to the new value
         }
     },
     /**
