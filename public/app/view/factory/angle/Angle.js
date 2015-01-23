@@ -33,6 +33,7 @@ Ext.define('NU.view.factory.angle.Angle', {
     },  {
         xtype: 'numberfield',
         reference: 'input',
+        allowBlank: false,
         listeners: {
             change: 'onInputUpdate'
         },

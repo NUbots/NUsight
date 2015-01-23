@@ -14,13 +14,6 @@ Ext.define('NU.view.window.ConfigurationController', {
         this.configurations = view.lookupReference('configurations');
         this.type = API.Configuration.Node.Type;
         this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
-        this.getConfigurationState();
-    },
-    /**
-     * A function called when the configuration window is initialised. It sends a message over the network requesting
-     * the data for each configuration.
-     */
-    getConfigurationState: function () {
         NU.util.Network.sendCommand(this.getRobotIP(), 'get_configuration_state');
     },
     /**
@@ -229,32 +222,45 @@ Ext.define('NU.view.window.ConfigurationController', {
             leaf: true
         });
     },
+    getRecordValue: function (record) {
+        var value = record.get('value');
+        if (record.get('widget') === 'ANGLE') {
+            return value.value;
+        }
+        return value;
+    },
     /**
      * Updates a configuration file with a new value based off the information found in the record.
      *
      * @param record The record associated with a particular widget that was updated.
-     * @param value The new value of the widget.
+     * @param newValue The new value of the configuration.
      */
-    onUpdateWidget: function (record, value) {
-        // create the configuration state message
-        var message = NU.util.Network.createMessage(API.Message.Type.CONFIGURATION_STATE, 0);
-        // calculates the configuration given the record and value being updated
-        var configuration = this.getConfiguration(record, value);
-        // set the configuration of the message
-        message.setConfigurationState(configuration);
-        // send the message over the network
-        NU.util.Network.send(this.getRobotIP(), message);
+    onUpdateWidget: function (record, newValue) {
+        // get the value of the record
+        var value = this.getRecordValue(record);
+        var type = record.get('type');
+        // check if we should even update the configuration file first
+        if (value !== newValue) {
+            // create the configuration state message
+            var message = NU.util.Network.createMessage(API.Message.Type.CONFIGURATION_STATE, 0);
+            // calculates the configuration given the record and value being updated
+            var configurationState = this.getConfiguration(record, newValue);
+            // set the configuration state of the message
+            message.setConfigurationState(configurationState);
+            // send the message over the network
+            NU.util.Network.send(this.getRobotIP(), message);
+        }
     },
     /**
      * Retrieves the ConfigurationState message by building the tree and setting its root.
      *
      * @param record The record that was modified by the user.
-     * @param value The new value for the record.
+     * @param newValue The new value for the configuration.
      * @returns {Window.API.Configuration} The ConfigurationState message.
      */
-    getConfiguration: function (record, value) {
+    getConfiguration: function (record, newValue) {
         var configuration = new API.Configuration();        // create the configuration API
-        var tree = this.buildTree(record, value);           // build the tree using the initial record
+        var tree = this.buildTree(record, newValue);        // build the tree using the initial record
         configuration.setRoot(tree.root);                   // set the root of the configuration message
         return configuration;                               // return the configuration message
     },
@@ -263,10 +269,10 @@ Ext.define('NU.view.window.ConfigurationController', {
      * path exists) and then creates a node using the current data and appends it to the current value of the tree.
      *
      * @param node The current node being processed.
-     * @param value The new value for the configuration.
+     * @param newValue The new value for the configuration.
      * @returns {*} The ConfigurationState message tree.
      */
-    buildTree: function (node, value) {
+    buildTree: function (node, newValue) {
         if (node.get('path')) {                             // check if the node contains a path
             var root = this.createFileNode(node);           // create the file node
             return {                                        // return an object containing the root and the file as the current value
@@ -274,8 +280,10 @@ Ext.define('NU.view.window.ConfigurationController', {
                 current: root.file
             }
         }
-        var tree = this.buildTree(node.parentNode, value);  // build the tree recursively using the parent node until the file is found
-        var newNode = this.processNode(node, value);        // create the proto node
+        // build the tree recursively using the parent node until the file is found
+        var tree = this.buildTree(node.parentNode, newValue);
+        // create the proto node
+        var newNode = this.processNode(node, newValue);
         var current = tree.current;                         // get the current node in the tree
         var type = current.type;                            // get the type of the current node in the tree
         if (type === this.type.MAP) {                       // check if the type of the current node is a map
@@ -291,7 +299,8 @@ Ext.define('NU.view.window.ConfigurationController', {
         } else {
             current.setValue(newNode);                      // append the new node as a KeyPair value
         }
-        tree.current = newNode;                             // set the new current node in the tree to the node that was created
+        // set the new current node in the tree to the node that was created and return the tree
+        tree.current = newNode;
         return tree;
     },
     /**
@@ -299,15 +308,15 @@ Ext.define('NU.view.window.ConfigurationController', {
      * message Node or KeyPair.
      *
      * @param node The node being processed.
-     * @param configuration The new value for the configuration.
+     * @param newValue The new value for the configuration.
      * @returns {*} A ConfigurationState Node or KeyPair.
      */
-    processNode: function (node, configuration) {
+    processNode: function (node, newValue) {
         var name = node.get('name');                        // get the name of the record
         var value = node.get('value');                      // get the value of the record
         var type = node.get('type');                        // get the type of the record
         if (!node.hasChildNodes()) {                        // check if at the widget node
-            value = configuration;                          // change the value to new configuration value
+            value = newValue;                               // change the value to new configuration value
         }
         switch (type) {                                     // evaluate the type of the record
             case this.type.MAP:
@@ -455,7 +464,6 @@ Ext.define('NU.view.window.ConfigurationController', {
     createSequenceNode: function (name) {
         var node = this.createNode(this.type.SEQUENCE);     // create a SEQUENCE Node
         return this.processConfigurationNode(node, name);   // return the processed Node
-
     },
     /**
      * Creates a MAP type Node and adds a Node to its map value.

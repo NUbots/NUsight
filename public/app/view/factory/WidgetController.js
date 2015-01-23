@@ -84,10 +84,12 @@ Ext.define('NU.view.factory.WidgetController', {
     addTextField: function (configuration, value) {
         this.widget.add(Ext.create('Ext.form.field.Text', {
             reference: configuration,
+            allowBlank: false,
+            enableKeyEvents: true,
             value: value,
             listeners: {
-                change: function (widget, value) {
-                    this.update(widget, value);
+                keyUp: function (widget) {
+                    this.update(widget, widget.getValue());
                 },
                 scope: this
             }
@@ -104,12 +106,14 @@ Ext.define('NU.view.factory.WidgetController', {
     addNumberField: function (configuration, value, minValue, maxValue) {
         this.widget.add(Ext.create('Ext.form.field.Number', {
             reference: configuration,
+            allowBlank: false,
+            enableKeyEvents: true,
             value: value,
             minValue: minValue || 0,
             maxValue: maxValue || 100,
             listeners: {
-                change: function (widget, value) {
-                    this.update(widget, value);
+                keyUp: function (widget) {
+                    this.update(widget, widget.getValue());
                 },
                 scope: this
             }
@@ -206,7 +210,7 @@ Ext.define('NU.view.factory.WidgetController', {
      * @returns {*} The new name of the configuration.
      */
     transformName: function (configuration) {
-        if (configuration === undefined) {
+        if (configuration === undefined || Ext.isNumber(configuration)) {
             configuration = Ext.id();
         }
         return configuration.replace(/[./\- ]/g, '_');
