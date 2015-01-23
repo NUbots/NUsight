@@ -376,9 +376,6 @@ Ext.define('NU.view.plot.Scatter3D', {
 	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB, renderRaw, renderCube) {
 		var points = this.getPoints();
 
-		var geometry = new THREE.BufferGeometry();
-		geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
 		// create a square texture
 		var data = new Uint8Array(lut.buffer);
 		var size = Math.ceil(Math.sqrt(data.length));
@@ -410,8 +407,12 @@ Ext.define('NU.view.plot.Scatter3D', {
 		points.material.uniforms.renderRaw.value = renderRaw;
 		points.material.uniforms.renderCube.value = renderCube;
 
-		points.geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-		points.geometry.needsUpdate = true;
+		var positionBuffer = points.geometry.getAttribute('position');
+		if (positionBuffer.array.length !== vertices.length) {
+			points.geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+			points.geometry.needsUpdate = true;
+		}
+
 		this.needsUpdate = true;
 	}
 });
