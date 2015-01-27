@@ -15,6 +15,35 @@ Ext.define('NU.view.window.Configuration', {
     title: 'Configuration',
     width: 1000,
     height: 550,
+    tbar: [{
+        xtype: 'robot_selector',
+        listeners: {
+            selectRobot: 'onSelectRobot'
+        }
+    }, {
+        xtype: 'component',
+        reference: 'currentMode',
+        tpl: '<strong>Current mode: </strong> {name}',
+        flex: 2,
+        listeners: {
+            afterRender: 'onCurrentModeAfterRender'
+        }
+    }, {
+        xtype: 'button',
+        reference: 'save',
+        text: 'Save',
+        handler: 'onSave',
+        listeners: {
+            afterRender: 'onSaveAfterRender'
+        }
+    }, {
+        xtype: 'button',
+        reference: 'switchMode',
+        tpl: 'Switch to {name}',
+        listeners: {
+            afterRender: 'onSwitchModeAfterRender'
+        }
+    }],
     items: [{
         xtype: 'treepanel',
         reference: 'configurations',

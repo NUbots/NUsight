@@ -5,7 +5,7 @@ Ext.define('NU.view.factory.WidgetController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.Widget',
     widget: null,
-    WIDGET: {
+    Widget: {
         TEXTBOX:    {type: "TEXT"},
         NUMBER:     {type: "NUMBER"},
         CHECKBOX:   {type: "BOOLEAN"},
@@ -42,22 +42,22 @@ Ext.define('NU.view.factory.WidgetController', {
         }
         // evaluates the widget based on its type
         switch (widget) {
-            case resolve(this.WIDGET.TEXTBOX):
+            case resolve(this.Widget.TEXTBOX):
                 this.addTextField(name, value);
                 break;
-            case resolve(this.WIDGET.NUMBER):
+            case resolve(this.Widget.NUMBER):
                 this.addNumberField(name, value);
                 break;
-            case resolve(this.WIDGET.CHECKBOX):
+            case resolve(this.Widget.CHECKBOX):
                 this.addCheckbox(name, value);
                 break;
-            case resolve(this.WIDGET.COMBOBOX):
+            case resolve(this.Widget.COMBOBOX):
                 this.addComboBox(name, value); // todo
                 break;
-            case resolve(this.WIDGET.SLIDER):
+            case resolve(this.Widget.SLIDER):
                 this.addSlider(name, value);
                 break;
-            case resolve(this.WIDGET.ANGLE):
+            case resolve(this.Widget.ANGLE):
                 this.addAngle(name, value);
                 break;
         }

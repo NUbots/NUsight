@@ -6,6 +6,12 @@ Ext.define('NU.view.window.ConfigurationController', {
     alias: 'controller.Configuration',
     configurations: null,               // The view that contains the configurations
     type: null,                         // The protocol buffer enumeration
+    currentTree: null,                  // The current configuration update tree
+    Modes: {
+        LIVE:     {name: 'Live'},       // Live updating
+        STANDARD: {name: 'Standard'}    // Standard updating
+    },
+    mode: null,                         // The current updating mode
     requires: [
         'Ext.slider.Single'
     ],
@@ -13,6 +19,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         var view = this.getView();
         this.configurations = view.lookupReference('configurations');
         this.type = API.ConfigurationState.Node.Type;
+        this.mode = this.Modes.LIVE;
         this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
         NU.util.Network.sendCommand(this.getRobotIP(), 'get_configuration_state');
     },
@@ -29,6 +36,101 @@ Ext.define('NU.view.window.ConfigurationController', {
         var store = this.configurations.getStore();
         // processes the message using the store's root as the initial node
         this.processMessage(store.getRoot(), root);
+    },
+    /**
+     * An event triggered when the current mode display has rendered.
+     *
+     * @param view The current mode display.
+     */
+    onCurrentModeAfterRender: function (view) {
+        this.updateMode(view, this.mode);
+    },
+    onSaveAfterRender: function (view) {
+        this.updateSaveDisplay(view);
+    },
+    /**
+     * An event triggered when the switch mode display has rendered.
+     *
+     * @param view The switch mode display.
+     */
+    onSwitchModeAfterRender: function (view) {
+        // add a click event to the component
+        view.getEl().on({
+            click: 'onSwitchMode'
+        });
+        // update the display
+        this.updateMode(view, this.getSwitchMode());
+    },
+    /**
+     * The handler for the button that switches the current mode. It also updates the mode display.
+     */
+    onSwitchMode: function () {
+        // check the mode and toggle it
+        if (this.mode === this.Modes.LIVE) {
+            this.mode = this.Modes.STANDARD;
+        } else {
+            this.mode = this.Modes.LIVE;
+        }
+        // update the displays to match the current mode
+        this.updateModeDisplay(this.mode);
+    },
+    onSave: function () {
+        debugger;
+    },
+    /**
+     * Updates the current mode component and switch button displays based on the current mode.
+     *
+     * @param mode The current mode.
+     */
+    updateModeDisplay: function (mode) {
+        // retrieve the configuration view
+        var view = this.getView();
+        // update the current mode and switch mode views
+        this.updateMode(view.lookupReference('currentMode'), mode);
+        this.updateMode(view.lookupReference('switchMode'), this.getSwitchMode());
+        this.updateSaveDisplay(view.lookupReference('save'));
+    },
+    /**
+     * Calculates and returns the updating mode that can be switched to.
+     *
+     * @returns {*} The switching mode.
+     */
+    getSwitchMode: function () {
+        if (this.mode === this.Modes.LIVE) {
+            return this.Modes.STANDARD;
+        }
+        return this.Modes.LIVE;
+    },
+    /**
+     * Updates the mode display based on the mode that is passed in.
+     *
+     * @param view The view being updated.
+     * @param mode The mode that is in context.
+     */
+    updateMode: function (view, mode) {
+        var name = mode.name;
+        // TODO: ExtJS doesn't support button tpl hack
+        if (view.isXType('button')) {
+            view.setText(new Ext.XTemplate(view.tpl).apply({
+                name: name
+            }));
+        } else {
+            view.update({
+                name: name
+            });
+        }
+    },
+    /**
+     * Shows or hides the save button based on the current mode.
+     *
+     * @param view The save button view.
+     */
+    updateSaveDisplay: function (view) {
+        if (this.mode === this.Modes.LIVE) {
+            view.hide();
+        } else {
+            view.show();
+        }
     },
     /**
      * Processes a message node based on its message type.
@@ -246,48 +348,51 @@ Ext.define('NU.view.window.ConfigurationController', {
         var type = record.get('type');
         // check if we should even update the configuration file first
         if (value !== newValue) {
-            // create the configuration state message
-            var message = NU.util.Network.createMessage(API.Message.Type.CONFIGURATION_STATE, 0);
-            // calculates the configuration given the record and value being updated
-            var configurationState = this.getConfiguration(record, newValue);
-            // set the configuration state of the message
-            message.setConfigurationState(configurationState);
-            // send the message over the network
-            NU.util.Network.send(this.getRobotIP(), message);
+            // build the tree using the initial record and its new value
+            var tree = this.buildTree(this.currentTree, record, newValue);
+            debugger;
+            if (this.mode === this.Modes.LIVE) {
+                // create the configuration state message
+                var message = NU.util.Network.createMessage(API.Message.Type.CONFIGURATION_STATE, 0);
+                // set the configuration state of the message
+                message.setConfigurationState(this.getConfigurationState(tree));
+                // send the message over the network
+                NU.util.Network.send(this.getRobotIP(), message);
+                // reset the current tree
+                this.currentTree = null;
+            } else {
+                this.currentTree = tree;
+            }
         }
     },
     /**
-     * Retrieves the ConfigurationState message by building the tree and setting its root.
+     * Retrieves the ConfigurationState message by using the tree.
      *
-     * @param record The record that was modified by the user.
-     * @param newValue The new value for the configuration.
+     * @param tree The configuration tree.
      * @returns {Window.API.Configuration} The ConfigurationState message.
      */
-    getConfiguration: function (record, newValue) {
+    getConfigurationState: function (tree) {
         var configuration = new API.Configuration();        // create the configuration API
-        var tree = this.buildTree(record, newValue);        // build the tree using the initial record
         configuration.setRoot(tree.root);                   // set the root of the configuration message
-        debugger;
         return configuration;                               // return the configuration message
     },
     /**
      * Recursively builds the Configuration State message. It keeps on going up the tree until a file is found (i.e. a
      * path exists) and then creates a node using the current data and appends it to the current value of the tree.
      *
+     * @param currentTree The current configuration update tree.
      * @param node The current node being processed.
      * @param newValue The new value for the configuration.
      * @returns {*} The ConfigurationState message tree.
      */
-    buildTree: function (node, newValue) {
-        if (node.get('path')) {                             // check if the node contains a path
-            var root = this.createFileNode(node);           // create the file node
-            return {                                        // return an object containing the root and the file as the current value
-                root: root.node,
-                current: root.file
-            }
+    buildTree: function (currentTree, node, newValue) {
+        var path = node.get('path');                        // get the path from the node
+        if (path) {                                         // check if the node contains a path
+            // process the file path
+            return this.processFilePath(currentTree, node, path);
         }
         // build the tree recursively using the parent node until the file is found
-        var tree = this.buildTree(node.parentNode, newValue);
+        var tree = this.buildTree(currentTree, node.parentNode, newValue);
         // create the proto node
         var newNode = this.processNode(node, newValue);
         var current = tree.current;                         // get the current node in the tree
@@ -306,6 +411,39 @@ Ext.define('NU.view.window.ConfigurationController', {
         // set the new current node in the tree to the node that was created and return the tree
         tree.current = newNode;
         return tree;
+    },
+    /**
+     * Processes a file node when the tree is being built.
+     *
+     * @param currentTree The current configuration update tree.
+     * @param node The file node being processed.
+     * @param path The path to the file.
+     * @returns {{root: (spec.Node|*), current: (API.Configuration.KeyPair|*), mappings: {}}}
+     */
+    processFilePath: function (currentTree, node, path) {
+        var fileNode = this.createFileNode(node);           // create the file node
+        var root = fileNode.node;                           // create the root
+        var current = fileNode.file;                        // create the current
+        var mappings = {};
+        if (currentTree === null) {                         // check if the current tree does not exist
+            mappings[path] = current;                       // add the file mapping for later
+        } else {
+            var file = currentTree.mappings[path];          // get the file from its mappings
+            if (file) {                                     // check if the file exists in the current tree
+                current = file;                             // make the file the current value
+            } else {
+                // add the file to the current tree
+                currentTree.root.getMapValue().push(current);
+            }
+            // override the root
+            root = currentTree.root;
+        }
+        // return an object containing the root and the file as the current value
+        return {
+            root: root,
+            current: current,
+            mappings: mappings
+        }
     },
     /**
      * Retrieves the data from the node that is being processed, then evaluates its type to build a protocol buffer
