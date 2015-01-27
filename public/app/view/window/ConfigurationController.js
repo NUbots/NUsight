@@ -290,10 +290,6 @@ Ext.define('NU.view.window.ConfigurationController', {
         var tree = this.buildTree(node.parentNode, newValue);
         // create the proto node
         var newNode = this.processNode(node, newValue);
-        if (newNode.getType() === this.type.SEQUENCE) {     // check if the type of the new node is a sequence
-            var index = node.get('index').toString();       // get the index of the sequence item
-            newNode.setTag(index);                          // set the tag of the new node
-        }
         var current = tree.current;                         // get the current node in the tree
         var type = current.type;                            // get the type of the current node in the tree
         if (type === this.type.MAP) {                       // check if the type of the current node is a map
@@ -302,7 +298,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         } else if (type === this.type.SEQUENCE) {           // check if the type of the current node is a sequence
             var parent = node.parentNode;                   // get the parent of the node
             var index = parent.get('index').toString();     // get the index of the sequence item
-            current.setTag(index);                          // set a tag on the sequence indicating the index
+            newNode.setTag(index);                          // set a tag on the new node indicating the index
             current.setSequenceValue(newNode);              // set the sequence value of the current tree
         } else {
             current.setValue(newNode);                      // append the new node as a KeyPair value
@@ -320,27 +316,25 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {*} A ConfigurationState Node or KeyPair.
      */
     processNode: function (node, newValue) {
-        var name = node.get('name');                        // get the name of the record
         var value = node.get('value');                      // get the value of the record
-        var type = node.get('type');                        // get the type of the record
         if (!node.hasChildNodes()) {                        // check if at the widget node
             value = newValue;                               // change the value to new configuration value
         }
-        switch (type) {                                     // evaluate the type of the record
+        switch (node.get('type')) {                         // evaluate the type of the record
             case this.type.MAP:
-                return this.createMapNode(this.createKeyPair(name));
+                return this.createMapNode(this.createKeyPair(node.get('name')));
             case this.type.LONG:
-                return this.createLongNode(name, value);
+                return this.createLongNode(node, value);
             case this.type.DOUBLE:
-                return this.createDoubleNode(name, value);
+                return this.createDoubleNode(node, value);
             case this.type.BOOLEAN:
-                return this.createBooleanNode(name, value);
+                return this.createBooleanNode(node, value);
             case this.type.STRING:
-                return this.createStringNode(name, value);
+                return this.createStringNode(node, value);
             case this.type.SEQUENCE:
-                return this.createSequenceNode(name);
+                return this.createSequenceNode(node);
             case this.type.NULL_VALUE:
-                return this.createNullNode(name);
+                return this.createNullNode(node);
         }
     },
     /**
@@ -394,90 +388,94 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Processes a configuration node by determining whether it is part of a sequence or map.
      *
      * @param node The configuration leaf node.
-     * @param name The name of the configuration.
+     * @param record The record containing the node data.
      * @returns {spec.Node} A ConfigurationState Node.
      */
-    processConfigurationNode: function (node, name) {
-        if (name) {                                         // check if the name exists
-            var keyPair = this.createKeyPair(name, node);   // create a KeyPair with the name and node as its value
-            return this.createMapNode(keyPair);             // return a Map Node with the key pair as its value
-        } else if (node.getType() !== this.type.SEQUENCE) { // check if the type is not a sequence
-            return this.createSequenceNode(name, node);     // create a sequence node as it is missing from the tree
+    processConfigurationNode: function (node, record) {
+        if (record) {                                           // check if the record exists
+            var name = record.get('name');                      // get the name of the node
+            if (name) {                                         // check if the name exists
+                var keyPair = this.createKeyPair(name, node);   // create a KeyPair with the name and node as its value
+                return this.createMapNode(keyPair);             // return a Map Node with the key pair as its value
+            } else if (node.getType() !== this.type.SEQUENCE) { // check if the type is not a sequence
+                node.setTag(record.get('index').toString());    // set the tag to the index of the node
+                return this.createSequenceNode(record, node);   // create a sequence node as it is missing from the tree
+            }
         }
-        return node;                                        // return the node
+        return node;                                            // return the node
     },
     /**
      * Create a NULL type Node given its name and value.
      *
-     * @param name The name of the null value.
+     * @param record The record containing the node data.
      * @returns {spec.Node} A null ConfigurationState Node.
      */
-    createNullNode: function (name) {
+    createNullNode: function (record) {
         var node = this.createNode(this.type.NULL_VALUE);   // create the NULL Node
         node.setNullValue(null);                            // set the value of the Node
-        return this.processConfigurationNode(node, name);   // return the processed Node
+        return this.processConfigurationNode(node, record); // return the processed Node
     },
     /**
      * Create a STRING type Node given its name and value.
      *
-     * @param name The name of the string.
+     * @param record The record containing the node data.
      * @param value The value of the string.
      * @returns {spec.Node} A string ConfigurationState Node.
      */
-    createStringNode: function (name, value) {
+    createStringNode: function (record, value) {
         var node = this.createNode(this.type.STRING);       // create the STRING Node
         node.setStringValue(value);                         // set the value of the Node
-        return this.processConfigurationNode(node, name);   // return the processed Node
+        return this.processConfigurationNode(node, record); // return the processed Node
     },
     /**
      * Create a BOOLEAN type Node given its name and value.
      *
-     * @param name The name of the boolean.
+     * @param record The record containing the node data.
      * @param value The value of the boolean.
      * @returns {spec.Node} A boolean ConfigurationState Node.
      */
-    createBooleanNode: function (name, value) {
+    createBooleanNode: function (record, value) {
         var node = this.createNode(this.type.BOOLEAN);      // create the BOOLEAN Node
         node.setBooleanValue(value);                        // set the value of the Node
-        return this.processConfigurationNode(node, name);   // return the processed Node
+        return this.processConfigurationNode(node, record); // return the processed Node
     },
     /**
      * Create a LONG type Node given its name and value.
      *
-     * @param name The name of the long.
+     * @param record The record containing the node data.
      * @param value The value of the long.
      * @returns {spec.Node} A long ConfigurationState Node.
      */
-    createLongNode: function (name, value) {
+    createLongNode: function (record, value) {
         var node = this.createNode(this.type.LONG);         // create the LONG Node
         node.setLongValue(value);                           // set the value of the Node
-        return this.processConfigurationNode(node, name);   // return the processed Node
+        return this.processConfigurationNode(node, record); // return the processed Node
     },
     /**
      * Create a DOUBLE type Node given its name and value.
      *
-     * @param name The name of the double.
+     * @param record The record containing the node data.
      * @param value The value of the double.
      * @returns {spec.Node} A double ConfigurationState Node.
      */
-    createDoubleNode: function (name, value) {
+    createDoubleNode: function (record, value) {
         var node = this.createNode(this.type.DOUBLE);       // create the DOUBLE Node
         node.setDoubleValue(value);                         // set the value of the Node
-        return this.processConfigurationNode(node, name);   // return the processed Node
+        return this.processConfigurationNode(node, record); // return the processed Node
     },
     /**
      * Creates a SEQUENCE type Node and adds a Node to its sequence value.
      *
-     * @param name The name of the sequence.
+     * @param record The record containing the node data.
      * @param [value] An optional sequence value.
      * @returns {spec.Node} A sequence ConfigurationState Node.
      */
-    createSequenceNode: function (name, value) {
+    createSequenceNode: function (record, value) {
         var node = this.createNode(this.type.SEQUENCE);     // create a SEQUENCE Node
         if (value) {                                        // check if the value exists
             node.setSequenceValue(value);                   // set the value of the Node
         }
-        return this.processConfigurationNode(node, name);   // return the processed Node
+        return this.processConfigurationNode(node, record); // return the processed Node
     },
     /**
      * Creates a MAP type Node and adds a Node to its map value.
