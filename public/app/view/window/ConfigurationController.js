@@ -4,6 +4,9 @@
 Ext.define('NU.view.window.ConfigurationController', {
     extend: 'NU.view.window.DisplayController',
     alias: 'controller.Configuration',
+    requires: [
+        'Ext.slider.Single'
+    ],
     configurations: null,               // The view that contains the configurations
     type: null,                         // The protocol buffer enumeration
     currentTree: null,                  // The current configuration update tree
@@ -12,9 +15,6 @@ Ext.define('NU.view.window.ConfigurationController', {
         STANDARD: {name: 'Standard'}    // Standard updating
     },
     mode: null,                         // The current updating mode
-    requires: [
-        'Ext.slider.Single'
-    ],
     init: function () {
         var view = this.getView();
         this.configurations = view.lookupReference('configurations');
@@ -45,61 +45,59 @@ Ext.define('NU.view.window.ConfigurationController', {
     onCurrentModeAfterRender: function (view) {
         this.updateMode(view, this.mode);
     },
+    /**
+     * An event triggered when the save button has been rendered. It simply determines whether the button should be
+     * visible on startup.
+     *
+     * @param view The save button.
+     */
     onSaveAfterRender: function (view) {
         this.updateSaveDisplay(view);
     },
     /**
-     * An event triggered when the switch mode display has rendered.
+     * An event triggered when the live toggle button has been rendered. It determines whether the button should begin
+     * as pressed or not.
      *
-     * @param view The switch mode display.
+     * @param view The live toggle button.
      */
-    onSwitchModeAfterRender: function (view) {
-        // add a click event to the component
-        view.getEl().on({
-            click: 'onSwitchMode'
-        });
-        // update the display
-        this.updateMode(view, this.getSwitchMode());
+    onLiveAfterRender: function (view) {
+        view.setPressed(this.mode === this.Modes.LIVE);
     },
     /**
-     * The handler for the button that switches the current mode. It also updates the mode display.
+     * The toggle handler for the button that toggles the current mode. It also updates the mode display.
+     *
+     * @param button The button being toggled.
+     * @param state The current state of the toggle
      */
-    onSwitchMode: function () {
-        // check the mode and toggle it
-        if (this.mode === this.Modes.LIVE) {
-            this.mode = this.Modes.STANDARD;
-        } else {
-            this.mode = this.Modes.LIVE;
-        }
+    onToggleMode: function (button, state) {
+        // change the mode based on the state
+        this.mode = state ? this.Modes.LIVE : this.Modes.STANDARD;
         // update the displays to match the current mode
         this.updateModeDisplay(this.mode);
     },
+    /**
+     * The event triggered when the user saves their configurations. It sends the message using the current tree.
+     */
     onSave: function () {
         this.send(this.currentTree);
     },
     /**
-     * Updates the current mode component and switch button displays based on the current mode.
+     * Updates the current mode component based on the current mode.
      *
      * @param mode The current mode.
      */
     updateModeDisplay: function (mode) {
         // retrieve the configuration view
         var view = this.getView();
+        // get the current mode component and save button
+        var currentMode = view.lookupReference('currentMode');
+        var save = view.lookupReference('save');
         // update the current mode and switch mode views
-        this.updateMode(view.lookupReference('currentMode'), mode);
-        this.updateMode(view.lookupReference('switchMode'), this.getSwitchMode());
-        this.updateSaveDisplay(view.lookupReference('save'));
-    },
-    /**
-     * Calculates and returns the updating mode that can be switched to.
-     *
-     * @returns {*} The switching mode.
-     */
-    getSwitchMode: function () {
-        if (this.mode === this.Modes.LIVE) {
-            return this.Modes.STANDARD;
-        }
-        return this.Modes.LIVE;
+        this.updateMode(currentMode, mode);
+        this.updateSaveDisplay(save);
+        // update the flex of the current mode component and then update the view layout
+        currentMode.flex += save.isHidden() ? save.flex : -save.flex;
+        view.updateLayout();
     },
     /**
      * Updates the mode display based on the mode that is passed in.
@@ -109,28 +107,17 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     updateMode: function (view, mode) {
         var name = mode.name;
-        // TODO: ExtJS doesn't support button tpl hack
-        if (view.isXType('button')) {
-            view.setText(new Ext.XTemplate(view.tpl).apply({
-                name: name
-            }));
-        } else {
-            view.update({
-                name: name
-            });
-        }
+        view.update({
+            name: name
+        });
     },
     /**
-     * Shows or hides the save button based on the current mode.
+     * Toggles the visibility of the save button based on the current mode.
      *
      * @param view The save button view.
      */
     updateSaveDisplay: function (view) {
-        if (this.mode === this.Modes.LIVE) {
-            view.hide();
-        } else {
-            view.show();
-        }
+        view.setVisible(this.mode === this.Modes.STANDARD);
     },
     /**
      * Processes a message node based on its message type.

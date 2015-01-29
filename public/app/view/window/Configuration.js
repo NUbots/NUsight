@@ -33,15 +33,19 @@ Ext.define('NU.view.window.Configuration', {
         reference: 'save',
         text: 'Save',
         handler: 'onSave',
+        flex: 0.5,
         listeners: {
             afterRender: 'onSaveAfterRender'
         }
     }, {
         xtype: 'button',
-        reference: 'switchMode',
-        tpl: 'Switch to {name}',
+        reference: 'live',
+        text: 'Live',
+        enableToggle: true,
+        flex: 1,
+        toggleHandler: 'onToggleMode',
         listeners: {
-            afterRender: 'onSwitchModeAfterRender'
+            afterRender: 'onLiveAfterRender'
         }
     }],
     items: [{
