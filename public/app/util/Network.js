@@ -1,10 +1,11 @@
 Ext.define('NU.util.Network', {
+	singleton: true,
+	alternateClassName: 'NU.Network',
 	mixins: {
 		observable: 'Ext.mixin.Observable'
 	},
 	socket: null,
 	cache: null,
-	singleton: true,
 	constructor: function (config) {
 		this.mixins.observable.constructor.call(this, config);
 

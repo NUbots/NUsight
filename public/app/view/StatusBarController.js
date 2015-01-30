@@ -3,7 +3,7 @@ Ext.define('NU.view.StatusBarController', {
 	alias: 'controller.StatusBar',
 	requires: [
 		'NU.util.Display',
-		'NU.util.Network'
+		'NU.Network'
 	],
 	config: {
 		packetCounter: 0,
@@ -14,7 +14,7 @@ Ext.define('NU.view.StatusBarController', {
 	init: function () {
 		this.robotMap = {};
 		var view = this.getView();
-		view.mon(NU.util.Network, 'packet', this.onPacket, this);
+		view.mon(NU.Network, 'packet', this.onPacket, this);
 		this.addRobots();
 	},
 	addRobots: function () {

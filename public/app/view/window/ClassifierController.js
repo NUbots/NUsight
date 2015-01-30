@@ -4,6 +4,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Classifier',
 	requires: [
+		'NU.util.Defer',
 		'NU.util.Vision',
 		'NU.view.webgl.Vision',
 		'NU.view.webgl.Classifier',
@@ -46,7 +47,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		renderCube: false,
 		rawLayeredCanvas: null,
 		classifiedLayeredCanvas: null,
-		imageFormat: null
+		imageFormat: null,
+		lutNeedsUpdate: false
 	},
 	statics: {
 		/**
@@ -328,6 +330,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setPolygonPoints([]);
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
+		this.lutDiffs = [];
 	},
 	onAfterRender: function () {
 		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
@@ -436,9 +439,9 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.classifiedRenderer.updateLut(lut);
 			this.selectionClassifier.updateLut(lut);
 
-			this.mon(NU.util.Network, 'image', this.onImage, this);
-			this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
-			this.mon(NU.util.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
+			this.mon(NU.Network, 'image', this.onImage, this);
+			this.mon(NU.Network, 'lookup_table', this.onLookUpTable, this);
+			this.mon(NU.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
 
 			this.testDrawImage();
 		}.bind(this));
@@ -492,7 +495,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		var command = new API.Message.Command();
 		command.setCommand("download_lut");
 		message.setCommand(command);
-		NU.util.Network.send(this.getRobotIP(), message);
+		NU.Network.send(this.getRobotIP(), message);
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
@@ -507,7 +510,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
 		lookupTable.setSave(save);
 		message.setLookupTable(lookupTable);
-		NU.util.Network.send(this.getRobotIP(), message);
+		NU.Network.send(this.getRobotIP(), message);
 	},
 	getLUTIndex: function (ycbcr) {
 		var bitsY = this.self.LutBitsPerColorY;
@@ -585,15 +588,26 @@ Ext.define('NU.view.window.ClassifierController', {
 			return;
 		}
 
-		var lut = this.getLookup();
 		var diffs = tableDiff.getDiff();
 		for (var i = 0; i < diffs.length; i++) {
 			var diff = diffs[i];
-			lut[diff.getLutIndex()] = diff.getClassification();
+			this.lutDiffs.push({
+				index: diff.getLutIndex(),
+				classification: diff.getClassification()
+			});
 		}
 
-		this.updateClassifiedData();
-		this.renderClassifiedImage();
+		NU.Defer.defer('lut_diffs', function () {
+			var lut = this.getLookup();
+			var diffs = this.lutDiffs;
+			console.log('updating with', diffs.length, 'diffs');
+			while (diffs.length > 0) {
+				var diff = diffs.shift();
+				lut[diff.index] = diff.classification;
+			}
+			this.updateClassifiedData();
+			this.renderClassifiedImage();
+		}.bind(this), 2000);
 	},
 	onImage: function (robotIP, image) {
 

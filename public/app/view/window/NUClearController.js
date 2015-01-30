@@ -15,7 +15,7 @@ Ext.define('NU.view.window.NUClearController', {
         this.lookupReference('updatespeed').setRawValue(this.getUpdateSpeed());
 
 		var view = this.getView();
-        view.mon(NU.util.Network, 'reaction_statistics', this.onReactionStatistics, this);
+        view.mon(NU.Network, 'reaction_statistics', this.onReactionStatistics, this);
 
         this.callParent(arguments);
 

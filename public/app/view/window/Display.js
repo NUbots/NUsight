@@ -2,7 +2,7 @@ Ext.define('NU.view.window.Display', {
     extend: 'Ext.Window',
     requires: [
         'NU.view.window.DisplayController',
-        'NU.util.Network',
+        'NU.Network',
         'NU.view.robot.Selector',
 	    'Ext.tree.Panel'
     ],

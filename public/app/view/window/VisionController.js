@@ -63,9 +63,9 @@ Ext.define('NU.view.window.VisionController', {
 			this.imageRenderer.onReady(),
 			this.imageDiffRenderer.onReady()
 		]).then(function () {
-			this.mon(NU.util.Network, 'image', this.onImage, this);
-			this.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
-			this.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
+			this.mon(NU.Network, 'image', this.onImage, this);
+			this.mon(NU.Network, 'classified_image', this.onClassifiedImage, this);
+			this.mon(NU.Network, 'vision_object', this.onVisionObjects, this);
 		}.bind(this));
     },
 	onLayerSelect: function (obj, newValue, oldValue, e) {

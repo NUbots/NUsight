@@ -3,7 +3,7 @@ Ext.define('NU.view.window.GameStateController', {
 	alias: 'controller.GameState',
 	init: function () {
 		var view = this.getView();
-		view.mon(NU.util.Network, 'game_state', this.onGameState, this);
+		view.mon(NU.Network, 'game_state', this.onGameState, this);
 	},
 	onSelectRobot: function (robotIP) {
 		var store = this.getStore();

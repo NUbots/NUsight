@@ -87,7 +87,7 @@ Ext.define('NU.view.webgl.WebGL', {
 			fragmentShader: this.fragmentShaderText
 		});
 		var mesh = new THREE.Mesh(geometry, material);
-		mesh.frustumCulling = false;
+		mesh.frustumCulled = false;
 		mesh.depthTest = false;
 		mesh.depthWrite = false;
 		return mesh;
