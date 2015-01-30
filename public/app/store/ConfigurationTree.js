@@ -3,8 +3,11 @@
  */
 Ext.define('NU.store.ConfigurationTree', {
     extend: 'Ext.data.TreeStore',
-    model: 'NU.model.Configuration',
     storeId: 'ConfigurationTree',
+    model: 'NU.model.Configuration',
+    root: {
+        expanded: true
+    },
     proxy: {
         type: 'memory',
         reader: {

@@ -4,8 +4,7 @@
 Ext.define('NU.view.window.Configuration', {
     extend : 'NU.view.window.Display',
     requires: [
-        'NU.store.ConfigurationTree',
-        'Ext.grid.column.Widget',
+        'NU.view.window.ConfigurationViewModel',
         'NU.view.column.Widget',
         'NU.view.factory.Widget',
         'NU.view.window.ConfigurationController'
@@ -52,8 +51,13 @@ Ext.define('NU.view.window.Configuration', {
         xtype: 'treepanel',
         reference: 'configurations',
         referenceHolder: true,
+        viewModel: {
+            type: 'Configuration'
+        },
+        bind: {
+            store: '{store}'
+        },
         title: 'Robot Configurations',
-        store: Ext.create('NU.store.ConfigurationTree'),
         autoLoad: true,
         rootVisible: false,
         rowLines: true,
