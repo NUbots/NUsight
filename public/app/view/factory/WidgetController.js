@@ -89,9 +89,7 @@ Ext.define('NU.view.factory.WidgetController', {
             enableKeyEvents: true,
             value: value,
             listeners: {
-                keyUp: function (widget) {
-                    this.update(widget, widget.getValue());
-                },
+                keyUp: 'onKeyUp',
                 scope: this
             }
         }));
@@ -110,15 +108,24 @@ Ext.define('NU.view.factory.WidgetController', {
             allowBlank: false,
             enableKeyEvents: true,
             value: value,
-            minValue: minValue || 0,
-            maxValue: maxValue || 100,
+            minValue: minValue || Number.NEGATIVE_INFINITY,
+            maxValue: maxValue || Number.MAX_VALUE,
             listeners: {
-                keyUp: function (widget) {
-                    this.update(widget, widget.getValue());
-                },
+                keyUp: 'onKeyUp',
                 scope: this
             }
         }));
+    },
+    /**
+     * An event triggered when the widget fires a key up event. This function ensures that the user finishes typing
+     * their input before updating the widget.
+     *
+     * @param widget The widget that fired the key up event.
+     */
+    onKeyUp: function (widget) {
+        Ext.create('Ext.util.DelayedTask', function (widget) {
+            this.update(widget, widget.getValue());
+        }, this, [widget]).delay(1000);
     },
     /**
      * Adds a check box to the configuration for the robot.

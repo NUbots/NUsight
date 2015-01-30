@@ -516,6 +516,9 @@ Ext.define('NU.view.window.ConfigurationController', {
             case this.type.MAP:
                 this.setNodeValue(node.getMapValue()[0].getValue(), value);
                 break;
+            case this.type.SEQUENCE:
+                this.setNodeValue(node.getSequenceValue()[0], value);
+                break;
             case this.type.LONG:
                 node.setLongValue(value);
                 break;
@@ -527,9 +530,6 @@ Ext.define('NU.view.window.ConfigurationController', {
                 break;
             case this.type.STRING:
                 node.setStringValue(value);
-                break;
-            case this.type.SEQUENCE:
-                this.setNodeValue(node.getSequenceValue()[0], value);
                 break;
             case this.type.NULL_VALUE:
                 node.setNullValue(value);
