@@ -70,6 +70,9 @@ Ext.define('NU.view.ToolbarController', {
 			window.close();
 		});
 	},
+    onConfiguration: function () {
+        this.create('NU.view.window.Configuration');
+    },
 	onNetworkSettings: function () {
 		Ext.syncRequire('NU.view.NetworkSettings');
 		Ext.create('Ext.Window', {

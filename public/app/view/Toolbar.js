@@ -48,9 +48,14 @@ Ext.define('NU.view.Toolbar', {
         listeners: {
             click: 'onCloseAll'
         }
+    }, {
+        text: 'Configuration',
+        iconCls: 'icon-cog',
+        listeners: {
+            click: 'onConfiguration'
+        }
 	}, {
 		text: 'Settings',
-		itemId: 'network_settings',
 		iconCls: 'icon-cog',
         listeners: {
             click: 'onNetworkSettings'

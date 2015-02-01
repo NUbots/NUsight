@@ -18,12 +18,14 @@
   ],
   "dependencies": {
     "threejs": "r70",
-    "extjs": "~5.0",
+    "extjs": "~5.0.x",
     "protobuf": "~3.5.4",
     "smoothie": "*",
     "jpgjs": "notmasteryet/jpgjs",
     "numericjs": "~1.2.6",
     "operative": "~0.3.1",
-    "bluebird": "~2.3.11"
+    "bluebird": "~2.3.11",
+    "svg.js": "*",
+    "gl-matrix": "*"
   }
 }

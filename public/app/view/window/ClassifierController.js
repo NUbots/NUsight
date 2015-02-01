@@ -488,21 +488,11 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setLookupVertexBuffer(vertices);
 	},
 	download: function () {
-		var message = new API.Message();
-		message.setType(API.Message.Type.COMMAND);
-		message.setFilterId(0);
-		message.setUtcTimestamp(Date.now() / 1000);
-		var command = new API.Message.Command();
-		command.setCommand("download_lut");
-		message.setCommand(command);
-		NU.Network.send(this.getRobotIP(), message);
+		NU.Network.sendCommand(this.getRobotIP(), "download_lut");
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
-		var message = new API.Message();
-		message.setType(API.Message.Type.LOOKUP_TABLE);
-		message.setFilterId(0);
-		message.setUtcTimestamp(Date.now() / 1000);
+		var message = NU.util.Network.createMessage(API.Message.Type.LOOKUP_TABLE, 0);
 		var lookupTable = new API.Vision.LookUpTable();
 		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
@@ -519,7 +509,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		var bitsRemovedY = 8 - bitsY;
 		var bitsRemovedCb = 8 - bitsCb;
 		var bitsRemovedCr = 8 - bitsCr;
-
 
 		var index = 0;
 		index |= ycbcr[0] >> bitsRemovedY;
