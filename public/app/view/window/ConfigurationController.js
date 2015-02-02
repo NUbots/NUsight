@@ -21,7 +21,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         this.type = API.ConfigurationState.Node.Type;
         this.mode = this.Modes.STANDARD;
         this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
-        NU.util.Network.sendCommand(this.getRobotIP(), 'get_configuration_state');
+        this.sendCommand();
     },
     /**
      * An event fired when the network has received the configuration state message.
@@ -38,6 +38,12 @@ Ext.define('NU.view.window.ConfigurationController', {
         var store = viewModel.getStore('store');
         // processes the message in the view model using the store's root as the initial node
         viewModel.processMessage(store.getRoot(), root);
+    },
+    /**
+     * Sends a command to the network requesting the configuration state.
+     */
+    sendCommand: function () {
+        NU.util.Network.sendCommand(this.getRobotIP(), 'get_configuration_state');
     },
     /**
      * An event triggered when the current mode display has rendered.
@@ -82,6 +88,18 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     onSave: function () {
         this.send(this.currentTree);
+    },
+    /**
+     * The event triggered when the user refreshes the treepanel. It reloads the store and sends the command requesting
+     * the store data again.
+     */
+    onRefresh: function () {
+        // get the store from the tree
+        var store = this.configurations.getStore();
+        // reload the store
+        store.reload();
+        // send the command again
+        this.sendCommand();
     },
     /**
      * Updates the current mode component based on the current mode.

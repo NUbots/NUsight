@@ -65,6 +65,10 @@ Ext.define('NU.view.window.Configuration', {
         viewConfig: {
             stripeRows: true
         },
+        tools: [{
+            type: 'refresh',
+            handler: 'onRefresh'
+        }],
         columns: [{
             xtype: 'treecolumn',
             text: 'Path',
