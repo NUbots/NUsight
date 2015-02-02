@@ -14,6 +14,9 @@ Ext.define('NU.view.window.Configuration', {
     title: 'Configuration',
     width: 1000,
     height: 550,
+    listeners: {
+        close: 'onClose'
+    },
     tbar: [{
         xtype: 'robot_selector',
         listeners: {

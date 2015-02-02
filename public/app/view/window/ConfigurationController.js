@@ -102,6 +102,13 @@ Ext.define('NU.view.window.ConfigurationController', {
         this.sendCommand();
     },
     /**
+     * An event triggered when the user closed the window. The store is reloaded to prevent duplication of data
+     * when reopened.
+     */
+    onClose: function () {
+        this.configurations.getStore().reload();
+    },
+    /**
      * Updates the current mode component based on the current mode.
      *
      * @param mode The current mode.
