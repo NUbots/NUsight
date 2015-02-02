@@ -596,7 +596,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			}
 			this.updateClassifiedData();
 			this.renderClassifiedImage();
-		}.bind(this), 2000);
+		}.bind(this), 500);
 	},
 	onImage: function (robotIP, image) {
 
