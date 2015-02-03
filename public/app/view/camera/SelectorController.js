@@ -12,12 +12,12 @@ Ext.define('NU.view.camera.SelectorController', {
 		if (recordSelected !== undefined) {
 			// select record
             combo.select(recordSelected);
-            combo.fireEvent('select', combo, recordSelected);
+            combo.fireEvent('select', combo, [recordSelected]);
 		}
 	},
 	onSelectCamera: function (combo, records, eOpts) {
 		// get the first camera id
-		var cameraId = records.get('id');
+		var cameraId = records[0].get('id');
 		// set the camera id
 		this.setCameraId(cameraId);
 		// fire event
