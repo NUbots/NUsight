@@ -41,14 +41,11 @@ Ext.define('NU.util.Network', {
 		robotsStore.on('update', this.onUpdateRobot, this);
 		robotsStore.on('remove', this.onRemoveRobot, this);
 
-		var me = this;
-		requestAnimationFrame(function () {
-			me.onAnimationFrame();
-		});
+		requestAnimationFrame(this.onAnimationFrame.bind(this));
 
 	},
 	onAnimationFrame: function () {
-		var me = this;
+		requestAnimationFrame(this.onAnimationFrame.bind(this));
 
 		Ext.Object.each(this.cache, function (hash, event) {
 			if (this.hasListener(event.name)) {
@@ -60,10 +57,6 @@ Ext.define('NU.util.Network', {
 				//console.log(event.robotIP, event.name);
 			}
 		}, this);
-
-		requestAnimationFrame(function () {
-			me.onAnimationFrame();
-		});
 	},
 	processPacket: function (packet) {
 		var message, eventName, filterId, robotIP, event, hash;
