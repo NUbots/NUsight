@@ -48,7 +48,8 @@ Ext.define('NU.view.field.Robot', {
 			}
 
 			if (this.getShowOrientation()) {
-				var rotation = new THREE.Matrix4(
+				var rotation = new THREE.Matrix4()
+				rotation.set(
 					api_sensor_data.orientation.x.x, api_sensor_data.orientation.x.y, api_sensor_data.orientation.x.z, 0,
 					api_sensor_data.orientation.y.x, api_sensor_data.orientation.y.y, api_sensor_data.orientation.y.z, 0,
 					api_sensor_data.orientation.z.x, api_sensor_data.orientation.z.y, api_sensor_data.orientation.z.z, 0,

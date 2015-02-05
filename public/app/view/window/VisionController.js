@@ -2,9 +2,11 @@ Ext.define('NU.view.window.VisionController', {
     extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Vision',
 	requires: [
-		'NU.view.webgl.Vision'
+		'NU.view.webgl.Vision',
+		'NU.view.webgl.VisionDiff'
 	],
 	imageRenderer: null,
+	imageDiffRenderer: null,
     config: {
 		cameraId: null,
         displayImage: false,
@@ -32,6 +34,19 @@ Ext.define('NU.view.window.VisionController', {
 			context: imageLayer.context
 		});
 
+		var imageDiffLayer = layeredCanvas.add('image_diff', {
+			webgl: true,
+			webglAttributes: {
+				antialias: false
+			}
+		});
+
+		this.imageDiffRenderer = Ext.create('NU.view.webgl.VisionDiff', {
+			shader: 'VisionDiff',
+			canvas: imageDiffLayer.canvas,
+			context: imageDiffLayer.context
+		});
+
 		layeredCanvas.add('classified_image_search');
 		layeredCanvas.add('classified_image_refine');
 		layeredCanvas.add('visual_horizon');
@@ -44,10 +59,13 @@ Ext.define('NU.view.window.VisionController', {
 //        this.setContext(this.getCanvas().el.dom.getContext('2d'));
         //this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
 
-		this.imageRenderer.onReady().then(function () {
-			this.mon(NU.util.Network, 'image', this.onImage, this);
-			this.mon(NU.util.Network, 'classified_image', this.onClassifiedImage, this);
-			this.mon(NU.util.Network, 'vision_object', this.onVisionObjects, this);
+		Promise.all([
+			this.imageRenderer.onReady(),
+			this.imageDiffRenderer.onReady()
+		]).then(function () {
+			this.mon(NU.Network, 'image', this.onImage, this);
+			this.mon(NU.Network, 'classified_image', this.onClassifiedImage, this);
+			this.mon(NU.Network, 'vision_object', this.onVisionObjects, this);
 		}.bind(this));
     },
 	onLayerSelect: function (obj, newValue, oldValue, e) {
@@ -60,6 +78,9 @@ Ext.define('NU.view.window.VisionController', {
 					break;
 				case 'raw':
 					layeredCanvas.show('image');
+					break;
+				case 'image_diff':
+					layeredCanvas.show('image_diff');
 					break;
 				case 'classified_search':
 					layeredCanvas.show('classified_image_search');
@@ -141,6 +162,7 @@ Ext.define('NU.view.window.VisionController', {
 		var height = this.getHeight();
 		var data = new Uint8Array(image.data.toArrayBuffer());
 		this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
 	},
     drawImageB64: function (image) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));

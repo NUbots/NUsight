@@ -1,6 +1,9 @@
 Ext.define('NU.view.plot.Scatter3D', {
 	extend: 'Ext.container.Container',
 	alias: 'widget.scatter3d',
+	requires: [
+		'NU.view.webgl.WebGL'
+	],
 	autoEl: {
 		tag: 'canvas',
 		width: '400',
@@ -13,13 +16,14 @@ Ext.define('NU.view.plot.Scatter3D', {
 			marginLeft: '3px'
 		}
 	},
+	needsUpdate: true,
+	positionBuffer: null,
 	config: {
 		width: 400,
 		height: 487,
 		mouseX: 0,
 		mouseY: 0,
 		down: false,
-		pointData: null,
 		scene: null,
 		camera: null,
 		renderer: null,
@@ -34,22 +38,24 @@ Ext.define('NU.view.plot.Scatter3D', {
 	listeners: {
 		resize: function (el, width, height) {
 //			this.autoSize(width, height);
-			this.getRenderer().setSize(width, height)
+			this.getRenderer().setSize(width, height);
 			var camera = this.getCamera();
 			camera.aspect = width / height;
 			camera.updateProjectionMatrix();
+			var points = this.getPoints();
+			if (points) {
+				points.material.uniforms.scale.value = height / 2;
+			}
+			this.needsUpdate = true;
 		}
 	},
 	initComponent: function () {
-		if (this.getPointData() === null) {
-			this.setPointData([]);
-		}
 		if (this.getTexts() === null) {
 			this.setTexts([]);
 		}
 		this.callParent(arguments);
 	},
-	updateCameraPosition: function (camera, distance, elevation, azimuth) {
+	updateCameraPosition: function (scene, camera, distance, elevation, azimuth) {
 		// lock view from (0, PI) exclusive to avoid flipping over the Z axis
 		elevation = Math.max(0.1 * Math.PI / 180, Math.min(179.9 * Math.PI / 180, elevation));
 		// calculate x,y,z from spherical coordinates
@@ -59,11 +65,17 @@ Ext.define('NU.view.plot.Scatter3D', {
 		this.setCameraAzimuth(azimuth);
 		this.setCameraElevation(elevation);
 		this.setCameraDistance(distance);
+		camera.lookAt(scene.position);
+		Ext.each(this.getTexts(), function (text) {
+			text.lookAt(camera.position);
+		}, this);
+		this.needsUpdate = true;
 	},
 	afterRender: function () {
 		var renderer = new THREE.WebGLRenderer({
 			antialias: true,
-			canvas: this.getEl().dom
+			canvas: this.getEl().dom,
+			alpha: true
 		});
 		renderer.setClearColor(0xf0f0f0, 1.0);
 		var camera = new THREE.PerspectiveCamera(
@@ -76,11 +88,13 @@ Ext.define('NU.view.plot.Scatter3D', {
 		var scene = new THREE.Scene();
 		scene.add(camera);
 		var cameraDistance = this.getCameraDistance();
-		this.updateCameraPosition(camera, cameraDistance, 19 * Math.PI / 32, 30 * Math.PI / 180);
 
 		var scatterPlot = new THREE.Object3D();
 		this.generateScene(scatterPlot);
+		this.createPointCloud(scatterPlot);
 		scene.add(scatterPlot);
+
+		this.updateCameraPosition(scene, camera, cameraDistance, 19 * Math.PI / 32, 30 * Math.PI / 180);
 		this.getEl().on({
 			'mousedown': function (e) {
 				this.setDown(true);
@@ -98,13 +112,13 @@ Ext.define('NU.view.plot.Scatter3D', {
 					var newCameraElevation = this.getCameraElevation() + dy * Math.PI / 180;
 					this.setMouseX(e.getX());
 					this.setMouseY(e.getY());
-					this.updateCameraPosition(camera, this.getCameraDistance(), newCameraElevation, newCameraAzimuth);
+					this.updateCameraPosition(scene, camera, this.getCameraDistance(), newCameraElevation, newCameraAzimuth);
 				}
 			},
 			'mousewheel': function (event) {
 				var newCameraDistance = this.getCameraDistance() - event.getWheelDelta() * 16;
 				newCameraDistance = Math.max(0.01, newCameraDistance);
-				this.updateCameraPosition(camera, newCameraDistance, this.getCameraElevation(), this.getCameraAzimuth());
+				this.updateCameraPosition(scene, camera, newCameraDistance, this.getCameraElevation(), this.getCameraAzimuth());
 			},
 			'click': function (e) {
 				if (e.ctrlKey && this.getPoints() != null) {
@@ -122,16 +136,20 @@ Ext.define('NU.view.plot.Scatter3D', {
 			scope: this
 		});
 
-		function animate() {
-			renderer.clear();
-			camera.lookAt(scene.position);
-			Ext.each(this.getTexts(), function (text) {
-				text.lookAt(camera.position);
-			}, this);
+		var animate = function () {
+
+			if (!this.needsUpdate) {
+				requestAnimationFrame(animate);
+				return;
+			}
+
 			renderer.render(scene, camera);
-			requestAnimationFrame(animate.bind(this));
-		}
-		requestAnimationFrame(animate.bind(this));
+			this.needsUpdate = false;
+			requestAnimationFrame(animate);
+
+		}.bind(this);
+
+		requestAnimationFrame(animate);
 
 		this.setScatterPlot(scatterPlot);
 		this.setRenderer(renderer);
@@ -198,7 +216,6 @@ Ext.define('NU.view.plot.Scatter3D', {
 		var yAxisGeo = new THREE.Geometry();
 		var zAxisGeo = new THREE.Geometry();
 		var midLinesGeo = new THREE.Geometry();
-		var boundaryGeo = new THREE.Geometry();
 
 		xAxisGeo.vertices.push(v(bounds.minx, 0, 0), v(bounds.maxx, 0, 0));
 		yAxisGeo.vertices.push(v(0, bounds.miny, 0), v(0, bounds.maxy, 0));
@@ -221,60 +238,36 @@ Ext.define('NU.view.plot.Scatter3D', {
 			v(0, bounds.miny, bounds.minz), v(0, bounds.miny, bounds.maxz)
 		);
 
-		boundaryGeo.vertices.push(
-			v(bounds.minx, bounds.maxy, bounds.minz), v(bounds.maxx, bounds.maxy, bounds.minz),
-			v(bounds.minx, bounds.miny, bounds.minz), v(bounds.maxx, bounds.miny, bounds.minz),
-			v(bounds.minx, bounds.maxy, bounds.maxz), v(bounds.maxx, bounds.maxy, bounds.maxz),
-			v(bounds.minx, bounds.miny, bounds.maxz), v(bounds.maxx, bounds.miny, bounds.maxz),
-
-			v(bounds.maxx, bounds.miny, bounds.minz), v(bounds.maxx, bounds.maxy, bounds.minz),
-			v(bounds.minx, bounds.miny, bounds.minz), v(bounds.minx, bounds.maxy, bounds.minz),
-			v(bounds.maxx, bounds.miny, bounds.maxz), v(bounds.maxx, bounds.maxy, bounds.maxz),
-			v(bounds.minx, bounds.miny, bounds.maxz), v(bounds.minx, bounds.maxy, bounds.maxz),
-
-			v(bounds.maxx, bounds.maxy, bounds.minz), v(bounds.maxx, bounds.maxy, bounds.maxz),
-			v(bounds.maxx, bounds.miny, bounds.minz), v(bounds.maxx, bounds.miny, bounds.maxz),
-			v(bounds.minx, bounds.maxy, bounds.minz), v(bounds.minx, bounds.maxy, bounds.maxz),
-			v(bounds.minx, bounds.miny, bounds.minz), v(bounds.minx, bounds.miny, bounds.maxz)
-		);
-
 		var xAxisMat = new THREE.LineBasicMaterial({
-			color: 0xeeeeee, //0xff0000,
-			lineWidth: 1
+			color: 0xeeeeee
 		});
 		var xAxis = new THREE.Line(xAxisGeo, xAxisMat, THREE.LinePieces);
 		scatterPlot.add(xAxis);
 
 		var yAxisMat = new THREE.LineBasicMaterial({
-			color: 0xeeeeee, //0x0000ff,
-			lineWidth: 1
+			color: 0xeeeeee
 		});
 		var yAxis = new THREE.Line(yAxisGeo, yAxisMat, THREE.LinePieces);
 		scatterPlot.add(yAxis);
 
 		var zAxisMat = new THREE.LineBasicMaterial({
-			color: 0xeeeeee, //0x00ff00,
-			lineWidth: 1
+			color: 0xeeeeee
 		});
 		var zAxis = new THREE.Line(zAxisGeo, zAxisMat, THREE.LinePieces);
 		scatterPlot.add(zAxis);
 
 		var midLinesMat = new THREE.LineBasicMaterial({
-			color: 0xdddddd,
-			lineWidth: 1,
-			transparent: true
+			color: 0xdddddd
 		});
 		var midLines = new THREE.Line(midLinesGeo, midLinesMat, THREE.LinePieces);
 		scatterPlot.add(midLines);
 
+		var boundaryGeo = new THREE.BoxGeometry(bounds.maxx - bounds.minx, bounds.maxy - bounds.miny, bounds.maxz - bounds.minz);
 		var boundaryMat = new THREE.LineBasicMaterial({
-			color: 0x090909,
-			lineWidth: 1,
-			transparent: true
+			color: 0x090909
 		});
-		var boundary = new THREE.Line(boundaryGeo, boundaryMat, THREE.LinePieces);
+		var boundary = new THREE.EdgesHelper(new THREE.Mesh(boundaryGeo, boundaryMat), 0x090909);
 		scatterPlot.add(boundary);
-//		this.updatePlot();
 
 		function createTextCanvas(text, color, font, size)
 		{
@@ -343,42 +336,83 @@ Ext.define('NU.view.plot.Scatter3D', {
 		texts.push(titleZ);
 
 	},
-	updatePlot: function () {
-		var scatterPlot = this.getScatterPlot();
+	createPointCloud: function (scatterPlot) {
 		var points = this.getPoints();
 		scatterPlot.remove(points);
 
-		var geometry = new THREE.Geometry();
+		var geometry = new THREE.BufferGeometry();
+		geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(0), 3));
 
-		Ext.each(this.getPointData(), function (row) {
-			var position = new THREE.Vector3(row[0], row[1], row[2]);
-			//var radius = 0.4;
-			geometry.vertices.push(position);
-			geometry.colors.push(row[3]);
-			//var sphere = new Sphere(radius, row[3]);
-			//sphere.position = position;
-			//this.objects.push(sphere);
-		}, this);
+		return NU.view.webgl.WebGL.loadShaders('LookUpTable3D').spread(function (vertexShaderText, fragmentShaderText) {
+			var material = new THREE.ShaderMaterial({
+				uniforms: {
+					'lut': {type: 't'},
+					'lutSize': {type: 'f'},
+					'bitsR': {type: 'f'},
+					'bitsG': {type: 'f'},
+					'bitsB': {type: 'f'},
+					scale: {type: 'f', value: this.getHeight() / 2}, // TODO
+					size: {type: 'f', value: 7},
+					renderRaw: {type: 'i'},
+					renderCube: {type: 'i'}
+				},
+				vertexShader: vertexShaderText,
+				fragmentShader: fragmentShaderText
+				//transparent: true,
+				//blending: THREE.CustomBlending,
+				//blendSrc: THREE.SrcAlphaFactor,
+				//blendDst: THREE.OneMinusSrcAlphaFactor
+				//side: THREE.DoubleSide
+			});
+			material.obj = this;
+			window.mat = material;
 
-		var texture = new THREE.Texture(this.generateTexture());
-		texture.needsUpdate = true; // important
-//		var texture = THREE.ImageUtils.loadTexture("resources/images/disc.png");
+			points = new THREE.PointCloud(geometry, material);
+			points.frustumCulled = false;
+			scatterPlot.add(points);
+			this.setPoints(points);
+		}.bind(this));
+	},
+	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB, renderRaw, renderCube) {
+		var points = this.getPoints();
 
-		var material = new THREE.PointCloudMaterial({
-			size: 8,
-//			sizeAttenuation: false,
-			map: texture,
-//			blending: THREE.AdditiveBlending, // required
-//			depthTest: false, // required
-//			depthWrite: false,
-			transparent: true,
-			opacity: 0.9,
-			vertexColors: true // optional
-		});
+		// create a square texture
+		var data = new Uint8Array(lut.buffer);
+		var size = Math.ceil(Math.sqrt(data.length));
+		var sizeSqr = size * size;
+		if (data.length != sizeSqr) {
+			// does not fit evenly, create new array with tail padding
+			var newData = new Uint8Array(sizeSqr);
+			newData.set(data);
+			data = newData;
+		}
+		var texture = points.material.uniforms.lut.value;
+		if (!texture) {
+			texture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat,
+				THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping,
+				THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+			points.material.uniforms.lut.value = texture;
+		}
+		else {
+			texture.image.data = data;
+			texture.image.width = size;
+			texture.image.height = size;
+		}
+		texture.needsUpdate = true;
 
-		var points = new THREE.PointCloud(geometry, material);
-		points.sortParticles = true;
-		scatterPlot.add(points);
-		this.setPoints(points);
+		points.material.uniforms.lutSize.value = size;
+		points.material.uniforms.bitsR.value = bitsR;
+		points.material.uniforms.bitsG.value = bitsG;
+		points.material.uniforms.bitsB.value = bitsB;
+		points.material.uniforms.renderRaw.value = renderRaw;
+		points.material.uniforms.renderCube.value = renderCube;
+
+		var positionBuffer = points.geometry.getAttribute('position');
+		if (positionBuffer.array.length !== vertices.length) {
+			points.geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+			points.geometry.needsUpdate = true;
+		}
+
+		this.needsUpdate = true;
 	}
 });

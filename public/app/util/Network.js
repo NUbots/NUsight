@@ -1,10 +1,11 @@
 Ext.define('NU.util.Network', {
+	singleton: true,
+	alternateClassName: 'NU.Network',
 	mixins: {
 		observable: 'Ext.mixin.Observable'
 	},
 	socket: null,
 	cache: null,
-	singleton: true,
 	constructor: function (config) {
 		this.mixins.observable.constructor.call(this, config);
 
@@ -30,6 +31,7 @@ Ext.define('NU.util.Network', {
 		window.API.ActionStateChange = this.builder.build("messages.behaviour.proto.ActionStateChange");
 		window.API.Image = this.builder.build("messages.input.proto.Image");
 		window.API.DataPoint = this.builder.build("messages.support.nubugger.proto.DataPoint");
+        window.API.Configuration = this.builder.build("messages.support.nubugger.proto.ConfigurationState");
 
 		var typeMap = {};
 		Ext.iterate(API.Message.Type, function (key, type) {
@@ -41,14 +43,11 @@ Ext.define('NU.util.Network', {
 		robotsStore.on('update', this.onUpdateRobot, this);
 		robotsStore.on('remove', this.onRemoveRobot, this);
 
-		var me = this;
-		requestAnimationFrame(function () {
-			me.onAnimationFrame();
-		});
+		requestAnimationFrame(this.onAnimationFrame.bind(this));
 
 	},
 	onAnimationFrame: function () {
-		var me = this;
+		requestAnimationFrame(this.onAnimationFrame.bind(this));
 
 		Ext.Object.each(this.cache, function (hash, event) {
 			if (this.hasListener(event.name)) {
@@ -60,10 +59,6 @@ Ext.define('NU.util.Network', {
 				//console.log(event.robotIP, event.name);
 			}
 		}, this);
-
-		requestAnimationFrame(function () {
-			me.onAnimationFrame();
-		});
 	},
 	processPacket: function (packet) {
 		var message, eventName, filterId, robotIP, event, hash;
@@ -157,5 +152,34 @@ Ext.define('NU.util.Network', {
 			result.push(record.get('ipAddress'));
 		});
 		return result;
+	},
+	/**
+	 * Creates a message of a particular type and filter identifier that can be used to send over the network.
+	 *
+	 * @param type The type of message being created.
+	 * @param filterId The filter identifier for the message.
+	 */
+	createMessage: function (type, filterId) {
+		var message = new API.Message();			// create the message API
+		message.setType(type);						// set the type of the message that was passed in
+		message.setFilterId(filterId);				// set the filter identifier of the message
+		message.setUtcTimestamp(Date.now() / 1000);	// set the time stamp of the message to the current time in seconds
+		return message;								// return the message that was created
+	},
+	/**
+	 * Creates a message and command of a particular name to send over the network.
+	 *
+	 * @param robotIP The IP address of the robot associated with the command.
+	 * @param commandName The name of the command.
+	 * @param [filterId] The filter identifier for the message.
+	 */
+	sendCommand: function (robotIP, commandName, filterId) {
+		// create the message of type command
+		var message = this.createMessage(API.Message.Type.COMMAND, filterId || 0);
+		// create the command
+		var command = new API.Message.Command();
+		command.setCommand(commandName);			// set the name of the command
+		message.setCommand(command);				// set the command of the message
+		this.send(robotIP, message);				// send the command message over the network
 	}
 });

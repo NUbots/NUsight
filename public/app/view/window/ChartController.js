@@ -48,8 +48,8 @@ Ext.define('NU.view.window.ChartController', {
 
         // setup network hook
 		var view = this.getView();
-        view.mon(NU.util.Network, 'data_point', this.onDataPoint, this);
-        view.mon(NU.util.Network, 'sensor_data', this.onSensorData, this);
+        view.mon(NU.Network, 'data_point', this.onDataPoint, this);
+        view.mon(NU.Network, 'sensor_data', this.onSensorData, this);
 
         this.onResize(view, view.getWidth(), view.getHeight());
     },

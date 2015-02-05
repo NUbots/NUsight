@@ -10,6 +10,17 @@ RegExp.escape = function (s) {
     return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
 
+// https://gist.github.com/davidwaterston/2982531
+var performance = window.performance || {};
+performance.now = (function() {
+    return performance.now    ||
+        performance.webkitNow     ||
+        performance.msNow         ||
+        performance.oNow          ||
+        performance.mozNow        ||
+        function() { return new Date().getTime(); };
+})();
+
 Ext.Loader.setConfig({
     disableCaching : false
 });
@@ -37,7 +48,7 @@ Ext.onReady(function() {
         ],
         autoCreateViewport: true,
 		launch: function () {
-            NU.util.Network.init();
+            NU.Network.init();
         }
     });
 });

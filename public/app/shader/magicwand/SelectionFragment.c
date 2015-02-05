@@ -1,5 +1,3 @@
-#include "Vision.h"
-
 /**
  * The raw (e.g. YCbCr) image
  */
@@ -20,10 +18,9 @@ varying vec2 center;
 void main() {
 	vec4 rawColour = texture2D(rawImage, center);
 	// check euclidean distance between rawColour and colour
-	// makes sure to keep units in range 0-1
-	if (distance(rawColour.xyz, colour / 255.0) / MAX_DISTANCE <= tolerance / MAX_TOLERANCE) {
+	if (distance(rawColour.rgb * 255.0, colour) <= tolerance) {
 		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 	} else {
-		gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+		discard;
 	}
 }

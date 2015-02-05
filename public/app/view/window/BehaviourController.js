@@ -3,7 +3,7 @@ Ext.define('NU.view.window.BehaviourController', {
 	alias: 'controller.Behaviour',
 	init: function () {
 		var view = this.getView();
-		view.mon(NU.util.Network, 'behaviour', this.onBehaviour, this);
+		view.mon(NU.Network, 'behaviour', this.onBehaviour, this);
 	},
 	onClearActionTable: function () {
 		this.lookupReference('actions').getStore().removeAll();

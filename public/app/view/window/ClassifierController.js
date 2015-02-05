@@ -4,6 +4,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Classifier',
 	requires: [
+		'NU.util.Defer',
 		'NU.util.Vision',
 		'NU.view.webgl.Vision',
 		'NU.view.webgl.Classifier',
@@ -19,6 +20,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		lookupBackwardHistory: null,
 		lookupForwardHistory: null,
 		lookupHistoryLength: 15,
+		lookupVertexBuffer: null,
 		previewLookup: null,
 		overwrite: false,
 		selectionTool: 'magic_wand',
@@ -45,7 +47,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		renderCube: false,
 		rawLayeredCanvas: null,
 		classifiedLayeredCanvas: null,
-		imageFormat: null
+		imageFormat: null,
+		lutNeedsUpdate: false
 	},
 	statics: {
 		/**
@@ -251,6 +254,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	onToggleOverwrite: function (btn, pressed) {
 		this.setOverwrite(pressed);
+		this.selectionClassifier.updateOverwrite(this.getOverwrite());
 	},
 	onChangeRange: function (checkbox, newValue, oldValue, eOpts) {
 		this.setRange(newValue);
@@ -289,25 +293,25 @@ Ext.define('NU.view.window.ClassifierController', {
 	onChangeBitsR: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorY = newValue;
-			this.resetBits();
 			this.classifiedRenderer.updateBitsR(newValue);
 			this.selectionClassifier.updateBitsR(newValue);
+			this.resetBits();
 		}
 	},
 	onChangeBitsG: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorCb = newValue;
-			this.resetBits();
 			this.classifiedRenderer.updateBitsG(newValue);
 			this.selectionClassifier.updateBitsG(newValue);
+			this.resetBits();
 		}
 	},
 	onChangeBitsB: function (field, newValue, oldValue, eOpts) {
 		if (field.isValid()) {
 			this.self.LutBitsPerColorCr = newValue;
-			this.resetBits();
 			this.classifiedRenderer.updateBitsB(newValue);
 			this.selectionClassifier.updateBitsB(newValue);
+			this.resetBits();
 		}
 	},
 	resetBits: function () {
@@ -326,6 +330,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setPolygonPoints([]);
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
+		this.lutDiffs = [];
 	},
 	onAfterRender: function () {
 		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
@@ -434,63 +439,25 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.classifiedRenderer.updateLut(lut);
 			this.selectionClassifier.updateLut(lut);
 
-			this.mon(NU.util.Network, 'image', this.onImage, this);
-			this.mon(NU.util.Network, 'lookup_table', this.onLookUpTable, this);
+			this.mon(NU.Network, 'image', this.onImage, this);
+			this.mon(NU.Network, 'lookup_table', this.onLookUpTable, this);
+			this.mon(NU.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
 
 			this.testDrawImage();
 		}.bind(this));
 	},
 	refreshScatter: function () {
 
-		var data = [];
-		var lut = this.getLookup();
-
-		function getColour(typeId) {
-			var rgb = this.getRGBfromType(typeId);
-			return new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-		}
-
-		function scale(value) {
-			// scale from [0, 255] to [-50, 50]
-			return (100 * value) / 255 - 50;
-		}
-
-		var index;
-		var min = 0;
-		var max = 255;
-		var numSteps = Math.pow(2, Math.max(this.self.LutBitsPerColorY, this.self.LutBitsPerColorCb, this.self.LutBitsPerColorCr));
-		var step = (max - min) / numSteps;
-		for (var z = min; z <= max; z += step) {
-			for (var y = min; y <= max; y += step) {
-				for (var x = min; x <= max; x += step) {
-					if (this.getRenderCube() && (z === 0 || z === 255 || y === 0 || y === 255 || x === 0 || x === 255)) {
-						var colour = new THREE.Color();
-						var rgb = NU.util.Vision.YCbCrtoRGB([x, y, z]);
-						colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-						data.push([scale(z), scale(x), scale(y), colour]);
-					} else {
-						index = this.getLUTIndex([x, y, z]);
-						if (lut[index] !== this.self.Target.Unclassified) {
-							var colour;
-							if (this.getRenderYUV()) {
-								colour = new THREE.Color();
-								var rgb = NU.util.Vision.YCbCrtoRGB([x, y, z]);
-								colour.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-							} else {
-								colour = getColour.call(this, lut[index]);
-							}
-							// swap y/z since axes change in threejs
-							data.push([scale(z), scale(x), scale(y), colour]);
-						}
-					}
-				}
-			}
-		}
-
 		var scatter3d = this.lookupReference('scatter3d');
-		scatter3d.setPointData(data);
-		scatter3d.updatePlot();
-
+		scatter3d.updatePlot(
+			this.getLookupVertexBuffer(),
+			this.getLookup(),
+			this.self.LutBitsPerColorY,
+			this.self.LutBitsPerColorCb,
+			this.self.LutBitsPerColorCr,
+			this.getRenderYUV(),
+			this.getRenderCube()
+		);
 	},
 	resetLUT: function () {
 		var lut = new Uint8ClampedArray(Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr));
@@ -498,23 +465,34 @@ Ext.define('NU.view.window.ClassifierController', {
 			lut[i] = this.self.Target.Unclassified;
 		}
 		this.setLookup(lut); // TODO: make constant or something
+
+		var bitsR = this.self.LutBitsPerColorY;
+		var bitsG = this.self.LutBitsPerColorCb;
+		var bitsB = this.self.LutBitsPerColorCr;
+		var maxR = Math.pow(2, bitsR);
+		var maxG = Math.pow(2, bitsG);
+		var maxB = Math.pow(2, bitsB);
+		var lutSize = lut.length;
+		var vertices = new Float32Array(lutSize * 3);
+		var index = 0;
+		for (var r = 0; r < maxR; r++) {
+			for (var g = 0; g < maxG; g++) {
+				for (var b = 0; b < maxB; b++) {
+					vertices[index    ] = r;
+					vertices[index + 1] = g;
+					vertices[index + 2] = b;
+					index += 3;
+				}
+			}
+		}
+		this.setLookupVertexBuffer(vertices);
 	},
 	download: function () {
-		var message = new API.Message();
-		message.setType(API.Message.Type.COMMAND);
-		message.setFilterId(0);
-		message.setUtcTimestamp(Date.now() / 1000);
-		var command = new API.Message.Command();
-		command.setCommand("download_lut");
-		message.setCommand(command);
-		NU.util.Network.send(this.getRobotIP(), message);
+		NU.Network.sendCommand(this.getRobotIP(), "download_lut");
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
-		var message = new API.Message();
-		message.setType(API.Message.Type.LOOKUP_TABLE);
-		message.setFilterId(0);
-		message.setUtcTimestamp(Date.now() / 1000);
+		var message = NU.util.Network.createMessage(API.Message.Type.LOOKUP_TABLE, 0);
 		var lookupTable = new API.Vision.LookUpTable();
 		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
@@ -522,7 +500,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
 		lookupTable.setSave(save);
 		message.setLookupTable(lookupTable);
-		NU.util.Network.send(this.getRobotIP(), message);
+		NU.Network.send(this.getRobotIP(), message);
 	},
 	getLUTIndex: function (ycbcr) {
 		var bitsY = this.self.LutBitsPerColorY;
@@ -531,7 +509,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		var bitsRemovedY = 8 - bitsY;
 		var bitsRemovedCb = 8 - bitsCb;
 		var bitsRemovedCr = 8 - bitsCr;
-
 
 		var index = 0;
 		index |= ycbcr[0] >> bitsRemovedY;
@@ -592,6 +569,34 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setLookup(lut);
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
+	},
+	onLookUpTableDiff: function (robotIP, tableDiff) {
+
+		// TODO: remove
+		if (robotIP !== this.getRobotIP()) {
+			return;
+		}
+
+		var diffs = tableDiff.getDiff();
+		for (var i = 0; i < diffs.length; i++) {
+			var diff = diffs[i];
+			this.lutDiffs.push({
+				index: diff.getLutIndex(),
+				classification: diff.getClassification()
+			});
+		}
+
+		NU.Defer.defer('lut_diffs', function () {
+			var lut = this.getLookup();
+			var diffs = this.lutDiffs;
+			console.log('updating with', diffs.length, 'diffs');
+			while (diffs.length > 0) {
+				var diff = diffs.shift();
+				lut[diff.index] = diff.classification;
+			}
+			this.updateClassifiedData();
+			this.renderClassifiedImage();
+		}.bind(this), 500);
 	},
 	onImage: function (robotIP, image) {
 
@@ -742,6 +747,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		var lut = this.getLookup();
 		var typeId = this.self.Target[this.getTarget()];
 		this.selectionClassifier.updateClassification(typeId);
+		this.selectionClassifier.updateTolerance(this.getTolerance());
 		this.selectionClassifier.render();
 		this.selectionClassifier.getLut(lut);
 		this.updateClassifiedData();
@@ -1336,9 +1342,9 @@ Ext.define('NU.view.window.ClassifierController', {
 		var height = this.getImageHeight();
 		var data = new Uint8Array(image.data.toArrayBuffer());
 		this.rawImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.selectionClassifier.updateRawImage(data, width, height, THREE.RGBFormat);
 		this.classifiedRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
 		this.selectionRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.selectionClassifier.updateRawImage(data, width, height, THREE.RGBFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageB64: function (image, callback, thisArg) {

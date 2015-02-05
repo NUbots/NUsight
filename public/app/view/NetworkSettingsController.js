@@ -2,7 +2,7 @@ Ext.define('NU.view.NetworkSettingsController', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.NetworkSettings',
 	requires: [
-		'NU.util.Network'
+		'NU.Network'
 	],
 	onSave: function () {
 		this.save();
@@ -19,6 +19,6 @@ Ext.define('NU.view.NetworkSettingsController', {
 			});
 		});
 		message.setReactionHandles(reactionHandles);
-		NU.util.Network.broadcast(message);
+		NU.Network.broadcast(message);
 	}
 });

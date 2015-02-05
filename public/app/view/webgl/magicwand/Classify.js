@@ -21,7 +21,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		this.callParent(arguments);
 
 		this.addReadyPromise(new Promise(function (resolve) {
-			this.loadShaders('magicwand/Classify').spread(function (vertexShaderText, fragmentShaderText) {
+			NU.view.webgl.WebGL.loadShaders('magicwand/Classify').spread(function (vertexShaderText, fragmentShaderText) {
 				this.imageVertexShaderText = vertexShaderText;
 				this.imageFragmentShaderText = fragmentShaderText;
 				this.createPointCloud(this.getWidth(), this.getHeight());
@@ -39,23 +39,23 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
 		var material = new THREE.ShaderMaterial({
 			uniforms: {
+				lut: {type: 't'},
 				lutSize: {type: 'f', value: 512},
 				bitsR: {type: 'f', value: 6},
 				bitsG: {type: 'f', value: 6},
 				bitsB: {type: 'f', value: 6},
 				colour: {type: '3fv', value: [0, 0, 0]},
 				tolerance: {type: 'f', value: -1},
-				classification: {type: 'f', value: -1}
+				classification: {type: 'f', value: -1},
+				overwrite: {type: 'i', value: 0}
 			},
 			vertexShader: this.imageVertexShaderText,
-			fragmentShader: this.imageFragmentShaderText,
-			transparent: true,
-			blending: THREE.CustomBlending,
-			blendSrc: THREE.SrcAlphaFactor,
-			blendDst: THREE.OneMinusSrcAlphaFactor
+			fragmentShader: this.imageFragmentShaderText
 		});
 		this.imagePointCloud = new THREE.PointCloud(geometry, material);
 		this.imagePointCloud.frustumCulled = false;
+		this.imagePointCloud.depthTest = false;
+		this.imagePointCloud.depthWrite = false;
 		this.imagePointCloud.position.set(0, 0, 1);
 		this.scene.add(this.imagePointCloud);
 	},
@@ -77,6 +77,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		}
 		this.resize(size, size);
 		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat);
+		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat, this.imagePointCloud.material);
 		this.updateUniform('lutSize', size, this.imagePointCloud.material);
 	},
 	updateRawImage: function (data, width, height, format) {
@@ -85,6 +86,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 			this.createPointCloud(width, height);
 			positionAttr = this.imagePointCloud.geometry.getAttribute('position');
 		}
+		positionAttr.needsUpdate = true;
 		positionAttr.set(data);
 	},
 	updateColour: function (value) {
@@ -104,6 +106,9 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 	},
 	updateBitsB: function (value) {
 		this.updateUniform('bitsB', value, this.imagePointCloud.material);
+	},
+	updateOverwrite: function (value) {
+		this.updateUniform('overwrite', value, this.imagePointCloud.material);
 	},
 	/**
 	 * @param {ArrayBuffer} [lut]
