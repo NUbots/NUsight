@@ -1,7 +1,7 @@
 {
-  "name": "NUsight",
+  "name": "nusight",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "start": "node app.js",
     "postinstall": "node node_modules/bower/bin/bower install"
