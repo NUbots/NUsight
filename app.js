@@ -2,7 +2,7 @@ var express = require('express');
 var http = require('http');
 var favicon = require('serve-favicon');
 var compression = require('compression');
-var NUbugger = require('./lib/NUbugger');
+var NUsight = require('./lib/NUsight');
 
 var app = express();
 var server = http.Server(app);
@@ -13,11 +13,11 @@ app.use(compression());
 app.use(express.static(__dirname + '/public'));
 
 server.listen(app.get('port'), function () {
-	
-	console.log("Express server listening on port " + app.get('port'));
-	
+
+    console.log("Express server listening on port " + app.get('port'));
+
 });
 
 io = require('socket.io').listen(server);
 
-var nubugger = new NUbugger(io);
+var nubugger = new NUsight(io);
