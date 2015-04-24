@@ -21,6 +21,14 @@ Ext.define('NU.view.window.ConfigurationController', {
         this.type = API.ConfigurationState.Node.Type;
         this.mode = this.Modes.STANDARD;
         this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
+    },
+    /**
+     * A function that is called when the user selects a robot. It then sends the command to get the configuration state with this IP address.
+     *
+     * @param robotIP The robot IP address selected by the user.
+     */
+    onSelectRobot: function (robotIP) {
+        this.setRobotIP(robotIP);
         this.sendCommand();
     },
     /**
