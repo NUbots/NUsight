@@ -3,11 +3,12 @@ Ext.define('NU.view.window.FieldController', {
 	alias: 'controller.Field',
 	mainScene: null,
 	objects: null,
+	objectsList: null,
 	robots : null,
 	config: {
 		closeDistance: 0.4,
 		closeHeight: 0.2,
-		// shape enum
+		// Shape enum.
 		Shape: {
 			ARROW: {
 				name: "Arrow"
@@ -37,7 +38,8 @@ Ext.define('NU.view.window.FieldController', {
 	},
 	constructor: function () {
 		this.robots = [];
-		this.objects = [];
+		this.objects = {};
+		this.objectsList = [];
 		this.callParent(arguments);
 	},
 	onHawkEye: function () {
@@ -98,12 +100,13 @@ Ext.define('NU.view.window.FieldController', {
 	},
 	onAfterRender: function () {
 		this.mainScene = this.createMainScene();
-		this.lookupReference('mainscene')
+		var mainScene = this.lookupReference('mainscene');
+		mainScene
 			.setComponents(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera, this.mainScene.effect)
 			.enableControls({
 				movementSpeed: 2
-			}, this.objects, this.lookupReference('coordinates'));
-		var controls = this.lookupReference('mainscene').controls;
+			}, this.objectsList, this.lookupReference('coordinates'));
+		var controls = mainScene.controls;
 		controls.yawObject.position.set(0, 4.5, 0);
 		controls.yawObject.rotation.set(0, 0, 0);
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
@@ -212,7 +215,8 @@ Ext.define('NU.view.window.FieldController', {
 		 */
 		robot.on('add-model', function (object) {
 			this.mainScene.scene.add(object);
-			this.objects.push(object);
+			this.objects[object.name] = object;
+			this.objectsList.push(object);
 		}, this);
 
 		/**
@@ -221,13 +225,14 @@ Ext.define('NU.view.window.FieldController', {
 		 */
 		robot.on('remove-model', function (object) {
 			this.mainScene.scene.remove(object);
-			Ext.Array.remove(this.objects, object);
+			delete this.objects[object.name];
+			Ext.Array.remove(this.objectsList, object);
 		}, this);
 //      robot.darwinModel.behaviourVisualiser.rotation.y = robot.darwinModel.object.dataModel.localisation.angle.get();
 
 		this.robots.push(robot);
 		//todo remove this:
-//		this.onAddObject(robot);
+		//this.onAddObject(robot);
 		//this.addObject(robot.darwinModels);
 		//todo this.addObject(robot.ballModels);
 	},
@@ -252,241 +257,251 @@ Ext.define('NU.view.window.FieldController', {
 		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
-		// get the robot from the IP sent from the network
+		// Get the robot from the IP sent from the network.
 		var robot = this.getRobot(robotIP);
-		// loop through each of the objects being added to the field
+		// Iterate through each of the objects being added to the field.
 		Ext.each(event.getObjects(), function (object) {
-			// get the shape requested over the network
-			var shape = object.getShape();
-			// get the name, position and color requested over the network
-			var name = object.getName();
-			var position = toVec3(object.getPosition());
-			var color = object.getColor();
-			// declare a variable for the model that is being created
-			var model;
-			// the function to convert the protocol to a vec3
-			function toVec3(vector) {
-				return vector == null ? null : new THREE.Vector3(vector.getX(), vector.getY(), vector.getZ());
+			// Get the field object from the objects on the field.
+			var fieldObject = this.objects[object.getName()];
+			// Check if the object should be added to the scene.
+			if (fieldObject === undefined) {
+				// Create the model based on the object and add the model to the field.
+				var model = this.createModel(robot, object);
+				robot.addModel(model, object.getName());
+			} else {
+				var currentModel = this.objects[object.getName()];
+				var newModel = this.createModel(robot, object);
+				robot.updateModel(currentModel, newModel);
 			}
-
-			// the function to create the arrow model
-			function createArrowModel() {
-				// get the arrow values
-				var target = toVec3(object.getTarget());
-				var direction = toVec3(object.getDirection());
-				var length = object.getLength();
-				var depth = object.getDepth();
-				// create the model
-				model = robot.createArrowModel({
-					name: name,
-					position: position,
-					target: target,
-					direction: direction,
-					length: length,
-					depth: depth,
-					color: color
-				});
+			// Get the timeout of the object.
+			var timeout = object.getTimeOut();
+			// Check if the object should fade out.
+			if (timeout !== 0) {
+				// Fade out the model using the specified timeout.
+				//TODO robot.fadeOutModel(model, timeout === null ? 2.5 : timeout);
 			}
-
-			// the function to create a box model
-			function createBoxModel() {
-				// get the box values
-				var width = object.getWidth();
-				var height = object.getHeight();
-				var depth = object.getDepth();
-				// create the model
-				model = robot.createBoxModel({
-					name: name,
-					position: position,
-					width: width,
-					height: height,
-					depth: depth,
-					color: color
-				});
-			}
-
-			// the function to create a circle model
-			function createCircleModel() {
-				// get the circle values
-				var width = object.getWidth();
-				var height = object.getHeight();
-				var rotation = toVec3(object.getRotation());
-				// create the model
-				model = robot.createCircleModel({
-					name: name,
-					position: position,
-					width: width,
-					height: height,
-					rotation: rotation,
-					color: color
-				});
-			}
-
-			// the function to create the cylinder model
-			function createCylinderModel() {
-				// get the cylinder values
-				var topRadius = object.getTopRadius();
-				var bottomRadius = object.getBottomRadius();
-				var height = object.getHeight();
-				var rotation = toVec3(object.getRotation());
-				// create the model
-				model = robot.createCylinderModel({
-					name: name,
-					position: position,
-					topRadius: topRadius,
-					bottomRadius: bottomRadius,
-					height: height,
-					rotation: rotation,
-					color: color
-				});
-			}
-
-			// the function to create the polyLine model
-			function createPolyLineModel() {
-				// get the polyLine values
-				var vertices = object.getVertices();
-				var lineWidth = object.getLineWidth();
-				var fill = object.getFill();
-				// create the model
-				model = robot.createPolyLineModel({
-					name: name,
-					position: position,
-					vertices: vertices,
-					lineWidth: lineWidth,
-					fill: fill,
-					color: color
-				});
-			}
-
-			// the function to create the pyramid model
-			function createPyramidModel() {
-				// get the pyramid values
-				var radius = object.getRadius();
-				var height = object.getHeight();
-				var faces = object.getFaces();
-				var rotation = object.getRotation();
-				// create the model
-				model = robot.createPyramidModel({
-					name: name,
-					position: position,
-					radius: radius,
-					height: height,
-					faces: faces,
-					rotation: rotation,
-					color: color
-				});
-			}
-
-			// the function to create the rectangle model
-			function createRectangleModel() {
-				// get the rectangle values
-				var target = object.getTarget();
-				var width = object.getWidth();
-				var length = object.getLength();
-				// create the model
-				model = robot.createRectangleModel({
-					name: name,
-					position: position,
-					target: target,
-					width: width,
-					length: length,
-					color: color
-				});
-			}
-
-			// the function to create the sphere model
-			function createSphereModel() {
-				var radius = object.getRadius();
-				model = robot.createSphereModel({
-					name: name,
-					position: position,
-					radius: radius,
-					color: color
-				});
-			}
-
-			// create a new shape onto the specified robot
-			var Shape = API.DrawObject.Shape;
-			switch (shape) {
-				case Shape.ARROW: // arrow
-					createArrowModel();
-					break;
-				case Shape.BOX: // box
-					createBoxModel();
-					break;
-				case Shape.CIRCLE: // circle
-					createCircleModel();
-					break;
-				case Shape.CYLINDER: // cylinder
-					createCylinderModel();
-					break;
-				case Shape.POLYLINE: // polygon
-					createPolyLineModel();
-					break;
-				case Shape.PYRAMID: // pyramid
-					createPyramidModel();
-					break;
-				case Shape.RECTANGLE: // rectangle
-					createRectangleModel();
-					break;
-				case Shape.SPHERE: // sphere
-					createSphereModel();
-					break;
-			}
-			// check if we want to display the certainty circle
-			/* TODO
-			 if (object.getDisplayCertainty()) {
-			 // display the certainty of the model
-			 model = robot.localiseModel(model, object.getCertaintyColour());
-			 }*/
-			// call the method to fire the event to add the model to the field
-			robot.addModel(model, object.getName());
-			// fade out the model using the specified timeout
-			robot.fadeOutModel(model, object.getTimeOut() || 2.5);
 		}, this);
 	},
+	/**
+	 * Converts a protocol vec3 into a THREE.js one.
+	 *
+	 * @param vector The vector being converted.
+	 * @returns {THREE.Vector3} The THREE.js vector.
+	 */
+	toVec3: function (vector) {
+		return vector === null ? new THREE.Vector3() : new THREE.Vector3(vector.getX(), vector.getY(), vector.getZ());
+	},
+	createModel: function (robot, object) {
+		// Create a new shape onto the specified robot.
+		var Shape = API.DrawObject.Shape;
+		switch (object.getShape()) {
+			case Shape.ARROW:
+				return this.createArrowModel(robot, object);
+			case Shape.BOX:
+				return this.createBoxModel(robot, object);
+			case Shape.CIRCLE:
+				return this.createCircleModel(robot, object);
+			case Shape.CYLINDER:
+				return this.createCylinderModel(robot, object);
+			case Shape.POLYLINE:
+				return this.createPolyLineModel(robot, object);
+			case Shape.PYRAMID:
+				return this.createPyramidModel(robot, object);
+			case Shape.RECTANGLE:
+				return this.createRectangleModel(robot, object);
+			case Shape.SPHERE:
+				return this.createSphereModel(robot, object);
+		}
+		// Check if we want to display the certainty circle.
+		/* TODO
+		 if (object.getDisplayCertainty()) {
+		 // display the certainty of the model
+		 model = robot.localiseModel(model, object.getCertaintyColour());
+		 }*/
+	},
+	/**
+	 * Creates and returns an arrow model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|Arrow} The arrow model.
+	 */
+	createArrowModel: function (robot, object) {
+		return robot.createArrowModel({
+			name: object.getName(),
+			position: this.toVec3(object.getPosition()),
+			target: this.toVec3(object.getTarget()),
+			direction: this.toVec3(object.getDirection()),
+			length: object.getLength(),
+			depth: object.getDepth(),
+			color: object.getColor()
+		});
+	},
+	/**
+	 * Creates and returns a box model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|Box} The box model.
+	 */
+	createBoxModel: function (robot, object) {
+		return robot.createBoxModel({
+			name: object.getName(),
+			position: this.toVec3(object.getPosition()),
+			width: object.getWidth(),
+			height: object.getHeight(),
+			depth: object.getDepth(),
+			color: object.getColor()
+		});
+	},
+	/**
+	 * Creates and returns a circle model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|Circle} The circle model.
+	 */
+	createCircleModel: function (robot, object) {
+		return robot.createCircleModel({
+			name: object.getName(),
+			position: this.toVec3(object.getPosition()),
+			width: object.getWidth(),
+			height: object.getHeight(),
+			rotation: this.toVec3(object.getRotation()),
+			color: object.getColor()
+		});
+	},
+	/**
+	 * Creates and returns a cylinder model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|Cylinder} The cylinder model.
+	 */
+	createCylinderModel: function (robot, object) {
+		return robot.createCylinderModel({
+			name: object.getName(),
+			position: this.toVec3(object.getPosition()),
+			topRadius: object.getTopRadius(),
+			bottomRadius: object.getBottomRadius(),
+			height: object.getHeight(),
+			rotation: this.toVec3(object.getRotation()),
+			color: object.getColor()
+		});
+	},
+	/**
+	 * Creates and returns a polyline model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|PolyLine} The polyline model.
+	 */
+	createPolyLineModel: function (robot, object) {
+		return robot.createPolyLineModel({
+			name: object.getName(),
+			position: this.toVec3(object.getPosition()),
+			vertices: object.getVertices(),
+			lineWidth: object.getLineWidth(),
+			fill: object.getFill(),
+			color: object.getColor()
+		});
+	},
+	/**
+	 * Creates and returns a pyramid model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|PolyLine} The polyline model.
+	 */
+	createPyramidModel: function (robot, object) {
+		return robot.createPyramidModel({
+			name: object.getName(),
+			position: this.toVec3(object.getPosition()),
+			radius: object.getRadius(),
+			height: object.getHeight(),
+			faces: object.getFaces(),
+			rotation: this.toVec3(object.getRotation()),
+			color: object.getColor()
+		});
+	},
+	/**
+	 * Creates and returns a rectangle model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|Rectangle} The rectangle model.
+	 */
+	createRectangleModel: function (robot, object) {
+		return robot.createRectangleModel({
+			name: object.getName(),
+			position: this.toVec3(object.getPosition()),
+			target: object.getTarget(),
+			width: object.getWidth(),
+			length: object.getLength(),
+			color: object.getColor()
+		});
+	},
+	/**
+	 * Creates and returns a sphere model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|Sphere} The sphere model.
+	 */
+	createSphereModel: function (robot, object) {
+		return robot.createSphereModel({
+			name: object.getName(),
+			position: this.toVec3(object.getPosition()),
+			radius: object.getRadius(),
+			color: object.getColor()
+		});
+	},
+	/**
+	 * A testing method for adding objects to the field.
+	 *
+	 * @param robot The robot having the object added to.
+	 */
 	onAddObject: function (robot) {
-		var me = this;
-		// loop every five seconds
+		// Loop every five seconds.
 		var add = setInterval(function () {
-			// get the shape requested over the network
+			// Get the shape requested over the network.
 			var shape = function () {
-				var index = Math.floor(Math.random() * Object.keys(me.Shape).length);
-				return Ext.Object.getValues(me.Shape)[index];
-			}();
+				var index = Math.floor(Math.random() * Object.keys(this.Shape).length);
+				return Ext.Object.getValues(this.Shape)[index];
+			}.bind(this)();
 			var model;
 			var color;
 			var displayCertainty = true;
-			// get the x and y coordinates requested over the network
+			// Get the x and y coordinates requested over the network.
 			var position = new THREE.Vector3(Math.random() * 2, Math.random() * 2, Math.random() * 2);
-			// create a new shape onto the specified robot
-			switch (me.Shape.BOX) {//shape) {
-				case me.Shape.ARROW: // arrow
+			// Create a new shape onto the specified robot.
+			switch (shape) {
+				case this.Shape.ARROW:
 					model = robot.createArrowModel({
 						position: position,
 						target: new THREE.Vector3(1, 1, 2)
 					});
 					displayCertainty = false;
 					break;
-				case me.Shape.BOX: // box
+				case this.Shape.BOX:
 					model = robot.createBoxModel({
 						position: position
 					});
 					color = 0x000000;
 					break;
-				case me.Shape.CIRCLE: // circle
+				case this.Shape.CIRCLE:
 					model = robot.createCircleModel({
 						position: position
 					});
 					color = 0xF1400D;
 					break;
-				case me.Shape.CYLINDER: // cylinder
+				case this.Shape.CYLINDER:
 					model = robot.createCylinderModel({
 						position: position
 					});
 					color = 0xFF5E45;
 					break;
-				case me.Shape.POLYLINE: // polygon
+				case this.Shape.POLYLINE:
 					model = robot.createPolyLineModel({
 						position: new THREE.Vector3(1, 1, 0),
 						vertices: [
@@ -498,20 +513,20 @@ Ext.define('NU.view.window.FieldController', {
 					color = 0x00FF45;
 					displayCertainty = false;
 					break;
-				case me.Shape.PYRAMID: // pyramid
+				case this.Shape.PYRAMID:
 					model = robot.createPyramidModel({
 						position: position
 					});
 					color = 0x155412;
 					break;
-				case me.Shape.RECTANGLE: // rectangle
+				case this.Shape.RECTANGLE:
 					model = robot.createRectangleModel({
 						position: position
 					});
 					displayCertainty = false;
 					color = 0x55FF33;
 					break;
-				case me.Shape.SPHERE: // sphere
+				case this.Shape.SPHERE:
 					model = robot.createSphereModel({
 						position: position
 					});
@@ -524,11 +539,11 @@ Ext.define('NU.view.window.FieldController', {
 			 color: color
 			 });
 			 } */
-			// call the method to fire the event to add the goal to the field
+			// Call the method to fire the event to add the goal to the field.
 			robot.addModel(model);
-			// fade the model out using the specified time
+			// Fade the model out using the specified time.
 			robot.fadeOutModel(model, 2.5);
-		}, 2500);
+		}.bind(this), 2500);
 	},
 	getRobot: function (robotIP) {
 		var foundRobot = null;
@@ -564,8 +579,9 @@ Ext.define('NU.view.window.FieldController', {
 
 		field = new Field();
 		scene.add(field);
-		// adds the field to the objects array
-		this.objects.push(field);
+		// Adds the field to the field objects.
+		this.objects['field'] = field;
+		this.objectsList.push(field);
 
 		//var circle = new THREE.Circle();
 		//scene.add(circle);

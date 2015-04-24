@@ -281,24 +281,21 @@
 	};
 
 	/**
-	 * Updates the coordinates listed at the bottom of the localisation display
+	 * Updates the coordinates listed at the bottom of the localisation display.
 	 */
 	NoClipControls.prototype.updateCoordinates = function () {
-		var me = this;
-		function updatePoints (points) {
-			// updates the coordinate template
-			me.coordinates.update({
-				x: points.x.toFixed(2),
-				y: points.y.toFixed(2),
-				z: points.z.toFixed(2)
-			});
-		}
-		// create a ray caster that takes the parameter of the origin position and direction vector
+		// Create a ray caster that takes the parameter of the origin position and direction vector.
 		var raycaster = new THREE.Raycaster(this.getPosition(), this.getDirection());
-		// checks for intersection between all objects where true checks all children
+		// Checks for intersection between all objects where true checks all children.
 		var intersects = raycaster.intersectObjects(this.objects, true);
-		// update the points using the closest intersection or reset to origin
-		updatePoints(intersects.length > 0 ? intersects[0].point : new THREE.Vector3(0, 0, 0));
+		// Update the points using the closest intersection or reset to origin.
+		var points = intersects.length > 0 ? intersects[0].point : new THREE.Vector3(0, 0, 0);
+		// Updates the coordinate template.
+		this.coordinates.update({
+			x: points.x.toFixed(2),
+			y: points.y.toFixed(2),
+			z: points.z.toFixed(2)
+		});
 	}
 
 }());
