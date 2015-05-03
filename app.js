@@ -20,4 +20,4 @@ server.listen(app.get('port'), function () {
 
 io = require('socket.io').listen(server);
 
-var nubugger = new NUsight(io);
+new NUsight(io);
