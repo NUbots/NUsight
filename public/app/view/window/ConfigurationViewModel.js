@@ -14,12 +14,12 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      * @param message The message node being processed.
      */
     processMessage: function (node, message) {
-        // get the type of nodes
+        // Get the type of nodes.
         var nodeType = API.ConfigurationState.Node.Type;
-        // retrieve the type and tag of the message
+        // Retrieve the type and tag of the message.
         var type = message.type;
         var tag = this.parseTag(message.tag);
-        // evaluate the message type
+        // Evaluate the message type.
         switch ((tag && tag.name) || type) {
             case nodeType.DIRECTORY:
             case nodeType.FILE:
@@ -62,21 +62,21 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      * @returns {*} The parsed tag in JSON.
      */
     parseTag: function (tag) {
-        // checks if the tag exists
-        if (tag !== null && tag !== "?" && tag != "!") {
-            // create a regex that splits the YAML tag into two components <NAME><PARAMS>
+        // Checks if the tag exists.
+        if (tag !== null && tag !== "?" && tag !== "!" && tag !== "") {
+            // Create a regex that splits the YAML tag into two components <NAME><PARAMS>.
             var regex = /(\w+)(?:\((.+)\))?/;
-            // executes the regex on the tag
+            // Executes the regex on the tag.
             var matches = regex.exec(tag);
-            // assigns the name and params of the tag
+            // Assigns the name and params of the tag.
             var name = matches[1].toUpperCase();
             var params = matches[2];
-            // checks if the params exist
+            // Checks if the params exist.
             if (params !== undefined) {
-                // replaces any "(" and ")" with "{" and "}" respectively and stringifies the params
+                // Replaces any "(" and ")" with "{" and "}" respectively and stringifies the params.
                 params = params.replace(/\(/g, "{").replace(/\)/g, "}").replace(/([A-Za-z]\w*)/g, '"$1"');
             }
-            // returns the tag with its respective name and params which are converted to JSON
+            // Returns the tag with its respective name and params which are converted to JSON.
             return {
                 name: name,
                 params: JSON.parse(Ext.String.format('[{0}]', params))
@@ -112,7 +112,7 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      * @returns {*} The new current node.
      */
     processCurrentNode: function (oldNode, newNode) {
-        // check that the node being replace is not the root
+        // Check that the node being replace is not the root.
         if (!oldNode.isRoot()) {
             var parent = oldNode.parentNode;
             var node = parent.appendChild(newNode);
@@ -129,9 +129,9 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      * @param sequence The sequence message.
      */
     processSequence: function (node, type, sequence) {
-        // iterates through every sequence message
+        // Iterates through every sequence message.
         Ext.each(sequence, function (item, i) {
-            // processes the sequence message
+            // Processes the sequence message.
             this.processMessage(node.appendChild({
                 type: type,
                 index: i
@@ -146,9 +146,9 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      * @param map The map message.
      */
     processMap: function (node, type, map) {
-        // iterates through every map item
+        // Iterates through every map item.
         Ext.each(map, function (item, i) {
-            // processes the message and its map value
+            // Processes the message and its map value.
             this.processMessage(node.appendChild({
                 name: item.name,
                 path: item.path,
@@ -165,18 +165,18 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      * @param value The current value of the angle in radians.
      */
     processAngle: function (node, type, value) {
-        // convert the value from radians to degrees
+        // Convert the value from radians to degrees.
         value = value * 180 / Math.PI;
         this.processCurrentNode(node, {
             name: node.get('name'),
-            type: type,
+            type: type,  
             widget: 'ANGLE',
             value: value,
             leaf: true
         });
     },
     /**
-     * Processes a slider tag of the format <!SLIDER(MIN,MAX,STEP)>.
+     * Processes a slider tag of the format !<SLIDER(MIN,MAX,STEP)>.
      *
      * @param node The node that is to be replaced.
      * @param type The YAML node type.
@@ -185,19 +185,19 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      */
     processSlider: function (node, type, value, params) {
         // get the values from the slider params
-        var minValue = params[0];
-        var maxValue = params[1];
-        var increment = params[2];
-        // process the current node using the new object
+        var min = params[0];
+        var max = params[1];
+        var step = params[2];
+        // Process the current node using the new object.
         this.processCurrentNode(node, {
             name: node.get('name'),
             type: type,
             widget: 'SLIDER',
             value: {
                 value: value,
-                minValue: minValue,
-                maxValue: maxValue,
-                increment: increment
+                min: min,
+                max: max,
+                step: step
             },
             leaf: true
         });

@@ -181,9 +181,9 @@ Ext.define('NU.view.factory.WidgetController', {
             reference: configuration,
             sliderWidth: slider.width,
             value: slider.value,
-            minValue: slider.minValue,
-            maxValue: slider.maxValue,
-            increment: slider.increment,
+            min: slider.min,
+            max: slider.max,
+            step: slider.step,
             listeners: {
                 update: this.update,
                 scope: this

@@ -12,30 +12,36 @@ Ext.define('NU.view.factory.slider.Slider', {
     config: {
         sliderWidth: null,
         value: null,
-        minValue: null,
-        maxValue: null,
-        increment: null
+        min: null,
+        max: null,
+        step: null
     },
     layout: {
         type: 'vbox',
         align: 'stretch'
     },
     initComponent: function () {
-        // initialise the default values
+        // Initialise the default values
         var value = this.getValue();
-        var minValue = this.getMinValue() === undefined ? Math.floor(value - value * 0.5) : this.getMinValue();
-        var maxValue = this.getMaxValue() === undefined ? Math.ceil(value + value * 0.5) : this.getMaxValue();
-        var increment = this.getIncrement() === undefined ? 0 : this.getIncrement();
+        var min = this.getMin() === undefined ? Math.floor(value - value * 0.5) : this.getMin();
+        var max = this.getMax() === undefined ? Math.ceil(value + value * 0.5) : this.getMax();
+        var step = this.getStep() === undefined ? 1 : this.getStep();
+        // Horrible way to get the max value.
+        var maxValue = (function () {
+            var count = 0;
+            for (var i = min; i <= max; i += step, count++) {}
+            return count;
+        }());
         Ext.apply(this, {
             items: [{
                 xtype: 'slider',
                 reference: 'slider',
-                decimalPrecision: increment === undefined ? false : increment < 1 ? false : 0,
                 width: this.getSliderWidth() === undefined ? 300 : this.getSliderWidth(),
-                value: value,
-                minValue: minValue,
+                value: (value / step) - min + 1,
+                minValue: 1,
                 maxValue: maxValue,
-                increment: increment,
+                increment: 1,
+                useTips: false,
                 listeners: {
                     change: 'onSliderChange'
                 }
@@ -44,8 +50,8 @@ Ext.define('NU.view.factory.slider.Slider', {
                 reference: 'input',
                 enableKeyEvents: true,
                 value: value,
-                minValue: minValue,
-                maxValue: maxValue,
+                minValue: min,
+                maxValue: max,
                 listeners: {
                     change: 'onInputChange'
                 }
