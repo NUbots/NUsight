@@ -23,11 +23,11 @@
 		var arrowOrigin = new THREE.Vector3(0, 0, 0);
         var direction;
         var length;
-		if (parameters.target !== null && parameters.target != undefined) {
-			var target = parameters.target;
-			direction = target.clone().sub(origin);
-			length = origin.distanceTo(target);
-		} else {
+		if (parameters.direction == null && parameters.length == undefined) {
+            var target = parameters.target;
+            direction = target.clone().sub(origin);
+            length = origin.distanceTo(target);
+        } else {
 			direction = parameters.direction || new THREE.Vector3(1, 0, 0);
 			length = parameters.length !== undefined ? parameters.length : 1;
 		}
