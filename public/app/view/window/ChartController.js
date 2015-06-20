@@ -141,36 +141,36 @@ Ext.define('NU.view.window.ChartController', {
         }, timestamp);
 
         // Left FSR
-        var lFSR = sensorData.getLeftFSR();
-        this.onDataPoint(robotIP, {
-            label: "Left FSR Position",
-            value: [
-                lFSR.x,
-                lFSR.y
-            ]
-        }, timestamp);
-        this.onDataPoint(robotIP, {
-            label: "Left FSR Force",
-            value: [
-                lFSR.z
-            ]
-        }, timestamp);
+        //var lFSR = sensorData.getLeftFSR();
+        //this.onDataPoint(robotIP, {
+        //    label: "Left FSR Position",
+        //    value: [
+        //        lFSR.x,
+        //        lFSR.y
+        //    ]
+        //}, timestamp);
+        //this.onDataPoint(robotIP, {
+        //    label: "Left FSR Force",
+        //    value: [
+        //        lFSR.z
+        //    ]
+        //}, timestamp);
 
         // Right FSR
-        var rFSR = sensorData.getRightFSR();
-        this.onDataPoint(robotIP, {
-            label: "Right FSR Position",
-            value: [
-                rFSR.x,
-                rFSR.y
-            ]
-        }, timestamp);
-        this.onDataPoint(robotIP, {
-            label: "Right FSR Force",
-            value: [
-                rFSR.z
-            ]
-        }, timestamp);
+        //var rFSR = sensorData.getRightFSR();
+        //this.onDataPoint(robotIP, {
+        //    label: "Right FSR Position",
+        //    value: [
+        //        rFSR.x,
+        //        rFSR.y
+        //    ]
+        //}, timestamp);
+        //this.onDataPoint(robotIP, {
+        //    label: "Right FSR Force",
+        //    value: [
+        //        rFSR.z
+        //    ]
+        //}, timestamp);
 
         // Servos
         Ext.each(sensorData.servo, function(servo) {
