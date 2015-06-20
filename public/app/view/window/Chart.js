@@ -59,6 +59,7 @@ Ext.define('NU.view.window.Chart', {
 				layout: 'fit'
 			}, {
 				region: 'east',
+				layout: 'fit',
 				width: 150,
 				items: [{
 					xtype: 'multiselect',

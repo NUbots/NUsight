@@ -44,6 +44,7 @@ Ext.define('NU.view.window.Vision', {
         reference: 'canvas'
     }, {
         region: 'east',
+        layout: 'fit',
         width: 150,
         items: [{
             anchor: '100%',
