@@ -88,11 +88,13 @@ Ext.define('NU.view.window.ChartController', {
                 }
             }, this);
             stream.enabled = found;
+            if (found) {
+                this.lookupReference('offset').setValue(stream.offset);
+            }
         }, this);
     },
     onResize: function (obj, width, height) {
 
-        // TODO: fix onload size
         var canvas = this.lookupReference('canvas');
         var canvasEl = canvas.getEl();
         var canvasDom = canvasEl.dom;
@@ -267,8 +269,23 @@ Ext.define('NU.view.window.ChartController', {
 
         var stream = this.getStream(label, values);
 
+        var now = Date.now();
+        var offset = now - timestamp;
+        stream.timestampValues.push(offset);
+        stream.timestampSum += offset;
+        stream.timestampNum++;
+        if (stream.timestampNum > 5) {
+            stream.timestampSum -= stream.timestampValues.shift();
+            stream.timestampNum--;
+        }
+        var average = stream.timestampSum / stream.timestampNum;
+        var difference = average - stream.offset;
+        if (Math.abs(difference) > 1000) {
+            stream.offset = average;
+            this.lookupReference('offset').setValue(average);
+        }
         Ext.each(values, function (value, i) {
-            stream.series[i].append(timestamp, value);
+            stream.series[i].append(new Date(timestamp.getTime() + stream.offset), value);
         }, this);
     },
     getStream: function(label, values) {
@@ -292,6 +309,10 @@ Ext.define('NU.view.window.ChartController', {
             label: label,
             size: size,
             series: series,
+            offset: 0,
+            timestampValues: [],
+            timestampSum: 0,
+            timestampNum: 0,
             enabled: false
         };
         this.getStreams().push(value);

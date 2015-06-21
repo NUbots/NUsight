@@ -8,7 +8,7 @@ Ext.define('NU.view.window.Chart', {
         'NU.store.Streams'
 	],
     controller: 'Chart',
-	width: 640,
+	width: 720,
 	height: 240,
 	title: 'Chart Display',
 	resizable: {
@@ -29,7 +29,7 @@ Ext.define('NU.view.window.Chart', {
 		fieldLabel: 'Min',
 		labelStyle: 'white-space: nowrap',
 		labelWidth: 30,
-		width: 120,
+		width: 100,
 		listeners: {
 			change: 'onMinChange'
 		}
@@ -38,7 +38,7 @@ Ext.define('NU.view.window.Chart', {
 		fieldLabel: 'Max',
 		labelStyle: 'white-space: nowrap',
 		labelWidth: 30,
-		width: 120,
+		width: 100,
 		listeners: {
 			change: 'onMaxChange'
 		}
@@ -48,10 +48,20 @@ Ext.define('NU.view.window.Chart', {
 		fieldLabel: 'Seconds',
 		labelStyle: 'white-space: nowrap',
 		labelWidth: 55,
-		width: 120,
+		width: 100,
 		listeners: {
 			change: 'onPeriodChange'
 		}
+	}, {
+		xtype: 'numberfield',
+		reference: 'offset',
+		fieldLabel: 'Offset (ms)',
+		labelStyle: 'white-space: nowrap',
+		labelWidth: 70,
+		width: 150,
+		value: 0,
+		readOnly: true,
+		disabled: true
 	}],
 	initComponent: function () {
 		Ext.applyIf(this, {
