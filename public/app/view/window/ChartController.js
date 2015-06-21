@@ -51,6 +51,10 @@ Ext.define('NU.view.window.ChartController', {
         var smoothie = this.getSmoothie();
         smoothie.options.maxValue = newValue;
     },
+    onPeriodChange: function (field, newValue, oldValue, eOpts) {
+        var smoothie = this.getSmoothie();
+        smoothie.options.millisPerPixel = newValue === null ? 20 : newValue / this.getView().getWidth() * 1000;
+    },
     onStreamSelect: function (obj, newValue, oldValue, e) {
         var colours = this.getColours();
         var numColours = colours.length;
@@ -96,6 +100,10 @@ Ext.define('NU.view.window.ChartController', {
         if (canvas !== null) {
             canvasDom.width = canvasEl.getWidth();
             canvasDom.height = canvasEl.getHeight();
+
+
+            var period = this.lookupReference('period').getValue();
+            this.getSmoothie().options.millisPerPixel = period === null ? 20 : period / canvasDom.width * 1000;
         }
 
     },

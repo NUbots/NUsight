@@ -42,6 +42,16 @@ Ext.define('NU.view.window.Chart', {
 		listeners: {
 			change: 'onMaxChange'
 		}
+	}, {
+		xtype: 'numberfield',
+		reference: 'period',
+		fieldLabel: 'Seconds',
+		labelStyle: 'white-space: nowrap',
+		labelWidth: 55,
+		width: 120,
+		listeners: {
+			change: 'onPeriodChange'
+		}
 	}],
 	initComponent: function () {
 		Ext.applyIf(this, {
