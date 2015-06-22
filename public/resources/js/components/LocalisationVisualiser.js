@@ -12,7 +12,7 @@
      */
     LocalisationVisualiser = function (parameters) {
         // call super constructor
-        THREE.Circle.call(this, parameters);
+        Circle.call(this, parameters);
         // set the position and rotation of the circle
         LocalisationVisualiser.z += LocalisationVisualiser.zDifference;
         this.position.z = LocalisationVisualiser.z; // keep them slightly apart
@@ -39,7 +39,7 @@
      *
      * @type {THREE.Circle}
      */
-    LocalisationVisualiser.prototype = Object.create(THREE.Circle.prototype);
+    LocalisationVisualiser.prototype = Object.create(Circle.prototype);
 
     /**
      * This method sets the width of the circle by scaling the y value of the unit circle.

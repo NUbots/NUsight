@@ -9,7 +9,7 @@
     /**
      * This constructs a sphere of a particular radius and color.
      *
-     * @param parameters the radius and color of the sphere
+     * @param parameters The radius and color of the sphere.
      * @constructor
      */
 	Sphere = function (parameters) {

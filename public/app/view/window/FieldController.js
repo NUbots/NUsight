@@ -5,36 +5,39 @@ Ext.define('NU.view.window.FieldController', {
 	objects: null,
 	objectsList: null,
 	robots : null,
+	// Shape enum.
+	Shape: {
+		ARROW: {
+			name: "Arrow"
+		},
+		BOX: {
+			name: "Box"
+		},
+		CIRCLE: {
+			name: "Circle"
+		},
+		CYLINDER: {
+			name: "Cylinder"
+		},
+		POLYLINE: {
+			name: "Polyline"
+		},
+		POLYPATH: {
+			name: "Polypath"
+		},
+		PYRAMID: {
+			name: "Pyramid"
+		},
+		RECTANGLE: {
+			name: "Rectangle"
+		},
+		SPHERE: {
+			name: "Sphere"
+		}
+	},
 	config: {
 		closeDistance: 0.4,
-		closeHeight: 0.2,
-		// Shape enum.
-		Shape: {
-			ARROW: {
-				name: "Arrow"
-			},
-			BOX: {
-				name: "Box"
-			},
-			CIRCLE: {
-				name: "Circle"
-			},
-			CYLINDER: {
-				name: "Cylinder"
-			},
-			POLYLINE: {
-				name: "PolyLine"
-			},
-			PYRAMID: {
-				name: "Pyramid"
-			},
-			RECTANGLE: {
-				name: "Rectangle"
-			},
-			SPHERE: {
-				name: "Sphere"
-			}
-		}
+		closeHeight: 0.2
 	},
 	constructor: function () {
 		this.robots = [];
@@ -307,7 +310,9 @@ Ext.define('NU.view.window.FieldController', {
 			case Shape.CYLINDER:
 				return this.createCylinderModel(robot, object);
 			case Shape.POLYLINE:
-				return this.createPolyLineModel(robot, object);
+				return this.createPolylineModel(robot, object);
+			case Shape.POLYPATH:
+				return this.createPolypathModel(robot, object);
 			case Shape.PYRAMID:
 				return this.createPyramidModel(robot, object);
 			case Shape.RECTANGLE:
@@ -397,10 +402,10 @@ Ext.define('NU.view.window.FieldController', {
 	 *
 	 * @param robot The selected robot.
 	 * @param object The protocol buffer that contains the object information.
-	 * @returns {*|PolyLine} The polyline model.
+	 * @returns {*|Polyline} The polyline model.
 	 */
-	createPolyLineModel: function (robot, object) {
-		return robot.createPolyLineModel({
+	createPolylineModel: function (robot, object) {
+		return robot.createPolylineModel({
 			name: object.getName(),
 			position: this.toVec3(object.getPosition()),
 			vertices: object.getVertices(),
@@ -410,11 +415,26 @@ Ext.define('NU.view.window.FieldController', {
 		});
 	},
 	/**
+	 * Creates and returns a polypath model.
+	 *
+	 * @param robot The selected robot.
+	 * @param object The protocol buffer that contains the object information.
+	 * @returns {*|Polypath} The polypath model.
+	 */
+	createPolypathModel: function (robot, object) {
+		return robot.createPolypathModel({
+			name: object.getName(),
+			path: object.getPath(),
+			width: object.getWidth(),
+			color: object.getColor()
+		});
+	},
+	/**
 	 * Creates and returns a pyramid model.
 	 *
 	 * @param robot The selected robot.
 	 * @param object The protocol buffer that contains the object information.
-	 * @returns {*|PolyLine} The polyline model.
+	 * @returns {*|Pyramid} The pyramid model.
 	 */
 	createPyramidModel: function (robot, object) {
 		return robot.createPyramidModel({
@@ -466,7 +486,7 @@ Ext.define('NU.view.window.FieldController', {
 	 */
 	onAddObject: function (robot) {
 		// Loop every five seconds.
-		var add = setInterval(function () {
+		//var add = setInterval(function () {
 			// Get the shape requested over the network.
 			var shape = function () {
 				var index = Math.floor(Math.random() * Object.keys(this.Shape).length);
@@ -478,7 +498,7 @@ Ext.define('NU.view.window.FieldController', {
 			// Get the x and y coordinates requested over the network.
 			var position = new THREE.Vector3(Math.random() * 2, Math.random() * 2, Math.random() * 2);
 			// Create a new shape onto the specified robot.
-			switch (shape) {
+			switch (this.Shape.POLYPATH) {//(shape) {
 				case this.Shape.ARROW:
 					model = robot.createArrowModel({
 						position: position,
@@ -505,7 +525,7 @@ Ext.define('NU.view.window.FieldController', {
 					color = 0xFF5E45;
 					break;
 				case this.Shape.POLYLINE:
-					model = robot.createPolyLineModel({
+					model = robot.createPolylineModel({
 						position: new THREE.Vector3(1, 1, 0),
 						vertices: [
 							[1, 1, 3],
@@ -515,6 +535,17 @@ Ext.define('NU.view.window.FieldController', {
 					});
 					color = 0x00FF45;
 					displayCertainty = false;
+					break;
+				case this.Shape.POLYPATH:
+					model = robot.createPolypathModel({
+						path: [
+							[new THREE.Vector2(1, 1), 0],
+							[new THREE.Vector2(1.5, 3), 0],
+							[new THREE.Vector2(5, 2), 0],
+							[new THREE.Vector2(0, -2), 2],
+							[new THREE.Vector2(0, -1), 0]
+						]
+					});
 					break;
 				case this.Shape.PYRAMID:
 					model = robot.createPyramidModel({
@@ -545,8 +576,8 @@ Ext.define('NU.view.window.FieldController', {
 			// Call the method to fire the event to add the goal to the field.
 			robot.addModel(model, false);
 			// Fade the model out using the specified time.
-			robot.fadeOutModel(model, 2.5);
-		}.bind(this), 2500);
+			//robot.fadeOutModel(model, 2.5);
+		//}.bind(this), 2500);
 	},
 	getRobot: function (robotIP) {
 		var foundRobot = null;

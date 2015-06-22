@@ -268,10 +268,19 @@ Ext.define('NU.view.field.Robot', {
 	 * This method creates a polygon object.
 	 *
 	 * @param parameters The x, y coordinates and the list of vertices of the polygon.
-	 * @returns {PolyLine} A PolyLine object.
+	 * @returns {Polyline} A Polyline object.
 	 */
-	createPolyLineModel: function (parameters) {
-		return new PolyLine(parameters);
+	createPolylineModel: function (parameters) {
+		return new Polyline(parameters);
+	},
+	/**
+	 * This method creates a polypath object.
+	 *
+	 * @param parameters
+	 * @returns {Polypath} A Polypath object.
+	 */
+	createPolypathModel: function (parameters) {
+		return new Polypath(parameters);
 	},
 	/**
 	 * This method creates a pyramid object.

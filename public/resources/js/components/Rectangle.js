@@ -5,15 +5,15 @@
     var Rectangle;
 
     /**
-     * This constructs a Rectangle of a particular width and length
+     * This constructs a Rectangle of a particular width and length.
      *
      * @type {Rectangle}
      */
-    Rectangle = THREE.Rectangle = function (parameters) {
+    Rectangle = function (parameters) {
         THREE.Object3D.call(this, parameters);
-        // ensure parameters is not undefined
+        // Ensure parameters is not undefined.
         parameters = parameters || {};
-        // the position, width, length and direction of the rectangle and its color
+        // The position, width, length and direction of the rectangle and its color.
         var origin = parameters.position || new THREE.Vector3(0, 0, 0);
 	    var width = parameters.width || 0.5;
         var length;
@@ -27,31 +27,31 @@
 		    length = parameters.length !== undefined ? parameters.length : 0.8;
 	    }
         var color = parameters.color || 0x1111FF;
-        // create the lines for the rectangle
+        // Create the lines for the rectangle.
         var rectangle = new THREE.Shape();
         rectangle.moveTo(0, 0);
         rectangle.lineTo(0, width);
         rectangle.lineTo(length, width);
         rectangle.lineTo(length, 0);
         rectangle.lineTo(0, 0);
-        // create the rectangle geometry
+        // Create the rectangle geometry.
         var geometry = new THREE.ShapeGeometry(rectangle);
         // create a material
         var material = new THREE.MeshBasicMaterial({
             color: color
         });
-        // create the rectangle mesh with its geometry and specified material
+        // Create the rectangle mesh with its geometry and specified material.
         this.mesh = new THREE.Mesh(geometry, material);
 		// move the position of the object
 		this.position = origin;
-	    // change the rotation order
+	    // Change the rotation order.
 	    this.rotation.order = 'ZYX';
-	    // point the mesh in the direction vector
+	    // Point the mesh in the direction vector.
 	    this.rotation.y = -Math.atan2(direction.z, Math.sqrt(Math.pow(length, 2) - Math.pow(direction.z, 2)));
 	    this.rotation.z = Math.PI * 0.5 - Math.atan2(direction.x, direction.y);
-	    // add a name to the object
-	    this.name = parameters.name || "Rectangle";
-        // add the rectangle to the object
+	    // Add a name to the object.
+	    this.name = parameters.name || 'Rectangle';
+        // Add the rectangle to the object.
         this.add(this.mesh);
     };
 

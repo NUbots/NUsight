@@ -2,48 +2,48 @@
 
     "use strict";
 
-    var PolyLine;
+    var Polyline;
 
     /**
-     * This constructs a Polygon using lines through specified vertices
+     * This constructs a Polygon using lines through specified vertices.
      *
-     * @type {PolyLine}
+     * @type {Polyline}
      */
-    PolyLine = THREE.Rectangle = function (parameters) {
+    Polyline = function (parameters) {
         THREE.Object3D.call(this, parameters);
-        // ensure parameters is not undefined
+        // Ensure parameters is not undefined.
         parameters = parameters || {};
-        // the vertices and fill of the polygon and its color
+        // The vertices and fill of the polygon and its color.
         var vertices = parameters.vertices;
         var lineWidth = parameters.lineWidth || 500;
         var fill = parameters.fill || true;
         var color = parameters.color || 0x00FF45;
-        // create the geometry
+        // Create the geometry
         var geometry = new THREE.Geometry();
-        // add the points to the geometry
+        // Add the points to the geometry.
         Ext.each(vertices , function (vertex) {
             var x = vertex[0] || 0;
             var y = vertex[1] || 0;
             var z = vertex[2] || 0;
             geometry.vertices.push(new THREE.Vector3(x, y, z));
         });
-        // create a material
+        // Create a material.
         var material = new THREE.LineBasicMaterial({
             color: color,
             lineWidth: lineWidth
         });
-        // create the polyLine mesh with its geometry and specified material
+        // Create the polyline mesh with its geometry and specified material.
         this.mesh = new THREE.Line(geometry, material);
-		// move the position of the object
+		// Move the position of the object.
 		this.position = parameters.position || new THREE.Vector3(0, 0, 0);
-	    // add a name to the object
-	    this.name = parameters.name || "PolyLine";
-        // add the rectangle to the object
+	    // Add a name to the object.
+	    this.name = parameters.name || 'Polyline';
+        // Add the rectangle to the object.
         this.add(this.mesh);
     };
 
-    PolyLine.prototype = Object.create(THREE.Object3D.prototype);
-    // export the object
-    window.PolyLine = PolyLine;
+    Polyline.prototype = Object.create(THREE.Object3D.prototype);
+    // Export the object.
+    window.Polyline = Polyline;
 
 }());

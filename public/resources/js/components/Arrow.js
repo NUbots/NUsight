@@ -10,15 +10,15 @@
     /**
      * This constructs an arrow of a particular direction, length, depth and color.
      *
-     * @param parameters the direction, length, depth and color of the arrow
+     * @param parameters The direction, length, depth and color of the arrow.
      * @constructor
      */
     Arrow = function (parameters) {
-        // call super constructor
+        // Call super constructor.
         THREE.Object3D.call(this);
-        // ensure parameters is not undefined
+        // Ensure parameters is not undefined.
         parameters = parameters || {};
-        // the origin, direction, length, width and height of the arrow and its color
+        // The origin, direction, length, width and height of the arrow and its color.
         var origin = parameters.position || new THREE.Vector3(0, 0, 0);
 		var arrowOrigin = new THREE.Vector3(0, 0, 0);
         var direction;
@@ -31,26 +31,27 @@
 			direction = parameters.direction || new THREE.Vector3(1, 0, 0);
 			length = parameters.length !== undefined ? parameters.length : 1;
 		}
-        var width = Math.min(length * 0.05, 0.05); // proportional to the length or the min default width
+        // Proportional to the length or the min default width
+        var width = Math.min(length * 0.05, 0.05);
         var depth = parameters.depth || 0.05;
-        // the value for left and right side of the arrow in the y-direction
+        // The value for left and right side of the arrow in the y-direction.
         var arrowBodyLeft = arrowOrigin.y - width * 0.5;
         var arrowBodyRight = arrowOrigin.y + width * 0.5;
-        // the arrow head is 1/4 of the length, we need a 0.75 multiplier
+        // The arrow head is 1/4 of the length, we need a 0.75 multiplier.
         var arrowHeadMultiplier = 0.75;
-		// the left and right arrow head position
+		// The left and right arrow head position.
 		var arrowHeadLeft = arrowBodyLeft - width * 2;
 		var arrowHeadRight = arrowBodyRight + width * 2;
-        // the bottom of the arrow head x coordinate with a maximum value
+        // The bottom of the arrow head x coordinate with a maximum value.
         var arrowHeadBottom = Math.max((arrowOrigin.x + length) * arrowHeadMultiplier, length - 0.25);
-        // the top of the arrow head x coordinate
+        // The top of the arrow head x coordinate.
         var arrowHeadTop = arrowHeadBottom + width * 0.5;
-	    // the value for the end of the arrow body
+	    // The value for the end of the arrow body.
 	    var arrowBodyEnd = arrowHeadBottom + width * 2 * Math.tan(55 * Math.PI / 180); // Math.tan needs to be in radians
-        // end of the arrow
+        // End of the arrow.
         var arrowEnd = arrowOrigin.x + length;
         var color = parameters.color || 0xF0FAB0;
-        // create the arrow geometry
+        // Create the arrow geometry.
         var arrow = new THREE.Shape();
         arrow.moveTo(arrowOrigin.x, arrowBodyLeft); // 0
         arrow.lineTo(arrowBodyEnd, arrowBodyLeft); // 2
@@ -62,33 +63,33 @@
         arrow.lineTo(arrowBodyEnd, arrowBodyRight); // 3
         arrow.lineTo(arrowOrigin.x, arrowBodyRight); // 1
         arrow.lineTo(arrowOrigin.x, arrowBodyLeft); // 0
-        // create the geometry by extruding the arrow shape
+        // Create the geometry by extruding the arrow shape.
         var geometry = new THREE.ExtrudeGeometry(arrow, {
             amount: depth,
             curveSegments: 3,
             bevelEnabled: false
         });
-        // create a material
+        // Create a material.
         var material = new THREE.MeshLambertMaterial({
             color: color
         });
-        // create the arrow mesh with its geometry and specified material
+        // Create the arrow mesh with its geometry and specified material.
         this.mesh = new THREE.Mesh(geometry, material);
-		// set the position of the object
+		// Set the position of the object.
 		this.position.copy(origin);
-		// change the rotation order
+		// Change the rotation order.
         this.rotation.order = 'ZYX';
-        // point the mesh in the direction vector
+        // Point the mesh in the direction vector.
 		this.rotation.y = -Math.atan2(direction.z, Math.sqrt(Math.pow(length, 2) - Math.pow(direction.z, 2)));
 		this.rotation.z = Math.PI * 0.5 - Math.atan2(direction.x, direction.y);
-	    // add a name to the object
-	    this.name = parameters.name || "Arrow";
-        // add this mesh to the object
+	    // Add a name to the object.
+	    this.name = parameters.name || 'Arrow';
+        // Add this mesh to the object.
         this.add(this.mesh);
     };
 
     Arrow.prototype = Object.create(THREE.Object3D.prototype);
-    // export the object
+    // Export the object.
     window.Arrow = Arrow;
 
 }(window.THREE));
