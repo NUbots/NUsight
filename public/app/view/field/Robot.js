@@ -142,7 +142,7 @@ Ext.define('NU.view.field.Robot', {
 	updateModel: function (currentModel, newModel) {
 		this.removeModel(currentModel, false);
 		this.addModel(newModel, false);
-		console.log(Ext.String.format("Updating {0} model", newModel.name));
+		//console.log(Ext.String.format("Updating {0} model", newModel.name));
 	},
 	/**
 	 * This method removes the model from the array and fires the event in the field controller to remove the

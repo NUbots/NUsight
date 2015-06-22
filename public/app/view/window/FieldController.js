@@ -267,7 +267,7 @@ Ext.define('NU.view.window.FieldController', {
 			if (fieldObject === undefined) {
 				// Create the model based on the object and add the model to the field.
 				var model = this.createModel(robot, object);
-				robot.addModel(model, object.getName());
+				robot.addModel(model, false);
 			} else {
 				var currentModel = this.objects[object.getName()];
 				var newModel = this.createModel(robot, object);
@@ -290,6 +290,9 @@ Ext.define('NU.view.window.FieldController', {
 	 */
 	toVec3: function (vector) {
 		return vector === null ? new THREE.Vector3() : new THREE.Vector3(vector.getX(), vector.getY(), vector.getZ());
+	},
+	toColor: function (vector) {
+		return vector === null ? vector : new THREE.Color(vector.getX(), vector.getY(), vector.getZ());
 	},
 	createModel: function (robot, object) {
 		// Create a new shape onto the specified robot.
@@ -351,7 +354,7 @@ Ext.define('NU.view.window.FieldController', {
 			width: object.getWidth(),
 			height: object.getHeight(),
 			depth: object.getDepth(),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -368,7 +371,7 @@ Ext.define('NU.view.window.FieldController', {
 			width: object.getWidth(),
 			height: object.getHeight(),
 			rotation: this.toVec3(object.getRotation()),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -386,7 +389,7 @@ Ext.define('NU.view.window.FieldController', {
 			bottomRadius: object.getBottomRadius(),
 			height: object.getHeight(),
 			rotation: this.toVec3(object.getRotation()),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -403,7 +406,7 @@ Ext.define('NU.view.window.FieldController', {
 			vertices: object.getVertices(),
 			lineWidth: object.getLineWidth(),
 			fill: object.getFill(),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -421,7 +424,7 @@ Ext.define('NU.view.window.FieldController', {
 			height: object.getHeight(),
 			faces: object.getFaces(),
 			rotation: this.toVec3(object.getRotation()),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -438,7 +441,7 @@ Ext.define('NU.view.window.FieldController', {
 			target: object.getTarget(),
 			width: object.getWidth(),
 			length: object.getLength(),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -453,7 +456,7 @@ Ext.define('NU.view.window.FieldController', {
 			name: object.getName(),
 			position: this.toVec3(object.getPosition()),
 			radius: object.getRadius(),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -540,7 +543,7 @@ Ext.define('NU.view.window.FieldController', {
 			 });
 			 } */
 			// Call the method to fire the event to add the goal to the field.
-			robot.addModel(model);
+			robot.addModel(model, false);
 			// Fade the model out using the specified time.
 			robot.fadeOutModel(model, 2.5);
 		}.bind(this), 2500);
