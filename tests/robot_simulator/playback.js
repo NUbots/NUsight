@@ -14,6 +14,7 @@ var socket = zmq.socket('pub');
 socket.bindSync('tcp://0.0.0.0:12000');
 
 var loop = true;
+var speed = 1; // 1 is normal, 2 is double speed, 0.5 is half speed
 
 (function readFile() {
 
@@ -52,7 +53,7 @@ var loop = true;
 
 						readMessage();
 
-					}, deltaTimestamp);
+					}, deltaTimestamp / speed);
 
 					lastTimestamp = timestamp;
 
