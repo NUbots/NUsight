@@ -2,15 +2,15 @@
 
 	"use strict";
 
-	var Polypath;
+	var Polyline;
 
 	/**
-	 * A constructor that builds a polypath mesh given a path.
+	 * A constructor that builds a polyline mesh given a path.
 	 *
-	 * @param parameters The arguments that can be passed into the polypath constructor.
+	 * @param parameters The arguments that can be passed into the polyline constructor.
 	 * @constructor
 	 */
-	Polypath = function (parameters) {
+	Polyline = function (parameters) {
 		THREE.Object3D.call(this, parameters);
 		// Ensure the parameters exist.
 		parameters = parameters || {};
@@ -18,7 +18,7 @@
 		var path = parameters.path || [];
 		var width = parameters.width || 0.1;
 		var color = parameters.color || 0xFFFFFF;
-		// Create the geometry and material for the polypath.
+		// Create the geometry and material for the polyline.
 		var geometry = new THREE.Geometry();
 		var material = new THREE.MeshBasicMaterial({
 			color: color
@@ -29,46 +29,49 @@
 		for (var i = 0, len = path.length; i < len; i++) {
 			// Obtain the node and its information.
 			var node = path[i];
-			var position = node[0];
-			var parentIndex = node[1];
+			var position = node.position;
+			var parentIndex = node.parentIndex;
 			// Check if the parentIndex has a parent of itself.
 			if (parentIndex === i) {
 				// Create the circle and merge it with the base geometry.
 				geometry.merge(this.createCircle(position, radius));
 			} else {
 				// Create the line and merge it with the base geometry.
-				geometry.merge(this.createLine(position, path[parentIndex][0], width));
+				geometry.merge(this.createLine(position, path[parentIndex].position, width));
 			}
 		}
-		// Add the polypath to the object.
+		// Add the polyline to the object.
 		this.add(new THREE.Mesh(geometry, material));
 	};
 
-	Polypath.prototype = Object.create(THREE.Object3D.prototype);
-	window.Polypath = Polypath;
+	Polyline.prototype = Object.create(THREE.Object3D.prototype);
+	window.Polyline = Polyline;
 
 	/**
-	 * Creates and returns a circle geometry to use with the polypath.
+	 * Creates and returns a circle geometry to use with the polyline.
 	 *
 	 * @param position The position of the circle.
 	 * @param radius The radius of the circle.
 	 * @returns {THREE.CircleGeometry}
 	 */
-	Polypath.prototype.createCircle = function (position, radius) {
+	Polyline.prototype.createCircle = function (position, radius) {
 		var circle = new THREE.CircleGeometry(radius, 128);
 		circle.applyMatrix(new THREE.Matrix4().makeTranslation(position.x, position.y, 0));
 		return circle;
 	};
 
 	/**
-	 * Creates and returns a plane geometry to use with the polypath.
+	 * Creates and returns a plane geometry to use with the polyline.
 	 *
 	 * @param position The position vector of the line.
 	 * @param target The target position vector.
 	 * @param width The width of the line.
 	 * @returns {THREE.PlaneGeometry}
 	 */
-	Polypath.prototype.createLine = function (position, target, width) {
+	Polyline.prototype.createLine = function (position, target, width) {
+		// Convert the position and target object to vectors.
+		position = new THREE.Vector2(position.x, position.y);
+		target = new THREE.Vector2(target.x, target.y);
 		// The vector going from the target to the position.
 		var vector = position.clone().sub(target);
 		// Obtain the angle from the positive x-axis.

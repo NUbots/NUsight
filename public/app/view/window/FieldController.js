@@ -7,33 +7,14 @@ Ext.define('NU.view.window.FieldController', {
 	robots : null,
 	// Shape enum.
 	Shape: {
-		ARROW: {
-			name: "Arrow"
-		},
-		BOX: {
-			name: "Box"
-		},
-		CIRCLE: {
-			name: "Circle"
-		},
-		CYLINDER: {
-			name: "Cylinder"
-		},
-		POLYLINE: {
-			name: "Polyline"
-		},
-		POLYPATH: {
-			name: "Polypath"
-		},
-		PYRAMID: {
-			name: "Pyramid"
-		},
-		RECTANGLE: {
-			name: "Rectangle"
-		},
-		SPHERE: {
-			name: "Sphere"
-		}
+		ARROW:      {name: 'Arrow'},
+		BOX:        {name: 'Box'},
+		CIRCLE:     {name: 'Circle'},
+		CYLINDER:   {name: 'Cylinder'},
+		POLYLINE:   {name: 'Polyline'},
+		PYRAMID:    {name: 'Pyramid'},
+		RECTANGLE:  {name: 'Rectangle'},
+		SPHERE:     {name: 'Sphere'}
 	},
 	config: {
 		closeDistance: 0.4,
@@ -311,8 +292,6 @@ Ext.define('NU.view.window.FieldController', {
 				return this.createCylinderModel(robot, object);
 			case Shape.POLYLINE:
 				return this.createPolylineModel(robot, object);
-			case Shape.POLYPATH:
-				return this.createPolypathModel(robot, object);
 			case Shape.PYRAMID:
 				return this.createPyramidModel(robot, object);
 			case Shape.RECTANGLE:
@@ -407,23 +386,6 @@ Ext.define('NU.view.window.FieldController', {
 	createPolylineModel: function (robot, object) {
 		return robot.createPolylineModel({
 			name: object.getName(),
-			position: this.toVec3(object.getPosition()),
-			vertices: object.getVertices(),
-			lineWidth: object.getLineWidth(),
-			fill: object.getFill(),
-			color: this.toColor(object.getColor())
-		});
-	},
-	/**
-	 * Creates and returns a polypath model.
-	 *
-	 * @param robot The selected robot.
-	 * @param object The protocol buffer that contains the object information.
-	 * @returns {*|Polypath} The polypath model.
-	 */
-	createPolypathModel: function (robot, object) {
-		return robot.createPolypathModel({
-			name: object.getName(),
 			path: object.getPath(),
 			width: object.getWidth(),
 			color: object.getColor()
@@ -498,7 +460,7 @@ Ext.define('NU.view.window.FieldController', {
 			// Get the x and y coordinates requested over the network.
 			var position = new THREE.Vector3(Math.random() * 2, Math.random() * 2, Math.random() * 2);
 			// Create a new shape onto the specified robot.
-			switch (this.Shape.POLYPATH) {//(shape) {
+			switch (this.Shape.POLYLINE) {//(shape) {
 				case this.Shape.ARROW:
 					model = robot.createArrowModel({
 						position: position,
@@ -526,25 +488,22 @@ Ext.define('NU.view.window.FieldController', {
 					break;
 				case this.Shape.POLYLINE:
 					model = robot.createPolylineModel({
-						position: new THREE.Vector3(1, 1, 0),
-						vertices: [
-							[1, 1, 3],
-							[1, 1, 1],
-							[2, 1, 3]
-						]
-					});
-					color = 0x00FF45;
-					displayCertainty = false;
-					break;
-				case this.Shape.POLYPATH:
-					model = robot.createPolypathModel({
-						path: [
-							[new THREE.Vector2(1, 1), 0],
-							[new THREE.Vector2(1.5, 3), 0],
-							[new THREE.Vector2(5, 2), 0],
-							[new THREE.Vector2(0, -2), 2],
-							[new THREE.Vector2(0, -1), 0]
-						]
+						path: [{
+							position: {x: 1, y: 1},
+							parentIndex: 0
+						}, {
+							position: {x: 1.5, y: 3},
+							parentIndex: 0
+						}, {
+							position: {x: 5, y: 2},
+							parentIndex: 0
+						}, {
+							position: {x: 0, y: -2},
+							parentIndex: 2
+						}, {
+							position: {x: 0, y: -1},
+							parentIndex: 0
+						}]
 					});
 					break;
 				case this.Shape.PYRAMID:

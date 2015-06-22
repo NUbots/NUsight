@@ -23,17 +23,15 @@ import "messages/Vector.proto";
 
 message DrawObject {
 
-    // TODO Update on C++ side
     enum Shape {
         ARROW = 1;
         BOX = 2;
         CIRCLE = 3;
         CYLINDER = 4;
         POLYLINE = 5;
-        POLYPATH = 6;
-        PYRAMID = 7;
-        RECTANGLE = 8;
-        SPHERE = 9;
+        PYRAMID = 6;
+        RECTANGLE = 7;
+        SPHERE = 8;
     }
 
     message Path {
