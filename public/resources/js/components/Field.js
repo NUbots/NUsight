@@ -5,6 +5,21 @@
 	var Field;
 
 	function buildFieldMesh() {
+		function buildLine(x1, y1, x2, y2, width) {
+			width = typeof width !== 'undefined' ? width : Field.constants.LINE_WIDTH;
+
+			var xDiff = x2 - x1;
+			var yDiff = y2 - y1;
+			var length = Math.sqrt(xDiff*xDiff + yDiff*yDiff)
+
+			var hLine = new THREE.PlaneGeometry(length, width);
+			hLine.applyMatrix(new THREE.Matrix4().makeTranslation(length * 0.5, 0, 0));
+			
+			var theta = Math.atan2(yDiff, xDiff)
+			hLine.applyMatrix(new THREE.Matrix4().makeRotationZ(theta));
+			hLine.applyMatrix(new THREE.Matrix4().makeTranslation(x1, y1, 0));
+			return hLine;
+		}
 		function buildHorizontalLine(x1, x2, y, width) {
 			width = typeof width !== 'undefined' ? width : Field.constants.LINE_WIDTH;
 			y = typeof y !== 'undefined' ? y : 0;
