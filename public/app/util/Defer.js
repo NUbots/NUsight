@@ -8,6 +8,7 @@ Ext.define('NU.util.Defer', {
 		this.callbackIds = {};
 		this.callbacks = [];
 		this.initConfig(config);
+		this.processCallback = this.process.bind(this);
 	},
 	defer: function (id, callback, minWait) {
 		if (this.callbacks.length > this.getHighWaterMark()) {
@@ -24,7 +25,7 @@ Ext.define('NU.util.Defer', {
 			time: performance.now()
 		});
 		if (this.callbacks.length === 1) {
-			requestAnimationFrame(this.process.bind(this));
+			requestAnimationFrame(this.processCallback);
 		}
 		return true;
 	},
@@ -37,7 +38,7 @@ Ext.define('NU.util.Defer', {
 			call = true;
 		}
 		if (this.callbacks.length > 0) {
-			requestAnimationFrame(this.process.bind(this));
+			requestAnimationFrame(this.processCallback);
 		}
 		if (call) {
 			callback.callback();

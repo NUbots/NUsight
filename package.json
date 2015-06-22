@@ -1,6 +1,7 @@
 {
   "name": "nusight",
   "version": "1.0.0",
+  "repository": "https://github.com/NUbots/NUsight.git",
   "private": false,
   "scripts": {
     "start": "node app.js",
@@ -16,6 +17,9 @@
   },
   "engines": {
     "node": "0.12.x"
+  },
+  "devDependencies": {
+    "gl-matrix": "^2.3.0",
+    "protobufjs": "^4.0.0-b5"
   }
 }
-

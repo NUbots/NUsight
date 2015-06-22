@@ -2,7 +2,7 @@ var express = require('express');
 var http = require('http');
 var favicon = require('serve-favicon');
 var compression = require('compression');
-var NUsight = require('./lib/NUsight');
+var NUsight = require('./app/NUsight');
 
 var app = express();
 var server = http.Server(app);

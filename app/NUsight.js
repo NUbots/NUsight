@@ -18,15 +18,15 @@ function NUsight (io) {
 		this.addRobot(robotIP);
 	}.bind(this));
 	this.addRobot('127.0.0.1', 'Virtual Machine');
-	this.addRobot('10.1.1.1', 'Robot #1');
-	this.addRobot('10.1.2.1', 'Robot #1e');
-	this.addRobot('10.1.1.2', 'Robot #2');
-	this.addRobot('10.1.2.2', 'Robot #2e');
-	this.addRobot('10.1.1.3', 'Robot #3');
-	this.addRobot('10.1.2.3', 'Robot #3e');
-	this.addRobot('10.1.1.4', 'Robot #4');
-	this.addRobot('10.1.2.4', 'Robot #4e');
-	this.addRobot('10.1.1.5', 'Robot #5');
+	//this.addRobot('10.1.1.1', 'Robot #1');
+	//this.addRobot('10.1.2.1', 'Robot #1e');
+	//this.addRobot('10.1.1.2', 'Robot #2');
+	//this.addRobot('10.1.2.2', 'Robot #2e');
+	//this.addRobot('10.1.1.3', 'Robot #3');
+	//this.addRobot('10.1.2.3', 'Robot #3e');
+	//this.addRobot('10.1.1.4', 'Robot #4');
+	//this.addRobot('10.1.2.4', 'Robot #4e');
+	//this.addRobot('10.1.1.5', 'Robot #5');
 	this.addRobot('10.1.2.5', 'Robot #5e');
 
 	this.io.sockets.on('connection', function (socket) {
@@ -153,7 +153,7 @@ NUsight.prototype.addRobots = function (robotIPs)
 NUsight.prototype.onMessage = function (robotIP, message) {
 
 	// Save the file! Yay?
-	if(false) {
+	if (false) {
 		// If our file is not yet open
 		if(this.files[robotIP] === undefined) {
 			try {

@@ -38,6 +38,9 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param configurationState The configuration state protocol buffer.
      */
     onConfigurationState: function (robotIP, configurationState) {
+        if (robotIP !== this.getRobotIP()) {
+            return;
+        }
         // retrieve the root from the buffer
         var root = configurationState.getRoot();
         // get the view model from the tree panel

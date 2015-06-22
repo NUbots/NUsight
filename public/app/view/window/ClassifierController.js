@@ -331,6 +331,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setMagicWandPoints([]);
 		this.setMagicWandColours([]);
 		this.lutDiffs = [];
+		this.onLookUpTableDiffBatch = this.onLookUpTableDiffBatch.bind(this);
 	},
 	onAfterRender: function () {
 		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
@@ -444,7 +445,43 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.mon(NU.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
 
 			this.testDrawImage();
+
+			//this.testClassifier();
 		}.bind(this));
+	},
+	testClassifier: function () {
+
+		if (this.lastIndex === 0) {
+			return;
+		}
+
+		requestAnimationFrame(this.testClassifier.bind(this));
+
+		if (!this.last) this.last = Date.now();
+		if (!this.lastIndex) this.lastIndex = 0;
+
+		var lut = this.getLookup();
+		var n = Math.pow(2, this.self.LutBitsPerColorCb) * (Math.pow(2, this.self.LutBitsPerColorCr) / 2);
+		for (var i = 0; i < n; i ++) {
+			/*var index = this.getLUTIndex([
+				Math.round(Math.random() * 255),
+				Math.round(Math.random() * 255),
+				Math.round(Math.random() * 255)
+			]);*/
+			var index = this.lastIndex;
+			var types = Object.keys(this.self.Target);
+			var type = types[1 + Math.floor(Math.random() * (types.length - 1))];
+			var typeId = this.self.Target[type];
+			//var typeId = this.self.Target.Field;
+			lut[index] = typeId;
+			this.lastIndex = (this.lastIndex + 1) % Math.pow(2, this.self.LutBitsPerColorY + this.self.LutBitsPerColorCb + this.self.LutBitsPerColorCr);
+		}
+		this.updateClassifiedData();
+
+		var now = Date.now();
+		//console.log(1000 / (now - this.last));
+		this.last = now;
+
 	},
 	refreshScatter: function () {
 
@@ -586,17 +623,17 @@ Ext.define('NU.view.window.ClassifierController', {
 			});
 		}
 
-		NU.Defer.defer('lut_diffs', function () {
-			var lut = this.getLookup();
-			var diffs = this.lutDiffs;
-			console.log('updating with', diffs.length, 'diffs');
-			while (diffs.length > 0) {
-				var diff = diffs.shift();
-				lut[diff.index] = diff.classification;
-			}
-			this.updateClassifiedData();
-			this.renderClassifiedImage();
-		}.bind(this), 500);
+		NU.Defer.defer('lut_diffs', this.onLookUpTableDiffBatch, 50);
+	},
+	onLookUpTableDiffBatch: function () {
+		var lut = this.getLookup();
+		var diffs = this.lutDiffs;
+		while (diffs.length > 0) {
+			var diff = diffs.shift();
+			lut[diff.index] = diff.classification;
+		}
+		this.updateClassifiedData();
+		this.renderClassifiedImage();
 	},
 	onImage: function (robotIP, image) {
 
