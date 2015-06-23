@@ -23,7 +23,8 @@ setInterval(function () {
 		utc_timestamp: Date.now(),
 		sensor_data: {
 			timestamp: new Date().getMilliseconds(),
-			battery: Math.random() * 10
+			voltage: 12,
+			battery: Math.random()
 		}
 	});
 

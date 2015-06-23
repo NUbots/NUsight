@@ -100,9 +100,10 @@ Ext.define('NU.view.window.DashboardController', {
 	 * @param timestamp The time the message was received.
 	 */
 	onSensorData: function (robotIP, sensorData, timestamp) {
-		// Get the robot from the robotIP and update the battery data.
+		// Get the robot from the robotIP and update the voltage and battery data.
 		var robot = this.getRobot(robotIP);
-		robot.set('battery', sensorData.getBattery());
+		robot.set('voltage', sensorData.getVoltage());
+		robot.set('battery', sensorData.getBattery() * 100);
 	}
 
 });

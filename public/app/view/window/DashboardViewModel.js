@@ -5,23 +5,8 @@ Ext.define('NU.view.window.DashboardViewModel', {
 		grid: {
 			fields: [
 				'robotIP',
-				'battery'//,
-				//'ping',
-				//'sensorData',
-				//'image',
-				//'classifiedImage',
-				//'visionObject',
-				//'localisation',
-				//'dataPoint',
-				//'drawObjects',
-				//'reactionStatistics',
-				//'lookupTable',
-				//'lookupTableDiff',
-				//'behaviour',
-				//'command',
-				//'reactionHandles',
-				//'gameState',
-				//'configurationState'
+				'voltage',
+				'battery'
 			]
 		}
 	}

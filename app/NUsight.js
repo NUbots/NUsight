@@ -23,12 +23,12 @@ function NUsight (io) {
 	//this.addRobot('10.1.2.1', 'Robot #1e');
 	//this.addRobot('10.1.1.2', 'Robot #2');
 	//this.addRobot('10.1.2.2', 'Robot #2e');
-	//this.addRobot('10.1.1.3', 'Robot #3');
+	this.addRobot('10.1.1.3', 'Robot #3');
 	//this.addRobot('10.1.2.3', 'Robot #3e');
 	//this.addRobot('10.1.1.4', 'Robot #4');
 	//this.addRobot('10.1.2.4', 'Robot #4e');
 	//this.addRobot('10.1.1.5', 'Robot #5');
-	this.addRobot('10.1.2.5', 'Robot #5e');
+	//this.addRobot('10.1.2.5', 'Robot #5e');
 
 	this.io.sockets.on('connection', function (socket) {
 

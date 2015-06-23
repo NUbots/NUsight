@@ -15,7 +15,8 @@ Ext.define('NU.view.window.Dashboard', {
 	},
 	controller: 'Dashboard',
 	title: 'Dashboard',
-	width: 500,
+	tbar: [],
+	width: 1000,
 	height: 350,
 	items: [{
 		xtype: 'grid',
@@ -28,8 +29,14 @@ Ext.define('NU.view.window.Dashboard', {
 			dataIndex: 'robotIP'
 		}, {
 			xtype: 'numbercolumn',
+			text: 'Voltage',
+			dataIndex: 'voltage',
+			format: '0.00'
+		}, {
+			xtype: 'numbercolumn',
 			text: 'Battery',
 			dataIndex: 'battery',
+			// TODO: Fix hack
 			format: '0.00%'
 		}]
 	}]
