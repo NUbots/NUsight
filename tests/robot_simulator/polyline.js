@@ -15,6 +15,13 @@ var filterId = 0;
 var socket = zmq.socket('pub');
 socket.bindSync('tcp://0.0.0.0:12000');
 
+var getRandomPosition = function () {
+	return {
+		x: Math.random() * 5,
+		y: Math.random() * 5
+	};
+};
+
 setInterval(function () {
 	var now = Date.now() / 1000;
 
@@ -26,19 +33,19 @@ setInterval(function () {
 			objects: [{
 				shape: 'POLYLINE',
 				path: [{
-					position: {x: 1, y: 1},
+					position: getRandomPosition(),
 					parentIndex: 0
 				}, {
-					position: {x: 1.5, y: 3},
+					position: getRandomPosition(),
 					parentIndex: 0
 				}, {
-					position: {x: 5, y: 2},
+					position: getRandomPosition(),
 					parentIndex: 0
 				}, {
-					position: {x: 0, y: -2},
+					position: getRandomPosition(),
 					parentIndex: 2
 				}, {
-					position: {x: 0, y: -1},
+					position: getRandomPosition(),
 					parentIndex: 0
 				}]
 			}]
@@ -52,4 +59,4 @@ setInterval(function () {
 	buffer.copy(finalBuffer, 2);
 	socket.send(finalBuffer);
 
-}, 50);
+}, 5000);

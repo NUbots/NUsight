@@ -41,7 +41,7 @@ Ext.define('NU.view.StatusBarController', {
 			}, this);
 		}, this);
 	},
-	onPacket: function (robotIP, packet) {
+	onPacket: function (robotIP, type, packet) {
 		this.incPacketCounter();
 		var robot = this.robotMap[robotIP];
 		robot.counter++;

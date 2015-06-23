@@ -4,6 +4,11 @@ Ext.define('NU.view.Toolbar', {
     requires: 'NU.view.ToolbarController',
     controller: 'Toolbar',
     items: [{
+        text: 'Dashboard',
+        listeners: {
+            click: 'onDashboardDisplay'
+        }
+    }, {
         text: 'Localisation',
         listeners: {
             click: 'onLocalisationDisplay'

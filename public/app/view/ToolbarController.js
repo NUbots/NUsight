@@ -7,6 +7,9 @@ Ext.define('NU.view.ToolbarController', {
 			constrainTo: this.getDisplay()
 		}, config || {}));
 	},
+	onDashboardDisplay: function () {
+		this.create('NU.view.window.Dashboard');
+	},
 	onLocalisationDisplay: function () {
 		this.create('NU.view.window.Field');
 	},
