@@ -3,7 +3,10 @@ Ext.define('NU.view.webgl.Vision', {
 	constructor: function (config) {
 		Ext.applyIf(config, {
 			uniforms: {
-				rawImage: {type: 't'}
+				rawImage: {type: 't'},
+				imageWidth: {type: 'i'},
+				imageHeight: {type: 'i'},
+				imageFormat: {type: 'i'}
 			}
 		});
 

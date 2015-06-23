@@ -6,6 +6,10 @@ const float T_ORANGE = 111.0; // ball
 const float T_CYAN = 99.0;
 const float T_MAGENTA = 109.0;
 
+const int FORMAT_YCBCR422 = 1;
+const int FORMAT_YCBCR444 = 2;
+const int FORMAT_JPEG = 3;
+
 float round(float value) {
 	return floor(value + 0.5);
 }
@@ -117,4 +121,41 @@ vec4 YCbCrToRGB(vec4 ycbcr) {
 		ycbcr.r + 1.772 * (ycbcr.g - 128.0 / 255.0),
 		ycbcr.a
 	), 0.0, 1.0);
+}
+
+vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int imageFormat, vec2 center) {
+	vec4 rawColour;
+
+	if (imageFormat == FORMAT_YCBCR422) {
+		float bytesPerPixel = 2.0;
+		float rawImageWidth = bytesPerPixel * float(imageWidth);
+		float startOffset = 0.5 / rawImageWidth;
+		float texelSize = 1.0 / rawImageWidth;
+
+		vec2 yCoord = vec2(
+			2.0 * texelSize * floor(gl_FragCoord.x) + startOffset,
+			gl_FragCoord.y / float(imageHeight)
+		);
+
+		vec2 cbCoord = vec2(
+			yCoord.x + texelSize * (1.0 - 2.0 * mod(floor(gl_FragCoord.x), 2.0)),
+			yCoord.y
+		);
+
+		vec2 crCoord = vec2(
+			yCoord.x + texelSize * (3.0 - 2.0 * mod(floor(gl_FragCoord.x), 2.0)),
+			yCoord.y
+		);
+
+		float y = texture2D(rawImage, yCoord).r;
+		float cb = texture2D(rawImage, cbCoord).r;
+		float cr = texture2D(rawImage, crCoord).r;
+
+		rawColour = vec4(y, cb, cr, 1.0);
+	} else {
+		// sample from the raw (e.g. YCbCr) image
+		rawColour = texture2D(rawImage, center);
+	}
+
+	return rawColour;
 }

@@ -138,6 +138,10 @@ Ext.define('NU.view.window.VisionController', {
 				// 2nd implementation - potentially faster
 				this.drawImageB64(image);
 				break;
+			case Format.YCbCr422:
+				this.drawImageYbCr422(image);
+				//this.drawImageBayer(image);
+				break;
 			case Format.YCbCr444:
 				this.drawImageYbCr444(image);
 				//this.drawImageBayer(image);
@@ -157,6 +161,20 @@ Ext.define('NU.view.window.VisionController', {
             URL.revokeObjectURL(url);
         };
     },
+	drawImageYbCr422: function (image) {
+		var width = this.getWidth();
+		var height = this.getHeight();
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		var bytesPerPixel = 2;
+		this.imageRenderer.resize(width, height);
+		this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+		this.imageRenderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+		this.imageRenderer.updateUniform('imageWidth', width);
+		this.imageRenderer.updateUniform('imageHeight', height);
+		// TODO
+		//this.imageDiffRenderer.updateRawImage(data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+		//this.imageDiffRenderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+	},
 	drawImageYbCr444: function (image) {
 		var width = this.getWidth();
 		var height = this.getHeight();
