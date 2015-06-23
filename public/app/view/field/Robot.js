@@ -67,8 +67,8 @@ Ext.define('NU.view.field.Robot', {
 			model.rotation.z = field_object.heading;
 			var result = this.calculateErrorElipse(field_object.sr_xx, field_object.sr_xy, field_object.sr_yy);
 			model.visualiser.scale.x = result.x;
-			model.visualiser.scale.z = result.y;
-			model.visualiser.rotation.y = result.angle;
+			model.visualiser.scale.y = result.y;
+			model.visualiser.rotation.z = result.angle;
 		}
 		api_localisation.field_object.forEach(function (field_object) {
 			if(field_object.name == 'ball') {
@@ -310,30 +310,28 @@ Ext.define('NU.view.field.Robot', {
 		return arr;
 	},
 	calculateErrorElipse: function (xx, xy, yy) {
+		//based on 
+		// http://www.math.harvard.edu/archive/21b_fall_04/exhibits/2dmatrices/index.html
+		// and 
+		// http://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
 		var result, scalefactor, Eig1, Eig2, maxEig, minEig;
 		result = {};
 		scalefactor = 2.4477; // for 95% confidence.
+
+		var trace = xx+yy
+		var det = xx * yy - xy * xy
+
+		Eig1 = trace / 2 + Math.sqrt(trace * trace / 4 - det)
+		Eig2 = trace / 2 - Math.sqrt(trace * trace / 4 - det)
 		
-		Eig1 = (xx + yy) / 2 + Math.sqrt(4 * xy * xy + (xx - yy) * (xx - yy)) / 2;
-		Eig2 = (xx + yy) / 2 - Math.sqrt(4 * xy * xy + (xx - yy) * (xx - yy)) / 2;
-	
 		maxEig = Math.max(Eig1, Eig2);
 		minEig = Math.min(Eig1, Eig2);
 	
-		if (Math.sqrt(xx) < Math.sqrt(yy)) {
-			result.x = Math.sqrt(minEig) * scalefactor;
-			result.y = Math.sqrt(maxEig) * scalefactor;
-		} else {
-			result.x = Math.sqrt(maxEig) * scalefactor;
-			result.y = Math.sqrt(minEig) * scalefactor;
-		}
-		var aspectratio = 1.0;
-		if (xx - yy != 0) {
-			result.angle = 0.5 * Math.atan((1 / aspectratio) * (2 * xy) / (xx - yy));
-		} else {
-			// it is a circle, no angle!
-			result.angle = 0;
-		}
+		result.x = Math.sqrt(maxEig) * scalefactor;
+		result.y = Math.sqrt(minEig) * scalefactor;
+
+		result.angle = Math.atan2(xy,maxEig-yy);
+
 		return result;
 	}
 });
