@@ -131,19 +131,20 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 		float rawImageWidth = bytesPerPixel * float(imageWidth);
 		float startOffset = 0.5 / rawImageWidth;
 		float texelSize = 1.0 / rawImageWidth;
+		vec2 coord = center * vec2(float(imageWidth), float(imageHeight));
 
 		vec2 yCoord = vec2(
-			2.0 * texelSize * floor(gl_FragCoord.x) + startOffset,
-			gl_FragCoord.y / float(imageHeight)
+			2.0 * texelSize * floor(coord.x) + startOffset,
+			center.y
 		);
 
 		vec2 cbCoord = vec2(
-			yCoord.x + texelSize * (1.0 - 2.0 * mod(floor(gl_FragCoord.x), 2.0)),
+			yCoord.x + texelSize * (1.0 - 2.0 * mod(floor(coord.x), 2.0)),
 			yCoord.y
 		);
 
 		vec2 crCoord = vec2(
-			yCoord.x + texelSize * (3.0 - 2.0 * mod(floor(gl_FragCoord.x), 2.0)),
+			yCoord.x + texelSize * (3.0 - 2.0 * mod(floor(coord.x), 2.0)),
 			yCoord.y
 		);
 

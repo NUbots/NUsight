@@ -35,10 +35,22 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		}
 		var geometry = new THREE.BufferGeometry();
 		var itemSize = 3;
-		var data = new Float32Array(width * height * itemSize); // TODO: unhack
+		var data = new Float32Array(width * height * itemSize);
+		for (var i = 0, len = data.length; i < len; i++) {
+			var offset = i * 3;
+			var x = i % width;
+			var y = Math.floor(i / width);
+			data[offset    ] = x;
+			data[offset + 1] = y;
+			data[offset + 2] = 0;
+		}
 		geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
 		var material = new THREE.ShaderMaterial({
 			uniforms: {
+				rawImage: {type: 't'},
+				imageWidth: {type: 'i'},
+				imageHeight: {type: 'i'},
+				imageFormat: {type: 'i'},
 				lut: {type: 't'},
 				lutSize: {type: 'f', value: 512},
 				bitsR: {type: 'f', value: 6},
@@ -80,14 +92,17 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		this.updateTexture('lut', data, size, size, THREE.LuminanceFormat, this.imagePointCloud.material);
 		this.updateUniform('lutSize', size, this.imagePointCloud.material);
 	},
-	updateRawImage: function (data, width, height, format) {
+	updateRawImage: function (imageFormat, data, width, height, textureFormat) {
 		var positionAttr = this.imagePointCloud.geometry.getAttribute('position');
-		if (!positionAttr || positionAttr.length != data.length) {
+		if (!positionAttr || positionAttr.length !== width * height * 3) {
 			this.createPointCloud(width, height);
-			positionAttr = this.imagePointCloud.geometry.getAttribute('position');
 		}
-		positionAttr.needsUpdate = true;
-		positionAttr.set(data);
+
+		var bytesPerPixel = 2;
+		this.updateTexture('rawImage', data, width * bytesPerPixel, height, textureFormat, this.imagePointCloud.material);
+		this.updateUniform('imageFormat', imageFormat, this.imagePointCloud.material);
+		this.updateUniform('imageWidth', width, this.imagePointCloud.material);
+		this.updateUniform('imageHeight', height, this.imagePointCloud.material);
 	},
 	updateColour: function (value) {
 		this.updateUniform('colour', value, this.imagePointCloud.material);

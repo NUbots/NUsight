@@ -31,7 +31,8 @@ Ext.define('NU.view.window.VisionController', {
 		this.imageRenderer = Ext.create('NU.view.webgl.Vision', {
 			shader: 'Vision',
 			canvas: imageLayer.canvas,
-			context: imageLayer.context
+			context: imageLayer.context,
+			autoRender: false
 		});
 
 		var imageDiffLayer = layeredCanvas.add('image_diff', {
@@ -44,7 +45,8 @@ Ext.define('NU.view.window.VisionController', {
 		this.imageDiffRenderer = Ext.create('NU.view.webgl.VisionDiff', {
 			shader: 'VisionDiff',
 			canvas: imageDiffLayer.canvas,
-			context: imageDiffLayer.context
+			context: imageDiffLayer.context,
+			autoRender: false
 		});
 
 		layeredCanvas.add('classified_image_search');
@@ -171,9 +173,14 @@ Ext.define('NU.view.window.VisionController', {
 		this.imageRenderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
 		this.imageRenderer.updateUniform('imageWidth', width);
 		this.imageRenderer.updateUniform('imageHeight', height);
-		// TODO
-		//this.imageDiffRenderer.updateRawImage(data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		//this.imageDiffRenderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+		this.imageRenderer.render();
+
+		this.imageDiffRenderer.resize(width, height);
+		this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+		this.imageDiffRenderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+		this.imageDiffRenderer.updateUniform('imageWidth', width);
+		this.imageDiffRenderer.updateUniform('imageHeight', height);
+		this.imageDiffRenderer.render();
 	},
 	drawImageYbCr444: function (image) {
 		var width = this.getWidth();

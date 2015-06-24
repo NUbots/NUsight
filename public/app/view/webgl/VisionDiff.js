@@ -3,9 +3,10 @@ Ext.define('NU.view.webgl.VisionDiff', {
 	constructor: function (config) {
 		Ext.applyIf(config, {
 			uniforms: {
-				imageWidth: {type: 'f'},
-				imageHeight: {type: 'f'},
-				rawImage: {type: 't'}
+				rawImage: {type: 't'},
+				imageWidth: {type: 'i'},
+				imageHeight: {type: 'i'},
+				imageFormat: {type: 'i'}
 			}
 		});
 

@@ -23,6 +23,12 @@ uniform sampler2D lut;
  */
 uniform sampler2D rawImage;
 /**
+ * The format of the image, e.g. YCbCr444 or YCbCr422 etc
+ */
+uniform int imageFormat;
+uniform int imageWidth;
+uniform int imageHeight;
+/**
  * The raw underlay opacity percentage ranging between 0-1
  */
 uniform float rawUnderlayOpacity;
@@ -45,7 +51,7 @@ varying vec2 center;
 
 void main() {
 	// sample from the raw (e.g. YCbCr) image
-	vec4 rawColour = texture2D(rawImage, center);
+	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, center);
 	// classify using the raw image
 	float classification = classify(rawColour, lut, lutSize, bitsR, bitsG, bitsB);
 

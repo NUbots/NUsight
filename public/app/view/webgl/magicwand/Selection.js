@@ -4,6 +4,9 @@ Ext.define('NU.view.webgl.magicwand.Selection', {
 		Ext.applyIf(config, {
 			uniforms: {
 				rawImage: {type: 't'},
+				imageWidth: {type: 'i'},
+				imageHeight: {type: 'i'},
+				imageFormat: {type: 'i'},
 				colour: {type: '3fv', value: [0, 0, 0]},
 				tolerance: {type: 'f', value: -1}
 			}

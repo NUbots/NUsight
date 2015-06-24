@@ -262,6 +262,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	onChangeTolerance: function (checkbox, newValue, oldValue, eOpts) {
 		this.setTolerance(newValue);
 		this.selectionRenderer.updateTolerance(this.getTolerance());
+		this.selectionRenderer.render();
 		this.selectionClassifier.updateTolerance(this.getTolerance());
 	},
 	onChangeRawUnderlay: function (checkbox, newValue, oldValue, eOpts) {
@@ -295,6 +296,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorY = newValue;
 			this.classifiedRenderer.updateBitsR(newValue);
 			this.selectionClassifier.updateBitsR(newValue);
+			this.selectionRenderer.render();
 			this.resetBits();
 		}
 	},
@@ -303,6 +305,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorCb = newValue;
 			this.classifiedRenderer.updateBitsG(newValue);
 			this.selectionClassifier.updateBitsG(newValue);
+			this.selectionRenderer.render();
 			this.resetBits();
 		}
 	},
@@ -311,6 +314,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorCr = newValue;
 			this.classifiedRenderer.updateBitsB(newValue);
 			this.selectionClassifier.updateBitsB(newValue);
+			this.selectionRenderer.render();
 			this.resetBits();
 		}
 	},
@@ -344,7 +348,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.rawImageRenderer = Ext.create('NU.view.webgl.Vision', {
 			shader: 'Vision',
 			canvas: rawImageLayer.canvas,
-			context: rawImageLayer.context
+			context: rawImageLayer.context,
+			autoRender: false
 		});
 
 		rawLayeredCanvas.add('selection');
@@ -370,13 +375,16 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.classifiedRenderer = Ext.create('NU.view.webgl.Classifier', {
 			shader: 'Classifier',
 			canvas: classifiedLayer.canvas,
-			context: classifiedLayer.context
+			context: classifiedLayer.contex,
+			autoRender: false
+
 		});
 
 		this.selectionRenderer = Ext.create('NU.view.webgl.magicwand.Selection', {
 			shader: 'magicwand/Selection',
 			canvas: selectionLayer.canvas,
-			context: selectionLayer.context
+			context: selectionLayer.context,
+			autoRender: false
 		});
 
 		this.selectionClassifier = Ext.create('NU.view.webgl.magicwand.Classify', {
@@ -774,6 +782,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		var colour = this.getColour(x, y);
 		this.selectionRenderer.updateColour(colour);
 		this.selectionRenderer.updateTolerance(tolerance);
+		this.selectionRenderer.render();
 		this.selectionClassifier.updateColour(colour);
 		this.selectionClassifier.updateTolerance(tolerance);
 	},
@@ -791,6 +800,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.renderClassifiedImage();
 		// clear selection layer
 		this.selectionRenderer.updateTolerance(-1);
+		this.selectionRenderer.render();
+		this.classifiedRenderer.render();
 	},
 	classifyRectangle: function (x, y) {
 		var start = this.getStartPoint();
@@ -1281,7 +1292,9 @@ Ext.define('NU.view.window.ClassifierController', {
 	updateClassifiedData: function () {
 		var lut = new Uint8Array(this.getLookup().buffer);
 		this.classifiedRenderer.updateLut(lut);
+		this.classifiedRenderer.render();
 		this.selectionClassifier.updateLut(lut);
+		this.selectionClassifier.render();
 		this.refreshScatter();
 	},
 	getColour: function (x, y) {
@@ -1297,13 +1310,21 @@ Ext.define('NU.view.window.ClassifierController', {
 			case Format.JPEG:
 				var offset = 3 * (y * imageWidth + x);
 				return [
-					components[offset + 0],
+					components[offset    ],
 					components[offset + 1],
 					components[offset + 2]
 				];
+			case Format.YCbCr422:
+				var offset = 2 * (y * imageWidth + x);
+				var shift = (x % 2) * 2;
+				return [
+					components[offset    ],
+					components[offset + 1 - shift],
+					components[offset + 3 - shift]
+				];
 			case Format.YCbCr444:
 				return [
-					components[3 * (y * imageWidth + x) + 0],
+					components[3 * (y * imageWidth + x)    ],
 					components[3 * (y * imageWidth + x) + 1],
 					components[3 * (y * imageWidth + x) + 2]
 				];
@@ -1340,6 +1361,10 @@ Ext.define('NU.view.window.ClassifierController', {
 				//this.drawImageB64(image, callback, thisArg);
 				this.drawImageB64YUV(image, callback, thisArg);
 				break;
+			case Format.YCbCr422:
+				//this.drawImageYbCr444(image, callback, thisArg);
+				this.drawImageYbCr422(image, callback, thisArg);
+				break;
 			case Format.YCbCr444:
 				//this.drawImageYbCr444(image, callback, thisArg);
 				this.drawImageYbCr444WebGL(image, callback, thisArg);
@@ -1347,6 +1372,25 @@ Ext.define('NU.view.window.ClassifierController', {
 			default:
 				throw 'Unsupported Format';
 		}
+	},
+	drawImageYbCr422: function (image) {
+		var width = this.getImageWidth();
+		var height = this.getImageHeight();
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		var bytesPerPixel = 2;
+
+		var renderers = [this.rawImageRenderer, this.classifiedRenderer, this.selectionRenderer];
+		for (var i = 0, len = renderers.length; i < len; i++) {
+			var renderer = renderers[i];
+			renderer.resize(width, height);
+			renderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+			renderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+			renderer.updateUniform('imageWidth', width);
+			renderer.updateUniform('imageHeight', height);
+			renderer.render();
+		}
+		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
+		this.setRawImageComponents(data);
 	},
 	drawImageYbCr444: function (image, callback, thisArg) {
 		var width = this.getImageWidth();

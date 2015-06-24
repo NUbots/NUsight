@@ -4,6 +4,9 @@ Ext.define('NU.view.webgl.Classifier', {
 		Ext.applyIf(config, {
 			uniforms: {
 				rawImage: {type: 't'},
+				imageWidth: {type: 'i'},
+				imageHeight: {type: 'i'},
+				imageFormat: {type: 'i'},
 				lut: {type: 't'},
 				lutSize: {type: 'f'},
 				rawUnderlayOpacity: {type: 'f', value: 0.5},
