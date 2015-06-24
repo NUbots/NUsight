@@ -296,8 +296,8 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorY = newValue;
 			this.classifiedRenderer.updateBitsR(newValue);
 			this.selectionClassifier.updateBitsR(newValue);
-			this.selectionRenderer.render();
 			this.resetBits();
+			this.selectionRenderer.render();
 		}
 	},
 	onChangeBitsG: function (field, newValue, oldValue, eOpts) {
@@ -305,8 +305,8 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorCb = newValue;
 			this.classifiedRenderer.updateBitsG(newValue);
 			this.selectionClassifier.updateBitsG(newValue);
-			this.selectionRenderer.render();
 			this.resetBits();
+			this.selectionRenderer.render();
 		}
 	},
 	onChangeBitsB: function (field, newValue, oldValue, eOpts) {
@@ -314,8 +314,8 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.self.LutBitsPerColorCr = newValue;
 			this.classifiedRenderer.updateBitsB(newValue);
 			this.selectionClassifier.updateBitsB(newValue);
-			this.selectionRenderer.render();
 			this.resetBits();
+			this.selectionRenderer.render();
 		}
 	},
 	resetBits: function () {
@@ -448,11 +448,11 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.classifiedRenderer.updateLut(lut);
 			this.selectionClassifier.updateLut(lut);
 
-			this.mon(NU.Network, 'image', this.onImage, this);
-			this.mon(NU.Network, 'lookup_table', this.onLookUpTable, this);
-			this.mon(NU.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
-
-			this.testDrawImage();
+			this.testDrawImage(function () {
+				this.mon(NU.Network, 'image', this.onImage, this);
+				this.mon(NU.Network, 'lookup_table', this.onLookUpTable, this);
+				this.mon(NU.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
+			});
 
 			//this.testClassifier();
 		}.bind(this));
@@ -794,6 +794,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		var typeId = this.self.Target[this.getTarget()];
 		this.selectionClassifier.updateClassification(typeId);
 		this.selectionClassifier.updateTolerance(this.getTolerance());
+		this.selectionClassifier.updateLut(new Uint8Array(lut.buffer));
 		this.selectionClassifier.render();
 		this.selectionClassifier.getLut(lut);
 		this.updateClassifiedData();
@@ -801,7 +802,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		// clear selection layer
 		this.selectionRenderer.updateTolerance(-1);
 		this.selectionRenderer.render();
-		this.classifiedRenderer.render();
 	},
 	classifyRectangle: function (x, y) {
 		var start = this.getStartPoint();
@@ -1389,6 +1389,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			renderer.updateUniform('imageHeight', height);
 			renderer.render();
 		}
+		this.selectionClassifier.resize(width, height);
 		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
@@ -1422,10 +1423,14 @@ Ext.define('NU.view.window.ClassifierController', {
 		var width = this.getImageWidth();
 		var height = this.getImageHeight();
 		var data = new Uint8Array(image.data.toArrayBuffer());
-		this.rawImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.classifiedRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.selectionRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.selectionClassifier.updateRawImage(data, width, height, THREE.RGBFormat);
+		var renderers = [this.rawImageRenderer, this.classifiedRenderer, this.selectionRenderer];
+		for (var i = 0, len = renderers.length; i < len; i++) {
+			var renderer = renderers[i];
+			renderer.updateRawImage(data, width, height, THREE.RGBFormat);
+			renderer.render();
+		}
+		this.selectionClassifier.resize(width, height);
+		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageB64: function (image, callback, thisArg) {
@@ -1461,7 +1466,7 @@ Ext.define('NU.view.window.ClassifierController', {
 //		this.renderImages();
 		callback.call(thisArg, ctx);
 	},
-	testDrawImage: function () {
+	testDrawImage: function (callback) {
 		var uri = 'resources/images/test_image2.jpg';
 		var imageObj = new JpegImage();
 		imageObj.onload = function () {
@@ -1479,6 +1484,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			});
 			image.setFormat(API.Image.Format.YCbCr444);
 			this.onImage(this.getRobotIP(), image);
+			callback.call(this);
 		}.bind(this);
 		imageObj.load(uri);
 	}

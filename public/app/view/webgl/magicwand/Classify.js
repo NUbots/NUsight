@@ -30,40 +30,51 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		}.bind(this)));
 	},
 	createPointCloud: function (width, height) {
-		if (this.imagePointCloud) {
-			this.scene.remove(this.imagePointCloud);
-		}
-		var geometry = new THREE.BufferGeometry();
 		var itemSize = 3;
-		var data = new Float32Array(width * height * itemSize);
-		for (var i = 0, len = data.length; i < len; i++) {
-			var offset = i * 3;
-			var x = i % width;
-			var y = Math.floor(i / width);
-			data[offset    ] = x;
-			data[offset + 1] = y;
-			data[offset + 2] = 0;
+		var size = width * height * itemSize;
+
+		function genData(size) {
+			var data = new Float32Array(size);
+			for (var i = 0, len = data.length; i < len; i++) {
+				var offset = i * 3;
+				var x = i % width;
+				var y = Math.floor(i / width);
+				data[offset] = x;
+				data[offset + 1] = y;
+				data[offset + 2] = 0;
+			}
+			return data;
 		}
-		geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
-		var material = new THREE.ShaderMaterial({
-			uniforms: {
-				rawImage: {type: 't'},
-				imageWidth: {type: 'i'},
-				imageHeight: {type: 'i'},
-				imageFormat: {type: 'i'},
-				lut: {type: 't'},
-				lutSize: {type: 'f', value: 512},
-				bitsR: {type: 'f', value: 6},
-				bitsG: {type: 'f', value: 6},
-				bitsB: {type: 'f', value: 6},
-				colour: {type: '3fv', value: [0, 0, 0]},
-				tolerance: {type: 'f', value: -1},
-				classification: {type: 'f', value: -1},
-				overwrite: {type: 'i', value: 0}
-			},
-			vertexShader: this.imageVertexShaderText,
-			fragmentShader: this.imageFragmentShaderText
-		});
+
+		var geometry = new THREE.BufferGeometry();
+		var data = genData(size);
+		var material;
+		if (!this.imagePointCloud) {
+			geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
+			material = new THREE.ShaderMaterial({
+				uniforms: {
+					rawImage: {type: 't'},
+					imageWidth: {type: 'i'},
+					imageHeight: {type: 'i'},
+					imageFormat: {type: 'i'},
+					lut: {type: 't'},
+					lutSize: {type: 'f', value: 512},
+					bitsR: {type: 'f', value: 6},
+					bitsG: {type: 'f', value: 6},
+					bitsB: {type: 'f', value: 6},
+					colour: {type: '3fv', value: [0, 0, 0]},
+					tolerance: {type: 'f', value: -1},
+					classification: {type: 'f', value: -1},
+					overwrite: {type: 'i', value: 0}
+				},
+				vertexShader: this.imageVertexShaderText,
+				fragmentShader: this.imageFragmentShaderText
+			});
+		} else {
+			material = this.imagePointCloud.material;
+			this.scene.remove(this.imagePointCloud);
+			geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
+		}
 		this.imagePointCloud = new THREE.PointCloud(geometry, material);
 		this.imagePointCloud.frustumCulled = false;
 		this.imagePointCloud.depthTest = false;
@@ -98,8 +109,13 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 			this.createPointCloud(width, height);
 		}
 
-		var bytesPerPixel = 2;
-		this.updateTexture('rawImage', data, width * bytesPerPixel, height, textureFormat, this.imagePointCloud.material);
+		var Format = API.Image.Format;
+		if (imageFormat === Format.YCbCr422) {
+			var bytesPerPixel = 2;
+			this.updateTexture('rawImage', data, width * bytesPerPixel, height, textureFormat, this.imagePointCloud.material);
+		} else {
+			this.updateTexture('rawImage', data, width, height, textureFormat, this.imagePointCloud.material);
+		}
 		this.updateUniform('imageFormat', imageFormat, this.imagePointCloud.material);
 		this.updateUniform('imageWidth', width, this.imagePointCloud.material);
 		this.updateUniform('imageHeight', height, this.imagePointCloud.material);

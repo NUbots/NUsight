@@ -291,6 +291,7 @@ Ext.define('NU.view.window.Classifier', {
 						fieldLabel: 'Y Bits',
 						labelWidth: 50,
 						value: 6,
+						maxValue: 8,
 						step: 1,
 						listeners: {
 							change: 'onChangeBitsR'
@@ -300,6 +301,8 @@ Ext.define('NU.view.window.Classifier', {
 						fieldLabel: 'Cb Bits',
 						labelWidth: 50,
 						value: 6,
+						minValue: 1,
+						maxValue: 8,
 						step: 1,
 						listeners: {
 							change: 'onChangeBitsG'
@@ -309,6 +312,8 @@ Ext.define('NU.view.window.Classifier', {
 						fieldLabel: 'Cr Bits',
 						labelWidth: 50,
 						value: 6,
+						minValue: 1,
+						maxValue: 8,
 						step: 1,
 						listeners: {
 							change: 'onChangeBitsB'

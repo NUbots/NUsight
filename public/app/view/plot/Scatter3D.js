@@ -291,6 +291,9 @@ Ext.define('NU.view.plot.Scatter3D', {
 			var canvas = createTextCanvas(text, color, font, size);
 			var plane = new THREE.PlaneBufferGeometry(canvas.width, canvas.height, segW, segH);
 			var tex = new THREE.Texture(canvas);
+			tex.minFilter = THREE.LinearFilter;
+			tex.unpackAlignment = 1;
+			tex.generateMipmaps = false;
 			tex.needsUpdate = true;
 			var planeMat = new THREE.MeshBasicMaterial({
 				map: tex, color: 0xffffff, transparent: true, side: THREE.DoubleSide
@@ -391,6 +394,8 @@ Ext.define('NU.view.plot.Scatter3D', {
 			texture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat,
 				THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING, THREE.ClampToEdgeWrapping,
 				THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+			texture.unpackAlignment = 1;
+			texture.generateMipmaps = false;
 			points.material.uniforms.lut.value = texture;
 		}
 		else {

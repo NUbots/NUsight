@@ -171,8 +171,9 @@ Ext.define('NU.view.webgl.WebGL', {
 			texture.image.data = data;
 			texture.image.width = width;
 			texture.image.height = height;
+			texture.format = format;
 		}
-		if (!this.powerOf2(width) || !this.powerOf2(height)) {
+		if (!THREE.Math.isPowerOfTwo(width) || !THREE.Math.isPowerOfTwo(height)) {
 			// if texture is a non-power-of-2, set alignment to 1-byte and turn off mipmapping
 			texture.unpackAlignment = 1;
 			texture.generateMipmaps = false;
@@ -183,10 +184,6 @@ Ext.define('NU.view.webgl.WebGL', {
 		if (this.getAutoRender()) {
 			this.render();
 		}
-	},
-	powerOf2: function (value) {
-		// http://www.skorks.com/2010/10/write-a-function-to-determine-if-a-number-is-a-power-of-2/
-		return value != 0 && value & (value - 1) == 0;
 	},
 	/**
 	 * Update the plane material uniform based on the given name, and re-render

@@ -60,6 +60,6 @@ void main() {
 		// Move the vertex to the given coordinate
 		gl_Position = projectionMatrix * modelViewMatrix * vec4(coordinate, 0.0, 1.0);
 	} else {
-		gl_Position = vec4(0, 0, 0, 0); // put the point behind the camera to discard it
+		gl_Position = vec4(2, 2, 2, 1); // discard vertex as pixel is not to be classified
 	}
 }
