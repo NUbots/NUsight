@@ -358,12 +358,35 @@ Ext.define('NU.view.window.Classifier', {
 						change: 'onChangeRawUnderlayOpacity'
 					}
 				}, {
-					xtype: 'checkbox',
-					checked: false,
-					fieldLabel: 'Render YUV',
-					listeners: {
-						change: 'onChangeRenderYUVBox'
-					}
+					layout: {
+						type: 'hbox'
+					},
+					flex: 1,
+					items: [{
+						xtype: 'checkbox',
+						checked: false,
+						fieldLabel: 'Render YUV',
+						listeners: {
+							change: 'onChangeRenderYUVBox'
+						}
+					}, {
+						xtype: 'combo',
+						fieldLabel: 'Colour Space',
+						store: {
+							fields: ['id', 'name'],
+							data : [
+								{'id': 1, 'name':'YCbCr'},
+								{'id': 2, 'name':'RGB'}
+							]
+						},
+						queryMode: 'local',
+						displayField: 'name',
+						valueField: 'id',
+						value: 1,
+						listeners: {
+							change: 'onChangeOutputColourSpace'
+						}
+					}]
 				}, {
 					xtype: 'checkbox',
 					checked: false,

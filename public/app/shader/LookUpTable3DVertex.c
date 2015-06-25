@@ -12,6 +12,8 @@ uniform float size;
 uniform bool renderRaw;
 uniform bool renderCube;
 
+uniform int outputColourSpace;
+
 varying vec4 colour;
 
 void main() {
@@ -42,8 +44,15 @@ void main() {
 			colour = getColour(classification);
 		}
 
+		vec4 outputColour;
+		if (outputColourSpace == COLOUR_SPACE_YCBCR) {
+		 	outputColour = rawColour;
+		}
+		else if (outputColourSpace == COLOUR_SPACE_RGB) {
+		 	outputColour = YCbCrToRGB(rawColour);
+		}
 		// Scale the position to the range [-50,50] as that is the scale of the plot
-		vec3 positionScaled = 100.0 * rawColour.brg - 50.0;
+		vec3 positionScaled = 100.0 * outputColour.brg - 50.0;
 		// Transform to eye-space
 		vec4 mvPosition = modelViewMatrix * vec4(positionScaled, 1.0);
 		// Scale the point size based on distance from the camera (aka. size attenuation)

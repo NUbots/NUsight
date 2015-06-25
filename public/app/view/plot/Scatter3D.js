@@ -357,7 +357,8 @@ Ext.define('NU.view.plot.Scatter3D', {
 					scale: {type: 'f', value: this.getHeight() / 2}, // TODO
 					size: {type: 'f', value: 7},
 					renderRaw: {type: 'i'},
-					renderCube: {type: 'i'}
+					renderCube: {type: 'i'},
+					outputColourSpace: {type: 'i', value: 1}
 				},
 				vertexShader: vertexShaderText,
 				fragmentShader: fragmentShaderText
@@ -368,13 +369,16 @@ Ext.define('NU.view.plot.Scatter3D', {
 				//side: THREE.DoubleSide
 			});
 			material.obj = this;
-			window.mat = material;
 
 			points = new THREE.PointCloud(geometry, material);
 			points.frustumCulled = false;
 			scatterPlot.add(points);
 			this.setPoints(points);
 		}.bind(this));
+	},
+	updateOutputColourSpace: function (outputColourSpace) {
+		this.getPoints().material.uniforms.outputColourSpace.value = outputColourSpace;
+		this.needsUpdate = true;
 	},
 	updatePlot: function (vertices, lut, bitsR, bitsG, bitsB, renderRaw, renderCube) {
 		var points = this.getPoints();

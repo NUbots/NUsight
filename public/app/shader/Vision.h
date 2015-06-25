@@ -10,6 +10,9 @@ const int FORMAT_YCBCR422 = 1;
 const int FORMAT_YCBCR444 = 2;
 const int FORMAT_JPEG = 3;
 
+const int COLOUR_SPACE_YCBCR = 1;
+const int COLOUR_SPACE_RGB = 2;
+
 float round(float value) {
 	return floor(value + 0.5);
 }

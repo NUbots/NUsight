@@ -285,6 +285,12 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.refreshScatter();
 		}
 	},
+	onChangeOutputColourSpace: function (combo, newValue, oldValue, eOpts) {
+		if (combo.isValid()) {
+			var scatter3d = this.lookupReference('scatter3d');
+			scatter3d.updateOutputColourSpace(newValue);
+		}
+	},
 	onChangeRenderCubeBox: function (checkbox, newValue, oldValue, eOpts) {
 		if (checkbox.isValid()) {
 			this.setRenderCube(newValue);
