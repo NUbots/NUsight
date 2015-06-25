@@ -9,6 +9,11 @@ Ext.define('NU.view.Toolbar', {
             click: 'onDashboardDisplay'
         }
     }, {
+        text: 'Network Statistics',
+        listeners: {
+            click: 'onNetworkStatisticsDisplay'
+        }
+    }, {
         text: 'Localisation',
         listeners: {
             click: 'onLocalisationDisplay'

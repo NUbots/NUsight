@@ -3,9 +3,14 @@ Ext.define('NU.view.window.DisplayController', {
 	config: {
 		robotIP: null
 	},
+	init: function () {
+		//this.robots = {};
+	},
+
 	onSelectRobot: function (robotIP) {
 		this.setRobotIP(robotIP);
 	},
+
     onMaximize: function (view) {
         // hack because ExtJS seems not to do this correctly! >_<
 		var newBox = view.constrainTo.getViewSize(false);

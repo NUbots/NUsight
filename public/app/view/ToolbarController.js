@@ -10,6 +10,9 @@ Ext.define('NU.view.ToolbarController', {
 	onDashboardDisplay: function () {
 		this.create('NU.view.window.Dashboard');
 	},
+	onNetworkStatisticsDisplay: function () {
+		this.create('NU.view.window.NetworkStatistics');
+	},
 	onLocalisationDisplay: function () {
 		this.create('NU.view.window.Field');
 	},

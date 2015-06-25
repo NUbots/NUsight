@@ -20,13 +20,13 @@ Ext.define('NU.view.window.Dashboard', {
 	height: 350,
 	items: [{
 		xtype: 'grid',
-		reference: 'dashboard',
+		reference: 'grid',
 		bind: {
 			store: '{grid}'
 		},
 		columns: [{
 			text: 'Robot',
-			dataIndex: 'robotIP'
+			dataIndex: 'robotName'
 		}, {
 			xtype: 'numbercolumn',
 			text: 'Voltage',
@@ -42,6 +42,12 @@ Ext.define('NU.view.window.Dashboard', {
 			text: 'Behaviour state',
 			dataIndex: 'behaviourState',
 			width: 200
+		}, {
+			text: 'Robot position',
+			dataIndex: 'robotPosition'
+		}, {
+			text: 'Robot heading',
+			dataIndex: 'robotHeading'
 		}]
 	}]
 });

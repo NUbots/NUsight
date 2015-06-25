@@ -4,10 +4,12 @@ Ext.define('NU.view.window.DashboardViewModel', {
 	stores: {
 		grid: {
 			fields: [
-				'robotIP',
-				'behaviourState',
+				'robotName',
 				'voltage',
-				'battery'
+				'battery',
+				'behaviourState',
+				'robotPosition',
+				'robotHeading'
 			]
 		}
 	}
