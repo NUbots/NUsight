@@ -38,6 +38,10 @@ Ext.define('NU.view.window.Dashboard', {
 			dataIndex: 'battery',
 			// TODO: Fix hack
 			format: '0.00%'
+		}, {
+			text: 'Behaviour state',
+			dataIndex: 'behaviourState',
+			width: 200
 		}]
 	}]
 });

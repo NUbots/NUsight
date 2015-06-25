@@ -5,6 +5,7 @@ Ext.define('NU.view.window.DashboardViewModel', {
 		grid: {
 			fields: [
 				'robotIP',
+				'behaviourState',
 				'voltage',
 				'battery'
 			]

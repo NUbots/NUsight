@@ -4,6 +4,9 @@
 Ext.define('NU.view.window.DashboardController', {
 	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.Dashboard',
+	requires: [
+		'NU.util.TypeMap'
+	],
 	init: function () {
 		this.grid = this.getView().lookupReference('dashboard');
 		this.store = this.getViewModel().getStore('grid');
@@ -11,7 +14,7 @@ Ext.define('NU.view.window.DashboardController', {
 		this.messages = [];
 		this.addColumns(this.grid.headerCt);
 		NU.Network.on('packet', this.onPacket, this);
-		NU.Network.on('sensor_data', this.onSensorData, this);
+		NU.Network.on('overview', this.onOverview, this);
 	},
 
 	/**
@@ -79,31 +82,20 @@ Ext.define('NU.view.window.DashboardController', {
 		var robot = this.getRobot(robotIP);
 		var key = NU.Network.getTypeMap()[type];
 		// Add the packet data to the column.
-		this.addPacket(robot, key);
-	},
-
-	/**
-	 * Increments the value of the packets received from a particular robot of a particular message type.
-	 *
-	 * @param robot The record of the robot that received the packet information.
-	 * @param key The name of the message that was sent over the network.
-	 */
-	addPacket: function (robot, key) {
 		robot.set(key, robot.get(key) + 1);
 	},
 
-	/**
-	 * An event triggered when a sensor data message has been received and decoded.
-	 *
-	 * @param robotIP The IP address of the robot.
-	 * @param sensorData The sensor data message.
-	 * @param timestamp The time the message was received.
-	 */
-	onSensorData: function (robotIP, sensorData, timestamp) {
+	onOverview: function (robotIP, overview, timestamp) {
 		// Get the robot from the robotIP and update the voltage and battery data.
 		var robot = this.getRobot(robotIP);
-		robot.set('voltage', sensorData.getVoltage());
-		robot.set('battery', sensorData.getBattery() * 100);
+		// Set the data obtained from the overview to update the view model for the selected robot.
+		robot.set('behaviourState', this.parseBehaviourState(overview.getBehaviourState()));
+		robot.set('voltage', overview.getVoltage());
+		robot.set('battery', overview.getBattery() * 100);
+	},
+
+	parseBehaviourState: function (state) {
+		return NU.TypeMap.get(API.Behaviour.State)[state];
 	}
 
 });
