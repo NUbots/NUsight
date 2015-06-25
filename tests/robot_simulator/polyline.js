@@ -13,7 +13,7 @@ var type = API.Message.Type.DRAW_OBJECTS;
 var filterId = 0;
 
 var socket = zmq.socket('pub');
-socket.bindSync('tcp://0.0.0.0:12000');
+socket.bindSync('tcp://0.0.0.0:14000');
 
 var getRandomPosition = function () {
 	return {

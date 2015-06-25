@@ -11,7 +11,7 @@ var API = builder.build('messages.support.nubugger.proto');
 var file = 'logs/10.1.2.3/1434957219766.nbs';
 
 var socket = zmq.socket('pub');
-socket.bindSync('tcp://0.0.0.0:12000');
+socket.bindSync('tcp://0.0.0.0:14000');
 
 var HEADER_SIZE = 4;
 var loop = true;

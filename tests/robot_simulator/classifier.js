@@ -13,7 +13,7 @@ API.LookUpTableDiff = builder.build('messages.vision.proto.LookUpTableDiff');
 var classifications = [119, 103, 121, 111, 99, 109];
 
 var socket = zmq.socket('pub');
-socket.bindSync('tcp://0.0.0.0:12000');
+socket.bindSync('tcp://0.0.0.0:14000');
 
 var numPoints = 10;
 var points = [];
