@@ -337,6 +337,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.lutDiffs = [];
 		this.onLookUpTableDiffBatch = this.onLookUpTableDiffBatch.bind(this);
 	},
+	onEsc: function () {
+		this.selectionRenderer.updateTolerance(-1);
+		this.selectionRenderer.render();
+	},
 	onAfterRender: function () {
 		var rawLayeredCanvas = this.lookupReference('rawImage').getController();
 		var rawImageLayer = rawLayeredCanvas.add('raw', {

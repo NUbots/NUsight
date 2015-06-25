@@ -11,13 +11,17 @@ Ext.define('NU.view.window.Classifier', {
 	title: 'Classifier',
 	width: 800,
 	height: 780,
+	onEsc: function () {
+		this.fireEvent('esc');
+	},
 	layout: {
 		type: 'vbox',
 		align: 'stretch',
 		flex: 1
 	},
 	listeners: {
-		afterrender: 'onAfterRender'
+		afterrender: 'onAfterRender',
+		esc: 'onEsc'
 	},
 	tbar: [{
 		xtype: 'robot_selector',
@@ -277,6 +281,8 @@ Ext.define('NU.view.window.Classifier', {
 					xtype: 'numberfield',
 					fieldLabel: 'Tolerance',
 					value: 50,
+					minValue: 0,
+					maxValue: Math.ceil(Math.sqrt(3 * 255 * 255)),
 					step: 1,
 					listeners: {
 						change: 'onChangeTolerance'
