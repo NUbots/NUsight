@@ -25,8 +25,8 @@ Ext.define('NU.view.ToolbarController', {
 	onClassifierDisplay: function () {
 		this.create('NU.view.window.Classifier');
 	},
-	onBehaviourDisplay: function () {
-		this.create('NU.view.window.Behaviour');
+	onSubsumptionDisplay: function () {
+		this.create('NU.view.window.Subsumption');
 	},
 	onGameStateDisplay: function () {
 		this.create('NU.view.window.GameState');

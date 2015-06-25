@@ -34,9 +34,9 @@ Ext.define('NU.view.Toolbar', {
             click: 'onClassifierDisplay'
         }
     }, {
-        text: 'Behaviour',
+        text: 'Subsumption',
         listeners: {
-            click: 'onBehaviourDisplay'
+            click: 'onSubsumptionDisplay'
         }
     }, {
         text: 'GameState',

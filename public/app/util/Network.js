@@ -27,7 +27,7 @@ Ext.define('NU.util.Network', {
 		// cry :'(
 		window.API.Sensors = this.builder.build('messages.input.proto.Sensors');
         window.API.Vision = this.builder.build('messages.vision.proto');
-		window.API.Behaviour = this.builder.build('messages.behaviour.proto.Behaviour');
+		window.API.Subsumption = this.builder.build('messages.behaviour.proto.Subsumption');
 		window.API.ActionStateChange = this.builder.build('messages.behaviour.proto.ActionStateChange');
 		window.API.Image = this.builder.build('messages.input.proto.Image');
         window.API.Configuration = this.builder.build('messages.support.nubugger.proto.ConfigurationState');
@@ -161,11 +161,14 @@ Ext.define('NU.util.Network', {
 	 * @param filterId The filter identifier for the message.
 	 */
 	createMessage: function (type, filterId) {
-		var message = new API.Message();			// create the message API
-		message.setType(type);						// set the type of the message that was passed in
-		message.setFilterId(filterId);				// set the filter identifier of the message
-		message.setUtcTimestamp(Date.now() / 1000);	// set the time stamp of the message to the current time in seconds
-		return message;								// return the message that was created
+		// Create the message.
+		var message = new API.Message();
+		// Set the type, filter identifier and timestamp of the message.
+		message.setType(type);
+		message.setFilterId(filterId);
+		message.setUtcTimestamp(Date.now() / 1000);
+		// Return the message that was created].
+		return message;
 	},
 	/**
 	 * Creates a message and command of a particular name to send over the network.
@@ -175,12 +178,15 @@ Ext.define('NU.util.Network', {
 	 * @param [filterId] The filter identifier for the message.
 	 */
 	sendCommand: function (robotIP, commandName, filterId) {
-		// create the message of type command
+		debugger;
+		// Create the message of type command.
 		var message = this.createMessage(API.Message.Type.COMMAND, filterId || 0);
-		// create the command
+		// Create the command and set its name.
 		var command = new API.Message.Command();
-		command.setCommand(commandName);			// set the name of the command
-		message.setCommand(command);				// set the command of the message
-		this.send(robotIP, message);				// send the command message over the network
+		command.setCommand(commandName);
+		// Set the command of the message
+		message.setCommand(command);
+		// Send the command message over the network.
+		this.send(robotIP, message);
 	}
 });
