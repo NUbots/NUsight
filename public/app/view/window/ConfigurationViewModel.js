@@ -1,11 +1,27 @@
 Ext.define('NU.view.window.ConfigurationViewModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.Configuration',
-    requires: [
-        'NU.store.ConfigurationTree'
-    ],
     stores: {
-        store: Ext.create('NU.store.ConfigurationTree')
+        tree: {
+            type: 'tree',
+            autoLoad: true,
+            fields: [
+                'path',     // The path to the configuration file.
+                'name',     // The name of the configuration.
+                'type',     // The type of the configuration i.e. file, directory, sequence, etc.
+                'widget',   // The type of widget associated with the configuration.
+                'value'     // The value of the configuration.
+            ],
+            root: {
+                expanded: true
+            },
+            proxy: {
+                type: 'memory',
+                reader: {
+                    type: 'json'
+                }
+            }
+        }
     },
     /**
      * Processes a message node based on its message type.
@@ -184,7 +200,7 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      * @param params The parameters associated with the slider.
      */
     processSlider: function (node, type, value, params) {
-        // get the values from the slider params
+        // Get the values from the slider params.
         var min = params[0];
         var max = params[1];
         var step = params[2];

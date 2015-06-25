@@ -3,13 +3,16 @@
  */
 Ext.define('NU.view.window.Configuration', {
     extend : 'NU.view.window.Display',
+    alias: 'widget.nu_configuration_window',
     requires: [
-        'NU.view.window.ConfigurationViewModel',
         'NU.view.column.Widget',
         'NU.view.factory.Widget',
+        'NU.view.window.ConfigurationViewModel',
         'NU.view.window.ConfigurationController'
     ],
-    alias: 'widget.nu_configuration_window',
+    viewModel: {
+        type: 'Configuration'
+    },
     controller: 'Configuration',
     title: 'Configuration',
     width: 1000,
@@ -54,11 +57,8 @@ Ext.define('NU.view.window.Configuration', {
         xtype: 'treepanel',
         reference: 'configurations',
         referenceHolder: true,
-        viewModel: {
-            type: 'Configuration'
-        },
         bind: {
-            store: '{store}'
+            store: '{tree}'
         },
         title: 'Robot Configurations',
         autoLoad: true,

@@ -7,20 +7,18 @@ Ext.define('NU.view.window.ConfigurationController', {
     requires: [
         'Ext.slider.Single'
     ],
-    configurations: null,               // The view that contains the configurations
-    type: null,                         // The protocol buffer enumeration
-    currentTree: null,                  // The current configuration update tree
+    type: null,                         // The protocol buffer enumeration.
+    currentTree: null,                  // The current configuration update tree.
     Modes: {
-        LIVE:     {name: 'Live'},       // Live updating
-        STANDARD: {name: 'Standard'}    // Standard updating
+        LIVE:     {name: 'Live'},       // Live updating.
+        STANDARD: {name: 'Standard'}    // Standard updating.
     },
-    mode: null,                         // The current updating mode
+    mode: null,                         // The current updating mode.
     init: function () {
-        var view = this.getView();
-        this.configurations = view.lookupReference('configurations');
+        this.store = this.getViewModel().getStore('tree');
         this.type = API.ConfigurationState.Node.Type;
         this.mode = this.Modes.STANDARD;
-        this.mon(NU.util.Network, 'configuration_state', this.onConfigurationState, this);
+        NU.Network.on('configuration_state', this.onConfigurationState, this);
     },
     /**
      * A function that is called when the user selects a robot. It then sends the command to get the configuration state with this IP address.
@@ -41,20 +39,16 @@ Ext.define('NU.view.window.ConfigurationController', {
         if (robotIP !== this.getRobotIP()) {
             return;
         }
-        // retrieve the root from the buffer
+        // Retrieve the root from the buffer.
         var root = configurationState.getRoot();
-        // get the view model from the tree panel
-        var viewModel = this.configurations.getViewModel();
-        // get the store from the view model
-        var store = viewModel.getStore('store');
-        // processes the message in the view model using the store's root as the initial node
-        viewModel.processMessage(store.getRoot(), root);
+        // Processes the message in the view model using the store's root as the initial node.
+        this.getViewModel().processMessage(this.store.getRoot(), root);
     },
     /**
      * Sends a command to the network requesting the configuration state.
      */
     sendCommand: function () {
-        NU.util.Network.sendCommand(this.getRobotIP(), 'get_configuration_state');
+        NU.Network.sendCommand(this.getRobotIP(), 'get_configuration_state');
     },
     /**
      * An event triggered when the current mode display has rendered.
@@ -89,9 +83,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param state The current state of the toggle
      */
     onToggleMode: function (button, state) {
-        // change the mode based on the state
+        // Change the mode based on the state and update the displays to match the current mode.
         this.mode = state ? this.Modes.LIVE : this.Modes.STANDARD;
-        // update the displays to match the current mode
         this.updateModeDisplay(this.mode);
     },
     /**
@@ -105,11 +98,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      * the store data again.
      */
     onRefresh: function () {
-        // get the store from the tree
-        var store = this.configurations.getStore();
-        // reload the store
-        store.reload();
-        // send the command again
+        // Reload the store and resend the command.
+        this.store.reload();
         this.sendCommand();
     },
     /**
@@ -117,7 +107,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * when reopened.
      */
     onClose: function () {
-        this.configurations.getStore().reload();
+        this.store.reload();
     },
     /**
      * Updates the current mode component based on the current mode.
@@ -125,15 +115,15 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param mode The current mode.
      */
     updateModeDisplay: function (mode) {
-        // retrieve the configuration view
+        // Retrieve the configuration view.
         var view = this.getView();
-        // get the current mode component and save button
+        // Get the current mode component and save button.
         var currentMode = view.lookupReference('currentMode');
         var save = view.lookupReference('save');
-        // update the current mode and switch mode views
+        // Update the current mode and switch mode views.
         this.updateMode(currentMode, mode);
         this.updateSaveDisplay(save);
-        // update the flex of the current mode component and then update the view layout
+        // Update the flex of the current mode component and then update the view layout.
         currentMode.flex += save.isHidden() ? save.flex : -save.flex;
         view.updateLayout();
     },
@@ -177,13 +167,14 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param newValue The new value of the configuration.
      */
     onUpdateWidget: function (record, newValue) {
-        // get the value of the record
+        // Get the value of the record and its type.
         var value = this.getRecordValue(record);
         var type = record.get('type');
-        // check if we should even update the configuration file first
+        // Check if we should even update the configuration file first.
         if (value !== newValue) {
-            // build the tree using the initial record and its new value
+            // Build the tree using the initial record and its new value.
             var tree = this.buildTree(this.currentTree, record, newValue);
+            // Check if the tree should be sent or updated.
             if (this.mode === this.Modes.LIVE) {
                 this.send(tree);
             } else {
@@ -205,12 +196,12 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {*} The ConfigurationState message tree.
      */
     buildTree: function (currentTree, record, newValue) {
-        var path = record.get('path');                          // get the path from the record
-        if (path) {                                             // check if the record contains a path
-            // process the file path
+        // Retrieve the path from the record and process it if it exists.
+        var path = record.get('path');
+        if (path) {
             return this.processFilePath(currentTree, record, path);
         }
-        // build the tree recursively using the parent node until the file is found
+        // Build the tree recursively using the parent node until the file is found.
         var tree = this.buildTree(currentTree, record.parentNode, newValue);
         path = this.createRecordPath(tree.currentPath, record);
         var node;
@@ -218,12 +209,15 @@ Ext.define('NU.view.window.ConfigurationController', {
             tree.current = node;
             tree.currentPath = path;
         } else {
-            node = this.processRecord(record);                  // create the proto node
-            this.addTreeMappings(tree, record, node);           // add the relevant mappings to the tree
-            this.processCurrent(tree, record, node);            // process the current node in the tree
+            // Create the protocol node, add the relevant tree mappings and process the current node in the tree.
+            node = this.processRecord(record);
+            this.addTreeMappings(tree, record, node);
+            this.processCurrent(tree, record, node);
         }
-        if (!record.hasChildNodes()) {                          // check if at the widget node
-            this.setNodeValue(tree.current, newValue);          // change the value to new configuration value
+        // Check if the the record does not have any more children which indicates that we are at the widget node.
+        if (!record.hasChildNodes()) {
+            // Change the value to the new configuration value.
+            this.setNodeValue(tree.current, newValue);
         }
         return tree;
     },
@@ -235,11 +229,12 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {*} The path to the record within the tree mappings.
      */
     createRecordPath: function (currentPath, record) {
-        var name = record.get('name');                          // get the name from the record
-        if (name) {                                             // check if the name exists
-            return this.createPath(currentPath, name);          // return the path by appending the name to the current path
+        var name = record.get('name');
+        if (name) {
+            // Return the path by appending the name to the current path.
+            return this.createPath(currentPath, name);
         }
-        // return the path by appending the index to the current path
+        // Return the path by appending the index to the current path.
         return this.createPath(currentPath, record.get('index'));
     },
     /**
@@ -269,36 +264,51 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param node The node that was created.
      */
     processCurrent: function (tree, record, node) {
-        var newCurrent = node;                                  // set the new current value to the node
-        var current = tree.current;                             // get the current node from the tree
-        var type = current.type;                                // get the type of the current node in the tree
-        if (type === this.type.MAP) {                           // check if the type of the current node is a map
-            var maps = current.getMapValue();                   // get all the map values from the node
-            var map = maps[0];                                  // get the first map from the current node in the tree
-            if (map.getValue() === null) {                      // check if the value does not exist
-                map.setValue(node);                             // set the value on the map
-            } else {                                            // we're in the correct map
-                if (node.type === this.type.MAP) {              // check if the node type is a map
-                    maps.push(node.getMapValue()[0]);           // append the map value of the node to the current maps
+        // Set the new current value to the node.
+        var newCurrent = node;
+        // Get the current node from the tree and its type
+        var current = tree.current;
+        var type = current.type;
+        // Check if the type of the current node is a map.
+        if (type === this.type.MAP) {
+            // Get all the map values from the node and its first value.
+            var maps = current.getMapValue();
+            var map = maps[0];
+            // Check if the map value does not exist and then set its value to the node.
+            if (map.getValue() === null) {
+                map.setValue(node);
+            } else {
+                // Check if the node type is a map.
+                if (node.type === this.type.MAP) {
+                    // Append the map value of the node to the current maps.
+                    maps.push(node.getMapValue()[0]);
                 } else {
-                    newCurrent = node.getSequenceValue()[0];    // set the new current value to the value
+                    // Set the new current value to the first sequence value.
+                    newCurrent = node.getSequenceValue()[0];
                 }
             }
-        } else if (type === this.type.SEQUENCE) {               // check if the type of the current node is a sequence
-            var parent = record.parentNode;                     // get the parent node that contains the index
-            node.setTag(parent.get('index').toString());        // set a tag on the new node indicating the index
-            current.getSequenceValue().push(node);              // set the sequence value of the current tree
+        // Check if the type of the current node is a sequence.
+        } else if (type === this.type.SEQUENCE) {
+            // Get the parent node that contains the index.
+            var parent = record.parentNode;
+            // Set a tag on the new node indicating the index.
+            node.setTag(parent.get('index').toString());
+            // Set the sequence value of the current tree.
+            current.getSequenceValue().push(node);
         } else {
-            var value = current.getValue();                     // get the value of the KeyPair
-            if (value) {                                        // check if a value exists
-                if (value.type === this.type.MAP) {             // check if the value contains a map
-                    // must be a map node too, append it
+            // Get the value of the KeyPair.
+            var value = current.getValue();
+            // Check if a value exists from the KeyPair.
+            if (value) {
+                // Check if the value contains a map node.
+                if (value.type === this.type.MAP) {
+                    // Must be a map node too, append it.
                     value.getMapValue().push(node.getMapValue()[0]);
                 } else {
-                    // get the sequence value
+                    // Get the sequence value.
                     var sequence = node.getSequenceValue();
-                    // append the sequence if there are already values inside it, otherwise set the current value to
-                    // the old value
+                    // Append the sequence if there are already values inside it, otherwise set the current value to
+                    // the old value.
                     if (sequence.length > 0) {
                         value.getSequenceValue().push(node.getSequenceValue()[0]);
                     } else {
@@ -306,7 +316,7 @@ Ext.define('NU.view.window.ConfigurationController', {
                     }
                 }
             } else {
-                // set the value of the KeyPair
+                // Set the value of the KeyPair.
                 current.setValue(node);
             }
         }
@@ -321,22 +331,30 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param node The node that was created.
      */
     addTreeMappings: function (tree, record, node) {
-        var path;                                               // create a variable to store the path
-        var name = record.get('name');                          // get the name of the record
-        var index = record.get('index');                        // get the index of the record
-        var currentPath = tree.currentPath;                     // get the current path from the tree
-        if (tree.current.type !== this.type.SEQUENCE) {         // check if the type of the current tree is not a sequence
-            path = this.createRecordPath(currentPath, record);  // set the current path of the tree using the record
-            tree.mappings[path] = node;                         // add the node mapping using the current path
+        var path;
+        // Retrieve the name and index of the record.
+        var name = record.get('name');
+        var index = record.get('index');
+        // Retrieve the current path from the tree.
+        var currentPath = tree.currentPath;
+        // If the current type of the tree is not a sequence node, the node can be added to the tree mappings using
+        // the record path as its key.
+        if (tree.current.type !== this.type.SEQUENCE) {
+            path = this.createRecordPath(currentPath, record);
+            tree.mappings[path] = node;
         } else {
-            tree.mappings[currentPath] = node;                  // fix the sequence node mapping
+            // Fix the sequence node mapping.
+            tree.mappings[currentPath] = node;
         }
-        if (name) {                                             // check if the name exists in the record
-            path = this.createPath(currentPath, name);          // create the path using the name
-            tree.mappings[path] = node.getMapValue()[0];        // add the mapping to the tree
+        // If the name exists in the record, then a path can be created based off the name so it can be used with the
+        // tree mappings.
+        if (name) {
+            path = this.createPath(currentPath, name);
+            tree.mappings[path] = node.getMapValue()[0];
         }
+        // If the path was set in this method, then the current path of the tree is set.
         if (path) {
-            tree.currentPath = path;                            // set the current path to the path
+            tree.currentPath = path;
         }
     },
     /**
@@ -348,24 +366,31 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {{root: (spec.Node|*), current: (API.Configuration.KeyPair|*), currentPath: *, mappings: {}}}
      */
     processFilePath: function (currentTree, node, path) {
-        var fileNode = this.createFileNode(node);               // create the file node
-        var root = fileNode.node;                               // default the root to the node within the object
-        var current = fileNode.file;                            // default current to the map within the object
+        // Create the file node.
+        var fileNode = this.createFileNode(node);
+        // Default the root to the node within the object.
+        var root = fileNode.node;
+        // Default current to the map within the object.
+        var current = fileNode.file;
+        // An object to store tree mappings.
         var mappings = {};
-        if (currentTree === null) {                             // check if the current tree does not exist
-            mappings[path] = current;                           // add the file mapping for later
+        // Check if the current tree does not exist and add the file mapping that is to be used later.
+        if (currentTree === null) {
+            mappings[path] = current;
         } else {
-            var file = currentTree.mappings[path];              // get the file from its mappings
-            if (file) {                                         // check if the file exists
-                current = file;                                 // override current to the existing file from the tree mappings
+            // Get the file from the tree mappings and override current to the existing file if the mapping exists.
+            var file = currentTree.mappings[path];
+            if (file) {
+                current = file;
             } else {
-                currentTree.root.getMapValue().push(current);   // add the file to the current tree as it does not exist in the tree mappings
+                // Add the file to the current tree as it does not exist in the tree mappings.
+                currentTree.root.getMapValue().push(current);
             }
-            // override the root and set the mappings to the original mappings from the current tree
+            // Override the root and set the mappings to the original mappings from the current tree.
             root = currentTree.root;
             mappings = currentTree.mappings;
         }
-        // return an object containing the root, current node and path and existing mappings
+        // Return an object containing the root, current node and path and existing mappings.
         return {
             root: root,
             current: current,
@@ -407,15 +432,15 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param [path] The path to the file or directory.
      */
     createKeyPair: function (name, value, path) {
-        var keyPair = new API.Configuration.KeyPair;            // create the KeyPair
-        keyPair.setName(name);                                  // set the name of the KeyPair
-        if (value) {                                            // check if the value was passed in
-            keyPair.setValue(value);                            // set the value of the KeyPair
+        var keyPair = new API.Configuration.KeyPair;
+        keyPair.setName(name);
+        if (value) {
+            keyPair.setValue(value);
         }
-        if (path) {                                             // check if the path was passed in
-            keyPair.setPath(path);                              // set the path of the keyPair if it exists
+        if (path) {
+            keyPair.setPath(path);
         }
-        return keyPair;                                         // return the KeyPair that was created
+        return keyPair;
     },
     /**
      * Creates a Node given a particular type.
@@ -424,9 +449,9 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A ConfigurationState Node.
      */
     createNode: function (type) {
-        var node = new API.Configuration.Node;                  // create the Configuration Node
-        node.setType(type);                                     // set its type
-        return node;                                            // return the Node that was created
+        var node = new API.Configuration.Node;
+        node.setType(type);
+        return node;
     },
     /**
      * Creates a FILE type Node given the record data.
@@ -435,12 +460,12 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {{node: spec.Node, file: API.Configuration.KeyPair}} The file node and its map value.
      */
     createFileNode: function (record) {
-        var node = this.createNode(this.type.FILE);             // create the FILE Node
-        var map = new API.Configuration.KeyPair;                // create the map associated with the Node
-        map.setName(record.get('name'));                        // set the name of the map to the file name
-        map.setPath(record.get('path'));                        // set the path of the map to the configuration path
-        node.getMapValue().push(map);                           // append the map to the Node
-        return {                                                // return the Node and KeyPair
+        var node = this.createNode(this.type.FILE);
+        var map = new API.Configuration.KeyPair;
+        map.setName(record.get('name'));
+        map.setPath(record.get('path'));
+        node.getMapValue().push(map);
+        return {
             node: node,
             file: map
         };
@@ -454,14 +479,14 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A ConfigurationState Node.
      */
     processConfigurationNode: function (node, record) {
-        if (record) {                                           // check if the record exists
-            var name = record.get('name');                      // get the name of the node
-            if (name) {                                         // check if the name exists
-                var keyPair = this.createKeyPair(name, node);   // create a KeyPair with the name and node as its value
-                return this.createMapNode(keyPair);             // return a Map Node with the key pair as its value
-            } else if (node.getType() !== this.type.SEQUENCE) { // check if the type is not a sequence
-                node.setTag(record.get('index').toString());    // set the tag to the index of the node
-                return this.createSequenceNode(record, node);   // create a sequence node as it is missing from the tree
+        if (record) {
+            var name = record.get('name');
+            if (name) {
+                var keyPair = this.createKeyPair(name, node);
+                return this.createMapNode(keyPair);
+            } else if (node.getType() !== this.type.SEQUENCE) {
+                node.setTag(record.get('index').toString());
+                return this.createSequenceNode(record, node);
             }
         }
         return node;
@@ -473,8 +498,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A null ConfigurationState Node.
      */
     createNullNode: function (record) {
-        var node = this.createNode(this.type.NULL_VALUE);       // create the NULL Node
-        return this.processConfigurationNode(node, record);     // return the processed Node
+        var node = this.createNode(this.type.NULL_VALUE);
+        return this.processConfigurationNode(node, record);
     },
     /**
      * Create a STRING type Node given its name and value.
@@ -483,8 +508,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A string ConfigurationState Node.
      */
     createStringNode: function (record) {
-        var node = this.createNode(this.type.STRING);           // create the STRING Node
-        return this.processConfigurationNode(node, record);     // return the processed Node
+        var node = this.createNode(this.type.STRING);
+        return this.processConfigurationNode(node, record);
     },
     /**
      * Create a BOOLEAN type Node given its name and value.
@@ -493,8 +518,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A boolean ConfigurationState Node.
      */
     createBooleanNode: function (record) {
-        var node = this.createNode(this.type.BOOLEAN);          // create the BOOLEAN Node
-        return this.processConfigurationNode(node, record);     // return the processed Node
+        var node = this.createNode(this.type.BOOLEAN);
+        return this.processConfigurationNode(node, record);
     },
     /**
      * Create a LONG type Node given its name and value.
@@ -503,8 +528,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A long ConfigurationState Node.
      */
     createLongNode: function (record) {
-        var node = this.createNode(this.type.LONG);             // create the LONG Node
-        return this.processConfigurationNode(node, record);     // return the processed Node
+        var node = this.createNode(this.type.LONG);
+        return this.processConfigurationNode(node, record);
     },
     /**
      * Create a DOUBLE type Node given its name and value.
@@ -513,8 +538,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A double ConfigurationState Node.
      */
     createDoubleNode: function (record) {
-        var node = this.createNode(this.type.DOUBLE);           // create the DOUBLE Node
-        return this.processConfigurationNode(node, record);     // return the processed Node
+        var node = this.createNode(this.type.DOUBLE);
+        return this.processConfigurationNode(node, record);
     },
     /**
      * Creates a SEQUENCE type Node and adds a Node to its sequence value.
@@ -524,11 +549,11 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A sequence ConfigurationState Node.
      */
     createSequenceNode: function (record, value) {
-        var node = this.createNode(this.type.SEQUENCE);         // create a SEQUENCE Node
-        if (value) {                                            // check if the value exists
-            node.getSequenceValue().push(value);                // set the value of the Node
+        var node = this.createNode(this.type.SEQUENCE);
+        if (value) {
+            node.getSequenceValue().push(value);
         }
-        return this.processConfigurationNode(node, record);     // return the processed Node
+        return this.processConfigurationNode(node, record);
     },
     /**
      * Creates a MAP type Node and adds a Node to its map value.
@@ -537,9 +562,9 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A map ConfigurationState Node.
      */
     createMapNode: function (value) {
-        var node = this.createNode(this.type.MAP);              // create the MAP Node
-        node.setMapValue(value);                                // set the value of the Node
-        return node;                                            // return the processed Node
+        var node = this.createNode(this.type.MAP);
+        node.setMapValue(value);
+        return node;
     },
     /**
      * Sets a node's value by evaluating its type.
@@ -579,14 +604,14 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     send: function (tree) {
         if (tree !== null) {
-            // create the configuration state message
+            // Create the configuration state message.
             var message = NU.Network.createMessage(API.Message.Type.CONFIGURATION_STATE, 0);
-            // set the configuration state of the message
+            // Set the configuration state of the message.
             message.setConfigurationState(this.getConfigurationState(tree));
-            // send the message over the network
+            // Send the message over the network.
             NU.Network.send(this.getRobotIP(), message);
         }
-        // reset the current tree
+        // Reset the current tree.
         this.currentTree = null;
     },
     /**
@@ -596,18 +621,19 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {Window.API.Configuration} The ConfigurationState message.
      */
     getConfigurationState: function (tree) {
-        var configuration = new API.Configuration();        // create the configuration API
-        configuration.setRoot(tree.root);                   // set the root of the configuration message
-        return configuration;                               // return the configuration message
-    },
-    /**
-     * Removes a configuration for a particular robot.
-     *
-     * @param configuration The widget associated with a configuration to remove.
-     */
-    removeConfiguration: function (configuration) {
-        configuration = this.transformReference(configuration);
-        this.configurations.remove(this.configurations.lookupReference(configuration));
+        var configuration = new API.Configuration();
+        configuration.setRoot(tree.root);
+        return configuration;
     }
+    //,
+    ///**
+    // * Removes a configuration for a particular robot.
+    // *
+    // * @param configuration The widget associated with a configuration to remove.
+    // */
+    //removeConfiguration: function (configuration) {
+    //    configuration = this.transformReference(configuration);
+    //    this.configurations.remove(this.configurations.lookupReference(configuration));
+    //}
     // TODO: vectors
 });
