@@ -1,8 +1,8 @@
 /**
  * @author: Monica Olejniczak
  */
-Ext.define('NU.view.window.dashboard.robot.RobotController', {
-	extend: 'NU.view.window.DisplayController',
+Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
+	extend: 'Ext.app.ViewController',
 	alias: 'controller.Robot',
 	requires: [
 		'NU.util.TypeMap'

@@ -262,7 +262,7 @@ Ext.define('NU.view.window.FieldController', {
 			// Check if the object should fade out.
 			if (timeout !== 0) {
 				// Fade out the model using the specified timeout.
-				//TODO robot.fadeOutModel(model, timeout === null ? 2.5 : timeout);
+				robot.fadeOutModel(model, timeout === null ? 2.5 : timeout);
 			}
 		}, this);
 	},

@@ -1,11 +1,11 @@
 /**
  * @author: Monica Olejniczak
  */
-Ext.define('NU.view.window.dashboard.DashboardController', {
-	extend: 'NU.view.window.DisplayController',
+Ext.define('NU.view.dashboard.DashboardController', {
+	extend: 'Ext.app.ViewController',
 	alias: 'controller.Dashboard',
 	requires: [
-		'NU.view.window.dashboard.robot.Robot'
+		'NU.view.dashboard.panel.DashboardPanel'
 	],
 	init: function () {
 		this.robots = {};
@@ -24,19 +24,7 @@ Ext.define('NU.view.window.dashboard.DashboardController', {
 		// Check if the robot does not exist.
 		if (!robot) {
 			// Add a mapping from the robot IP to the view so it can be updated later.
-			robot = this.robots[robotIP] = this.getView().add(Ext.widget('nu_robot', {
-				name: robotIP
-			}));
-
-			this.getView().add(Ext.widget('nu_robot', {
-				name: robotIP
-			}));
-
-			this.getView().add(Ext.widget('nu_robot', {
-				name: robotIP
-			}));
-
-			this.getView().add(Ext.widget('nu_robot', {
+			robot = this.robots[robotIP] = this.getView().add(Ext.widget('nu_dashboard_panel', {
 				name: robotIP
 			}));
 		}

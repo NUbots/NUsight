@@ -1,7 +1,7 @@
 /**
  * @author Monica Olejniczak
  */
-Ext.define('NU.view.window.dashboard.robot.RobotViewModel', {
+Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 	extend: 'Ext.app.ViewModel',
 	alias: 'viewmodel.Robot',
 	data: {
