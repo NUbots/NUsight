@@ -8,10 +8,7 @@ Ext.define('NU.view.ToolbarController', {
 		}, config || {}));
 	},
 	onDashboardDisplay: function () {
-		this.create('NU.view.window.Dashboard');
-	},
-	onNetworkStatisticsDisplay: function () {
-		this.create('NU.view.window.NetworkStatistics');
+		this.create('NU.view.window.dashboard.Dashboard');
 	},
 	onLocalisationDisplay: function () {
 		this.create('NU.view.window.Field');
@@ -80,12 +77,13 @@ Ext.define('NU.view.ToolbarController', {
         this.create('NU.view.window.Configuration');
     },
 	onNetworkSettings: function () {
-		Ext.syncRequire('NU.view.NetworkSettings');
+		Ext.syncRequire('NU.view.network.NetworkSettings');
 		Ext.create('Ext.Window', {
 			autoShow: true,
 			modal: true,
+			maximizable: true,
 			title: 'Network Settings',
-			width: 500,
+			width: 800,
 			height: 500,
 			layout: 'fit',
 			items: [{

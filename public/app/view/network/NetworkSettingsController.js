@@ -1,4 +1,4 @@
-Ext.define('NU.view.NetworkSettingsController', {
+Ext.define('NU.view.network.NetworkSettingsController', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.NetworkSettings',
 	requires: [

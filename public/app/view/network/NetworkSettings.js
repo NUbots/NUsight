@@ -1,10 +1,11 @@
-Ext.define('NU.view.NetworkSettings', {
+Ext.define('NU.view.network.NetworkSettings', {
 	extend: 'Ext.tab.Panel',
 	requires: [
-		'NU.view.NetworkSettingsController',
-		'NU.view.robot.List',
 		'Ext.grid.Panel',
-		'Ext.grid.column.CheckColumn'
+		'Ext.grid.column.CheckColumn',
+		'NU.view.robot.List',
+		'NU.view.network.statistics.NetworkStatistics',
+		'NU.view.network.NetworkSettingsController'
 	],
 	controller: 'NetworkSettings',
 	alias: 'widget.networksettings',
@@ -43,5 +44,7 @@ Ext.define('NU.view.NetworkSettings', {
 			flex: 1,
 			dataIndex: 'enabled'
 		}]
+	}, {
+		xtype: 'nu_network_statistics_panel'
 	}]
 });

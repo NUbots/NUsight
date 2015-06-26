@@ -1,11 +1,11 @@
 /**
  * @author: Monica Olejniczak
  */
-Ext.define('NU.view.window.NetworkStatisticsController', {
-	extend: 'NU.view.window.DisplayController',
+Ext.define('NU.view.network.statistics.NetworkStatisticsController', {
+	extend: 'Ext.app.ViewController',
 	alias: 'controller.NetworkStatistics',
 	requires: [
-		'NU.view.window.NetworkStatisticsRobot'
+		'NU.view.network.statistics.grid.NetworkStatisticsGrid'
 	],
 	init: function () {
 		this.view = this.getView();
@@ -25,7 +25,7 @@ Ext.define('NU.view.window.NetworkStatisticsController', {
 		// Check if the robot does not exist.
 		if (!robot) {
 			// Add a mapping from the robot IP to the view so it can be updated later.
-			robot = this.robots[robotIP] = this.view.add(Ext.create('NU.view.window.NetworkStatisticsRobot', {
+			robot = this.robots[robotIP] = this.view.add(Ext.widget('nu_network_statistics_grid_panel', {
 				robot: {
 					name: robotIP
 				}
@@ -45,7 +45,6 @@ Ext.define('NU.view.window.NetworkStatisticsController', {
 		// Obtain the robot and the key.
 		var robot = this.getRobot(robotIP);
 		var key = NU.Network.getTypeMap()[type];
-		debugger;
 		robot.fireEvent('update', key);
 	}
 

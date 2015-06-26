@@ -1,6 +1,6 @@
-Ext.define('NU.view.window.NetworkStatisticsRobotViewModel', {
+Ext.define('NU.view.network.statistics.grid.NetworkStatisticsGridViewModel', {
 	extend: 'Ext.app.ViewModel',
-	alias: 'viewmodel.NetworkStatisticsRobot',
+	alias: 'viewmodel.NetworkStatisticsGrid',
 	data: {
 		name: ''
 	},

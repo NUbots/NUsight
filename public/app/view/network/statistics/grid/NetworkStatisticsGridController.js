@@ -1,9 +1,9 @@
 /**
  * @author: Monica Olejniczak
  */
-Ext.define('NU.view.window.NetworkStatisticsRobotController', {
+Ext.define('NU.view.network.statistics.grid.NetworkStatisticsGridController', {
 	extend: 'NU.view.window.DisplayController',
-	alias: 'controller.NetworkStatisticsRobot',
+	alias: 'controller.NetworkStatisticsGrid',
 	init: function () {
 		var viewModel = this.getViewModel();
 		viewModel.set('name', this.getView().getRobot().name);
