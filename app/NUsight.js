@@ -4,6 +4,7 @@ var Client = require('./Client');
 var fs = require('fs');
 var util = require('util');
 var events = require('events');
+var yaml = require('js-yaml');
 
 function NUsight (io) {
 
@@ -17,18 +18,8 @@ function NUsight (io) {
 	this.robotFinder.on('robotIP', function (robotIP) {
 		this.addRobot(robotIP);
 	}.bind(this));
-	this.addRobot('127.0.0.1', 'Virtual Machine');
-	//this.addRobot('127.0.0.1', 'Robot Simulator', 14000);
-	//this.addRobot('10.1.1.1', 'Robot #1');
-	//this.addRobot('10.1.2.1', 'Robot #1e');
-	//this.addRobot('10.1.1.2', 'Robot #2');
-	//this.addRobot('10.1.2.2', 'Robot #2e');
-	this.addRobot('10.1.1.3', 'Robot #3');
-	//this.addRobot('10.1.2.3', 'Robot #3e');
-	//this.addRobot('10.1.1.4', 'Robot #4');
-	//this.addRobot('10.1.2.4', 'Robot #4e');
-	//this.addRobot('10.1.1.5', 'Robot #5');
-	//this.addRobot('10.1.2.5', 'Robot #5e');
+
+	this.loadConfig('app/configuration.yaml');
 
 	this.io.sockets.on('connection', function (socket) {
 
@@ -40,7 +31,7 @@ function NUsight (io) {
 
 			socket.emit('robotIP', robot.host, robot.name);
 
-		}.bind(this));
+		}, this);
 
 		console.log('New web client', this.clients.length);
 
@@ -89,6 +80,20 @@ function NUsight (io) {
 
 util.inherits(NUsight, events.EventEmitter);
 
+NUsight.prototype.loadConfig = function (filename) {
+
+	var config = yaml.safeLoad(fs.readFileSync(filename, 'utf8'));
+
+	config.robots.forEach(function (robot) {
+
+		var address = robot.addresses[robot.defaultAddress || 'wifi'];
+
+		this.addRobot(address.host, robot.name, address.port || 12000);
+
+	}, this);
+
+};
+
 NUsight.prototype.getRobot = function (robotIP) {
 	var result = null;
 	this.robots.forEach(function (robot) {
@@ -96,7 +101,7 @@ NUsight.prototype.getRobot = function (robotIP) {
 			result = robot;
 			return false;
 		}
-	}.bind(this));
+	}, this);
 	return result;
 };
 
@@ -111,7 +116,7 @@ NUsight.prototype.removeRobot = function (robotIP) {
 			this.robots.splice(index, 1);
 			return false;
 		}
-	}.bind(this));
+	}, this);
 };
 
 NUsight.prototype.addRobot = function (robotIP, robotName, port) {
@@ -135,6 +140,8 @@ NUsight.prototype.addRobot = function (robotIP, robotName, port) {
 
 	this.robots.push(robot);
 
+	return robot;
+
 };
 
 NUsight.prototype.addRobots = function (robotIPs)
@@ -148,7 +155,7 @@ NUsight.prototype.addRobots = function (robotIPs)
 
 		this.addRobot(robotIP);
 
-	}.bind(this));
+	}, this);
 };
 
 NUsight.prototype.onMessage = function (robotIP, message) {
@@ -203,7 +210,7 @@ NUsight.prototype.onMessage = function (robotIP, message) {
 			}
 		}
 
-	}.bind(this));
+	}, this);
 
 };
 
