@@ -17,7 +17,7 @@
 		// Obtain the necessary parameters.
 		var path = parameters.path || [];
 		var width = parameters.width || 0.1;
-		var color = parameters.color || 0xFFFFFF;
+		var color = parameters.color || 0xffaaff;
 		// Create the geometry and material for the polyline.
 		var geometry = new THREE.Geometry();
 		var material = new THREE.MeshBasicMaterial({
@@ -38,10 +38,13 @@
 			} else {
 				// Create the line and merge it with the base geometry.
 				geometry.merge(this.createLine(position, path[parentIndex].position, width));
+				geometry.merge(this.createCircle(position, radius));
 			}
 		}
 		// Add the polyline to the object.
 		this.add(new THREE.Mesh(geometry, material));
+
+	    this.name = parameters.name || 'Polyline';
 	};
 
 	Polyline.prototype = Object.create(THREE.Object3D.prototype);
@@ -55,8 +58,8 @@
 	 * @returns {THREE.CircleGeometry}
 	 */
 	Polyline.prototype.createCircle = function (position, radius) {
-		var circle = new THREE.CircleGeometry(radius, 128);
-		circle.applyMatrix(new THREE.Matrix4().makeTranslation(position.x, position.y, 0));
+		var circle = new THREE.CircleGeometry(radius, 64);
+		circle.applyMatrix(new THREE.Matrix4().makeTranslation(position.x, position.y, 0.01));
 		return circle;
 	};
 
@@ -85,7 +88,7 @@
 		// Rotate the line along the vertical up-axis to face the target vector.
 		line.applyMatrix(new THREE.Matrix4().makeRotationZ(theta));
 		// Apply a translation to the line so that the line is at the desired position.
-		line.applyMatrix(new THREE.Matrix4().makeTranslation(target.x, target.y, 0));
+		line.applyMatrix(new THREE.Matrix4().makeTranslation(target.x, target.y, 0.01));
 		// Return the geometry.
 		return line;
 	};
