@@ -13,8 +13,10 @@
 		this.coordinates = coordinates;
 
 		this.slow = false;
+		this.fast = false;
 		this.movementSpeed = 1;
 		this.slowSpeedMultiplier = 0.10;
+		this.fastSpeedMultiplier = 5;
 		this.forwardSpeed = 0;
 		this.strafeSpeed = 0;
 		this.verticalSpeed = 0;
@@ -131,6 +133,8 @@
 			var speedDirection = speed;
 			if (me.slow) {
 				speedDirection *= me.slowSpeedMultiplier;
+			} else if (me.fast) {
+				speedDirection *= me.fastSpeedMultiplier;
 			}
 			// updates the coordinates during movement
 			me.updateCoordinates();
@@ -144,6 +148,15 @@
 					this.strafeSpeed *= this.slowSpeedMultiplier;
 					this.verticalSpeed *= this.slowSpeedMultiplier;
 					this.slow = true;
+				}
+				break;
+
+			case 17: /*ctrl*/
+				if (!this.fast) {
+					this.forwardSpeed *= this.fastSpeedMultiplier;
+					this.strafeSpeed *= this.fastSpeedMultiplier;
+					this.verticalSpeed *= this.fastSpeedMultiplier;
+					this.fast = true;
 				}
 				break;
 
@@ -185,6 +198,15 @@
 					this.strafeSpeed /= this.slowSpeedMultiplier;
 					this.verticalSpeed /= this.slowSpeedMultiplier;
 					this.slow = false;
+				}
+				break;
+
+			case 17: /*ctrl*/
+				if (this.fast) {
+					this.forwardSpeed /= this.fastSpeedMultiplier;
+					this.strafeSpeed /= this.fastSpeedMultiplier;
+					this.verticalSpeed /= this.fastSpeedMultiplier;
+					this.fast = false;
 				}
 				break;
 
