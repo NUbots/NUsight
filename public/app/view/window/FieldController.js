@@ -258,7 +258,7 @@ Ext.define('NU.view.window.FieldController', {
 				robot.updateModel(currentModel, newModel);
 			}
 			// Get the timeout of the object.
-			var timeout = object.getTimeOut();
+			var timeout = object.getTimeout();
 			// Check if the object should fade out.
 			if (timeout !== 0) {
 				// Fade out the model using the specified timeout.
@@ -420,7 +420,7 @@ Ext.define('NU.view.window.FieldController', {
 		return robot.createRectangleModel({
 			name: object.getName(),
 			position: this.toVec3(object.getPosition()),
-			target: object.getTarget(),
+			rotation: this.toVec3(object.getRotation()),
 			width: object.getWidth(),
 			length: object.getLength(),
 			color: this.toColor(object.getColor())
