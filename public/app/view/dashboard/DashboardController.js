@@ -8,49 +8,53 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		'NU.view.dashboard.panel.DashboardPanel'
 	],
 	init: function () {
-		this.robots = {};
+		this.dashboardPanels = {};
+		// Listen to the network events.
 		NU.Network.on({
 			robotIP: this.onRobotIP,
 			overview: this.onOverview,
 			scope: this
 		});
+		// Iterate through each robot and create the dashboard panel for it.
 		NU.Network.getRobotIPs().forEach(function (robotIP) {
-			this.getRobot(robotIP);
+			this.createDashboardPanel(robotIP, robotIP);
 		}, this);
 	},
 
 	/**
-	 * Retrieves the robot record from the grid store based of its IP address.
+	 * Creates the dashboard panel for a certain robot IP address.
 	 *
 	 * @param robotIP The IP address of the robot.
-	 * @returns {*}
+	 * @param robotName The name of the robot.
 	 */
-	getRobot: function (robotIP) {
-		// Get the robot from the object.
-		var robot = this.robots[robotIP];
-		// Check if the robot does not exist.
-		if (!robot) {
-			// Add a mapping from the robot IP to the view so it can be updated later.
-			robot = this.robots[robotIP] = this.getView().add(Ext.widget('nu_dashboard_panel', {
-				name: robotIP
-			}));
-		}
-		return robot;
-	},
-	onRobotIP: function (robotIP, robotName) {
-		this.getRobot(robotIP);
+	createDashboardPanel: function (robotIP, robotName) {
+		// Add a mapping from the robot IP to the view so it can be updated later.
+		this.dashboardPanels[robotIP] = this.getView().add(Ext.widget('nu_dashboard_panel', {
+			name: robotName
+		}));
 	},
 
 	/**
-	 * An event triggered when the Network class receives an Overview protocol buffer.
+	 * An event triggered when the Network class receives a new robot. This method creates the dashboard panel
+	 * associated with the robot that was added to the network.
+	 *
+	 * @param robotIP The IP address of the robot.
+	 * @param robotName The name of the robot.
+	 */
+	onRobotIP: function (robotIP, robotName) {
+		this.createDashboardPanel(robotIP, robotName);
+	},
+
+	/**
+	 * An event triggered when the Network class receives an Overview protocol buffer. This method fires the update
+	 * event on the dashboard panel view associated with the IP address of a robot.
 	 *
 	 * @param robotIP The IP address of the robot.
 	 * @param overview The protocol buffer data.
 	 * @param timestamp The time the data was received.
 	 */
 	onOverview: function (robotIP, overview, timestamp) {
-		// Get the robot from the robotIP and fire an event to update its data.
-		this.getRobot(robotIP).fireEvent('update', overview, timestamp);
+		this.dashboardPanels[robotIP].fireEvent('update', overview, timestamp);
 	}
 
 });

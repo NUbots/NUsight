@@ -24,8 +24,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		lastCameraImage: 0,
 		// Vision
 		lastSeenBall: 0,
-		lastSeenBallElapsed: 0,
-		currentTime: null
+		lastSeenGoal: 0
+	},
+	getUninitialised: function () {
+		return 'NO DATA';
 	},
 	/**
 	 * Retrieves the colour assicated with a value between 0 and 1.
@@ -71,24 +73,23 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return this.getColor(Math.abs(position.x) <= length * 0.5 && Math.abs(position.y) <= width * 0.5);
 		},
 		covariance: function (get) {
-			var robotPositionCovariance = get('robotPositionCovariance');
-			return robotPositionCovariance;
+			return get('robotPositionCovariance') || {x: {x: 0, y: 0}, y: {x: 0, y: 0}};
 		},
 		heading: function (get) {
 			var robotHeading = get('robotHeading') || {};
 			return (Math.atan2(robotHeading.y, robotHeading.x) * 180 / Math.PI).toFixed(2);
 		},
 		state: function (get) {
-			return NU.TypeMap.get(API.Behaviour.State)[get('behaviourState')];
+			return NU.TypeMap.get(API.Behaviour.State)[get('behaviourState')] || this.getUninitialised();
 		},
 		mode: function (get) {
-			return NU.TypeMap.get(API.GameState.Data.Mode)[get('gameMode')];
+			return NU.TypeMap.get(API.GameState.Data.Mode)[get('gameMode')] || this.getUninitialised();
 		},
 		phase: function (get) {
-			return NU.TypeMap.get(API.GameState.Data.Phase)[get('gamePhase')];
+			return NU.TypeMap.get(API.GameState.Data.Phase)[get('gamePhase')] || this.getUninitialised();
 		},
 		penalty: function (get) {
-			return NU.TypeMap.get(API.GameState.Data.PenaltyReason)[get('penaltyReason')];
+			return NU.TypeMap.get(API.GameState.Data.PenaltyReason)[get('penaltyReason')] || this.getUninitialised();
 		},
 		penaltyBackground: function (get) {
 			var PenaltyReason = API.GameState.Data.PenaltyReason;
@@ -106,7 +107,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return this.getColor(this.convertValue(0, 3, get('cameraImage')));
 		},
 		lastSeenBallElapsed: function (get) {
-			var currentTime = get('currentTime');
+			var currentTime = Date.now();
 			var lastSeenBall = get('lastSeenBall') || 0;
 			if (lastSeenBall !== 0) {
 				lastSeenBall = lastSeenBall.toNumber();
@@ -125,7 +126,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return this.getColor(this.convertValue(0, 5, get('lastSeenBallElapsed')));
 		},
 		lastSeenGoalElapsed: function (get) {
-			var currentTime = get('currentTime');
+			var currentTime = Date.now();
 			var lastSeenGoal = get('lastSeenGoal') || 0;
 			if (lastSeenGoal !== 0) {
 				lastSeenGoal = lastSeenGoal.toNumber();

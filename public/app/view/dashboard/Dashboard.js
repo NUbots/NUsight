@@ -14,5 +14,9 @@ Ext.define('NU.view.dashboard.Dashboard', {
 	maximizable: true,
 	width: 1000,
 	height: 550,
-	layout: 'hbox'
+	autoScroll: true,
+	layout: {
+		type: 'column',
+		align: 'stretch'
+	}
 });

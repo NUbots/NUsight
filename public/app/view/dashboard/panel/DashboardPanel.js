@@ -26,12 +26,17 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		title: '{name}'
 	},
 	listeners: {
+		destroy: 'onDestroy',
 		update: 'onUpdate'
 	},
 	style: {
 		marginRight: '2px'
 	},
-	width: '30%',
+	layout: {
+		type: 'vbox',
+		align: 'stretch'
+	},
+	columnWidth: 0.25,
 	border: true,
 	tools:[{
 		xtype: 'container',

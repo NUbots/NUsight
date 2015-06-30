@@ -6,9 +6,25 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 	alias: 'controller.DashboardPanel',
 	init: function () {
 		this.getViewModel().set('name', this.getView().getName());
-		requestAnimationFrame(this.updateView.bind(this));
+		this.requestId = requestAnimationFrame(this.updateView.bind(this));
 	},
 
+	/**
+	 * An event triggered when the user closes the window. This method stops the requestAnimationFrame method from
+	 * calling.
+	 */
+	onDestroy: function () {
+		if (this.requestId) {
+			cancelAnimationFrame(this.requestId);
+		}
+	},
+
+	/**
+	 * An event triggered when the data for this view is updated.
+	 *
+	 * @param data The Overview protocol buffer data.
+	 * @param timestamp The time that the message was sent.
+	 */
 	onUpdate: function (data, timestamp) {
 		var viewModel = this.getViewModel();
 		// Set the data obtained from the event to update the view model for the robot.
@@ -26,7 +42,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 	},
 
 	updateView: function () {
-		requestAnimationFrame(this.updateView.bind(this));
+		this.requestId = requestAnimationFrame(this.updateView.bind(this));
 		this.getViewModel().set('currentTime', Date.now());
 	}
 
