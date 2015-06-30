@@ -275,6 +275,9 @@ Ext.define('NU.view.window.FieldController', {
 	toVec3: function (vector) {
 		return vector === null ? new THREE.Vector3() : new THREE.Vector3(vector.getX(), vector.getY(), vector.getZ());
 	},
+	toEuler: function (euler) {
+		return euler === null ? new THREE.Euler() : new THREE.Euler(euler.getX(), euler.getY(), euler.getZ(), 'XYZ');
+	},
 	toColor: function (vector) {
 		return vector === null ? vector : new THREE.Color(vector.getX(), vector.getY(), vector.getZ());
 	},
@@ -420,7 +423,7 @@ Ext.define('NU.view.window.FieldController', {
 		return robot.createRectangleModel({
 			name: object.getName(),
 			position: this.toVec3(object.getPosition()),
-			rotation: this.toVec3(object.getRotation()),
+			rotation: this.toEuler(object.getRotation()),
 			width: object.getWidth(),
 			length: object.getLength(),
 			color: this.toColor(object.getColor())

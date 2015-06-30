@@ -28,15 +28,6 @@
 		   //  length = parameters.length !== undefined ? parameters.length : 0.8;
 	    // }
         var color = parameters.color || 0x1111FF;
-        // // Create the lines for the rectangle.
-        // var rectangle = new THREE.Shape();
-        // rectangle.moveTo(0, 0);
-        // rectangle.lineTo(0, width);
-        // rectangle.lineTo(length, width);
-        // rectangle.lineTo(length, 0);
-        // rectangle.lineTo(0, 0);
-        // Create the rectangle geometry.
-        // var geometry = new THREE.ShapeGeometry(rectangle);
         var geometry = new THREE.PlaneBufferGeometry(length, width);
         // geometry.applyMatrix(new THREE.Matrix4().makeTranslation(length * 0.5, width * 0.5, 0));
         // create a material
@@ -52,8 +43,8 @@
 	    // Point the mesh in the direction vector.
 	    // this.rotation.y = -Math.atan2(direction.z, Math.sqrt(Math.pow(length, 2) - Math.pow(direction.z, 2)));
 	    // this.rotation.z = rotation.z; // Math.PI * 0.5 - Math.atan2(direction.x, direction.y);
-	    this.rotation.copy(rotation);
-        console.log(rotation, this.rotation);
+	    //this.rotation.set(rotation.x, rotation.y, rotation.z, 'ZYX');
+        this.rotation.copy(rotation);
         // Add a name to the object.
 	    this.name = parameters.name || 'Rectangle';
         // Add the rectangle to the object.
@@ -61,7 +52,7 @@
     };
 
     Rectangle.prototype = Object.create(THREE.Object3D.prototype);
-    // export the object
+    // Export the object.
     window.Rectangle = Rectangle;
 
 }());
