@@ -321,7 +321,7 @@ Ext.define('NU.view.window.FieldController', {
 			direction: this.toVec3(object.getDirection()),
 			length: object.getLength(),
 			depth: object.getDepth(),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -388,7 +388,7 @@ Ext.define('NU.view.window.FieldController', {
 			name: object.getName(),
 			path: object.getPath(),
 			width: object.getWidth(),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
