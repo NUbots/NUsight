@@ -5,7 +5,16 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.DashboardPanel',
 	init: function () {
-		this.getViewModel().set('name', this.getView().getName());
+		var view = this.getView();
+		var colors = view.getColors();
+		this.getViewModel().set('name', view.getName());
+		if (!colors) {
+			view.setColors({
+				OKAY: 'white',
+				WARNING: 'orange',
+				DANGER: 'red'
+			});
+		}
 		this.requestId = requestAnimationFrame(this.updateView.bind(this));
 	},
 

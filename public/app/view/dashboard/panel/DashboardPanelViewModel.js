@@ -29,6 +29,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 	getUninitialised: function () {
 		return 'NO DATA';
 	},
+	getFontColor: function (color) {
+		var colors = this.getView().getColors();
+		return color === colors.OKAY ? 'black' : 'white';
+	},
 	/**
 	 * Retrieves the colour assicated with a value between 0 and 1.
 	 *
@@ -59,6 +63,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		batteryPercentage: function (get) {
 			return get('battery') * 100;
 		},
+		batteryColor: function (get) {
+			return this.getColor(1 - get('battery'));
+		},
 		position: function (get) {
 			var robotPosition = get('robotPosition') || {x: 0, y: 0};
 			return {
@@ -71,6 +78,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			var width = Field.constants.FIELD_WIDTH;
 			var length = Field.constants.FIELD_LENGTH;
 			return this.getColor(Math.abs(position.x) <= length * 0.5 && Math.abs(position.y) <= width * 0.5);
+		},
+		positionColor: function (get) {
+			return this.getFontColor(get('positionBackground'));
 		},
 		covariance: function (get) {
 			return get('robotPositionCovariance') || {x: {x: 0, y: 0}, y: {x: 0, y: 0}};
@@ -91,7 +101,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		penalty: function (get) {
 			return NU.TypeMap.get(API.GameState.Data.PenaltyReason)[get('penaltyReason')] || this.getUninitialised();
 		},
-		penaltyBackground: function (get) {
+		penaltyColor: function (get) {
 			var PenaltyReason = API.GameState.Data.PenaltyReason;
 			var penaltyReason = get('penaltyReason');
 			return this.getColor(penaltyReason === PenaltyReason.UNPENALISED);
@@ -105,6 +115,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 				return this.getColor(1);
 			}
 			return this.getColor(this.convertValue(0, 3, get('cameraImage')));
+		},
+		lastCameraColor: function (get) {
+			return this.getFontColor(get('lastCameraBackground'));
 		},
 		lastSeenBallElapsed: function (get) {
 			var currentTime = Date.now();
@@ -125,6 +138,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			}
 			return this.getColor(this.convertValue(0, 5, get('lastSeenBallElapsed')));
 		},
+		lastBallColor: function (get) {
+			return this.getFontColor(get('lastBallBackground'));
+		},
 		lastSeenGoalElapsed: function (get) {
 			var currentTime = Date.now();
 			var lastSeenGoal = get('lastSeenGoal') || 0;
@@ -143,6 +159,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 				return this.getColor(1);
 			}
 			return this.getColor(this.convertValue(0, 5, get('lastSeenGoalElapsed')));
+		},
+		lastGoalColor: function (get) {
+			return this.getFontColor(get('lastGoalBackground'));
 		}
 	}
 });
