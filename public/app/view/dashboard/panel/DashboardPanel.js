@@ -11,12 +11,17 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		'NU.view.dashboard.panel.DashboardPanelController'
 	],
 	config: {
-		name: null
+		name: null,
+		colors: {
+			OKAY: 'green',
+			WARNING: 'orange',
+			DANGER: 'red'
+		}
 	},
 	viewModel: {
-		type: 'Robot'
+		type: 'DashboardPanel'
 	},
-	controller: 'Robot',
+	controller: 'DashboardPanel',
 	bind: {
 		title: '{name}'
 	},
@@ -48,17 +53,21 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		html: 'Localisation'
 	}, {
 		xtype: 'container',
-		padding: 10,
 		defaults: {
-			xtype: 'container'
+			xtype: 'container',
+			padding: '5px 10px 5px 10px'
 		},
 		items: [{
 			bind: {
-				html: '<strong>Position:</strong> [{position.x}, {position.y}]'
+				html: '<strong>Position:</strong> [{position.x}, {position.y}]',
+				style: {
+					background: '{positionBackground}',
+					color: 'white'
+				}
 			}
 		}, {
 			bind: {
-				html: '<strong>Covariance:</strong> {covariance}'
+				html: '<strong>Covariance:</strong> {covariance.x.x}, {covariance.x.y}, {covariance.y.y}'
 			}
 		}, {
 			bind: {
@@ -70,7 +79,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		html: 'Behaviour'
 	}, {
 		xtype: 'container',
-		padding: 10,
+		padding: '5px 10px 5px 10px',
 		bind: {
 			html: '<strong>Behaviour state:</strong> {state}'
 		}
@@ -79,9 +88,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		html: 'Game controller'
 	}, {
 		xtype: 'container',
-		padding: 10,
 		defaults: {
-			xtype: 'container'
+			xtype: 'container',
+			padding: '5px 10px 5px 10px'
 		},
 		items: [{
 			bind: {
@@ -93,7 +102,11 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			}
 		}, {
 			bind: {
-				html: '<strong>Penalty:</strong> {penalty}'
+				html: '<strong>Penalty:</strong> {penalty}',
+				style: {
+					background: '{penaltyBackground}',
+					color: 'white'
+				}
 			}
 		}]
 	}, {
@@ -101,26 +114,38 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		html: 'Hardware'
 	}, {
 		xtype: 'container',
-		padding: 10,
+		padding: '5px 10px 5px 10px',
 		bind: {
-			html: '<strong>Last camera image:</strong> {cameraImage}'
+			html: '<strong>Last camera image:</strong> {cameraImage}',
+			style: {
+				background: '{lastCameraBackground}',
+				color: 'white'
+			}
 		}
 	}, {
 		xtype: 'nu_dashboard_panel_title',
 		html: 'Vision'
 	}, {
 		xtype: 'container',
-		padding: 10,
 		defaults: {
-			xtype: 'container'
+			xtype: 'container',
+			padding: '5px 10px 5px 10px'
 		},
 		items: [{
 			bind: {
-				html: '<strong>Last seen ball:</strong> {lastBall}'
+				html: '<strong>Last seen ball:</strong> {lastBall}',
+				style: {
+					background: '{lastBallBackground}',
+					color: 'white'
+				}
 			}
 		}, {
 			bind: {
-				html: '<strong>Last seen goal:</strong> {lastGoal}'
+				html: '<strong>Last seen goal:</strong> {lastGoal}',
+				style: {
+					background: '{lastGoalBackground}',
+					color: 'white'
+				}
 			}
 		}]
 	}]

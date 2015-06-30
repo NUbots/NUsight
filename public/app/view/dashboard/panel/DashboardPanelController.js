@@ -3,7 +3,7 @@
  */
 Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 	extend: 'Ext.app.ViewController',
-	alias: 'controller.Robot',
+	alias: 'controller.DashboardPanel',
 	init: function () {
 		this.getViewModel().set('name', this.getView().getName());
 		requestAnimationFrame(this.updateView.bind(this));
