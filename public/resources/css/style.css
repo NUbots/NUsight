@@ -37,3 +37,7 @@ div.crosshair {
 	height: 25px;
 	background-image: url('../images/crosshair.png');
 }
+
+.x-tool-battery {
+	background-image: url('../svg/battery.svg') !important;
+}

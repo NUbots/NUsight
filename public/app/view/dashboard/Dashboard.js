@@ -13,6 +13,6 @@ Ext.define('NU.view.dashboard.Dashboard', {
 	constrain: true,
 	maximizable: true,
 	width: 1000,
-	height: 350,
+	height: 550,
 	layout: 'hbox'
 });

@@ -6,6 +6,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 	alias: 'widget.nu_dashboard_panel',
 	requires: [
 		'NU.view.dashboard.panel.title.Title',
+		'NU.view.dashboard.panel.tool.Battery',
 		'NU.view.dashboard.panel.DashboardPanelViewModel',
 		'NU.view.dashboard.panel.DashboardPanelController'
 	],
@@ -22,54 +23,104 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 	listeners: {
 		update: 'onUpdate'
 	},
-	width: '30%',
-	border: true,
 	style: {
 		marginRight: '2px'
 	},
-	defaults: {
-		style: {
-			padding: 10
-		}
-	},
-	items: [{
-		xtype: 'nu_dashboard_panel_title',
-		html: 'Sensors'
-	}, {
+	width: '30%',
+	border: true,
+	tools:[{
 		xtype: 'container',
 		layout: 'hbox',
-		defaults: {
+		items: [{
 			xtype: 'container',
-			flex: 1
+			bind: {
+				html: '{batteryPercentage}%'
+			},
+			style: {
+				color: 'white'
+			}
+		}, {
+			xtype: 'nu_tool_battery'
+		}]
+	}],
+	items: [{
+		xtype: 'nu_dashboard_panel_title',
+		html: 'Localisation'
+	}, {
+		xtype: 'container',
+		padding: 10,
+		defaults: {
+			xtype: 'container'
 		},
 		items: [{
 			bind: {
-				html: '<strong>Voltage:</strong> {voltage}'
+				html: '<strong>Position:</strong> [{position.x}, {position.y}]'
 			}
 		}, {
 			bind: {
-				html: '<strong>Battery:</strong> {battery}'
+				html: '<strong>Covariance:</strong> {covariance}'
+			}
+		}, {
+			bind: {
+				html: '<strong>Heading:</strong> {heading}&deg;'
 			}
 		}]
 	}, {
-		xtype: 'container',
-		bind: {
-			html: '<strong>Behaviour state:</strong> {behaviourState}'
-		}
+		xtype: 'nu_dashboard_panel_title',
+		html: 'Behaviour'
 	}, {
 		xtype: 'container',
-		layout: 'hbox',
+		padding: 10,
+		bind: {
+			html: '<strong>Behaviour state:</strong> {state}'
+		}
+	}, {
+		xtype: 'nu_dashboard_panel_title',
+		html: 'Game controller'
+	}, {
+		xtype: 'container',
+		padding: 10,
 		defaults: {
-			xtype: 'container',
-			flex: 1
+			xtype: 'container'
 		},
 		items: [{
 			bind: {
-				html: '<strong>Position:</strong> {position}'
+				html: '<strong>Mode:</strong> {mode}'
 			}
 		}, {
 			bind: {
-				html: '<strong>Heading:</strong> {heading}'
+				html: '<strong>Phase:</strong> {phase}'
+			}
+		}, {
+			bind: {
+				html: '<strong>Penalty:</strong> {penalty}'
+			}
+		}]
+	}, {
+		xtype: 'nu_dashboard_panel_title',
+		html: 'Hardware'
+	}, {
+		xtype: 'container',
+		padding: 10,
+		bind: {
+			html: '<strong>Last camera image:</strong> {cameraImage}'
+		}
+	}, {
+		xtype: 'nu_dashboard_panel_title',
+		html: 'Vision'
+	}, {
+		xtype: 'container',
+		padding: 10,
+		defaults: {
+			xtype: 'container'
+		},
+		items: [{
+			bind: {
+				html: '<strong>Last seen ball:</strong> {lastBall}'
+			}
+		}, {
+			bind: {
+				html: '<strong>Last seen goal:</strong> {lastGoal}'
 			}
 		}]
 	}]
