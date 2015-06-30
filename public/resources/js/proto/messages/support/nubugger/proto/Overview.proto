@@ -52,3 +52,4 @@ message Overview {
 	optional uint64 last_seen_goal = 12;
 
 }
+
