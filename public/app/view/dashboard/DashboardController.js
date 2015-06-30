@@ -9,7 +9,14 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	],
 	init: function () {
 		this.robots = {};
-		NU.Network.on('overview', this.onOverview, this);
+		NU.Network.on({
+			robotIP: this.onRobotIP,
+			overview: this.onOverview,
+			scope: this
+		});
+		NU.Network.getRobotIPs().forEach(function (robotIP) {
+			this.getRobot(robotIP);
+		}, this);
 	},
 
 	/**
@@ -29,6 +36,9 @@ Ext.define('NU.view.dashboard.DashboardController', {
 			}));
 		}
 		return robot;
+	},
+	onRobotIP: function (robotIP, robotName) {
+		this.getRobot(robotIP);
 	},
 
 	/**

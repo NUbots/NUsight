@@ -51,8 +51,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 	 * @returns {*}
 	 */
 	convertValue: function (min, max, value) {
-		var previousRange = max - min;
-		return ((value - min) / previousRange) + min;
+		return ((value - min) / (max - min)) + min;
 	},
 	formulas: {
 		batteryPercentage: function (get) {
