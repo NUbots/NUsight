@@ -7,6 +7,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 	requires: [
 		'NU.view.dashboard.panel.title.Title',
 		'NU.view.dashboard.panel.tool.Battery',
+		'NU.view.dashboard.panel.tool.Packet',
 		'NU.view.dashboard.panel.DashboardPanelViewModel',
 		'NU.view.dashboard.panel.DashboardPanelController'
 	],
@@ -22,6 +23,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		title: '{name} - <span style="color:{penaltyColor}">{penalty}</span>'
 	},
 	listeners: {
+		destroy: 'onDestroy',
 		update: 'onUpdate'
 	},
 	style: {
@@ -47,6 +49,13 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		}, {
 			xtype: 'nu_tool_battery'
 		}]
+	}, {
+		xtype: 'nu_tool_packet',
+		bind: {
+			style: {
+				backgroundColor: '{elapsedBackground}'
+			}
+		}
 	}],
 	items: [/*{
 		xtype: 'nu_dashboard_panel_title',

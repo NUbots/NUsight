@@ -25,29 +25,43 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		lastCameraImage: null,
 		// Vision
 		lastSeenBall: null,
-		lastSeenGoal: null
+		lastSeenGoal: null,
+		// Timestamp
+		timestamp: null,
+		currentTime: null
 	},
 	getUninitialised: function () {
 		return 'NO DATA';
 	},
 	getFontColor: function (color) {
 		var colors = this.getView().getColors();
-		return color === colors.OKAY ? 'black' : 'white';
+		return color === colors.NEUTRAL ? 'black' : 'white';
 	},
 	/**
 	 * Retrieves the colour assicated with a value between 0 and 1.
 	 *
 	 * @param value The value being mapped to a color between 0 and 1.
+	 * @param [okay] Whether to display the okay colour. Defaults to false.
 	 * @returns {string}
 	 */
-	getColor: function (value) {
+	getColor: function (value, okay) {
 		var colors = this.getView().getColors();
 		// Check if the value is a boolean.
 		if (typeof value === 'boolean') {
-			return value ? colors.OKAY : colors.DANGER;
+			return value ? (okay === true ? colors.OKAY : colors.NEUTRAL) : colors.DANGER;
 		}
 		// Returns the colour based on the value.
-		return value < 0.5 ? colors.OKAY : value > 0.8 ? colors.DANGER : colors.WARNING;
+		return value < 0.5 ? (okay === true ? colors.OKAY : colors.NEUTRAL) : value > 0.9 ? colors.DANGER : colors.WARNING;
+	},
+	// see http://easings.net/ and http://gizma.com/easing/
+	easeOutCirc: function (value) {
+		return Math.sqrt(1 - (value - 1) * (value - 1));
+	},
+	easeOutSine: function (value) {
+		return Math.sin(Math.PI * value / 2);
+	},
+	easeOutCubic: function (value) {
+		return Math.pow(value - 1, 3) + 1;
 	},
 	/**
 	 * Converts a value with a specified range to a new range between 0 and 1.
@@ -66,6 +80,14 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		batteryColor: function (get) {
 			return this.getColor(1 - get('battery'));
+		},
+		elapsedBackground: function (get) {
+			var timestamp = get('timestamp');
+			if (timestamp === null) {
+				return this.getColor(1);
+			}
+			var elapsed = ((get('currentTime') - timestamp.getTime()) / 1000);
+			return this.getColor(this.easeOutCubic(this.normalize(0, 10, elapsed)), true);
 		},
 		position: function (get) {
 			var position = get('robotPosition') || {x: 0, y: 0};
@@ -92,7 +114,6 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return (Math.atan2(heading.y, heading.x) * 180 / Math.PI).toFixed(2);
 		},
 		ball: function (get) {
-			debugger;
 			var position = get('ballPosition') || {x: 0, y: 0};
 			return {
 				x: position.x.toFixed(2),
@@ -129,46 +150,28 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		lastCameraColor: function (get) {
 			return this.getFontColor(get('lastCameraBackground'));
 		},
-		lastSeenBallElapsed: function (get) {
-			var currentTime = Date.now();
-			var lastSeenBall = get('lastSeenBall') || 0;
-			if (lastSeenBall !== 0) {
-				lastSeenBall = lastSeenBall.toNumber();
-			}
-			return ((currentTime - lastSeenBall) / 1000).toFixed(2);
-		},
 		lastBall: function (get) {
 			var lastSeenBall = get('lastSeenBall');
-			var elapsedTime = get('lastSeenBallElapsed');
-			return lastSeenBall ? elapsedTime: 'Not seen';
+			return lastSeenBall ? ((Date.now() - lastSeenBall.toNumber()) / 1000).toFixed(2) : 'Not seen';
 		},
 		lastBallBackground: function (get) {
 			if (get('lastSeenBall') === null) {
 				return this.getColor(1);
 			}
-			return this.getColor(this.normalize(0, 5, get('lastSeenBallElapsed')));
+			return this.getColor(this.normalize(0, 5, get('lastBall')));
 		},
 		lastBallColor: function (get) {
 			return this.getFontColor(get('lastBallBackground'));
 		},
-		lastSeenGoalElapsed: function (get) {
-			var currentTime = Date.now();
-			var lastSeenGoal = get('lastSeenGoal') || 0;
-			if (lastSeenGoal !== 0) {
-				lastSeenGoal = lastSeenGoal.toNumber();
-			}
-			return ((currentTime - lastSeenGoal) / 1000).toFixed(2);
-		},
 		lastGoal: function (get) {
 			var lastSeenGoal = get('lastSeenGoal');
-			var elapsedTime = get('lastSeenGoalElapsed');
-			return lastSeenGoal ? elapsedTime : 'Not seen';
+			return lastSeenGoal ? ((Date.now() - lastSeenGoal.toNumber()) / 1000).toFixed(2) : 'Not seen';
 		},
 		lastGoalBackground: function (get) {
 			if (get('lastSeenGoal') === null) {
 				return this.getColor(1);
 			}
-			return this.getColor(this.normalize(0, 5, get('lastSeenGoalElapsed')));
+			return this.getColor(this.normalize(0, 5, get('lastGoal')));
 		},
 		lastGoalColor: function (get) {
 			return this.getFontColor(get('lastGoalBackground'));

@@ -41,3 +41,8 @@ div.crosshair {
 .x-tool-battery {
 	background-image: url('../svg/battery.svg') !important;
 }
+
+.x-tool-packet {
+	background-image: none !important;
+	border-radius: 50%;
+}

@@ -6,15 +6,27 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 	alias: 'controller.DashboardPanel',
 	init: function () {
 		var view = this.getView();
+		// Get the colours from the view and set them if they do not exist.
 		var colors = view.getColors();
-		this.getViewModel().set('name', view.getName());
 		if (!colors) {
 			view.setColors({
-				OKAY: 'white',
+				OKAY: 'green',
+				NEUTRAL: 'white',
 				WARNING: 'orange',
 				DANGER: 'red'
 			});
 		}
+		// Set the name of the robot on the view model.
+		this.getViewModel().set('name', view.getName());
+		// Begin the animation loop.
+		this.requestId = requestAnimationFrame(this.update.bind(this));
+	},
+
+	/**
+	 * An event triggered when the user closes the dashboard display. This method cancels the animation frame loop.
+	 */
+	onDestroy: function () {
+		cancelAnimationFrame(this.requestId);
 	},
 
 	/**
@@ -38,6 +50,12 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		viewModel.set('lastCameraImage', data.getLastCameraImage());
 		viewModel.set('lastSeenBall', data.getLastSeenBall());
 		viewModel.set('lastSeenGoal', data.getLastSeenGoal());
+		viewModel.set('timestamp', timestamp);
+	},
+
+	update: function () {
+		this.requestId = requestAnimationFrame(this.update.bind(this));
+		this.getViewModel().set('currentTime', Date.now());
 	}
 
 });
