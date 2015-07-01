@@ -58,7 +58,8 @@ Ext.define('NU.view.window.Vision', {
                 ['classified_refine', 'Classified Refined'],
                 ['visual_horizon', 'Visual Horizon'],
                 ['horizon', 'Horizon'],
-                ['objects', 'Field Objects']
+                ['objects', 'Field Objects'],
+				['lines', 'Debug Lines']
             ],
             blankText: 'No items available',
             listeners: {

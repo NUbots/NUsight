@@ -55,6 +55,7 @@ Ext.define('NU.view.window.VisionController', {
 		layeredCanvas.add('horizon');
 		layeredCanvas.add('goals', {group: 'field_objects'});
 		layeredCanvas.add('balls', {group: 'field_objects'});
+		layeredCanvas.add('lines');
 
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
@@ -98,6 +99,9 @@ Ext.define('NU.view.window.VisionController', {
 					break;
 				case 'objects':
 					layeredCanvas.showGroup('field_objects');
+					break;
+				case 'lines':
+					layeredCanvas.show('lines');
 					break;
 			}
 		}, this);
@@ -365,6 +369,9 @@ Ext.define('NU.view.window.VisionController', {
 			case 1: // Ball
 				this.drawBalls(visionObjects.getBall());
 				break;
+			case 3: // Lines
+				this.drawLines(visionObjects.getLine());
+				break;
 		}
 
 	},
@@ -420,6 +427,33 @@ Ext.define('NU.view.window.VisionController', {
 			context.lineWidth = 2;
 			context.stroke();
 		}
+	},
+	drawLines: function (lines) {
+
+		var context = this.getContext('lines');
+		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+		function colourToRGBA(colour) {
+			return "rgba("
+				+ Math.floor(colour.getX() * 255) + ", "
+				+ Math.floor(colour.getY() * 255) + ", "
+				+ Math.floor(colour.getZ() * 255) + ", "
+				+ colour.getT() + ")";
+		}
+
+		for (var i = 0; i < lines.length; i++) {
+			var line = lines[i];
+			context.beginPath();
+
+			var start = line.getStart();
+			context.moveTo(start.getX(), start.getY());
+			context.strokeStyle = colourToRGBA(line.getColour());
+			context.lineWidth = 1;
+			var end = line.getEnd();
+			context.lineTo(end.getX(), end.getY());
+			context.stroke();
+		}
+
 	},
     segmentColourToRGB: function (colourType)
     {
