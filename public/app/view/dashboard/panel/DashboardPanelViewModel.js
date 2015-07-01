@@ -14,6 +14,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		robotPosition: null,
 		robotPositionCovariance: null,
 		robotHeading: null,
+		ballPosition: null,
 		// Behaviour
 		behaviourState: null,
 		// Game controller
@@ -67,10 +68,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return this.getColor(1 - get('battery'));
 		},
 		position: function (get) {
-			var robotPosition = get('robotPosition') || {x: 0, y: 0};
+			var position = get('robotPosition') || {x: 0, y: 0};
 			return {
-				x: robotPosition.x.toFixed(2),
-				y: robotPosition.y.toFixed(2)
+				x: position.x.toFixed(2),
+				y: position.y.toFixed(2)
 			};
 		},
 		positionBackground: function (get) {
@@ -87,8 +88,16 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return {xx: covariance.x.x.toFixed(4), xy: covariance.x.y.toFixed(4), yy: covariance.y.y.toFixed(4)};
 		},
 		heading: function (get) {
-			var robotHeading = get('robotHeading') || {};
-			return (Math.atan2(robotHeading.y, robotHeading.x) * 180 / Math.PI).toFixed(2);
+			var heading = get('robotHeading') || {};
+			return (Math.atan2(heading.y, heading.x) * 180 / Math.PI).toFixed(2);
+		},
+		ball: function (get) {
+			debugger;
+			var position = get('ballPosition') || {x: 0, y: 0};
+			return {
+				x: position.x.toFixed(2),
+				y: position.y.toFixed(2)
+			};
 		},
 		state: function (get) {
 			return NU.TypeMap.get(API.Behaviour.State)[get('behaviourState')] || this.getUninitialised();

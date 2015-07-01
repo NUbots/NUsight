@@ -85,7 +85,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			}
 		}, {
 			bind: {
-				html: '<strong>Ball position:</strong> [{position.x}, {position.y}]'
+				html: '<strong>Ball position:</strong> [{ball.x}, {ball.y}]'
 			}
 		}]
 	}, /*{

@@ -30,6 +30,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		viewModel.set('robotPosition', data.getRobotPosition());
 		viewModel.set('robotPositionCovariance', data.getRobotPositionCovariance());
 		viewModel.set('robotHeading', data.getRobotHeading());
+		viewModel.set('ballPosition', data.getBallPosition());
 		viewModel.set('behaviourState', data.getBehaviourState());
 		viewModel.set('gameMode', data.getGameMode());
 		viewModel.set('gamePhase', data.getGamePhase());
