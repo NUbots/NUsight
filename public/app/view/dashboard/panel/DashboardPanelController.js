@@ -15,17 +15,6 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 				DANGER: 'red'
 			});
 		}
-		this.requestId = requestAnimationFrame(this.updateView.bind(this));
-	},
-
-	/**
-	 * An event triggered when the user closes the window. This method stops the requestAnimationFrame method from
-	 * calling.
-	 */
-	onDestroy: function () {
-		if (this.requestId) {
-			cancelAnimationFrame(this.requestId);
-		}
 	},
 
 	/**
@@ -48,11 +37,6 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		viewModel.set('lastCameraImage', data.getLastCameraImage());
 		viewModel.set('lastSeenBall', data.getLastSeenBall());
 		viewModel.set('lastSeenGoal', data.getLastSeenGoal());
-	},
-
-	updateView: function () {
-		this.requestId = requestAnimationFrame(this.updateView.bind(this));
-		this.getViewModel().set('currentTime', Date.now());
 	}
 
 });

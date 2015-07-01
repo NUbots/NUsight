@@ -22,7 +22,6 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		title: '{name} - <span style="color:{penaltyColor}">{penalty}</span>'
 	},
 	listeners: {
-		destroy: 'onDestroy',
 		update: 'onUpdate'
 	},
 	style: {
@@ -49,10 +48,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			xtype: 'nu_tool_battery'
 		}]
 	}],
-	items: [{
+	items: [/*{
 		xtype: 'nu_dashboard_panel_title',
-		html: 'Localisation'
-	}, {
+		html: 'Robot Localisation'
+	}, */{
 		xtype: 'container',
 		defaults: {
 			xtype: 'container',
@@ -70,29 +69,29 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			},
 			items: [{
 				bind: {
-					html: '<strong>Robot position:</strong> [{position.x}, {position.y}]'
+					html: '<strong>Position:</strong> [{position.x}, {position.y}]'
 				},
 				style: {
 					marginRight: '5px'
 				}
 			}, {
 				bind: {
-					html: '<strong>Heading:</strong> {heading}&deg;'
+					html: '<strong>Angle:</strong> {heading}&deg;'
 				}
 			}]
 		}, {
 			bind: {
-				html: '<strong>Covariance:</strong> {covariance.x.x}, {covariance.x.y}, {covariance.y.y}'
+				html: '<strong>Cov:</strong> {covariance.xx}, {covariance.xy}, {covariance.yy}'
 			}
 		}, {
 			bind: {
 				html: '<strong>Ball position:</strong> [{position.x}, {position.y}]'
 			}
 		}]
-	}, {
+	}, /*{
 		xtype: 'nu_dashboard_panel_title',
 		html: 'Behaviour'
-	}, {
+	}, */{
 		xtype: 'container',
 		defaults: {
 			xtype: 'container',
@@ -100,17 +99,17 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		},
 		items: [{
 			bind: {
-				html: '<strong>Behaviour:</strong> {state}'
+				html: '<strong>GameController:</strong> {phase} ({mode})'
 			}
 		}, {
 			bind: {
-				html: '<strong>State:</strong> {mode}, {phase}'
+				html: '<strong>State:</strong> {state}'
 			}
 		}]
-	}, {
+	}, /*{
 		xtype: 'nu_dashboard_panel_title',
 		html: 'Last seen'
-	}, {
+	}, */{
 		xtype: 'container',
 		defaults: {
 			xtype: 'container',

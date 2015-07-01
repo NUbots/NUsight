@@ -8,12 +8,12 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		'NU.util.TypeMap'
 	],
 	data: {
-		name: '',
-		battery: 0,
+		name: null,
+		battery: null,
 		// Localisation
 		robotPosition: null,
-		robotPositionCovariance: 0,
-		robotHeading: 0,
+		robotPositionCovariance: null,
+		robotHeading: null,
 		// Behaviour
 		behaviourState: null,
 		// Game controller
@@ -21,10 +21,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		gamePhase: null,
 		penaltyReason: null,
 		// Hardware
-		lastCameraImage: 0,
+		lastCameraImage: null,
 		// Vision
-		lastSeenBall: 0,
-		lastSeenGoal: 0
+		lastSeenBall: null,
+		lastSeenGoal: null
 	},
 	getUninitialised: function () {
 		return 'NO DATA';
@@ -56,12 +56,12 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 	 * @param value The value being converted.
 	 * @returns {*}
 	 */
-	convertValue: function (min, max, value) {
+	normalize: function (min, max, value) {
 		return ((value - min) / (max - min)) + min;
 	},
 	formulas: {
 		batteryPercentage: function (get) {
-			return get('battery') * 100;
+			return (get('battery') * 100).toFixed(2);
 		},
 		batteryColor: function (get) {
 			return this.getColor(1 - get('battery'));
@@ -83,7 +83,8 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return this.getFontColor(get('positionBackground'));
 		},
 		covariance: function (get) {
-			return get('robotPositionCovariance') || {x: {x: 0, y: 0}, y: {x: 0, y: 0}};
+			var covariance = get('robotPositionCovariance') || {x: {x: 0, y: 0}, y: {x: 0, y: 0}};
+			return {xx: covariance.x.x.toFixed(4), xy: covariance.x.y.toFixed(4), yy: covariance.y.y.toFixed(4)};
 		},
 		heading: function (get) {
 			var robotHeading = get('robotHeading') || {};
@@ -108,13 +109,13 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		cameraImage: function (get) {
 			var lastCameraImage = get('lastCameraImage');
-			return lastCameraImage ? new Date(lastCameraImage.getUtcTimestamp().toNumber()) : 'Not seen';
+			return lastCameraImage ? ((Date.now() - lastCameraImage.toNumber()) / 1000).toFixed(2) : 'Not seen';
 		},
 		lastCameraBackground: function (get) {
-			if (!get('lastCameraImage')) {
+			if (get('lastCameraImage') === null) {
 				return this.getColor(1);
 			}
-			return this.getColor(this.convertValue(0, 3, get('cameraImage')));
+			return this.getColor(this.normalize(0, 3, get('cameraImage')));
 		},
 		lastCameraColor: function (get) {
 			return this.getFontColor(get('lastCameraBackground'));
@@ -133,10 +134,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return lastSeenBall ? elapsedTime: 'Not seen';
 		},
 		lastBallBackground: function (get) {
-			if (!get('lastSeenBall')) {
+			if (get('lastSeenBall') === null) {
 				return this.getColor(1);
 			}
-			return this.getColor(this.convertValue(0, 5, get('lastSeenBallElapsed')));
+			return this.getColor(this.normalize(0, 5, get('lastSeenBallElapsed')));
 		},
 		lastBallColor: function (get) {
 			return this.getFontColor(get('lastBallBackground'));
@@ -155,10 +156,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return lastSeenGoal ? elapsedTime : 'Not seen';
 		},
 		lastGoalBackground: function (get) {
-			if (!get('lastSeenGoal')) {
+			if (get('lastSeenGoal') === null) {
 				return this.getColor(1);
 			}
-			return this.getColor(this.convertValue(0, 5, get('lastSeenGoalElapsed')));
+			return this.getColor(this.normalize(0, 5, get('lastSeenGoalElapsed')));
 		},
 		lastGoalColor: function (get) {
 			return this.getFontColor(get('lastGoalBackground'));
