@@ -39,10 +39,14 @@ div.crosshair {
 }
 
 .x-tool-battery {
-	background-image: url('../svg/battery.svg') !important;
+	background: transparent url('../svg/battery.svg') !important;
 }
 
 .x-tool-packet {
 	background-image: none !important;
 	border-radius: 50%;
+}
+
+.dashboard-panel .x-panel-header {
+	background: #50b6d3 !important;
 }

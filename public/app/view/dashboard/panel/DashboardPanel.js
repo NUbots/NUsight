@@ -26,6 +26,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		destroy: 'onDestroy',
 		update: 'onUpdate'
 	},
+	cls: 'dashboard-panel',
 	style: {
 		marginRight: '2px'
 	},
