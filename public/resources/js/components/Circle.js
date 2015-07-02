@@ -33,8 +33,8 @@
         var rotationZ = (parameters.rotation && parameters.rotation.z) || 0;
         this.mesh.rotation.set(rotationX, rotationY, rotationZ);
         // Change the width and height of the circle.
-        this.mesh.scale.y = parameters.width * 2 || 1;
-        this.mesh.scale.x = parameters.height * 2 || 1;
+        this.mesh.scale.y = parameters.width  * 0.5 || 1;
+        this.mesh.scale.x = parameters.height * 0.5 || 1;
 	    // Add a name to the object.
 	    this.name = parameters.name || 'Circle';
         // Add the circle to the object.

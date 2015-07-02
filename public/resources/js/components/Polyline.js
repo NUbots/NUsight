@@ -22,7 +22,7 @@
 		var linesGeometry = new THREE.Geometry();
 		var pointsGeometry = new THREE.Geometry();
 		var linesMaterial = new THREE.MeshBasicMaterial({ color: color });
-		var pointsMaterial = new THREE.MeshBasicMaterial({ color: 0xff77ff });
+		var pointsMaterial = new THREE.MeshBasicMaterial({ color: (color & 0xfefefe) >> 1 });
 		// Set the radius for an endpoint.
 		var radius = width * 0.5;
 		// Iterate through each path.
