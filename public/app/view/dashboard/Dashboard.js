@@ -19,5 +19,10 @@ Ext.define('NU.view.dashboard.Dashboard', {
 	layout: {
 		type: 'column',
 		align: 'stretch'
-	}
+	},
+	tools: [{
+		xtype: 'button',
+		text: 'Toggle localisation',
+		handler: 'onToggle'
+	}]
 });

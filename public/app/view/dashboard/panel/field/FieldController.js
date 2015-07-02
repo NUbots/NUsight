@@ -41,10 +41,10 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	/**
 	 * This method is triggered when an Overview packet is sent to this view.
 	 *
-	 * @param robotPosition The position of the robot.
+	 * @param robotPosition The position of the robot in world space.
 	 * @param robotPositionCovariance The certainty of the robot position.
-	 * @param robotHeading The direction the robot is facing.
-	 * @param ballPosition The position of the ball.
+	 * @param robotHeading The direction the robot is facing in local space.
+	 * @param ballPosition The position of the ball in world space.
 	 */
 	onUpdate: function (robotPosition, robotPositionCovariance, robotHeading, ballPosition) {
 		// Get the context and check if it exists.
@@ -61,7 +61,7 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 			robotHeading = this.localToWorld(robotPosition, robotHeading);
 			// Draw the robot and the ball on the field.
 			this.drawRobot(context, robotPosition, robotHeading);
-			this.drawBall(context, ballPosition, robotPosition, robotHeading);
+			this.drawBall(context, ballPosition);
 		}
 	},
 
@@ -149,10 +149,9 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 		this.drawLine(context, screenPosition, screenHeading, 'black');
 	},
 
-	drawBall: function (context, position, robotPosition, robotHeading) {
-		// Get the screen position of the ball.
-		var screenPosition = this.worldToScreen(this.localToWorld(position, robotPosition));
-		debugger;
+	drawBall: function (context, position) {
+		// Get the screen position of the ball and draw the circle.
+		var screenPosition = this.worldToScreen(position);
 		this.drawCircle(context, screenPosition, this.ball.radius, 'orange', 'red');
 	}
 

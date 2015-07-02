@@ -25,7 +25,8 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 	},
 	listeners: {
 		destroy: 'onDestroy',
-		update: 'onUpdate'
+		update: 'onUpdate',
+		toggleLocalisation: 'onToggleLocalisation'
 	},
 	cls: 'dashboard-panel',
 	style: {
@@ -64,6 +65,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		html: 'Robot Localisation'
 	}, */{
 		xtype: 'container',
+		bind: {
+			hidden: '{localisation}'
+		},
 		defaults: {
 			xtype: 'container',
 			padding: '5px 10px 5px 10px'
@@ -101,7 +105,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		}]
 	}, {
 		xtype: 'nu_dashboard_panel_field',
-		reference: 'field'
+		reference: 'field',
+		bind: {
+			hidden: '{!localisation}'
+		}
 	}, /*{
 		xtype: 'nu_dashboard_panel_title',
 		html: 'Behaviour'

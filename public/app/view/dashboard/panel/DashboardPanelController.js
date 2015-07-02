@@ -6,6 +6,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 	alias: 'controller.DashboardPanel',
 	init: function () {
 		var view = this.getView();
+		var viewModel = this.getViewModel();
 		// Get the colours from the view and set them if they do not exist.
 		var colors = view.getColors();
 		if (!colors) {
@@ -16,9 +17,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 				DANGER: 'red'
 			});
 		}
-		// Set the name of the robot on the view model.
-		this.getViewModel().set('name', view.getName());
-		// Store the field view.
+		// Set the name of the robot and the localisation default value on the view model.
+		viewModel.set('name', view.getName());
+		viewModel.set('localisation', true);
+		// Store the field view so items can be rendered.
 		this.field = view.lookupReference('field');
 		// Begin the animation loop.
 		this.requestId = requestAnimationFrame(this.update.bind(this));
@@ -45,12 +47,13 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		var robotPosition = data.getRobotPosition();
 		var robotPositionCovariance = data.getRobotPositionCovariance();
 		var robotHeading = data.getRobotHeading();
-		var ballPosition = data.getBallPosition();
+		var ballWorldPosition = data.getBallWorldPosition();
 		viewModel.set('robotPosition', robotPosition);
 		viewModel.set('robotPositionCovariance', robotPositionCovariance);
 		viewModel.set('robotHeading', robotHeading);
-		viewModel.set('ballPosition', ballPosition);
-		this.field.fireEvent('update', robotPosition, robotPositionCovariance, robotHeading, ballPosition);
+		viewModel.set('ballPosition', data.getBallPosition());
+		viewModel.set('ballWorldPosition', ballWorldPosition);
+		this.field.fireEvent('update', robotPosition, robotPositionCovariance, robotHeading, ballWorldPosition);
 		// Update the game controller details in the view model.
 		viewModel.set('behaviourState', data.getBehaviourState());
 		viewModel.set('gameMode', data.getGameMode());
@@ -64,9 +67,19 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		viewModel.set('timestamp', timestamp);
 	},
 
+	/**
+	 * Updates the current time in the view model so the packet icon can be updated via its dependency.
+	 */
 	update: function () {
 		this.requestId = requestAnimationFrame(this.update.bind(this));
 		this.getViewModel().set('currentTime', Date.now());
+	},
+
+	onToggleLocalisation: function () {
+		var viewModel = this.getViewModel();
+		// Toggle the localisation attribute on the view model.
+		viewModel.set('localisation', !viewModel.get('localisation'));
+
 	}
 
 });

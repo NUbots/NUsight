@@ -9,12 +9,14 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 	],
 	data: {
 		name: null,
+		localisation: null,
 		battery: null,
 		// Localisation
 		robotPosition: null,
 		robotPositionCovariance: null,
 		robotHeading: null,
 		ballPosition: null,
+		ballWorldPosition: null,
 		// Behaviour
 		behaviourState: null,
 		// Game controller

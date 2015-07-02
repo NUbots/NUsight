@@ -55,6 +55,15 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 */
 	onOverview: function (robotIP, overview, timestamp) {
 		this.dashboardPanels[robotIP].fireEvent('update', overview, timestamp);
+	},
+
+	/**
+	 * An event triggered when the user toggles the localisation views.
+	 */
+	onToggle: function () {
+		Ext.Object.each(this.dashboardPanels, function (key, dashboardPanel) {
+			dashboardPanel.fireEvent('toggleLocalisation');
+		});
 	}
 
 });
