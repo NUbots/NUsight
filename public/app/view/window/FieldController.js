@@ -257,13 +257,13 @@ Ext.define('NU.view.window.FieldController', {
 				var newModel = this.createModel(robot, object);
 				robot.updateModel(currentModel, newModel);
 			}
-			// Get the timeout of the object.
-			var timeout = object.getTimeout();
-			// Check if the object should fade out.
-			if (timeout !== 0) {
-				// Fade out the model using the specified timeout.
-				robot.fadeOutModel(model, timeout === null ? 2.5 : timeout);
-			}
+			// // Get the timeout of the object.
+			// var timeout = object.getTimeout();
+			// // Check if the object should fade out.
+			// if (timeout !== 0) {
+			// 	// Fade out the model using the specified timeout.
+			// 	robot.fadeOutModel(model, timeout === null ? 2.5 : timeout);
+			// }
 		}, this);
 	},
 	/**
