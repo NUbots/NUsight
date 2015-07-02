@@ -444,6 +444,7 @@ Ext.define('NU.view.window.ClassifierController', {
 						this.setLeftMouseDown(false);
 					}
 				},
+				mousewheel: this.onMouseWheel,
 				scope: this
 			});
 		}, this);
@@ -680,6 +681,12 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setImageHeight(height);
 		this.getRawLayeredCanvas().setCanvasSize(width, height);
 		this.getClassifiedLayeredCanvas().setCanvasSize(width, height);
+	},
+	onMouseWheel: function (e) {
+		var direction = Math.sign(e.event.wheelDelta);
+		var speed = 2;
+		var tolerance = this.lookupReference('tolerance')
+		tolerance.setValue(tolerance.getValue() + speed * direction);
 	},
 	onImageMouseMove: function (x, y) {
 		this.setMouseX(x);

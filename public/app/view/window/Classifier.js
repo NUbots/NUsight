@@ -286,7 +286,8 @@ Ext.define('NU.view.window.Classifier', {
 					step: 1,
 					listeners: {
 						change: 'onChangeTolerance'
-					}
+					},
+					reference: 'tolerance'
 				}, {
 					layout: 'hbox',
 					defaults: {
