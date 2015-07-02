@@ -38,13 +38,20 @@ div.crosshair {
 	background-image: url('../images/crosshair.png');
 }
 
+.x-tool-img {
+	background-color: transparent !important;
+}
+
 .x-tool-battery {
 	background: transparent url('../svg/battery.svg') !important;
 }
 
 .x-tool-packet {
+	width: 14px;
+	height: 14px;
 	background-image: none !important;
 	border-radius: 50%;
+	margin: 1px 4px !important;
 }
 
 .dashboard-panel .x-panel-header {

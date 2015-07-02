@@ -23,6 +23,15 @@ function randFloat(min, max) {
 
 setInterval(function () {
 	var now = Date.now();
+	var robotHeading = {
+		x: 1,//Math.random() * 2 - 1,
+		y: 0//Math.random() * 2 - 1
+	};
+
+	var robotHeadingLength = Math.sqrt(robotHeading.x * robotHeading.x + robotHeading.y * robotHeading.y);
+
+	robotHeading.x /= robotHeadingLength;
+	robotHeading.y /= robotHeadingLength;
 
 	var message = new API.Message({
 		type: type,
@@ -32,9 +41,10 @@ setInterval(function () {
 			voltage: randFloat(10, 13),
 			battery: Math.random(),
 			behaviour_state: API.Behaviour.State.INIT,
-			robot_position: {x: Math.random(), y: Math.random()},
+			robot_position: {x: 1, y: 0},
 			robot_position_covariance: {x: {x: Math.random(), y: Math.random()}, y: {x: Math.random(), y: Math.random()}},
-			robot_heading: {x: Math.random() * 2 - 1, y: Math.random() * 2 - 1},
+			robot_heading: robotHeading,
+			ball_position: {x: 1, y: 1},
 			game_mode: API.GameState.Data.Mode.NORMAL,
 			game_phase: API.GameState.Data.Phase.INITIAL,
 			penalty_reason: API.GameState.Data.PenaltyReason.UNPENALISED,

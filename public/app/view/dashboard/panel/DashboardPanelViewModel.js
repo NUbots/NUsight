@@ -132,10 +132,11 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		penalty: function (get) {
 			return NU.TypeMap.get(API.GameState.Data.PenaltyReason)[get('penaltyReason')] || this.getUninitialised();
 		},
+		penaltyBackground: function (get) {
+			return this.getColor(get('penaltyReason') === API.GameState.Data.PenaltyReason.UNPENALISED);
+		},
 		penaltyColor: function (get) {
-			var PenaltyReason = API.GameState.Data.PenaltyReason;
-			var penaltyReason = get('penaltyReason');
-			return this.getColor(penaltyReason === PenaltyReason.UNPENALISED);
+			return this.getFontColor(get('penaltyBackground'));
 		},
 		cameraImage: function (get) {
 			var lastCameraImage = get('lastCameraImage');

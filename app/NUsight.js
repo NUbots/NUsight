@@ -17,8 +17,8 @@ function NUsight (io) {
 	this.robotFinder.on('robotIP', function (robotIP) {
 		this.addRobot(robotIP);
 	}.bind(this));
-	this.addRobot('127.0.0.1', 'Virtual Machine');
-	//this.addRobot('127.0.0.1', 'Robot Simulator', 14000);
+	//this.addRobot('127.0.0.1', 'Virtual Machine');
+	this.addRobot('127.0.0.1', 'Robot Simulator', 14000);
 	//this.addRobot('10.1.1.1', 'Robot #1');
 	//this.addRobot('10.1.2.1', 'Robot #1e');
 	//this.addRobot('10.1.1.2', 'Robot #2');
