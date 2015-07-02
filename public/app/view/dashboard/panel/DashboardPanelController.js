@@ -75,11 +75,13 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		this.getViewModel().set('currentTime', Date.now());
 	},
 
+	/**
+	 * An event triggered when the user chooses to toggles which localisation display is visible.
+	 */
 	onToggleLocalisation: function () {
 		var viewModel = this.getViewModel();
 		// Toggle the localisation attribute on the view model.
 		viewModel.set('localisation', !viewModel.get('localisation'));
-
 	}
 
 });

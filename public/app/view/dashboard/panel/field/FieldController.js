@@ -6,8 +6,13 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	alias: 'controller.DashboardPanelField',
 	init: function () {
 		var view = this.getView();
+		//this.field = view;
 		this.canvas = view.lookupReference('canvas');
 		this.context = null;
+		this.fieldLine = {
+			color: 'white',
+			width: 3
+		};
 		this.robot = {
 			radius: 6
 		};
@@ -33,9 +38,49 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * @param height The new height of the component.
 	 */
 	onResize: function (component, width, height) {
-		var canvas = this.canvas.getEl().dom;
+		this.setSize(this.canvas.getEl().dom, width, height);
+	},
+
+	/**
+	 * Set the size of the canvas to the specified width and height.
+	 *
+	 * @param canvas The canvas dom element.
+	 * @param width The new width of the canvas.
+	 * @param height The new height of the canvas.
+	 */
+	setSize: function (canvas, width, height) {
 		canvas.width = width;
 		canvas.height = height;
+	},
+
+	drawField: function (context) {
+		var canvas = context.canvas;
+		var width = canvas.width;
+		var height = canvas.height;
+		this.drawCentreCircle(context, width, height);
+		this.drawCentreLine(context, width, height);
+	},
+
+
+	drawCentreCircle: function (context, width, height) {
+		var position = this.worldToScreen(vec2.create());
+		var radius = (Field.constants.CENTER_CIRCLE_DIAMETER * 0.5);
+		var radiusX = Math.round(radius  * (width / Field.constants.FIELD_LENGTH));
+		var radiusY = Math.round(radius * (height / Field.constants.FIELD_WIDTH));
+		this.drawEllipse(context, position, radiusX, radiusY, 'transparent', this.fieldLine.color, this.fieldLine.width);
+	},
+
+	/**
+	 * A method that draws the centre vertical line of the field given the canvas context, width, height and line
+	 * width.
+	 *
+	 * @param context The canvas context.
+	 * @param width The width of the canvas.
+	 * @param height The height of the canvas.
+	 * @param lineWidth The width of the line.
+	 */
+	drawCentreLine: function (context, width, height, lineWidth) {
+		this.drawLine(context, vec2.fromValues(width * 0.5, 0), vec2.fromValues(width * 0.5, height), this.fieldLine.color, this.fieldLine.width);
 	},
 
 	/**
@@ -59,6 +104,8 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 			ballPosition = vec2.fromValues(ballPosition.x, ballPosition.y);
 			// Convert the robot heading to world space.
 			robotHeading = this.localToWorld(robotPosition, robotHeading);
+			// Draw the field.
+			this.drawField(context);
 			// Draw the robot and the ball on the field.
 			this.drawRobot(context, robotPosition, robotHeading);
 			this.drawBall(context, ballPosition);
@@ -103,12 +150,28 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * @param radius The radius of the circle.
 	 * @param fillColor The color of the circle.
 	 * @param [strokeColor] An optional stroke color.
+	 * @param [lineWidth] An optional line width.
 	 */
-	drawCircle: function (context, position, radius, fillColor, strokeColor) {
+	drawCircle: function (context, position, radius, fillColor, strokeColor, lineWidth) {
+		this.drawEllipse(context, position, radius, radius, fillColor, strokeColor, lineWidth);
+	},
+
+	/**
+	 * Draws an ellipse in the specified canvas context using a screen position, radius and fill color.
+	 *
+	 * @param context The canvas context.
+	 * @param position The position to draw the ellipse on.
+	 * @param radiusX The radius of the ellipse in the x direction.
+	 * @param radiusY The radius of teh sllipse in the y direction.
+	 * @param fillColor The color of the ellipse.
+	 * @param [strokeColor] An optional stroke color.
+	 * @param [lineWidth] An optional line width.
+	 */
+	drawEllipse: function (context, position, radiusX, radiusY, fillColor, strokeColor, lineWidth) {
 		context.beginPath();
-		context.arc(position[0], position[1], radius, 0, Math.PI * 2);
+		context.ellipse(position[0], position[1], radiusX, radiusY, 0, 0, Math.PI * 2);
 		context.fillStyle = fillColor;
-		context.lineWidth = 1;
+		context.lineWidth = lineWidth || 1;
 		context.fill();
 		if (strokeColor) {
 			context.strokeStyle = strokeColor;
@@ -123,13 +186,14 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * @param origin The point to begin the line at.
 	 * @param target The point to end the line at.
 	 * @param strokeColor The color of the line.
+	 * @param [lineWidth] The width of the line.
 	 */
-	drawLine: function (context, origin, target, strokeColor) {
+	drawLine: function (context, origin, target, strokeColor, lineWidth) {
 		context.beginPath();
 		context.moveTo(origin[0], origin[1]);
 		context.lineTo(target[0], target[1]);
 		context.strokeStyle = strokeColor;
-		context.lineWidth = 2;
+		context.lineWidth = lineWidth || 2;
 		context.stroke();
 	},
 

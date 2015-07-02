@@ -9,12 +9,10 @@ Ext.define('NU.view.dashboard.panel.field.Field', {
 		'NU.view.dashboard.panel.field.FieldController'
 	],
 	controller: 'DashboardPanelField',
-	width: '100%',
 	height: 100,
 	layout: 'fit',
 	style: {
-		background: 'url("../resources/images/field.png") no-repeat',
-		backgroundSize: '100% 100%'
+		background: '#009900'
 	},
 	listeners: {
 		afterRender: 'onAfterRender',
