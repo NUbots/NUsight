@@ -298,23 +298,25 @@ Ext.define('NU.view.window.VisionController', {
 
         var context = this.getContext('visual_horizon');
         context.clearRect(0, 0, this.getWidth(), this.getHeight());
-        context.beginPath();
-        context.moveTo(horizonPoints[0].x, horizonPoints[0].y);
+        if(horizonPoints.length > 0) {
+            context.beginPath();
+            context.moveTo(horizonPoints[0].x, horizonPoints[0].y);
 
-        for(var i = 1; i < horizonPoints.length; i++) {
-            var point = horizonPoints[i];
-            context.lineTo(point.x, point.y);
+            for(var i = 1; i < horizonPoints.length; i++) {
+                var point = horizonPoints[i];
+                context.lineTo(point.x, point.y);
+            }
+
+            context.shadowColor = 'black';
+            context.shadowBlur = 5;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+
+            context.strokeStyle = "rgba(0, 255, 0, 1)";
+            context.lineWidth = 2;
+
+            context.stroke();
         }
-
-        context.shadowColor = 'black';
-        context.shadowBlur = 5;
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
-
-        context.strokeStyle = "rgba(0, 255, 0, 1)";
-        context.lineWidth = 2;
-
-        context.stroke();
     },
     drawHorizon: function(horizon) {
 
