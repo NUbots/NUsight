@@ -9,11 +9,17 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 		//this.field = view;
 		this.canvas = view.lookupReference('canvas');
 		this.context = null;
+		var distance = 0.5;
+		this.distanceOutsideField = {
+			width: Field.constants.GOAL_AREA_LENGTH + distance,
+			height: Field.constants.GOAL_AREA_LENGTH + distance
+		};
 		this.fieldLine = {
 			color: 'white',
-			width: 3
+			width: 2
 		};
 		this.robot = {
+			color: 'black',
 			radius: 6
 		};
 		this.ball = {
@@ -53,63 +59,26 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 		canvas.height = height;
 	},
 
-	drawField: function (context) {
+	/**
+	 *
+	 * @param context
+	 * @param width
+	 * @returns {number}
+	 */
+	SIToScreenWidth: function (context, width) {
 		var canvas = context.canvas;
-		var width = canvas.width;
-		var height = canvas.height;
-		this.drawCentreCircle(context, width, height);
-		this.drawCentreLine(context, width, height);
-	},
-
-
-	drawCentreCircle: function (context, width, height) {
-		var position = this.worldToScreen(vec2.create());
-		var radius = (Field.constants.CENTER_CIRCLE_DIAMETER * 0.5);
-		var radiusX = Math.round(radius  * (width / Field.constants.FIELD_LENGTH));
-		var radiusY = Math.round(radius * (height / Field.constants.FIELD_WIDTH));
-		this.drawEllipse(context, position, radiusX, radiusY, 'transparent', this.fieldLine.color, this.fieldLine.width);
+		return width * (canvas.width / (Field.constants.FIELD_LENGTH + (this.distanceOutsideField.width * 2)));
 	},
 
 	/**
-	 * A method that draws the centre vertical line of the field given the canvas context, width, height and line
-	 * width.
 	 *
-	 * @param context The canvas context.
-	 * @param width The width of the canvas.
-	 * @param height The height of the canvas.
-	 * @param lineWidth The width of the line.
+	 * @param context
+	 * @param height
+	 * @returns {number}
 	 */
-	drawCentreLine: function (context, width, height, lineWidth) {
-		this.drawLine(context, vec2.fromValues(width * 0.5, 0), vec2.fromValues(width * 0.5, height), this.fieldLine.color, this.fieldLine.width);
-	},
-
-	/**
-	 * This method is triggered when an Overview packet is sent to this view.
-	 *
-	 * @param robotPosition The position of the robot in world space.
-	 * @param robotPositionCovariance The certainty of the robot position.
-	 * @param robotHeading The direction the robot is facing in local space.
-	 * @param ballPosition The position of the ball in world space.
-	 */
-	onUpdate: function (robotPosition, robotPositionCovariance, robotHeading, ballPosition) {
-		// Get the context and check if it exists.
-		var context = this.context;
-		if (context) {
-			// Get the canvas and clear what was drawn in the previous frame.
-			var canvas = this.canvas;
-			this.context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-			// Convert the robot position, robot heading and ball position to vectors.
-			robotPosition = vec2.fromValues(robotPosition.x, robotPosition.y);
-			robotHeading = vec2.fromValues(robotHeading.x, robotHeading.y);
-			ballPosition = vec2.fromValues(ballPosition.x, ballPosition.y);
-			// Convert the robot heading to world space.
-			robotHeading = this.localToWorld(robotPosition, robotHeading);
-			// Draw the field.
-			this.drawField(context);
-			// Draw the robot and the ball on the field.
-			this.drawRobot(context, robotPosition, robotHeading);
-			this.drawBall(context, ballPosition);
-		}
+	SIToScreenHeight: function (context, height) {
+		var canvas = context.canvas;
+		return height * (canvas.height / (Field.constants.FIELD_WIDTH + (this.distanceOutsideField.height * 2)));
 	},
 
 	/**
@@ -117,16 +86,15 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * ratio of the field to the canvas size. The offset of the canvas is added to this position so the origin begins
 	 * at the center when drawing.
 	 *
+	 * @param context The canvas context.
 	 * @param position The position being converted.
 	 * @returns {vec2} The new screen position.
 	 */
-	worldToScreen: function (position) {
-		var canvas = this.canvas;
-		var width = canvas.getWidth();
-		var height = canvas.getHeight();
-		var fieldWidth = Math.round(width / Field.constants.FIELD_LENGTH);
-		var fieldHeight = Math.round(height / Field.constants.FIELD_WIDTH);
-		return vec2.fromValues(position[0] * fieldWidth + (width * 0.5), -position[1] * fieldHeight + (height * 0.5));
+	worldToScreen: function (context, position) {
+		var canvas = context.canvas;
+		var width = this.SIToScreenWidth(context, 1);
+		var height = this.SIToScreenHeight(context, 1);
+		return vec2.fromValues(position[0] * width + (canvas.width * 0.5), -position[1] * height + (canvas.height * 0.5));
 	},
 
 	/**
@@ -180,6 +148,28 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	},
 
 	/**
+	 * Draws a rectangle on the canvas given a position, width and height.
+	 *
+	 * @param context The canvas context.
+	 * @param position The position of the rectangle.
+	 * @param width The width of the rectangle.
+	 * @param height The height of the rectangle.
+	 * @param fillColor The color of the rectangle.
+	 * @param [strokeColor] An optional stroke color.
+	 * @param [lineWidth] An optional line width.
+	 */
+	drawRectangle: function (context, position, width, height, fillColor, strokeColor, lineWidth) {
+		context.rect(position[0], position[1], width, height);
+		context.fillStyle = fillColor;
+		context.lineWidth = lineWidth || 1;
+		context.fill();
+		if (strokeColor) {
+			context.strokeStyle = strokeColor;
+			context.stroke();
+		}
+	},
+
+	/**
 	 * Draws a line in the specified canvas context using a screen origin and target.
 	 *
 	 * @param context The canvas context.
@@ -198,6 +188,132 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	},
 
 	/**
+	 * Draws the components that make up a field given the canvas context.
+	 *
+	 * @param context The canvas context.
+	 */
+	drawField: function (context) {
+		var color = this.fieldLine.color;
+		var fieldLineWidth = this.fieldLine.width;
+		var distanceOutsideField = {
+			width: this.SIToScreenWidth(context, this.distanceOutsideField.width),
+			height: this.SIToScreenHeight(context, this.distanceOutsideField.height)
+		};
+		// Draw each component of the field.
+		this.drawFieldBorder(context, distanceOutsideField, color, fieldLineWidth);
+		this.drawGoalArea(context, distanceOutsideField, color, fieldLineWidth);
+		this.drawCentreCircle(context, color, fieldLineWidth);
+		this.drawCentreLine(context, distanceOutsideField, color, fieldLineWidth);
+	},
+
+	/**
+	 * Draws the top, right, bottom and left field border lines on the canvas using a rectangle.
+	 *
+	 * @param context The canvas context.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The color of the field border.
+	 * @param fieldLineWidth The line width of the field border.
+	 */
+	drawFieldBorder: function (context, distanceOutsideField, color, fieldLineWidth) {
+		// Get the position, width and height of the field border in screen units.
+		var position = vec2.fromValues(distanceOutsideField.width, distanceOutsideField.height);
+		var width = this.SIToScreenWidth(context, Field.constants.FIELD_LENGTH);
+		var height = this.SIToScreenHeight(context, Field.constants.FIELD_WIDTH);
+		// Draw the field border.
+		this.drawRectangle(context, position, width, height, 'transparent', color, fieldLineWidth);
+	},
+
+	/**
+	 *
+	 * @param context The canvas context.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The oolor of the goal areas.
+	 * @param fieldLineWidth The line width of the goal area.
+	 */
+	drawGoalArea: function (context, distanceOutsideField, color, fieldLineWidth) {
+		// Get the width and height of the goal area in screen units.
+		var width = this.SIToScreenWidth(context, Field.constants.GOAL_AREA_LENGTH);
+		var height = this.SIToScreenHeight(context, Field.constants.GOAL_AREA_WIDTH);
+		var fieldHeight = this.SIToScreenHeight(context, Field.constants.FIELD_WIDTH);
+		// Calculate the y value of the goal area.
+		var y = ((fieldHeight - height) * 0.5) + distanceOutsideField.height;
+		// Draw the left and right goal area.
+		this.drawLeftGoalArea(context, y, width, height, distanceOutsideField, color, fieldLineWidth);
+		this.drawRightGoalArea(context, y, width, height, distanceOutsideField, color, fieldLineWidth);
+	},
+
+	/**
+	 * Draws the left goal area on the canvas.
+	 *
+	 * @param context The canvas context.
+	 * @param y The y position of the goal area in screen units.
+	 * @param width The width of the goal area in screen units.
+	 * @param height The height of the goal area in screen units.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The color of the goal area.
+	 * @param fieldLineWidth The line width of the goal area.
+	 */
+	drawLeftGoalArea: function (context, y, width, height, distanceOutsideField, color, fieldLineWidth) {
+		var position = vec2.fromValues(distanceOutsideField.width, y);
+		this.drawRectangle(context, position, width, height, 'transparent', color, fieldLineWidth);
+	},
+
+	/**
+	 * Draws the right goal area on the canvas.
+	 *
+	 * @param context The canvas context.
+	 * @param y The y position of the goal area in screen units.
+	 * @param width The width of the goal area in screen units.
+	 * @param height The height of the goal area in screen units.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The color of the goal area.
+	 * @param fieldLineWidth The line width of the goal area.
+	 */
+	drawRightGoalArea: function (context, y, width, height, distanceOutsideField, color, fieldLineWidth) {
+		var fieldWidth = this.SIToScreenWidth(context, Field.constants.FIELD_LENGTH);
+		var position = vec2.fromValues(distanceOutsideField.width + fieldWidth - width, y);
+		this.drawRectangle(context, position, width, height, 'transparent', color, fieldLineWidth);
+	},
+
+	/**
+	 * Draws the centre circle for the field given the canvas context.
+	 *
+	 * @param context The canvas conext.
+	 * @param color The color of the centre circle.
+	 * @param fieldLineWidth The thickness of the circle.
+	 */
+	drawCentreCircle: function (context, color, fieldLineWidth) {
+		// Get the screen position of the origin.
+		var position = this.worldToScreen(context, vec2.create());
+		// Get the radius of the center circle.
+		var radius = Field.constants.CENTER_CIRCLE_DIAMETER * 0.5;
+		// Calculate the radius x and y component by converting from SI units to screen coordinates.
+		var radiusX = this.SIToScreenWidth(context, radius);
+		var radiusY = this.SIToScreenHeight(context, radius);
+		// Draw the ellipse with the specified position and radius components.
+		this.drawEllipse(context, position, radiusX, radiusY, 'transparent', color, fieldLineWidth);
+	},
+
+	/**
+	 * Draws the centre vertical line of the field given the canvas context.
+	 *
+	 * @param context The canvas context.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The color of the centre line.
+	 * @param fieldLineWidth The width of the centre line.
+	 */
+	drawCentreLine: function (context, distanceOutsideField, color, fieldLineWidth) {
+		// Get the width and height of the field in screen units.
+		var width = this.SIToScreenWidth(context, Field.constants.FIELD_LENGTH);
+		var height = this.SIToScreenHeight(context, Field.constants.FIELD_WIDTH);
+		// Calculate the origin and target of the circle.
+		var origin = vec2.fromValues(distanceOutsideField.width + width * 0.5, distanceOutsideField.height);
+		var target = vec2.fromValues(origin[0], origin[1] + height);
+		// Draw the centre circle.
+		this.drawLine(context, origin, target, color, fieldLineWidth);
+	},
+
+	/**
 	 * Draws a robot position and its heading arrow on the field.
 	 *
 	 * @param context The canvas context.
@@ -205,18 +321,73 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * @param robotHeading The direction the robot is facing.
 	 */
 	drawRobot: function (context, position, robotHeading) {
+		// Get the color of the robot.
+		var color = this.robot.color;
 		// Get the screen position and heading of the robot.
-		var screenPosition = this.worldToScreen(position);
-		var screenHeading = this.worldToScreen(robotHeading);
-		// Draw a circle representing the robot using its screen coordinates.
-		this.drawCircle(context, screenPosition, this.robot.radius, 'black', 'gray');
-		this.drawLine(context, screenPosition, screenHeading, 'black');
+		var screenPosition = this.worldToScreen(context, position);
+		// Check if the robot is going to be rendered on the canvas.
+		if (this.inBounds(context, screenPosition)) {
+			var screenHeading = this.worldToScreen(context, robotHeading);
+			// Draw a circle representing the robot using its screen coordinates and its heading as a line.
+			this.drawCircle(context, screenPosition, this.robot.radius, color, 'gray');
+			this.drawLine(context, screenPosition, screenHeading, color);
+		} else {
+			// The robot will not be rendered, so draw a line indicating its position from the center.
+			this.drawLine(context, this.worldToScreen(context, vec2.create()), screenPosition, color);
+		}
 	},
 
+	/**
+	 * Draws the ball on the canvas.
+	 *
+	 * @param context The canvas context.
+	 * @param position The world position of the ball.
+	 */
 	drawBall: function (context, position) {
 		// Get the screen position of the ball and draw the circle.
-		var screenPosition = this.worldToScreen(position);
+		var screenPosition = this.worldToScreen(context, position);
 		this.drawCircle(context, screenPosition, this.ball.radius, 'orange', 'red');
+	},
+
+	/**
+	 * Checks if a particular position is in the bounds of the canvas.
+	 *
+	 * @param context The canvas context.
+	 * @param position The position being checked in screen units.
+	 * @returns {boolean} Whether the position will be rendered on the canvas.
+	 */
+	inBounds: function (context, position) {
+		var canvas = context.canvas;
+		return position[0] >= 0 && position[0] <= canvas.width && position[1] >= 0 && position[1] <= canvas.height;
+	},
+
+	/**
+	 * This method is triggered when an Overview packet is sent to this view.
+	 *
+	 * @param robotPosition The position of the robot in world space.
+	 * @param robotPositionCovariance The certainty of the robot position.
+	 * @param robotHeading The direction the robot is facing in local space.
+	 * @param ballPosition The position of the ball in world space.
+	 */
+	onUpdate: function (robotPosition, robotPositionCovariance, robotHeading, ballPosition) {
+		// Get the context and check if it exists.
+		var context = this.context;
+		if (context) {
+			// Get the canvas and clear what was drawn in the previous frame.
+			var canvas = this.canvas;
+			this.context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+			// Convert the robot position, robot heading and ball position to vectors.
+			robotPosition = vec2.fromValues(robotPosition.x, robotPosition.y);
+			robotHeading = vec2.fromValues(robotHeading.x, robotHeading.y);
+			ballPosition = vec2.fromValues(ballPosition.x, ballPosition.y);
+			// Convert the robot heading to world space.
+			robotHeading = this.localToWorld(robotPosition, robotHeading);
+			// Draw the field.
+			this.drawField(context);
+			// Draw the robot and the ball on the field.
+			this.drawRobot(context, robotPosition, robotHeading);
+			this.drawBall(context, ballPosition);
+		}
 	}
 
 });
