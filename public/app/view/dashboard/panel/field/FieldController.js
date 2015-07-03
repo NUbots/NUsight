@@ -19,6 +19,7 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 			width: 2
 		};
 		this.robot = {
+			color: 'black',
 			radius: 6
 		};
 		this.ball = {
@@ -320,18 +321,44 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * @param robotHeading The direction the robot is facing.
 	 */
 	drawRobot: function (context, position, robotHeading) {
+		// Get the color of the robot.
+		var color = this.robot.color;
 		// Get the screen position and heading of the robot.
 		var screenPosition = this.worldToScreen(context, position);
-		var screenHeading = this.worldToScreen(context, robotHeading);
-		// Draw a circle representing the robot using its screen coordinates.
-		this.drawCircle(context, screenPosition, this.robot.radius, 'black', 'gray');
-		this.drawLine(context, screenPosition, screenHeading, 'black');
+		// Check if the robot is going to be rendered on the canvas.
+		if (this.inBounds(context, screenPosition)) {
+			var screenHeading = this.worldToScreen(context, robotHeading);
+			// Draw a circle representing the robot using its screen coordinates and its heading as a line.
+			this.drawCircle(context, screenPosition, this.robot.radius, color, 'gray');
+			this.drawLine(context, screenPosition, screenHeading, color);
+		} else {
+			// The robot will not be rendered, so draw a line indicating its position from the center.
+			this.drawLine(context, this.worldToScreen(context, vec2.create()), screenPosition, color);
+		}
 	},
 
+	/**
+	 * Draws the ball on the canvas.
+	 *
+	 * @param context The canvas context.
+	 * @param position The world position of the ball.
+	 */
 	drawBall: function (context, position) {
 		// Get the screen position of the ball and draw the circle.
 		var screenPosition = this.worldToScreen(context, position);
 		this.drawCircle(context, screenPosition, this.ball.radius, 'orange', 'red');
+	},
+
+	/**
+	 * Checks if a particular position is in the bounds of the canvas.
+	 *
+	 * @param context The canvas context.
+	 * @param position The position being checked in screen units.
+	 * @returns {boolean} Whether the position will be rendered on the canvas.
+	 */
+	inBounds: function (context, position) {
+		var canvas = context.canvas;
+		return position[0] >= 0 && position[0] <= canvas.width && position[1] >= 0 && position[1] <= canvas.height;
 	},
 
 	/**
