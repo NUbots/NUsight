@@ -364,17 +364,23 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 			// Get the canvas and clear what was drawn in the previous frame.
 			var canvas = this.canvas;
 			this.context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-			// Convert the robot position, robot heading and ball position to vectors.
-			robotPosition = vec2.fromValues(robotPosition.x, robotPosition.y);
-			robotHeading = vec2.fromValues(robotHeading.x, robotHeading.y);
-			ballPosition = vec2.fromValues(ballPosition.x, ballPosition.y);
-			// Convert the robot heading to world space.
-			robotHeading = this.localToWorld(robotPosition, robotHeading);
 			// Draw the field.
 			this.drawField(context);
-			// Draw the robot and the ball on the field.
-			this.drawRobot(context, robotPosition, robotHeading);
-			this.drawBall(context, ballPosition);
+			// Check the robot position and robot heading exist.
+			if (robotPosition && robotHeading) {
+				// Convert the robot position and robot heading to vectors.
+				robotPosition = vec2.fromValues(robotPosition.x, robotPosition.y);
+				robotHeading = vec2.fromValues(robotHeading.x, robotHeading.y);
+				// Convert the robot heading to world space.
+				robotHeading = this.localToWorld(robotPosition, robotHeading);
+				// Draw the robot and the ball on the field.
+				this.drawRobot(context, robotPosition, robotHeading);
+			}
+			// Check if a ball position exists.
+			if (ballPosition) {
+				// Convert the ball position to a vector and draw it on the field.
+				this.drawBall(context, vec2.fromValues(ballPosition.x, ballPosition.y));
+			}
 		}
 	}
 
