@@ -9,13 +9,14 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 		//this.field = view;
 		this.canvas = view.lookupReference('canvas');
 		this.context = null;
+		var distance = 0.5;
 		this.distanceOutsideField = {
-			width: Field.constants.GOAL_AREA_LENGTH,
-			height: Field.constants.GOAL_AREA_LENGTH
+			width: Field.constants.GOAL_AREA_LENGTH + distance,
+			height: Field.constants.GOAL_AREA_LENGTH + distance
 		};
 		this.fieldLine = {
 			color: 'white',
-			width: 3
+			width: 2
 		};
 		this.robot = {
 			radius: 6
@@ -193,44 +194,84 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	drawField: function (context) {
 		var color = this.fieldLine.color;
 		var fieldLineWidth = this.fieldLine.width;
+		var distanceOutsideField = {
+			width: this.SIToScreenWidth(context, this.distanceOutsideField.width),
+			height: this.SIToScreenHeight(context, this.distanceOutsideField.height)
+		};
 		// Draw each component of the field.
-		this.drawFieldBorder(context, color, fieldLineWidth);
-		this.drawGoalArea(context, color, fieldLineWidth);
+		this.drawFieldBorder(context, distanceOutsideField, color, fieldLineWidth);
+		this.drawGoalArea(context, distanceOutsideField, color, fieldLineWidth);
 		this.drawCentreCircle(context, color, fieldLineWidth);
-		this.drawCentreLine(context, color, fieldLineWidth);
+		this.drawCentreLine(context, distanceOutsideField, color, fieldLineWidth);
 	},
 
 	/**
 	 * Draws the top, right, bottom and left field border lines on the canvas using a rectangle.
 	 *
 	 * @param context The canvas context.
-	 * @param color The color of the field lines.
-	 * @param fieldLineWidth The width of the field lines.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The color of the field border.
+	 * @param fieldLineWidth The line width of the field border.
 	 */
-	drawFieldBorder: function (context, color, fieldLineWidth) {
-		var distanceOutsideField = {
-			width: this.SIToScreenWidth(context, this.distanceOutsideField.width),
-			height: this.SIToScreenHeight(context, this.distanceOutsideField.height)
-		};
+	drawFieldBorder: function (context, distanceOutsideField, color, fieldLineWidth) {
+		// Get the position, width and height of the field border in screen units.
 		var position = vec2.fromValues(distanceOutsideField.width, distanceOutsideField.height);
 		var width = this.SIToScreenWidth(context, Field.constants.FIELD_LENGTH);
 		var height = this.SIToScreenHeight(context, Field.constants.FIELD_WIDTH);
+		// Draw the field border.
 		this.drawRectangle(context, position, width, height, 'transparent', color, fieldLineWidth);
 	},
 
-	drawGoalArea: function (context, color, fieldLineWidth) {
-		this.drawLeftGoalArea(context, color, fieldLineWidth);
-		this.drawRightGoalArea(context, color, fieldLineWidth);
+	/**
+	 *
+	 * @param context The canvas context.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The oolor of the goal areas.
+	 * @param fieldLineWidth The line width of the goal area.
+	 */
+	drawGoalArea: function (context, distanceOutsideField, color, fieldLineWidth) {
+		// Get the width and height of the goal area in screen units.
+		var width = this.SIToScreenWidth(context, Field.constants.GOAL_AREA_LENGTH);
+		var height = this.SIToScreenHeight(context, Field.constants.GOAL_AREA_WIDTH);
+		var fieldHeight = this.SIToScreenHeight(context, Field.constants.FIELD_WIDTH);
+		// Calculate the y value of the goal area.
+		var y = ((fieldHeight - height) * 0.5) + distanceOutsideField.height;
+		// Draw the left and right goal area.
+		this.drawLeftGoalArea(context, y, width, height, distanceOutsideField, color, fieldLineWidth);
+		this.drawRightGoalArea(context, y, width, height, distanceOutsideField, color, fieldLineWidth);
 	},
 
-	drawLeftGoalArea: function (context, color, fieldLineWidth) {
-
-		//var blueGoalArea = buildRectangle(-halfLength, -Field.constants.GOAL_AREA_WIDTH * 0.5, Field.constants.GOAL_AREA_LENGTH, Field.constants.GOAL_AREA_WIDTH);
-		//var yellowGoalArea = buildRectangle(halfLength - Field.constants.GOAL_AREA_LENGTH, -Field.constants.GOAL_AREA_WIDTH * 0.5, Field.constants.GOAL_AREA_LENGTH, Field.constants.GOAL_AREA_WIDTH);
+	/**
+	 * Draws the left goal area on the canvas.
+	 *
+	 * @param context The canvas context.
+	 * @param y The y position of the goal area in screen units.
+	 * @param width The width of the goal area in screen units.
+	 * @param height The height of the goal area in screen units.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The color of the goal area.
+	 * @param fieldLineWidth The line width of the goal area.
+	 */
+	drawLeftGoalArea: function (context, y, width, height, distanceOutsideField, color, fieldLineWidth) {
+		var position = vec2.fromValues(distanceOutsideField.width, y);
+		this.drawRectangle(context, position, width, height, 'transparent', color, fieldLineWidth);
 	},
 
-	drawRightGoalArea: function (context, color, fieldLineWidth) {
-
+	/**
+	 * Draws the right goal area on the canvas.
+	 *
+	 * @param context The canvas context.
+	 * @param y The y position of the goal area in screen units.
+	 * @param width The width of the goal area in screen units.
+	 * @param height The height of the goal area in screen units.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
+	 * @param color The color of the goal area.
+	 * @param fieldLineWidth The line width of the goal area.
+	 */
+	drawRightGoalArea: function (context, y, width, height, distanceOutsideField, color, fieldLineWidth) {
+		var fieldWidth = this.SIToScreenWidth(context, Field.constants.FIELD_LENGTH);
+		var position = vec2.fromValues(distanceOutsideField.width + fieldWidth - width, y);
+		this.drawRectangle(context, position, width, height, 'transparent', color, fieldLineWidth);
 	},
 
 	/**
@@ -256,18 +297,18 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * Draws the centre vertical line of the field given the canvas context.
 	 *
 	 * @param context The canvas context.
+	 * @param distanceOutsideField The distance outside of the field in screen units.
 	 * @param color The color of the centre line.
 	 * @param fieldLineWidth The width of the centre line.
 	 */
-	drawCentreLine: function (context, color, fieldLineWidth) {
-		var distanceOutsideField = {
-			width: this.SIToScreenWidth(context, this.distanceOutsideField.width),
-			height: this.SIToScreenHeight(context, this.distanceOutsideField.height)
-		};
+	drawCentreLine: function (context, distanceOutsideField, color, fieldLineWidth) {
+		// Get the width and height of the field in screen units.
 		var width = this.SIToScreenWidth(context, Field.constants.FIELD_LENGTH);
 		var height = this.SIToScreenHeight(context, Field.constants.FIELD_WIDTH);
+		// Calculate the origin and target of the circle.
 		var origin = vec2.fromValues(distanceOutsideField.width + width * 0.5, distanceOutsideField.height);
 		var target = vec2.fromValues(origin[0], origin[1] + height);
+		// Draw the centre circle.
 		this.drawLine(context, origin, target, color, fieldLineWidth);
 	},
 
