@@ -41,7 +41,7 @@ setInterval(function () {
 			voltage: randFloat(10, 13),
 			battery: Math.random(),
 			behaviour_state: API.Behaviour.State.INIT,
-			robot_position: {x: 1, y: 0},
+			robot_position: {x: Math.random(), y: Math.random()},
 			robot_position_covariance: {x: {x: Math.random(), y: Math.random()}, y: {x: Math.random(), y: Math.random()}},
 			robot_heading: robotHeading,
 			ball_position: {x: 1, y: 1},
