@@ -28,9 +28,7 @@ function NUsight (io) {
 		this.clients.push(client);
 
 		this.robots.forEach(function (robot) {
-
 			socket.emit('robotIP', robot.host, robot.name);
-
 		}, this);
 
 		console.log('New web client', this.clients.length);
@@ -61,19 +59,20 @@ function NUsight (io) {
 		}.bind(this));
 
 		socket.on('disconnect', function () {
-
 			this.clients.splice(this.clients.indexOf(client), 1);
-
 			console.log('Lost web client', this.clients.length);
+		}.bind(this));
 
+		socket.on('reconnectRobots', function () {
+			this.robots.forEach(function (robot) {
+				robot.reconnect();
+			}, this);
 		}.bind(this));
 
 	}.bind(this));
 
 	this.on('message', function (robotIP, message) {
-
 		this.onMessage(robotIP, message);
-
 	}.bind(this));
 
 }
@@ -146,15 +145,12 @@ NUsight.prototype.addRobot = function (robotIP, robotName, port) {
 
 NUsight.prototype.addRobots = function (robotIPs)
 {
-	if (!Array.isArray(robotIPs))
-	{
+	if (!Array.isArray(robotIPs)) {
 		robotIPs = [robotIPs];
 	}
 
 	robotIPs.forEach(function (robotIP) {
-
 		this.addRobot(robotIP);
-
 	}, this);
 };
 
@@ -164,11 +160,8 @@ NUsight.prototype.onMessage = function (robotIP, message) {
 	if (false) {
 		// If our file is not yet open
 		if(this.files[robotIP] === undefined) {
-			try {
-				fs.mkdirSync('logs');
-				fs.mkdirSync('logs/' + robotIP);
-			}
-			catch(e) {}
+			try { fs.mkdirSync('logs'); } catch(e) {}
+			try { fs.mkdirSync('logs/' + robotIP); } catch(e) {}
 
 			this.files[robotIP] = fs.createWriteStream('logs/' + robotIP + '/' + Date.now() + '.nbs');
 		}

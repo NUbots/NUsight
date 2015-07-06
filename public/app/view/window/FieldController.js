@@ -257,13 +257,13 @@ Ext.define('NU.view.window.FieldController', {
 				var newModel = this.createModel(robot, object);
 				robot.updateModel(currentModel, newModel);
 			}
-			// Get the timeout of the object.
-			var timeout = object.getTimeOut();
-			// Check if the object should fade out.
-			if (timeout !== 0) {
-				// Fade out the model using the specified timeout.
-				robot.fadeOutModel(model, timeout === null ? 2.5 : timeout);
-			}
+			// // Get the timeout of the object.
+			// var timeout = object.getTimeout();
+			// // Check if the object should fade out.
+			// if (timeout !== 0) {
+			// 	// Fade out the model using the specified timeout.
+			// 	robot.fadeOutModel(model, timeout === null ? 2.5 : timeout);
+			// }
 		}, this);
 	},
 	/**
@@ -274,6 +274,9 @@ Ext.define('NU.view.window.FieldController', {
 	 */
 	toVec3: function (vector) {
 		return vector === null ? new THREE.Vector3() : new THREE.Vector3(vector.getX(), vector.getY(), vector.getZ());
+	},
+	toEuler: function (euler) {
+		return euler === null ? new THREE.Euler() : new THREE.Euler(euler.getX(), euler.getY(), euler.getZ(), 'XYZ');
 	},
 	toColor: function (vector) {
 		return vector === null ? vector : new THREE.Color(vector.getX(), vector.getY(), vector.getZ());
@@ -321,7 +324,7 @@ Ext.define('NU.view.window.FieldController', {
 			direction: this.toVec3(object.getDirection()),
 			length: object.getLength(),
 			depth: object.getDepth(),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -388,7 +391,7 @@ Ext.define('NU.view.window.FieldController', {
 			name: object.getName(),
 			path: object.getPath(),
 			width: object.getWidth(),
-			color: object.getColor()
+			color: this.toColor(object.getColor())
 		});
 	},
 	/**
@@ -420,7 +423,7 @@ Ext.define('NU.view.window.FieldController', {
 		return robot.createRectangleModel({
 			name: object.getName(),
 			position: this.toVec3(object.getPosition()),
-			target: object.getTarget(),
+			rotation: this.toEuler(object.getRotation()),
 			width: object.getWidth(),
 			length: object.getLength(),
 			color: this.toColor(object.getColor())

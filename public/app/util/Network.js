@@ -28,6 +28,7 @@ Ext.define('NU.util.Network', {
 		window.API.ActionStateChange = this.builder.build('messages.behaviour.proto.ActionStateChange');
 		window.API.Behaviour = this.builder.build('messages.behaviour.proto.Behaviour');
 		window.API.Configuration = this.builder.build('messages.support.nubugger.proto.ConfigurationState');
+		window.API.GameState = this.builder.build('messages.input.proto.GameState');
 		window.API.Image = this.builder.build('messages.input.proto.Image');
 		window.API.Sensors = this.builder.build('messages.input.proto.Sensors');
 		window.API.Subsumption = this.builder.build('messages.behaviour.proto.Subsumption');
@@ -119,6 +120,9 @@ Ext.define('NU.util.Network', {
 			this.socket.emit('removeRobot', record.get('ipAddress'));
 			this.fireEvent('removeRobot', record.get('ipAddress'));
 		}, this);
+	},
+	reconnect: function () {
+		this.socket.emit('reconnectRobots');
 	},
 	onRobotIP: function (robotIP, robotName) {
 		var robotsStore = Ext.getStore('Robots');

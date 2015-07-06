@@ -41,6 +41,13 @@ Robot.prototype.connect = function () {
 	this.pub.connect('tcp://' + this.host + ':' + (this.port + 1));
 };
 
+Robot.prototype.reconnect = function () {
+
+	this.disconnect();
+	this.connect();
+
+};
+
 Robot.prototype.disconnect = function () {
 
 	console.log('Disconnected from robot on tcp://' + this.host + ':' + this.port);
