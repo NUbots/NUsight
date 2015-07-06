@@ -153,11 +153,8 @@ NUsight.prototype.onMessage = function (robotIP, message) {
 	if (false) {
 		// If our file is not yet open
 		if(this.files[robotIP] === undefined) {
-			try {
-				fs.mkdirSync('logs');
-				fs.mkdirSync('logs/' + robotIP);
-			}
-			catch(e) {}
+			try { fs.mkdirSync('logs'); } catch(e) {}
+			try { fs.mkdirSync('logs/' + robotIP); } catch(e) {}
 
 			this.files[robotIP] = fs.createWriteStream('logs/' + robotIP + '/' + Date.now() + '.nbs');
 		}
