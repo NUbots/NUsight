@@ -45,6 +45,7 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 */
 	onResize: function (component, width, height) {
 		this.setSize(this.canvas.getEl().dom, width, height);
+		this.drawField(this.context);
 	},
 
 	/**
