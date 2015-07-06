@@ -21,7 +21,12 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 	},
 	controller: 'DashboardPanel',
 	bind: {
-		title: '{name}'
+		title: '{name}',
+		style: {
+			background: '{maskBackground}',
+			opacity: '{maskOpacity}',
+			marginRight: '2px'
+		}
 	},
 	listeners: {
 		destroy: 'onDestroy',
@@ -29,9 +34,6 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		toggleLocalisation: 'onToggleLocalisation'
 	},
 	cls: 'dashboard-panel',
-	style: {
-		marginRight: '2px'
-	},
 	layout: {
 		type: 'vbox',
 		align: 'stretch'
@@ -60,125 +62,116 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			}
 		}
 	}],
-	items: [{
+	items: [
+	/*{
+	 xtype: 'nu_dashboard_panel_title',
+	 html: 'Robot Localisation'
+	 }, */{
 		xtype: 'container',
 		bind: {
-			style: {
-				background: '{maskBackground}',
-				opacity: '{maskOpacity}'
-			}
+			hidden: '{localisation}'
 		},
-		items: [
-		/*{
-		 xtype: 'nu_dashboard_panel_title',
-		 html: 'Robot Localisation'
-		 }, */{
+		defaults: {
 			xtype: 'container',
-			bind: {
-				hidden: '{localisation}'
+			padding: '5px 10px 5px 10px'
+		},
+		items: [{
+			xtype: 'container',
+			layout: 'hbox',
+			style: {
+				background: '{positionBackground}',
+				color: '{positionColor}'
 			},
 			defaults: {
-				xtype: 'container',
-				padding: '5px 10px 5px 10px'
+				xtype: 'container'
 			},
 			items: [{
-				xtype: 'container',
-				layout: 'hbox',
-				style: {
-					background: '{positionBackground}',
-					color: '{positionColor}'
-				},
-				defaults: {
-					xtype: 'container'
-				},
-				items: [{
-					bind: {
-						html: '<strong>Position:</strong> [{position.x}, {position.y}]'
-					},
-					style: {
-						marginRight: '5px'
-					}
-				}, {
-					bind: {
-						html: '<strong>Angle:</strong> {heading}&deg;'
-					}
-				}]
-			}, {
 				bind: {
-					html: '<strong>Cov:</strong> {covariance.xx}, {covariance.xy}, {covariance.yy}'
+					html: '<strong>Position:</strong> [{position.x}, {position.y}]'
+				},
+				style: {
+					marginRight: '5px'
 				}
 			}, {
 				bind: {
-					html: '<strong>Ball position:</strong> [{ball.x}, {ball.y}]'
+					html: '<strong>Angle:</strong> {heading}&deg;'
 				}
 			}]
 		}, {
-			xtype: 'nu_dashboard_panel_field',
-			reference: 'field',
 			bind: {
-				hidden: '{!localisation}'
+				html: '<strong>Cov:</strong> {covariance.xx}, {covariance.xy}, {covariance.yy}'
 			}
-		}, /*{
-		 xtype: 'nu_dashboard_panel_title',
-		 html: 'Behaviour'
-		 }, */{
+		}, {
+			bind: {
+				html: '<strong>Ball position:</strong> [{ball.x}, {ball.y}]'
+			}
+		}]
+	}, {
+		xtype: 'nu_dashboard_panel_field',
+		reference: 'field',
+		bind: {
+			hidden: '{!localisation}'
+		}
+	}, /*{
+	 xtype: 'nu_dashboard_panel_title',
+	 html: 'Behaviour'
+	 }, */{
+		xtype: 'container',
+		defaults: {
 			xtype: 'container',
-			defaults: {
-				xtype: 'container',
-				padding: '5px 10px 5px 10px'
-			},
-			items: [{
-				bind: {
-					html: '<strong>GameController:</strong> {phase} ({mode})'
+			padding: '5px 10px 5px 10px'
+		},
+		items: [{
+			bind: {
+				html: '<strong>GameController:</strong> {phase} ({mode})'
+			}
+		}, {
+			bind: {
+				html: '<strong>State:</strong> {state}'
+			}
+		}, {
+			bind: {
+				html:  '<strong>Penalty:</strong> {penalty}',
+				style: {
+					backgroundColor: '{penaltyBackground}',
+					color: '{penaltyColor}'
 				}
-			}, {
-				bind: {
-					html: '<strong>State:</strong> {state}'
-				}
-			}, {
-				bind: {
-					html:  '<strong>Penalty:</strong> {penalty}',
-					style: {
-						backgroundColor: '{penaltyBackground}',
-						color: '{penaltyColor}'
-					}
 
-				}
-			}]
-		}, /*{
-		 xtype: 'nu_dashboard_panel_title',
-		 html: 'Last seen'
-		 }, */{
+			}
+		}]
+	}, /*{
+	 xtype: 'nu_dashboard_panel_title',
+	 html: 'Last seen'
+	 }, */{
+		xtype: 'container',
+		defaults: {
 			xtype: 'container',
-			defaults: {
-				xtype: 'container',
-				padding: '5px 10px 5px 10px'
-			},
-			items: [{
-				bind: {
-					html: '<strong>Camera image:</strong> {cameraImage}',
-					style: {
-						background: '{lastCameraBackground}',
-						color: '{lastCameraColor}'
-					}
+			padding: '5px 10px 5px 10px'
+		},
+		items: [{
+			bind: {
+				html: '<strong>Camera image:</strong> {cameraImage}',
+				style: {
+					background: '{lastCameraBackground}',
+					color: '{lastCameraColor}'
 				}
-			}, {
-				bind: {
-					html: '<strong>Ball:</strong> {lastBall}',
-					style: {
-						background: '{lastBallBackground}',
-						color: '{lastBallColor}'
-					}
+			}
+		}, {
+			bind: {
+				html: '<strong>Ball:</strong> {lastBall}',
+				style: {
+					background: '{lastBallBackground}',
+					color: '{lastBallColor}'
 				}
-			}, {
-				bind: {
-					html: '<strong>Goal:</strong> {lastGoal}',
-					style: {
-						background: '{lastGoalBackground}',
-						color: '{lastGoalColor}'
-					}
+			}
+		}, {
+			bind: {
+				html: '<strong>Goal:</strong> {lastGoal}',
+				style: {
+					background: '{lastGoalBackground}',
+					color: '{lastGoalColor}'
 				}
-			}]
+			}
 		}]
 	}]
 });

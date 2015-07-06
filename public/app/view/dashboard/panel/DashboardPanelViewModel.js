@@ -83,7 +83,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		maskOpacity: function (get) {
 			var elapsed = get('elapsedBackground');
-			return elapsed === this.getView().getColors().DANGER ? 0.5 : 1;
+			return elapsed === this.getView().getColors().DANGER ? 0.25 : 1;
 		},
 		batteryPercentage: function (get) {
 			return (get('battery') * 100).toFixed(2);
@@ -91,13 +91,13 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		batteryColor: function (get) {
 			return this.getColor(1 - get('battery'));
 		},
-		elapsedBackground: function (get) {
+		elapsed: function (get) {
 			var timestamp = get('timestamp');
-			if (timestamp === null) {
-				return this.getColor(1);
-			}
-			var elapsed = ((get('currentTime') - timestamp.getTime()) / 1000);
-			return this.getColor(this.easeOutCubic(this.normalize(0, 10, elapsed)), true);
+			return timestamp ? ((get('currentTime') - timestamp.getTime()) / 1000) : null;
+		},
+		elapsedBackground: function (get) {
+			var elapsed = get('elapsed');
+			return elapsed ? this.getColor(this.easeOutCubic(this.normalize(0, 10, elapsed)), true) : this.getColor(1);
 		},
 		position: function (get) {
 			var position = get('robotPosition') || {x: 0, y: 0};
@@ -143,7 +143,11 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return NU.TypeMap.get(API.GameState.Data.PenaltyReason)[get('penaltyReason')] || this.getUninitialised();
 		},
 		penaltyBackground: function (get) {
-			return this.getColor(get('penaltyReason') === API.GameState.Data.PenaltyReason.UNPENALISED);
+			var penaltyReason = get('penaltyReason');
+			if (penaltyReason === null && get('elapsed') === null) {
+				return this.getColor(0);
+			}
+			return this.getColor(penaltyReason === API.GameState.Data.PenaltyReason.UNPENALISED);
 		},
 		penaltyColor: function (get) {
 			return this.getFontColor(get('penaltyBackground'));
@@ -154,7 +158,8 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		lastCameraBackground: function (get) {
 			if (get('lastCameraImage') === null) {
-				return this.getColor(1);
+				var color = get('elapsed') ? 1 : 0;
+				return this.getColor(color);
 			}
 			return this.getColor(this.normalize(0, 3, get('cameraImage')));
 		},
@@ -167,7 +172,8 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		lastBallBackground: function (get) {
 			if (get('lastSeenBall') === null) {
-				return this.getColor(1);
+				var color = get('elapsed') ? 1 : 0;
+				return this.getColor(color);
 			}
 			return this.getColor(this.normalize(0, 5, get('lastBall')));
 		},
@@ -180,7 +186,8 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		lastGoalBackground: function (get) {
 			if (get('lastSeenGoal') === null) {
-				return this.getColor(1);
+				var color = get('elapsed') ? 1 : 0;
+				return this.getColor(color);
 			}
 			return this.getColor(this.normalize(0, 5, get('lastGoal')));
 		},
