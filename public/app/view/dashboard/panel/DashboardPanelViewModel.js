@@ -77,6 +77,14 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		return ((value - min) / (max - min)) + min;
 	},
 	formulas: {
+		maskBackground: function (get) {
+			var elapsed = get('elapsedBackground');
+			return elapsed === this.getView().getColors().DANGER ? 'white' : '';
+		},
+		maskOpacity: function (get) {
+			var elapsed = get('elapsedBackground');
+			return elapsed === this.getView().getColors().DANGER ? 0.5 : 1;
+		},
 		batteryPercentage: function (get) {
 			return (get('battery') * 100).toFixed(2);
 		},

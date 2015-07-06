@@ -60,115 +60,125 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			}
 		}
 	}],
-	items: [/*{
-		xtype: 'nu_dashboard_panel_title',
-		html: 'Robot Localisation'
-	}, */{
+	items: [{
 		xtype: 'container',
 		bind: {
-			hidden: '{localisation}'
-		},
-		defaults: {
-			xtype: 'container',
-			padding: '5px 10px 5px 10px'
-		},
-		items: [{
-			xtype: 'container',
-			layout: 'hbox',
 			style: {
-				background: '{positionBackground}',
-				color: '{positionColor}'
+				background: '{maskBackground}',
+				opacity: '{maskOpacity}'
+			}
+		},
+		items: [
+		/*{
+		 xtype: 'nu_dashboard_panel_title',
+		 html: 'Robot Localisation'
+		 }, */{
+			xtype: 'container',
+			bind: {
+				hidden: '{localisation}'
 			},
 			defaults: {
-				xtype: 'container'
+				xtype: 'container',
+				padding: '5px 10px 5px 10px'
 			},
 			items: [{
-				bind: {
-					html: '<strong>Position:</strong> [{position.x}, {position.y}]'
-				},
+				xtype: 'container',
+				layout: 'hbox',
 				style: {
-					marginRight: '5px'
+					background: '{positionBackground}',
+					color: '{positionColor}'
+				},
+				defaults: {
+					xtype: 'container'
+				},
+				items: [{
+					bind: {
+						html: '<strong>Position:</strong> [{position.x}, {position.y}]'
+					},
+					style: {
+						marginRight: '5px'
+					}
+				}, {
+					bind: {
+						html: '<strong>Angle:</strong> {heading}&deg;'
+					}
+				}]
+			}, {
+				bind: {
+					html: '<strong>Cov:</strong> {covariance.xx}, {covariance.xy}, {covariance.yy}'
 				}
 			}, {
 				bind: {
-					html: '<strong>Angle:</strong> {heading}&deg;'
+					html: '<strong>Ball position:</strong> [{ball.x}, {ball.y}]'
 				}
 			}]
 		}, {
+			xtype: 'nu_dashboard_panel_field',
+			reference: 'field',
 			bind: {
-				html: '<strong>Cov:</strong> {covariance.xx}, {covariance.xy}, {covariance.yy}'
+				hidden: '{!localisation}'
 			}
-		}, {
-			bind: {
-				html: '<strong>Ball position:</strong> [{ball.x}, {ball.y}]'
-			}
-		}]
-	}, {
-		xtype: 'nu_dashboard_panel_field',
-		reference: 'field',
-		bind: {
-			hidden: '{!localisation}'
-		}
-	}, /*{
-		xtype: 'nu_dashboard_panel_title',
-		html: 'Behaviour'
-	}, */{
-		xtype: 'container',
-		defaults: {
+		}, /*{
+		 xtype: 'nu_dashboard_panel_title',
+		 html: 'Behaviour'
+		 }, */{
 			xtype: 'container',
-			padding: '5px 10px 5px 10px'
-		},
-		items: [{
-			bind: {
-				html: '<strong>GameController:</strong> {phase} ({mode})'
-			}
-		}, {
-			bind: {
-				html: '<strong>State:</strong> {state}'
-			}
-		}, {
-			bind: {
-				html:  '<strong>Penalty:</strong> {penalty}',
-				style: {
-					backgroundColor: '{penaltyBackground}',
-					color: '{penaltyColor}'
+			defaults: {
+				xtype: 'container',
+				padding: '5px 10px 5px 10px'
+			},
+			items: [{
+				bind: {
+					html: '<strong>GameController:</strong> {phase} ({mode})'
 				}
+			}, {
+				bind: {
+					html: '<strong>State:</strong> {state}'
+				}
+			}, {
+				bind: {
+					html:  '<strong>Penalty:</strong> {penalty}',
+					style: {
+						backgroundColor: '{penaltyBackground}',
+						color: '{penaltyColor}'
+					}
 
-			}
-		}]
-	}, /*{
-		xtype: 'nu_dashboard_panel_title',
-		html: 'Last seen'
-	}, */{
-		xtype: 'container',
-		defaults: {
+				}
+			}]
+		}, /*{
+		 xtype: 'nu_dashboard_panel_title',
+		 html: 'Last seen'
+		 }, */{
 			xtype: 'container',
-			padding: '5px 10px 5px 10px'
-		},
-		items: [{
-			bind: {
-				html: '<strong>Camera image:</strong> {cameraImage}',
-				style: {
-					background: '{lastCameraBackground}',
-					color: '{lastCameraColor}'
+			defaults: {
+				xtype: 'container',
+				padding: '5px 10px 5px 10px'
+			},
+			items: [{
+				bind: {
+					html: '<strong>Camera image:</strong> {cameraImage}',
+					style: {
+						background: '{lastCameraBackground}',
+						color: '{lastCameraColor}'
+					}
 				}
-			}
-		}, {
-			bind: {
-				html: '<strong>Ball:</strong> {lastBall}',
-				style: {
-					background: '{lastBallBackground}',
-					color: '{lastBallColor}'
+			}, {
+				bind: {
+					html: '<strong>Ball:</strong> {lastBall}',
+					style: {
+						background: '{lastBallBackground}',
+						color: '{lastBallColor}'
+					}
 				}
-			}
-		}, {
-			bind: {
-				html: '<strong>Goal:</strong> {lastGoal}',
-				style: {
-					background: '{lastGoalBackground}',
-					color: '{lastGoalColor}'
+			}, {
+				bind: {
+					html: '<strong>Goal:</strong> {lastGoal}',
+					style: {
+						background: '{lastGoalBackground}',
+						color: '{lastGoalColor}'
+					}
 				}
-			}
+			}]
 		}]
 	}]
 });
