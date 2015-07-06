@@ -121,6 +121,9 @@ Ext.define('NU.util.Network', {
 			this.fireEvent('removeRobot', record.get('ipAddress'));
 		}, this);
 	},
+	reconnect: function () {
+		this.socket.emit('reconnectRobots');
+	},
 	onRobotIP: function (robotIP, robotName) {
 		var robotsStore = Ext.getStore('Robots');
 		var robotIndex = robotsStore.find('ipAddress', robotIP);

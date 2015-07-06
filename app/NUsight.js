@@ -27,7 +27,7 @@ function NUsight (io) {
 	//this.addRobot('10.1.2.3', 'Robot #3e');
 	//this.addRobot('10.1.1.4', 'Robot #4');
 	//this.addRobot('10.1.2.4', 'Robot #4e');
-	//this.addRobot('10.1.1.5', 'Robot #5');
+	this.addRobot('10.1.1.5', 'Robot #5');
 	//this.addRobot('10.1.2.5', 'Robot #5e');
 
 	this.io.sockets.on('connection', function (socket) {
@@ -37,9 +37,7 @@ function NUsight (io) {
 		this.clients.push(client);
 
 		this.robots.forEach(function (robot) {
-
 			socket.emit('robotIP', robot.host, robot.name);
-
 		}.bind(this));
 
 		console.log('New web client', this.clients.length);
@@ -70,19 +68,20 @@ function NUsight (io) {
 		}.bind(this));
 
 		socket.on('disconnect', function () {
-
 			this.clients.splice(this.clients.indexOf(client), 1);
-
 			console.log('Lost web client', this.clients.length);
+		}.bind(this));
 
+		socket.on('reconnectRobots', function () {
+			this.robots.forEach(function (robot) {
+				robot.reconnect();
+			}, this);
 		}.bind(this));
 
 	}.bind(this));
 
 	this.on('message', function (robotIP, message) {
-
 		this.onMessage(robotIP, message);
-
 	}.bind(this));
 
 }
@@ -139,15 +138,12 @@ NUsight.prototype.addRobot = function (robotIP, robotName, port) {
 
 NUsight.prototype.addRobots = function (robotIPs)
 {
-	if (!Array.isArray(robotIPs))
-	{
+	if (!Array.isArray(robotIPs)) {
 		robotIPs = [robotIPs];
 	}
 
 	robotIPs.forEach(function (robotIP) {
-
 		this.addRobot(robotIP);
-
 	}.bind(this));
 };
 

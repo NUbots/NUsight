@@ -65,5 +65,9 @@ Ext.define('NU.view.Toolbar', {
         listeners: {
             click: 'onNetworkSettings'
         }
-	}]
+	}, {
+        xtype: 'tool',
+        type: 'refresh',
+        callback: 'onReconnect'
+    }]
 });
