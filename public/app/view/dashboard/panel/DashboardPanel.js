@@ -127,7 +127,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			}
 		}, {
 			bind: {
-				html: '<strong>State:</strong> {state}'
+				html: '<strong>Behaviour:</strong> {state}'
 			}
 		}, {
 			bind: {
