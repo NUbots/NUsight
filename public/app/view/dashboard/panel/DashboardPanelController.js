@@ -41,6 +41,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 	 */
 	onUpdate: function (data, timestamp) {
 		var viewModel = this.getViewModel();
+		viewModel.set('roleName', data.getRoleName());
 		// Update the battery value in the view model.
 		viewModel.set('battery', data.getBattery());
 		// Get the robot localisation details, then update the view model and field view.

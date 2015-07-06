@@ -9,6 +9,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 	],
 	data: {
 		name: null,
+		roleName: null,
 		localisation: null,
 		battery: null,
 		// Localisation
@@ -77,6 +78,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		return ((value - min) / (max - min)) + min;
 	},
 	formulas: {
+		role: function (get) {
+			return get('roleName') || 'Unknown';
+		},
 		maskBackground: function (get) {
 			var elapsed = get('elapsedBackground');
 			return elapsed === this.getView().getColors().DANGER ? 'white' : '';
