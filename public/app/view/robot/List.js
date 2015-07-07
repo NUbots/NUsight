@@ -1,11 +1,13 @@
 Ext.define('NU.view.robot.List', {
     extend: 'Ext.grid.Panel',
+    alias: 'widget.robotlist',
     requires: [
+        'NU.store.Robots',
         'NU.view.robot.ListController',
         'Ext.grid.plugin.RowEditing'
 	],
     controller: 'List',
-    alias: 'widget.robotlist',
+    store: 'Robots',
     columns: [{
         header: 'Name',
         width: 170,
