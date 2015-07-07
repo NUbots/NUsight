@@ -191,7 +191,9 @@ Ext.define('NU.util.Network', {
 		});
 		return result;
 	},
-
+	getRobotStore: function () {
+		return Ext.getStore('Robots');
+	},
 	/**
 	 * Creates a message of a particular type and filter identifier that can be used to send over the network.
 	 *

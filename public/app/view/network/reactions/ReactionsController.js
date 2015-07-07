@@ -15,8 +15,8 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 			scope: this
 		});
 		// Iterate through each robot and create the dashboard panel for it.
-		NU.Network.getRobotIPs().forEach(function (robotIP) {
-			this.createGrid(robotIP, robotIP);
+		NU.Network.getRobotStore().each(function (robot) {
+			this.createGrid(robot.get('ipAddress'), robot.get('name'));
 		}, this);
 	},
 
@@ -28,7 +28,7 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	 */
 	createGrid: function (robotIP, robotName) {
 		// Add a mapping from the robot name to the view so it can be updated later.
-		this.robots[robotName] = this.getView().add(Ext.widget('nu_network_reactions_grid_panel', {
+		this.robots[robotIP] = this.getView().add(Ext.widget('nu_network_reactions_grid_panel', {
 			robot: {
 				name: robotName,
 				IP: robotIP
