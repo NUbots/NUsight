@@ -21,6 +21,14 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		}, this);
 	},
 
+	onMaximize: function (view) {
+		// hack because ExtJS seems not to do this correctly! >_<
+		var newBox = view.constrainTo.getViewSize(false);
+		newBox.x = 0;
+		newBox.y = 0;
+		view.setBox(newBox)
+	},
+
 	/**
 	 * Creates the dashboard panel for a certain robot.
 	 *
