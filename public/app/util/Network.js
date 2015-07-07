@@ -6,48 +6,34 @@ Ext.define('NU.util.Network', {
 	},
 	socket: null,
 	cache: null,
+
 	constructor: function (config) {
 		this.mixins.observable.constructor.call(this, config);
-
 		this.initConfig(config);
-
 		this.cache = [];
 	},
+
 	init: function () {
-		var robotsStore = Ext.getStore('Robots');
 
 		this.setupSocket();
+		this.setupAPI();
+		this.setupTypeMap();
 
-		this.builder = dcodeIO.ProtoBuf.loadProtoFile({
-			root: 'resources/js/proto',
-			file: 'messages/support/nubugger/proto/Message.proto'
+		Ext.getStore('Robots').on({
+			add: this.onAddRobot,
+			update: this.onUpdateRobot,
+			remove: this.onRemoveRobot,
+			scope: this
 		});
-
-		window.API = this.builder.build('messages.support.nubugger.proto');
-		// cry :'(
-		window.API.Behaviour = this.builder.build('messages.behaviour.proto.Behaviour');
-		window.API.Configuration = this.builder.build('messages.support.nubugger.proto.ConfigurationState');
-		window.API.GameState = this.builder.build('messages.input.proto.GameState');
-		window.API.Image = this.builder.build('messages.input.proto.Image');
-		window.API.Sensors = this.builder.build('messages.input.proto.Sensors');
-		window.API.Subsumption = this.builder.build('messages.behaviour.proto.Subsumption');
-		window.API.Vision = this.builder.build('messages.vision.proto');
-		var typeMap = {};
-		Ext.iterate(API.Message.Type, function (key, type) {
-			typeMap[type] = key.toLowerCase();
-		}, this);
-		this.typeMap = typeMap;
-
-		robotsStore.on('add', this.onAddRobot, this);
-		robotsStore.on('update', this.onUpdateRobot, this);
-		robotsStore.on('remove', this.onRemoveRobot, this);
 
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
 
 	},
+
 	getTypeMap: function () {
 		return this.typeMap;
 	},
+
 	onAnimationFrame: function () {
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
 
@@ -58,6 +44,7 @@ Ext.define('NU.util.Network', {
 			}
 		}, this);
 	},
+
 	processPacket: function (packet) {
 		var message, type, eventName, filterId, robotIP, event, hash;
 		robotIP = packet.robotIP;
@@ -83,6 +70,7 @@ Ext.define('NU.util.Network', {
 
 		this.fireEvent('packet', robotIP, type, packet);
 	},
+
 	processMessage: function (event) {
 		var api_message = API.Message.decode(event.message);
 		var api_event = api_message[event.name];
@@ -90,13 +78,39 @@ Ext.define('NU.util.Network', {
 		this.fireEvent(event.name, event.robotIP, api_event, time);
 		//console.log(event.robotIP, event.name);
 	},
-	setupSocket: function () {
 
+	setupSocket: function () {
 		var socket = io.connect(document.location.origin);
 		socket.on('robotIP', this.onRobotIP.bind(this));
 		socket.on('message', this.onMessage.bind(this));
 		this.socket = socket;
 	},
+
+	setupAPI: function () {
+		var builder = this.builder = dcodeIO.ProtoBuf.loadProtoFile({
+			root: 'resources/js/proto',
+			file: 'messages/support/nubugger/proto/Message.proto'
+		});
+
+		window.API = builder.build('messages.support.nubugger.proto');
+		// cry :'(
+		window.API.Behaviour = builder.build('messages.behaviour.proto.Behaviour');
+		window.API.Configuration = builder.build('messages.support.nubugger.proto.ConfigurationState');
+		window.API.GameState = builder.build('messages.input.proto.GameState');
+		window.API.Image = builder.build('messages.input.proto.Image');
+		window.API.Sensors = builder.build('messages.input.proto.Sensors');
+		window.API.Subsumption = builder.build('messages.behaviour.proto.Subsumption');
+		window.API.Vision = builder.build('messages.vision.proto');
+	},
+
+	setupTypeMap: function () {
+		var typeMap = {};
+		Ext.iterate(API.Message.Type, function (key, type) {
+			typeMap[type] = key.toLowerCase();
+		}, this);
+		this.typeMap = typeMap;
+	},
+
 	onAddRobot: function (store, records, index, eOpts) {
 		Ext.each(records, function (record) {
 			if (record.get('ipAddress') !== '') {
@@ -105,24 +119,39 @@ Ext.define('NU.util.Network', {
 			}
 		}, this);
 	},
-	onUpdateRobot: function (store, record, operation, eOpts) {
-		if (eOpts.indexOf('ipAddress') !== -1) {
-			// ipAddress modified
-			if (record.get('ipAddress') !== '') {
-				this.socket.emit('addRobot', record.get('ipAddress'));
-				this.fireEvent('addRobot', record.get('ipAddress'));
+
+	onUpdateRobot: function (store, record, operation, modifiedFieldNames) {
+		var robotIP = record.get('ipAddress');
+		// Check if the IP address of the robot was modified.
+		if (modifiedFieldNames.indexOf('ipAddress') !== -1) {
+			if (robotIP !== '') {
+				this.socket.emit('addRobot', robotIP);
+				this.fireEvent('addRobot', robotIP);
+			}
+		}
+		// Check if the enabled flag of the robot was modified.
+		if (modifiedFieldNames.indexOf('enabled') !== 1) {
+			var enabled = record.get('enabled');
+			if (enabled) {
+				this.socket.emit('enableRobot', robotIP);
+			} else {
+				this.socket.emit('disableRobot', robotIP);
 			}
 		}
 	},
+
 	onRemoveRobot: function (store, records, indexes, isMove, eOpts) {
 		Ext.each(records, function (record) {
-			this.socket.emit('removeRobot', record.get('ipAddress'));
-			this.fireEvent('removeRobot', record.get('ipAddress'));
+			var robotIP = record.get('ipAddress');
+			this.socket.emit('removeRobot', robotIP);
+			this.fireEvent('removeRobot', robotIP);
 		}, this);
 	},
+
 	reconnect: function () {
 		this.socket.emit('reconnectRobots');
 	},
+
 	onRobotIP: function (robotIP, robotName) {
 		var robotsStore = Ext.getStore('Robots');
 		var robotIndex = robotsStore.find('ipAddress', robotIP);
@@ -133,6 +162,7 @@ Ext.define('NU.util.Network', {
 			});
 		}
 	},
+
 	onMessage: function (robotIP, message, callback) {
 		var packet = {
 			robotIP: robotIP,
@@ -144,12 +174,15 @@ Ext.define('NU.util.Network', {
 			callback();
 		}
 	},
+
 	send: function (robotIP, message) {
 		this.socket.emit('message', robotIP, message.encode().toArrayBuffer());
 	},
+
 	broadcast: function (message) {
 		this.socket.emit('broadcast', message.encode().toArrayBuffer());
 	},
+
 	getRobotIPs: function () {
 		var result = [];
 		var robotsStore = Ext.getStore('Robots');
@@ -158,6 +191,7 @@ Ext.define('NU.util.Network', {
 		});
 		return result;
 	},
+
 	/**
 	 * Creates a message of a particular type and filter identifier that can be used to send over the network.
 	 *
@@ -174,6 +208,7 @@ Ext.define('NU.util.Network', {
 		// Return the message that was created].
 		return message;
 	},
+
 	/**
 	 * Creates a message and command of a particular name to send over the network.
 	 *

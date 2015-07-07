@@ -42,7 +42,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 	 *
 	 * @param column The checkcolumn that was altered.
 	 * @param rowIndex The row within the store that had the checkbox toggled.
-	 * @param checked The new state of the checbox.
+	 * @param checked The new state of the checkbox.
 	 */
 	onCheckChange: function (column, rowIndex, checked) {
 		var record = this.store.getAt(rowIndex);
