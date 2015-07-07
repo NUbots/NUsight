@@ -25,7 +25,6 @@ Ext.define('NU.util.Network', {
 
 		window.API = this.builder.build('messages.support.nubugger.proto');
 		// cry :'(
-		window.API.ActionStateChange = this.builder.build('messages.behaviour.proto.ActionStateChange');
 		window.API.Behaviour = this.builder.build('messages.behaviour.proto.Behaviour');
 		window.API.Configuration = this.builder.build('messages.support.nubugger.proto.ConfigurationState');
 		window.API.GameState = this.builder.build('messages.input.proto.GameState');

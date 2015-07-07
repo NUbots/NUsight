@@ -8,16 +8,10 @@ Ext.define('NU.model.ActionStateChange', {
 		{name: 'limbs', type: 'auto'}, // array of int
 		{name: 'state', type: 'int'}
 	],
-	proxy: {
-		type: 'memory',
-		reader: {
-			type: 'json'
-		}
-	},
 	getStateDescription: function () {
 		var result = "unknown";
 		var state = this.get('state');
-		var State = API.ActionStateChange.State;
+		var State = API.Subsumption.ActionStateChange.State;
 		Ext.Object.each(State, function (name, value) {
 			if (state === value) {
 				result = name;
@@ -38,12 +32,13 @@ Ext.define('NU.model.ActionStateChange', {
 		return this.arrayToSentence(output);
 	},
 	getLimbName: function (limbID) {
+		var Limb = API.Subsumption.Limb;
 		switch (limbID) {
-			case 0: return 'Left Leg';
-			case 1: return 'Right Leg';
-			case 2: return 'Left Arm';
-			case 3: return 'Right Arm';
-			case 4: return 'Head';
+			case Limb.LEFT_LEG: return 'Left Leg';
+			case Limb.RIGHT_LEG: return 'Right Leg';
+			case Limb.LEFT_ARM: return 'Left Arm';
+			case Limb.RIGHT_ARM: return 'Right Arm';
+			case Limb.ARM: return 'Head';
 		}
 	},
 	arrayToSentence: function (arr) {
