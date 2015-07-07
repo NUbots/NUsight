@@ -68,4 +68,3 @@ message VisionObject {
     repeated Obstacle obstacle = 4;
     repeated Line line = 6;
 }
-

@@ -38,4 +38,3 @@ message Behaviour {
     required State state = 1;
 
 }
-
