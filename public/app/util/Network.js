@@ -182,7 +182,6 @@ Ext.define('NU.util.Network', {
 	 * @param [filterId] The filter identifier for the message.
 	 */
 	sendCommand: function (robotIP, commandName, filterId) {
-		debugger;
 		// Create the message of type command.
 		var message = this.createMessage(API.Message.Type.COMMAND, filterId || 0);
 		// Create the command and set its name.
