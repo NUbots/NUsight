@@ -57,7 +57,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		});
 		message.setReactionHandles(reactionHandles);
 		// Send the message.
-		NU.Network.send(message);
+		NU.Network.send(this.getView().getRobot().IP, message);
 	},
 
 	/**
