@@ -52,66 +52,17 @@ Robot.prototype.disconnect = function () {
 
 	console.log('Disconnected from robot on tcp://' + this.host + ':' + this.port);
 
-	this.sub.removeAllListeners();
-	this.sub.disconnect('tcp://' + this.host + ':' + this.port);
-	this.sub.close();
+	try {
+		this.sub.removeAllListeners();
+		this.sub.disconnect('tcp://' + this.host + ':' + this.port);
+		this.sub.close();
+	} catch (e) {}
 
-	this.pub.removeAllListeners();
-	this.pub.disconnect('tcp://' + this.host + ':' + (this.port + 1));
-	this.pub.close();
-
-};
-
-Robot.prototype.connect2 = function () {
-
-	var filename = 'data.log';
-
-	var input = fs.createReadStream(filename);
-
-	var remaining = '';
-
-	input.on('data', function(data) {
-		remaining += data;
-		var index = remaining.indexOf('\n');
-		while (index > -1) {
-			var line = remaining.substring(0, index);
-			remaining = remaining.substring(index + 1);
-			input.emit('line', line);
-			index = remaining.indexOf('\n');
-		}
-	}.bind(this));
-
-	input.on('end', function() {
-		if (remaining.length > 0) {
-			input.emit('line', line);
-		}
-	}.bind(this));
-
-	input.on('line', function (line) {
-
-		//console.log(line);
-		//this.onMessage(line);
-
-	}.bind(this));
-
-	/*fs.open(filename, 'r', function (fd) {
-	 fs.read(fd, function (err, data) {
-
-	 console.log('salkdfjasldkfjs');
-
-	 console.log(err, data.length);
-
-	 var lines = data.split("\n");
-
-	 lines.forEach(function (line) {
-
-	 // base64 decode? maybe not
-	 // emit as event
-	 console.log('test');
-
-	 });
-
-	 });*/
+	try {
+		this.pub.removeAllListeners();
+		this.pub.disconnect('tcp://' + this.host + ':' + (this.port + 1));
+		this.pub.close();
+	} catch (e) {}
 
 };
 

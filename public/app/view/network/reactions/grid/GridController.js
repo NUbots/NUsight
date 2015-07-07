@@ -56,8 +56,8 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 			enabled: record.get('enabled')
 		});
 		message.setReactionHandles(reactionHandles);
-		// Broadcast the message.
-		NU.Network.broadcast(message);
+		// Send the message.
+		NU.Network.send(message);
 	},
 
 	/**

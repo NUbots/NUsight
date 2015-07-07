@@ -80,7 +80,7 @@ Ext.define('NU.view.ToolbarController', {
 		Ext.syncRequire('NU.view.network.NetworkSettings');
 		Ext.create('Ext.Window', {
 			autoShow: true,
-			modal: true,
+			//modal: true,
 			maximizable: true,
 			title: 'Network Settings',
 			width: 800,

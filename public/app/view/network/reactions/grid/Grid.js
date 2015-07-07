@@ -32,7 +32,7 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 		flex: 1
 	}, {
 		dataIndex: 'packets',
-		width: 50
+		width: 80
 	}, {
 		xtype: 'checkcolumn',
 		dataIndex: 'enabled',
