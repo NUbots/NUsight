@@ -8,9 +8,11 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 		'NU.view.network.reactions.grid.Grid'
 	],
 	init: function () {
-		this.robots = {};
+		this.grids = {};
 		NU.Network.on({
-			robotIP: this.onRobotIP,
+			robotIP: this.onAddRobot,
+			addRobot: this.onAddRobot,
+			removeRobot: this.onRemoveRobot,
 			packet: this.onPacket,
 			scope: this
 		});
@@ -27,8 +29,8 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	 */
 	createGrid: function (robot) {
 		var robotIP = robot.get('ipAddress');
-		// Add a mapping from the robot name to the view so it can be updated later.
-		this.robots[robotIP] = this.getView().add(Ext.widget('nu_network_reactions_grid_panel', {
+		// Add a mapping from the robot IP to the view so it can be updated later.
+		this.grids[robotIP] = this.getView().add(Ext.widget('nu_network_reactions_grid', {
 			robot: robot
 		}));
 	},
@@ -39,8 +41,21 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	 *
 	 * @param robot The robot record from the robot store.
 	 */
-	onRobotIP: function (robot) {
+	onAddRobot: function (robot) {
 		this.createGrid(robot);
+	},
+
+	/**
+	 * An event triggered when the Network class deletes a robot. This method removes the grid associated with the
+	 * robot that was removed from the network.
+	 *
+	 * @param robot The robot record from the robot store.
+	 */
+	onRemoveRobot: function (robot) {
+		var robotIP = robot.get('ipAddress');
+		var grid = this.grids[robotIP];
+		this.getView().remove(grid);
+		delete this.grids[robotIP];
 	},
 
 	/**
@@ -52,7 +67,7 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	 */
 	onPacket: function (robot, type, packet) {
 		// Obtain the grid and the key, then fire the update event.
-		var grid = this.robots[robot.get('ipAddress')];
+		var grid = this.grids[robot.get('ipAddress')];
 		var key = NU.Network.getTypeMap()[type];
 		grid.fireEvent('update', key);
 	}

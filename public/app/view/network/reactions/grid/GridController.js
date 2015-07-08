@@ -6,12 +6,12 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 	alias: 'controller.NetworkReactionsGrid',
 	init: function () {
 		var viewModel = this.getViewModel();
+		var robot = this.getView().getRobot();
 		this.messages = {};
 		this.store = viewModel.getStore('grid');
-		var robot = this.getView().getRobot();
-		viewModel.set('name', robot.name);
+		viewModel.set('name', robot.get('name') || 'Unknown');
 		this.addData(this.store);
-		NU.Network.sendCommand(robot.IP, 'get_reaction_handles');
+		NU.Network.sendCommand(robot.get('ipAddress'), 'get_reaction_handles');
 		NU.Network.on('reaction_handles', this.onReactionHandles, this);
 	},
 

@@ -115,7 +115,7 @@ Ext.define('NU.util.Network', {
 		Ext.each(records, function (record) {
 			if (record.get('ipAddress') !== '') {
 				this.socket.emit('addRobot', record.get('ipAddress'), record.get('name'));
-				this.fireEvent('addRobot', record.get('ipAddress'));
+				this.fireEvent('addRobot', record);
 			}
 		}, this);
 	},
@@ -126,7 +126,7 @@ Ext.define('NU.util.Network', {
 		if (modifiedFieldNames.indexOf('ipAddress') !== -1) {
 			if (robotIP !== '') {
 				this.socket.emit('addRobot', robotIP);
-				this.fireEvent('addRobot', robotIP);
+				this.fireEvent('addRobot', record);
 			}
 		}
 		// Check if the enabled flag of the robot was modified.
@@ -144,7 +144,7 @@ Ext.define('NU.util.Network', {
 		Ext.each(records, function (record) {
 			var robotIP = record.get('ipAddress');
 			this.socket.emit('removeRobot', robotIP);
-			this.fireEvent('removeRobot', robotIP);
+			this.fireEvent('removeRobot', record);
 		}, this);
 	},
 

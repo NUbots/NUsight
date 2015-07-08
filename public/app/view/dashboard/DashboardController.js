@@ -11,7 +11,9 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		this.dashboardPanels = {};
 		// Listen to the network events.
 		NU.Network.on({
-			robotIP: this.onRobotIP,
+			robotIP: this.onAddRobot,
+			addRobot: this.onAddRobot,
+			removeRobot: this.onRemoveRobot,
 			overview: this.onOverview,
 			scope: this
 		});
@@ -48,8 +50,21 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 *
 	 * @param robot The robot record from the robot store.
 	 */
-	onRobotIP: function (robot) {
-		this.createGrid(robot);
+	onAddRobot: function (robot) {
+		this.createDashboardPanel(robot);
+	},
+
+	/**
+	 * An event triggered when the Network class deletes a robot. This method removes the dashboard panel associated
+	 * with the robot that was removed from the network.
+	 *
+	 * @param robot The robot record from the robot store.
+	 */
+	onRemoveRobot: function (robot) {
+		var robotIP = robot.get('ipAddress');
+		var dashboardPanel = this.dashboardPanels[robotIP];
+		this.getView().remove(dashboardPanel);
+		delete this.dashboardPanels[robotIP];
 	},
 
 	/**
