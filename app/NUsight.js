@@ -58,9 +58,9 @@ function NUsight (io) {
 			}
 		}.bind(this));
 
-		socket.on('enableRobot', function (robotIP, robotName) {
+		socket.on('enableRobot', function (robotIP) {
 			var robot = this.getRobot(robotIP);
-			if (robot === null) {
+			if (robot !== null) {
 				robot.connect();
 			}
 		}.bind(this));
