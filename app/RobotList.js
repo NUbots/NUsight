@@ -8,10 +8,10 @@ function RobotList() {
 
 util.inherits(RobotList, events.EventEmitter);
 
-RobotList.prototype.getRobot = function (robotIP) {
+RobotList.prototype.getRobot = function (robotId) {
 	var result = null;
 	this.robots.forEach(function (robot) {
-		if (robot.host === robotIP) {
+		if (robot.id === robotId) {
 			result = robot;
 			return false;
 		}
@@ -19,13 +19,13 @@ RobotList.prototype.getRobot = function (robotIP) {
 	return result;
 };
 
-RobotList.prototype.removeRobot = function (robotIP) {
+RobotList.prototype.removeRobot = function (robotId) {
 	this.robots.forEach(function (robot, index) {
-		if (robot.host === robotIP) {
+		if (robot.id === robotId) {
 			try {
 				robot.disconnect();
 			} catch (e) {
-				console.log('Error disconnecting to:', robotIP);
+				console.log('Error disconnecting to:', robotId);
 			}
 			this.robots.splice(index, 1);
 			return false;
@@ -33,20 +33,18 @@ RobotList.prototype.removeRobot = function (robotIP) {
 	}, this);
 };
 
-RobotList.prototype.addRobot = function (robotIP, robotName, port) {
+RobotList.prototype.addRobot = function (robotId, robotIP, robotPort, robotName) {
 
-	var robot = new Robot(robotIP, port, robotName);
+	var robot = new Robot(robotId, robotIP, robotPort, robotName);
 	try {
 		robot.connect();
 	} catch(e) {
 		console.log(e);
-		console.log('Error connecting to:', robotIP);
+		console.log('Error connecting to:', robotId);
 	}
 
 	this.robots.push(robot);
-
 	this.emit('add_robot', robot);
-
 	return robot;
 
 };

@@ -2,7 +2,7 @@ Ext.define('NU.model.ActionStateChange', {
 	extend: 'Ext.data.Model',
 	fields: [
 		{name: 'id', type: 'int'},
-		{name: 'robotIP', type: 'string'},
+		{name: 'robotId', type: 'int'},
 		{name: 'time', type: 'date'},
 		{name: 'name', type: 'string'},
 		{name: 'limbs', type: 'auto'}, // array of int

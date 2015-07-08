@@ -66,11 +66,19 @@ Ext.define('NU.view.window.VisionController', {
 			this.imageRenderer.onReady(),
 			this.imageDiffRenderer.onReady()
 		]).then(function () {
-			this.mon(NU.Network, 'image', this.onImage, this);
-			this.mon(NU.Network, 'classified_image', this.onClassifiedImage, this);
-			this.mon(NU.Network, 'vision_object', this.onVisionObjects, this);
+			this.addEvents();
 		}.bind(this));
     },
+
+	addEvents: function () {
+		NU.Network.on({
+			image: this.onImage,
+			classified_image: this.onClassifiedImage,
+			vision_object: this.onVisionObjects,
+			scope: this
+		});
+	},
+
 	onLayerSelect: function (obj, newValue, oldValue, e) {
 		var layeredCanvas = this.getLayeredCanvas();
 		layeredCanvas.hideAll();
@@ -121,9 +129,9 @@ Ext.define('NU.view.window.VisionController', {
 		this.setHeight(height);
 		this.getLayeredCanvas().setCanvasSize(width, height);
 	},
-    onImage: function (robotIP, image) {
+    onImage: function (robotId, image) {
 
-        if (robotIP != this.getRobotIP() || image === null) {
+        if (robotId != this.getRobotId() || image === null) {
             return;
         }
 
@@ -218,9 +226,9 @@ Ext.define('NU.view.window.VisionController', {
 		}
 		return window.btoa(binary);
 	},
-    onClassifiedImage: function (robotIP, image) {
+    onClassifiedImage: function (robotId, image) {
 
-        if(robotIP != this.getRobotIP()) {
+        if(robotId != this.getRobotId()) {
             return;
         }
 
@@ -358,9 +366,9 @@ Ext.define('NU.view.window.VisionController', {
             context.stroke();
         }
     },
-	onVisionObjects: function (robotIP, visionObjects) {
+	onVisionObjects: function (robotId, visionObjects) {
 
-		if (robotIP !== this.getRobotIP()) {
+		if (robotId !== this.getRobotId()) {
 			return;
 		}
 

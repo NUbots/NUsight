@@ -7,15 +7,16 @@ zmq = require('zmq');
 fs = require('fs');
 dgram = require('dgram');
 
-function Robot (host, port, robotName) {
+function Robot (id, host, port, name) {
 
 	if (port === undefined) {
 		port = 12000;
 	}
 
+	this.id = id;
 	this.host = host;
 	this.port = port;
-	this.name = robotName;
+	this.name = name;
 	this.enabled = true;
 	// Robot to Node
 	this.sub = null;
@@ -96,6 +97,16 @@ Robot.prototype.onMessage = function (data) {
 		console.log(err);
 	}
 
+};
+
+Robot.prototype.getModel = function () {
+	return {
+		id: this.id,
+		ipAddress: this.host,
+		port: this.port,
+		name: this.name,
+		enabled: this.enabled
+	}
 };
 
 Robot.prototype.record = function (data) {

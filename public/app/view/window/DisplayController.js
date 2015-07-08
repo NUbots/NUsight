@@ -1,14 +1,14 @@
 Ext.define('NU.view.window.DisplayController', {
     extend: 'Ext.app.ViewController',
 	config: {
-		robotIP: null
+		robotId: null
 	},
 	init: function () {
 		//this.robots = {};
 	},
 
-	onSelectRobot: function (robotIP) {
-		this.setRobotIP(robotIP);
+	onSelectRobot: function (robotId) {
+		this.setRobotId(robotId);
 	},
 
     onMaximize: function (view) {

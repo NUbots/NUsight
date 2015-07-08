@@ -22,9 +22,18 @@ Ext.define('NU.view.window.ChartController', {
         streams: null
     },
     init: function () {
-        // init array
         this.setStreams([]);
+        this.addEvents();
     },
+
+    addEvents: function () {
+        NU.Network.on({
+            data_point: this.onDataPoint,
+            sensor_data: this.onSensorData,
+            scope: this
+        });
+    },
+
     onAfterRender: function () {
         // setup canvas
         var canvas = this.lookupReference('canvas');
@@ -36,11 +45,7 @@ Ext.define('NU.view.window.ChartController', {
         this.setSmoothie(smoothie);
         smoothie.streamTo(canvasDom, 0);
 
-        // setup network hook
-		var view = this.getView();
-        view.mon(NU.Network, 'data_point', this.onDataPoint, this);
-        view.mon(NU.Network, 'sensor_data', this.onSensorData, this);
-
+        var view = this.getView();
         this.onResize(view, view.getWidth(), view.getHeight());
     },
     onMinChange: function (field, newValue, oldValue, eOpts) {
@@ -109,11 +114,11 @@ Ext.define('NU.view.window.ChartController', {
         }
 
     },
-    onSensorData: function (robotIP, sensorData, timestamp) {
+    onSensorData: function (robotId, sensorData, timestamp) {
 
         // Accelerometer
         var accel = sensorData.getAccelerometer();
-        this.onDataPoint(robotIP, {
+        this.onDataPoint(robotId, {
             label: "Accelerometer",
             value: [
                 accel.x,
@@ -124,7 +129,7 @@ Ext.define('NU.view.window.ChartController', {
 
         // Gyroscope
         var gyro = sensorData.getGyroscope();
-        this.onDataPoint(robotIP, {
+        this.onDataPoint(robotId, {
             label: "Gyroscope",
             value: [
                 gyro.x,
@@ -135,7 +140,7 @@ Ext.define('NU.view.window.ChartController', {
 
         // Orientation
         var orientation = sensorData.getOrientation();
-        this.onDataPoint(robotIP, {
+        this.onDataPoint(robotId, {
             label: "Orientation",
             value: [
                 orientation.xx,
@@ -152,14 +157,14 @@ Ext.define('NU.view.window.ChartController', {
 
         // Left FSR
         //var lFSR = sensorData.getLeftFSR();
-        //this.onDataPoint(robotIP, {
+        //this.onDataPoint(robotId, {
         //    label: "Left FSR Position",
         //    value: [
         //        lFSR.x,
         //        lFSR.y
         //    ]
         //}, timestamp);
-        //this.onDataPoint(robotIP, {
+        //this.onDataPoint(robotId, {
         //    label: "Left FSR Force",
         //    value: [
         //        lFSR.z
@@ -168,14 +173,14 @@ Ext.define('NU.view.window.ChartController', {
 
         // Right FSR
         //var rFSR = sensorData.getRightFSR();
-        //this.onDataPoint(robotIP, {
+        //this.onDataPoint(robotId, {
         //    label: "Right FSR Position",
         //    value: [
         //        rFSR.x,
         //        rFSR.y
         //    ]
         //}, timestamp);
-        //this.onDataPoint(robotIP, {
+        //this.onDataPoint(robotId, {
         //    label: "Right FSR Force",
         //    value: [
         //        rFSR.z
@@ -189,7 +194,7 @@ Ext.define('NU.view.window.ChartController', {
             var name = id; // TODO use the ID to get a name from a cache
 
             // PID gain
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotId, {
                 label: name + " Gain",
                 value: [
                     servo.getPGain(),
@@ -199,7 +204,7 @@ Ext.define('NU.view.window.ChartController', {
             }, timestamp);
 
             // Goal position
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotId, {
                 label: name + " Goal Position",
                 value: [
                     servo.getGoalPosition()
@@ -207,7 +212,7 @@ Ext.define('NU.view.window.ChartController', {
             }, timestamp);
 
             // Goal Velocity
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotId, {
                 label: name + " Goal Velocity",
                 value: [
                     servo.getGoalVelocity()
@@ -215,7 +220,7 @@ Ext.define('NU.view.window.ChartController', {
             }, timestamp);
 
             // Present position
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotId, {
                 label: name + " Present Position",
                 value: [
                     servo.getPresentPosition()
@@ -223,7 +228,7 @@ Ext.define('NU.view.window.ChartController', {
             }, timestamp);
 
             // Present Velocity
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotId, {
                 label: name + " Present Velocity",
                 value: [
                     servo.getPresentVelocity()
@@ -231,7 +236,7 @@ Ext.define('NU.view.window.ChartController', {
             }, timestamp);
 
             // Load
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotId, {
                 label: name + " Load",
                 value: [
                     servo.getLoad()
@@ -239,7 +244,7 @@ Ext.define('NU.view.window.ChartController', {
             }, timestamp);
 
             // Voltage
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotId, {
                 label: name + " Voltage",
                 value: [
                     servo.getVoltage()
@@ -247,7 +252,7 @@ Ext.define('NU.view.window.ChartController', {
             }, timestamp);
 
             // Temperature
-            this.onDataPoint(robotIP, {
+            this.onDataPoint(robotId, {
                 label: name + " Temperature",
                 value: [
                     servo.getTemperature()
@@ -256,10 +261,10 @@ Ext.define('NU.view.window.ChartController', {
 
         }, this);
     },
-    onDataPoint: function (robotIP, dataPoint, timestamp) {
+    onDataPoint: function (robotId, dataPoint, timestamp) {
 
         // TODO: remove
-        if (robotIP !== this.getRobotIP()) {
+        if (robotId !== this.getRobotId()) {
             return;
         }
 

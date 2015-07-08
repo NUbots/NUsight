@@ -2,31 +2,30 @@ Ext.define('NU.view.window.GameStateController', {
 	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.GameState',
 	init: function () {
-		var view = this.getView();
-		view.mon(NU.Network, 'game_state', this.onGameState, this);
+		NU.Network.on('game_state', this.onGameState, this);
 	},
-	onSelectRobot: function (robotIP) {
+	onSelectRobot: function (robotId) {
 		var store = this.getStore();
 		store.clearFilter(true);
 		store.addFilter({
-			property: 'robotIP', value: robotIP
+			property: 'robotId', value: robotId
 		});
 		this.callParent(arguments);
 	},
 	onClearStateLog: function () {
 		var store = this.getStore();
-		store.remove(store.query('robotIP', this.getRobotIP()).items);
+		store.remove(store.query('robotId', this.getRobotId()).items);
 	},
-	onGameState: function (robotIP, gameState, timestamp) {
+	onGameState: function (robotId, gameState, timestamp) {
 		// TODO: remove
-		if (robotIP !== this.getRobotIP()) {
+		if (robotId !== this.getRobotId()) {
 			return;
 		}
 
 		var store = this.getStore();
 		store.add({
 			time: timestamp,
-			robotIP: robotIP,
+			robotId: robotId,
 			eventName: gameState.getEvent(),
 			state: gameState.getData()
 		});

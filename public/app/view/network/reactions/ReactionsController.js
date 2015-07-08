@@ -10,7 +10,6 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	init: function () {
 		this.grids = {};
 		NU.Network.on({
-			robotIP: this.onAddRobot,
 			addRobot: this.onAddRobot,
 			removeRobot: this.onRemoveRobot,
 			packet: this.onPacket,
@@ -28,9 +27,9 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	 * @param robot The robot record from the robot store.
 	 */
 	createGrid: function (robot) {
-		var robotIP = robot.get('ipAddress');
+		var robotId = robot.get('id');
 		// Add a mapping from the robot IP to the view so it can be updated later.
-		this.grids[robotIP] = this.getView().add(Ext.widget('nu_network_reactions_grid', {
+		this.grids[robotId] = this.getView().add(Ext.widget('nu_network_reactions_grid', {
 			robot: robot
 		}));
 	},
@@ -52,7 +51,7 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	 * @param robot The robot record from the robot store.
 	 */
 	onRemoveRobot: function (robot) {
-		var key = robot.get('ipAddress');
+		var key = robot.get('id');
 		var grid = this.grids[key];
 		this.getView().remove(grid);
 		delete this.grids[key];
@@ -67,7 +66,7 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	 */
 	onPacket: function (robot, type, packet) {
 		// Obtain the grid and the key, then fire the update event.
-		var grid = this.grids[robot.get('ipAddress')];
+		var grid = this.grids[robot.get('id')];
 		var key = NU.Network.getTypeMap()[type];
 		grid.fireEvent('update', key);
 	}

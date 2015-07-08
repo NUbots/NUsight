@@ -26,6 +26,21 @@ Ext.define('NU.view.window.FieldController', {
 		this.objectsList = [];
 		this.callParent(arguments);
 	},
+
+	init: function () {
+		this.addEvents();
+	},
+
+	addEvents: function () {
+		NU.Network.on({
+			localisation: this.onLocalisation,
+			addRobot: this.onAddRobot,
+			draw_objects: this.onDrawObjects,
+			sensor_data: this.onSensorData,
+			scope: this
+		});
+	},
+
 	onHawkEye: function () {
 		// These controls use Threejs coordinates not field coordinates
 		var controls = this.lookupReference('mainscene').controls;
@@ -33,6 +48,7 @@ Ext.define('NU.view.window.FieldController', {
 		controls.yawObject.rotation.set(0, 0, 0);
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 	},
+
 	onCloseFront: function () {
 		// These controls use Threejs coordinates not field coordinates
 		var controls = this.lookupReference('mainscene').controls;
@@ -40,6 +56,7 @@ Ext.define('NU.view.window.FieldController', {
 		controls.yawObject.rotation.set(0, Math.PI / 2, 0);
 		controls.pitchObject.rotation.set(0.05, 0, 0);
 	},
+
 	onCloseAngle: function () {
 		// These controls use Threejs coordinates not field coordinates
 		var controls = this.lookupReference('mainscene').controls;
@@ -48,6 +65,7 @@ Ext.define('NU.view.window.FieldController', {
 		controls.yawObject.rotation.set(0, 3 * Math.PI / 4, 0);
 		controls.pitchObject.rotation.set(0.05, 0, 0);
 	},
+
 	onCloseSide: function () {
 		// These controls use Threejs coordinates not field coordinates
 		var controls = this.lookupReference('mainscene').controls;
@@ -55,26 +73,32 @@ Ext.define('NU.view.window.FieldController', {
 		controls.yawObject.rotation.set(0, Math.PI, 0);
 		controls.pitchObject.rotation.set(0.05, 0, 0);
 	},
+
 	onAnaglyph: function (obj, newValue, oldValue, eOpts) {
 		this.lookupReference('mainscene').setRenderEffect(newValue);
 	},
+
 	onGamepad: function (obj, newValue, oldValue, eOpts) {
 		var controls = this.lookupReference('mainscene').controls;
 		controls.gamepad = newValue;
 	},
+
 	onInverted: function (obj, newValue, oldValue, eOpts) {
 		var controls = this.lookupReference('mainscene').controls;
 		controls.inverted = newValue;
 	},
+
 	onDisplayCrosshair: function (obj, newValue, oldValue, eOpt) {
 		var crosshair = this.getCrosshair();
 		crosshair.setVisible(crosshair.isHidden() ? true : false);
 	},
+
 	onOrientation: function (obj, newValue, oldValue, eOpts) {
 		this.robots.forEach(function (robot) {
 			robot.setShowOrientation(newValue);
 		});
 	},
+
 	onResetOrientation: function () {
 		this.robots.forEach(function (robot) {
 			robot.darwinModels.forEach(function (model) {
@@ -82,6 +106,7 @@ Ext.define('NU.view.window.FieldController', {
 			});
 		});
 	},
+
 	onAfterRender: function () {
 		this.mainScene = this.createMainScene();
 		var mainScene = this.lookupReference('mainscene');
@@ -90,24 +115,20 @@ Ext.define('NU.view.window.FieldController', {
 			.enableControls({
 				movementSpeed: 2
 			}, this.objectsList, this.lookupReference('coordinates'));
+
 		var controls = mainScene.controls;
 		controls.yawObject.position.set(0, 4.5, 0);
 		controls.yawObject.rotation.set(0, 0, 0);
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 
-		var view = this.getView();
-		view.mon(NU.Network, 'sensor_data', this.onSensorData, this);
-		view.mon(NU.Network, 'localisation', this.onLocalisation, this);
-		view.mon(NU.Network, 'addRobot', this.onAddRobot, this);
-		view.mon(NU.Network, 'draw_objects', this.onDrawObjects, this);
-
-		Ext.each(NU.Network.getRobotIPs(), function (robotIP) {
-			this.onAddRobot(robotIP);
+		NU.Network.getRobotStore().each(function (robot) {
+			this.onAddRobot(robot.get('id'));
 		}, this);
 	},
-	onSelectRobot: function (robotIP) {
+
+	onSelectRobot: function (robotId) {
 		this.robots.forEach(function (robot) {
-			if (robot.robotIP !== robotIP) {
+			if (robot.robotId !== robotId) {
 				robot.darwinModels.forEach(function (model) {
 					model.traverse(function (object) {
 						object.visible = false;
@@ -131,22 +152,22 @@ Ext.define('NU.view.window.FieldController', {
 				});
 			}
 		});
-		this.setRobotIP(robotIP);
+		this.setRobotId(robotId);
 	},
-	onAddRobot: function (robotIP) {
-		var robot;
-		robot = this.getRobot(robotIP);
+
+	onAddRobot: function (robotId) {
+		var robot = this.getRobot(robotId);
 
 		if (robot !== null) {
 			return; // TODO: already exists
 		}
 
 		robot = Ext.create('NU.view.field.Robot', {
-			robotIP: robotIP
+			robotId: robotId
 		});
 
 		robot.on('loaded', function () {
-			if (robotIP !== this.getRobotIP()) {
+			if (robotId !== this.getRobotId()) {
 				robot.darwinModels.forEach(function (model) {
 					model.traverse(function (object) {
 						object.visible = false;
@@ -220,29 +241,32 @@ Ext.define('NU.view.window.FieldController', {
 		//this.addObject(robot.darwinModels);
 		//todo this.addObject(robot.ballModels);
 	},
-	onSensorData: function (robotIP, api_sensor_data) {
-		var robot = this.getRobot(robotIP);
+
+	onSensorData: function (robotId, api_sensor_data) {
+		var robot = this.getRobot(robotId);
 		if (robot == null) {
 			// TODO: console.log('error', robotIP);
 			return;
 		}
 		robot.onSensorData(api_sensor_data);
 	},
-	onLocalisation: function (robotIP, api_localisation) {
-		var robot = this.getRobot(robotIP);
+
+	onLocalisation: function (robotId, api_localisation) {
+		var robot = this.getRobot(robotId);
 		if (robot == null) {
-			console.log('error', robotIP);
+			console.log('error', robotId);
 			return;
 		}
 		robot.onLocalisation(api_localisation);
 	},
-	onDrawObjects: function (robotIP, event, timestamp) {
+
+	onDrawObjects: function (robotId, event, timestamp) {
 		// TODO: remove
-		if (robotIP !== this.getRobotIP()) {
+		if (robotId !== this.getRobotId()) {
 			return;
 		}
 		// Get the robot from the IP sent from the network.
-		var robot = this.getRobot(robotIP);
+		var robot = this.getRobot(robotId);
 		// Iterate through each of the objects being added to the field.
 		Ext.each(event.getObjects(), function (object) {
 			// Get the field object from the objects on the field.
@@ -266,6 +290,7 @@ Ext.define('NU.view.window.FieldController', {
 			// }
 		}, this);
 	},
+
 	/**
 	 * Converts a protocol vec3 into a THREE.js one.
 	 *
@@ -275,12 +300,15 @@ Ext.define('NU.view.window.FieldController', {
 	toVec3: function (vector) {
 		return vector === null ? new THREE.Vector3() : new THREE.Vector3(vector.getX(), vector.getY(), vector.getZ());
 	},
+
 	toEuler: function (euler) {
 		return euler === null ? new THREE.Euler() : new THREE.Euler(euler.getX(), euler.getY(), euler.getZ(), 'XYZ');
 	},
+
 	toColor: function (vector) {
 		return vector === null ? vector : new THREE.Color(vector.getX(), vector.getY(), vector.getZ());
 	},
+
 	createModel: function (robot, object) {
 		// Create a new shape onto the specified robot.
 		var Shape = API.DrawObject.Shape;
@@ -309,6 +337,7 @@ Ext.define('NU.view.window.FieldController', {
 		 model = robot.localiseModel(model, object.getCertaintyColour());
 		 }*/
 	},
+
 	/**
 	 * Creates and returns an arrow model.
 	 *
@@ -327,6 +356,7 @@ Ext.define('NU.view.window.FieldController', {
 			color: this.toColor(object.getColor())
 		});
 	},
+
 	/**
 	 * Creates and returns a box model.
 	 *
@@ -344,6 +374,7 @@ Ext.define('NU.view.window.FieldController', {
 			color: this.toColor(object.getColor())
 		});
 	},
+
 	/**
 	 * Creates and returns a circle model.
 	 *
@@ -361,6 +392,7 @@ Ext.define('NU.view.window.FieldController', {
 			color: this.toColor(object.getColor())
 		});
 	},
+
 	/**
 	 * Creates and returns a cylinder model.
 	 *
@@ -379,6 +411,7 @@ Ext.define('NU.view.window.FieldController', {
 			color: this.toColor(object.getColor())
 		});
 	},
+
 	/**
 	 * Creates and returns a polyline model.
 	 *
@@ -394,6 +427,7 @@ Ext.define('NU.view.window.FieldController', {
 			color: this.toColor(object.getColor())
 		});
 	},
+
 	/**
 	 * Creates and returns a pyramid model.
 	 *
@@ -412,6 +446,7 @@ Ext.define('NU.view.window.FieldController', {
 			color: this.toColor(object.getColor())
 		});
 	},
+
 	/**
 	 * Creates and returns a rectangle model.
 	 *
@@ -429,6 +464,7 @@ Ext.define('NU.view.window.FieldController', {
 			color: this.toColor(object.getColor())
 		});
 	},
+
 	/**
 	 * Creates and returns a sphere model.
 	 *
@@ -444,6 +480,7 @@ Ext.define('NU.view.window.FieldController', {
 			color: this.toColor(object.getColor())
 		});
 	},
+
 	/**
 	 * A testing method for adding objects to the field.
 	 *
@@ -541,10 +578,11 @@ Ext.define('NU.view.window.FieldController', {
 			//robot.fadeOutModel(model, 2.5);
 		//}.bind(this), 2500);
 	},
-	getRobot: function (robotIP) {
+
+	getRobot: function (robotId) {
 		var foundRobot = null;
 		Ext.each(this.robots, function (robot) {
-			if (robot.robotIP == robotIP) {
+			if (robot.robotId == robotId) {
 				foundRobot = robot;
 				return false;
 			}
@@ -552,6 +590,7 @@ Ext.define('NU.view.window.FieldController', {
 		});
 		return foundRobot;
 	},
+
 	createMainScene: function () {
 		var field, camera, scene, renderer;
 		scene = new THREE.Scene();
@@ -563,7 +602,6 @@ Ext.define('NU.view.window.FieldController', {
 		 darwin.bindToData(Data.robot);
 		 darwin = LocalisationVisualiser.localise(darwin);//, new THREE.Vector3(0, -0.343, 0)
 		 window.darwin = darwin;
-
 
 		 ball = new Ball();
 		 ball = LocalisationVisualiser.localise(ball, {color: 0x0000ff});
@@ -641,4 +679,5 @@ Ext.define('NU.view.window.FieldController', {
 			effect: effect
 		};
 	}
+
 });

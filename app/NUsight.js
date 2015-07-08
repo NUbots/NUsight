@@ -14,11 +14,11 @@ function NUsight (io) {
 	this.files = [];
 	this.robots = new RobotList();
 
-	this.robotFinder = new RobotFinder('238.158.129.230', 7447);
-	this.robotFinder.listen();
-	this.robotFinder.on('robotIP', function (robotIP) {
-		this.addRobot(robotIP);
-	}.bind(this));
+	//this.robotFinder = new RobotFinder('238.158.129.230', 7447);
+	//this.robotFinder.listen();
+	//this.robotFinder.on('robotIP', function (robotIP) {
+	//	this.addRobot(robotIP);
+	//}.bind(this));
 
 	this.loadConfig('app/configuration.yaml');
 
@@ -29,13 +29,13 @@ function NUsight (io) {
 		this.clients.push(client);
 
 		this.robots.forEach(function (robot) {
-			socket.emit('robotIP', robot.host, robot.name);
+			socket.emit('addRemoteRobot', robot.getModel());
 		}, this);
 
 		console.log('New web client', this.clients.length);
 
-		socket.on('message', function (robotIP, message) {
-			var robot = this.robots.getRobot(robotIP);
+		socket.on('message', function (robotId, message) {
+			var robot = this.robots.getRobot(robotId);
 			if (robot !== null) {
 				robot.send(message);
 			}
@@ -47,27 +47,25 @@ function NUsight (io) {
 			});
 		}.bind(this));
 
-		socket.on('addRobot', function (robotIP, robotName) {
-			if (this.robots.getRobot(robotIP) === null) {
-				this.robots.addRobot(robotIP, robotName);
+		socket.on('addRobot', function (robotId, robotIP, robotPort, robotName) {
+			if (this.robots.getRobot(robotId) === null) {
+				this.robots.addRobot(robotId, robotIP, robotPort, robotName);
 			}
 		}.bind(this));
 
-		socket.on('removeRobot', function (robotIP) {
-			if (this.robots.getRobot(robotIP) !== null) {
-				this.robots.removeRobot(robotIP);
-			}
+		socket.on('removeRobot', function (robotId) {
+			this.robots.removeRobot(robotId);
 		}.bind(this));
 
-		socket.on('enableRobot', function (robotIP) {
-			var robot = this.robots.getRobot(robotIP);
+		socket.on('enableRobot', function (robotId) {
+			var robot = this.robots.getRobot(robotId);
 			if (robot !== null) {
 				robot.enable();
 			}
 		}.bind(this));
 
-		socket.on('disableRobot', function (robotIP) {
-			var robot = this.robots.getRobot(robotIP);
+		socket.on('disableRobot', function (robotId) {
+			var robot = this.robots.getRobot(robotId);
 			if (robot !== null) {
 				robot.disable();
 			}
@@ -86,10 +84,6 @@ function NUsight (io) {
 
 	}.bind(this));
 
-	this.on('message', function (robotIP, message) {
-		this.onMessage(robotIP, message);
-	}.bind(this));
-
 }
 
 util.inherits(NUsight, events.EventEmitter);
@@ -101,30 +95,26 @@ NUsight.prototype.loadConfig = function (filename) {
 	config.robots.forEach(function (robotConfig) {
 
 		var address = robotConfig.addresses[robotConfig.defaultAddress || 'wifi'];
+		var robotName = robotConfig.name;
 
-		var robot = this.robots.addRobot(address.host, robotConfig.name, address.port || 12000);
-
+		var robot = this.robots.addRobot(robotConfig.id, address.host, address.port || 12000, robotName);
 		robot.on('message', function (message) {
-
-			this.onMessage(address.host, message);
-
+			this.onMessage(robot.id, message);
 		}.bind(this));
 
-		this.clients.forEach(function (client) {
-			client.socket.emit('robotIP', robotIP, robotName);
-		});
+		//this.clients.forEach(function (client) {
+		//	client.socket.emit('robotIP', robotIP, robotName);
+		//});
 
 	}, this);
 
 };
 
 
-NUsight.prototype.onMessage = function (robotIP, message) {
+NUsight.prototype.onMessage = function (robotId, message) {
 
 	this.clients.forEach(function (client) {
-
-		client.sendMessage(robotIP, message);
-
+		client.sendMessage(robotId, message);
 	}, this);
 
 };
