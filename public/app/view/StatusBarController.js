@@ -85,5 +85,5 @@ Ext.define('NU.view.StatusBarController', {
 	incPacketCounter: function () {
 		this.packetCounter++;
 	}
-	
+
 });

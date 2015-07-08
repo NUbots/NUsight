@@ -6,6 +6,7 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 	alias: 'widget.nu_network_reactions_grid',
 	requires: [
 		'Ext.grid.column.CheckColumn',
+		'Ext.form.field.Checkbox',
 		'NU.view.network.reactions.grid.GridController',
 		'NU.view.network.reactions.grid.GridViewModel'
 	],
@@ -29,6 +30,12 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 		update: 'onUpdate'
 	},
 	hideHeaders: true,
+	tools: [{
+		xtype: 'checkbox',
+		bind: {
+			value: '{robot.enabled}'
+		}
+	}],
 	columns: [{
 		text: 'Type',
 		dataIndex: 'name',
@@ -41,7 +48,7 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 		xtype: 'checkcolumn',
 		text: 'Enabled',
 		dataIndex: 'enabled',
-		width: 30,
+		width: 35,
 		listeners: {
 			checkChange: 'onCheckChange'
 		}

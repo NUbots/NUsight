@@ -134,8 +134,10 @@ Ext.define('NU.util.Network', {
 			var enabled = record.get('enabled');
 			if (enabled) {
 				this.socket.emit('enableRobot', robotIP);
+				this.fireEvent('enableRobot', record);
 			} else {
 				this.socket.emit('disableRobot', robotIP);
+				this.fireEvent('disableRobot', record);
 			}
 		}
 	},
