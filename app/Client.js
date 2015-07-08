@@ -1,64 +1,34 @@
 function Client(socket) {
 	
 	this.socket = socket;
-	this.mode = Client.modes.STREAM;
-	this.logfile = null;
 	this.cache = [];
-	
-	this.socket.on('stream', function () {
-		
-		this.stream();
-		
-	}.bind(this));
-	
-	this.socket.on('playback', function (filename) {
-		
-		this.playback(filename);
-		
-	}.bind(this));
-	
-	this.socket.on('pause', function () {
-		
-		this.pause();
-		
-	}.bind(this));
-	
-	this.socket.on('resume', function () {
-		
-		this.pause();
-		
-	}.bind(this));
 	
 }
 
-Client.modes = {
-	STREAM: 0,
-	PLAYBACK: 1
-};
+Client.prototype.sendMessage = function (robotIP, message) {
 
-Client.prototype.stream = function () {
-	
-	this.setMode(Client.modes.STREAM);
-	
-};
+	// This code throttles packets that are marked as filterable.
+	// It waits for the client to send back an acknowledgement after each message (of each particular type) before sending another.
+	var type = message[0];
+	var filterId = message[1];
+	if (filterId === 0) {
+		this.socket.emit('message', robotIP, message);
+	} else {
+		var hash = type + ':' + filterId + ':' + robotIP;
+		var now = Date.now();
+		var timeout = 1000 * 2;
+		var timedOut = this.cache[hash] !== undefined && this.cache[hash] + timeout < now;
+		if (this.cache[hash] === undefined || timedOut) {
+			if (timedOut) {
+				console.warn('ACK not received for:', hash);
+			}
+			this.cache[hash] = now;
+			this.socket.emit('message', robotIP, message, function () {
+				delete this.cache[hash];
+			}.bind(this));
+		}
+	}
 
-Client.prototype.playback = function (logfile) {
-	
-	this.setMode(Client.modes.PLAYBACK);
-	this.logfile = logfile;
-	
-};
-
-Client.prototype.pause = function () {
-	
-};
-
-Client.prototype.resume = function () {
-	
-};
-
-Client.prototype.setMode = function (mode) {
-	this.mode = mode;
 };
 
 module.exports = Client;

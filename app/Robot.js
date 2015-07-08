@@ -20,6 +20,9 @@ function Robot (host, port, robotName) {
 	this.sub = null;
 	// Node to Robot
 	this.pub = null;
+
+	this.recording = false;
+	this.recordingFile = null;
 }
 
 util.inherits(Robot, events.EventEmitter);
@@ -68,12 +71,37 @@ Robot.prototype.disconnect = function () {
 
 Robot.prototype.onMessage = function (data) {
 
+	if (this.recording) {
+		this.record(data);
+	}
+
 	try {
-		this.emit("message", data);
+		this.emit('message', data);
 	} catch (err) {
 		console.log(err);
 	}
 
+};
+
+Robot.prototype.record = function (data) {
+	// If our file is not yet open
+	if (this.recordingFile === undefined) {
+		try { fs.mkdirSync('logs'); } catch(e) {}
+		try { fs.mkdirSync('logs/' + this.host + "_" + this.port); } catch(e) {}
+
+		this.recordingFile = fs.createWriteStream('logs/' + this.host + "_" + this.port + '/' + Date.now() + '.nbs');
+	}
+
+	// Get the data portion of our stream
+	data = message.slice(2);
+
+	// Get the length of the data
+	var len = new Buffer(4);
+	len.writeUInt32LE(data.length, 0);
+
+	// // Write the two to the stream
+	this.recordingFile.write(len);
+	this.recordingFile.write(data);
 };
 
 Robot.prototype.send = function (data) {
