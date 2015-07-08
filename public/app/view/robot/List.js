@@ -1,21 +1,30 @@
 Ext.define('NU.view.robot.List', {
     extend: 'Ext.grid.Panel',
+    alias: 'widget.robotlist',
     requires: [
+        'NU.store.Robots',
         'NU.view.robot.ListController',
         'Ext.grid.plugin.RowEditing'
 	],
     controller: 'List',
-    alias: 'widget.robotlist',
+    store: 'Robots',
     columns: [{
-        header: 'Name',
-        width: 170,
+        text: 'Name',
         dataIndex: 'name',
-        editor: 'textfield'
+        editor: 'textfield',
+        width: 170
     }, {
-        header: 'IP Address',
-        flex: 1,
+        text: 'IP Address',
         dataIndex: 'ipAddress',
-        editor: 'textfield'
+        editor: 'textfield',
+        flex: 1
+    }, {
+        xtype: 'checkcolumn',
+        text: 'Enabled',
+        dataIndex: 'enabled',
+        listeners: {
+            checkChange: 'onCheckChange'
+        }
     }],
     plugins: [{
         ptype: 'rowediting',
@@ -24,14 +33,10 @@ Ext.define('NU.view.robot.List', {
     tbar: [{
         text: 'Add Robot',
         iconCls: 'icon-add',
-        listeners: {
-            click: 'onAddRobot'
-        }
+        handler: 'onAddRobot'
     }, {
         text: 'Remove Robot',
         iconCls: 'icon-cross',
-        listeners: {
-            click: 'onRemoveRobot'
-        }
+        handler: 'onRemoveRobot'
     }]
 });

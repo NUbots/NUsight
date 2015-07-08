@@ -91,5 +91,6 @@ message Sensors {
     required float voltage = 10;
     required float battery = 11;
 
+
 }
 

@@ -58,6 +58,20 @@ function NUsight (io) {
 			}
 		}.bind(this));
 
+		socket.on('enableRobot', function (robotIP, robotName) {
+			var robot = this.getRobot(robotIP);
+			if (robot === null) {
+				robot.connect();
+			}
+		}.bind(this));
+
+		socket.on('disableRobot', function (robotIP) {
+			var robot = this.getRobot(robotIP);
+			if (robot !== null) {
+				robot.disconnect();
+			}
+		}.bind(this));
+
 		socket.on('disconnect', function () {
 			this.clients.splice(this.clients.indexOf(client), 1);
 			console.log('Lost web client', this.clients.length);

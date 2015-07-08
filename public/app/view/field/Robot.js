@@ -54,7 +54,7 @@ Ext.define('NU.view.field.Robot', {
 					api_sensor_data.orientation.z.x, api_sensor_data.orientation.z.y, api_sensor_data.orientation.z.z, 0,
 					0, 0, 0, 1
 				);
-				darwin.object.quaternion.setFromRotationMatrix(rotation.transpose());
+				darwin.object.quaternion.setFromRotationMatrix(rotation);
 			}
 			// TODO: remove - walk engine orientation override for testing
 	//        darwin.object.rotation.y = -15 * Math.PI / 180;

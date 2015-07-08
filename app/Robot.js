@@ -52,13 +52,17 @@ Robot.prototype.disconnect = function () {
 
 	console.log('Disconnected from robot on tcp://' + this.host + ':' + this.port);
 
-	this.sub.removeAllListeners();
-	this.sub.disconnect('tcp://' + this.host + ':' + this.port);
-	this.sub.close();
+	try {
+		this.sub.removeAllListeners();
+		this.sub.disconnect('tcp://' + this.host + ':' + this.port);
+		this.sub.close();
+	} catch (e) {}
 
-	this.pub.removeAllListeners();
-	this.pub.disconnect('tcp://' + this.host + ':' + (this.port + 1));
-	this.pub.close();
+	try {
+		this.pub.removeAllListeners();
+		this.pub.disconnect('tcp://' + this.host + ':' + (this.port + 1));
+		this.pub.close();
+	} catch (e) {}
 
 };
 

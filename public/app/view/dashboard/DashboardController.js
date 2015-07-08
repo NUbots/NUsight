@@ -21,15 +21,23 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		}, this);
 	},
 
+	onMaximize: function (view) {
+		// hack because ExtJS seems not to do this correctly! >_<
+		var newBox = view.constrainTo.getViewSize(false);
+		newBox.x = 0;
+		newBox.y = 0;
+		view.setBox(newBox)
+	},
+
 	/**
-	 * Creates the dashboard panel for a certain robot IP address.
+	 * Creates the dashboard panel for a certain robot.
 	 *
 	 * @param robotIP The IP address of the robot.
 	 * @param robotName The name of the robot.
 	 */
 	createDashboardPanel: function (robotIP, robotName) {
-		// Add a mapping from the robot IP to the view so it can be updated later.
-		this.dashboardPanels[robotIP] = this.getView().add(Ext.widget('nu_dashboard_panel', {
+		// Add a mapping from the robot name to the view so it can be updated later.
+		this.dashboardPanels[robotName] = this.getView().add(Ext.widget('nu_dashboard_panel', {
 			name: robotName
 		}));
 	},
