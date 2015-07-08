@@ -16,6 +16,7 @@ function Robot (host, port, robotName) {
 	this.host = host;
 	this.port = port;
 	this.name = robotName;
+	this.enabled = true;
 	// Robot to Node
 	this.sub = null;
 	// Node to Robot
@@ -29,25 +30,29 @@ util.inherits(Robot, events.EventEmitter);
 
 Robot.prototype.connect = function () {
 
-	this.sub = zmq.socket('sub');
-	this.sub.connect('tcp://' + this.host + ':' + this.port);
-	console.log('Connecting to robot on tcp://' + this.host + ':' + this.port);
-	this.sub.subscribe("");
+	if (this.enabled) {
+		this.sub = zmq.socket('sub');
+		this.sub.connect('tcp://' + this.host + ':' + this.port);
+		console.log('Connecting to robot on tcp://' + this.host + ':' + this.port);
+		this.sub.subscribe("");
 
-	this.sub.on('message', function () {
+		this.sub.on('message', function () {
 
-		this.onMessage.apply(this, arguments);
+			this.onMessage.apply(this, arguments);
 
-	}.bind(this));
+		}.bind(this));
 
-	this.pub = zmq.socket('pub');
-	this.pub.connect('tcp://' + this.host + ':' + (this.port + 1));
+		this.pub = zmq.socket('pub');
+		this.pub.connect('tcp://' + this.host + ':' + (this.port + 1));
+	}
 };
 
 Robot.prototype.reconnect = function () {
 
-	this.disconnect();
-	this.connect();
+	if (this.enabled) {
+		this.disconnect();
+		this.connect();
+	}
 
 };
 
@@ -67,6 +72,16 @@ Robot.prototype.disconnect = function () {
 		this.pub.close();
 	} catch (e) {}
 
+};
+
+Robot.prototype.enable = function () {
+	this.enabled = true;
+	this.connect();
+};
+
+Robot.prototype.disable = function () {
+	this.enabled = false;
+	this.disconnect();
 };
 
 Robot.prototype.onMessage = function (data) {

@@ -62,14 +62,14 @@ function NUsight (io) {
 		socket.on('enableRobot', function (robotIP) {
 			var robot = this.robots.getRobot(robotIP);
 			if (robot !== null) {
-				robot.connect();
+				robot.enable();
 			}
 		}.bind(this));
 
 		socket.on('disableRobot', function (robotIP) {
 			var robot = this.robots.getRobot(robotIP);
 			if (robot !== null) {
-				robot.disconnect();
+				robot.disable();
 			}
 		}.bind(this));
 
