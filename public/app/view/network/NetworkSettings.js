@@ -9,6 +9,6 @@ Ext.define('NU.view.network.NetworkSettings', {
 		title: 'Robots',
 		xtype: 'robotlist'
 	}, {
-		xtype: 'nu_network_reactions_panel'
+		xtype: 'nu_network_reactions'
 	}]
 });
