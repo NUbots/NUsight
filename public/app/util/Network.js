@@ -130,7 +130,7 @@ Ext.define('NU.util.Network', {
 			}
 		}
 		// Check if the enabled flag of the robot was modified.
-		if (modifiedFieldNames.indexOf('enabled') !== 1) {
+		if (modifiedFieldNames.indexOf('enabled') !== -1) {
 			var enabled = record.get('enabled');
 			if (enabled) {
 				this.socket.emit('enableRobot', robotIP);
