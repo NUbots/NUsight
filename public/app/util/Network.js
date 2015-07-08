@@ -46,12 +46,12 @@ Ext.define('NU.util.Network', {
 	},
 
 	processPacket: function (packet) {
-		var message, type, eventName, filterId, robotIP, event, hash;
-		robotIP = packet.robotIP;
-		message = new Uint8ClampedArray(packet.message);
-		type = message[0];
-		eventName = this.typeMap[type];
-		filterId = message[1];
+		var robotIP = packet.robotIP;
+		var robot = this.getRobot(robotIP);
+		var message = new Uint8ClampedArray(packet.message);
+		var type = message[0];
+		var eventName = this.typeMap[type];
+		var filterId = message[1];
 
 		event = {
 			name: eventName,
@@ -60,7 +60,7 @@ Ext.define('NU.util.Network', {
 		};
 
 		if (filterId > 0) {
-			hash = eventName + ':' + filterId + ':' + robotIP;
+			var hash = eventName + ':' + filterId + ':' + robotIP;
 			this.cache[hash] = event;
 		} else {
 			if (this.hasListener(event.name)) {
@@ -68,7 +68,7 @@ Ext.define('NU.util.Network', {
 			}
 		}
 
-		this.fireEvent('packet', robotIP, type, packet);
+		this.fireEvent('packet', robot, type, packet);
 	},
 
 	processMessage: function (event) {
@@ -193,6 +193,10 @@ Ext.define('NU.util.Network', {
 	},
 	getRobotStore: function () {
 		return Ext.getStore('Robots');
+	},
+	getRobot: function (robotId) {
+		var store = this.getRobotStore();
+		return store.findRecord('ipAddress', robotId);
 	},
 	/**
 	 * Creates a message of a particular type and filter identifier that can be used to send over the network.

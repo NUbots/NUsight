@@ -10,11 +10,9 @@ Ext.define('NU.view.StatusBarController', {
 		insertIndex: 0,
 		updateRate: 600
 	},
-	robotMap: null,
 	init: function () {
-		this.robotMap = {};
-		var view = this.getView();
-		view.mon(NU.Network, 'packet', this.onPacket, this);
+		this.panels = {};
+		NU.Network.on('packet', this.onPacket.bind(this));
 		this.addRobots();
 	},
 	addRobots: function () {
@@ -24,7 +22,7 @@ Ext.define('NU.view.StatusBarController', {
 			Ext.each(robots, function(robot) {
 				var name = robot.get('name');
 				var robotIP = robot.get('ipAddress');
-				var panel = view.insert(this.getInsertIndex(), {
+				this.panels[robotIP] = view.insert(this.getInsertIndex(), {
 					xtype: 'panel',
 					tpl: '{name}: {count}',
 					data: {
@@ -32,27 +30,22 @@ Ext.define('NU.view.StatusBarController', {
 						count: 0
 					}
 				});
-				this.robotMap[robotIP] = {
-					counter: 0,
-					name: name,
-					panel: panel
-				};
 				this.insertIndex++;
 			}, this);
 		}, this);
 	},
-	onPacket: function (robotIP, type, packet) {
+	onPacket: function (robot, type, packet) {
 		this.incPacketCounter();
-		var robot = this.robotMap[robotIP];
-		robot.counter++;
+		var panel = this.panels[robot.get('ipAddress')];
+		var count = panel.getData().count;
 
 		NU.util.Display.updateDelayed(this.lookupReference('packetCount'), {
 			count: this.getPacketCounter()
 		}, this.getUpdateRate());
 
-		NU.util.Display.updateDelayed(robot.panel, {
-			name: robot.name,
-			count: robot.counter
+		NU.util.Display.updateDelayed(panel, {
+			name: robot.get('name'),
+			count: count + 1
 		}, this.getUpdateRate());
 	},
 	incPacketCounter: function () {

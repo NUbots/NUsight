@@ -16,8 +16,8 @@ Ext.define('NU.view.dashboard.DashboardController', {
 			scope: this
 		});
 		// Iterate through each robot and create the dashboard panel for it.
-		NU.Network.getRobotIPs().forEach(function (robotIP) {
-			this.createDashboardPanel(robotIP, robotIP);
+		NU.Network.getRobotStore().each(function (robot) {
+			this.createDashboardPanel(robot);
 		}, this);
 	},
 
@@ -32,13 +32,13 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	/**
 	 * Creates the dashboard panel for a certain robot.
 	 *
-	 * @param robotIP The IP address of the robot.
-	 * @param robotName The name of the robot.
+	 * @param robot The robot record from the robot store.
 	 */
-	createDashboardPanel: function (robotIP, robotName) {
+	createDashboardPanel: function (robot) {
+		var robotIP = robot.get('ipAddress');
 		// Add a mapping from the robot name to the view so it can be updated later.
-		this.dashboardPanels[robotName] = this.getView().add(Ext.widget('nu_dashboard_panel', {
-			name: robotName
+		this.dashboardPanels[robotIP] = this.getView().add(Ext.widget('nu_dashboard_panel', {
+			robot: robot
 		}));
 	},
 
@@ -46,11 +46,10 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 * An event triggered when the Network class receives a new robot. This method creates the dashboard panel
 	 * associated with the robot that was added to the network.
 	 *
-	 * @param robotIP The IP address of the robot.
-	 * @param robotName The name of the robot.
+	 * @param robot The robot record from the robot store.
 	 */
-	onRobotIP: function (robotIP, robotName) {
-		this.createDashboardPanel(robotIP, robotName);
+	onRobotIP: function (robot) {
+		this.createGrid(robot);
 	},
 
 	/**

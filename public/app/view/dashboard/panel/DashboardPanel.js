@@ -13,7 +13,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		'NU.view.dashboard.panel.DashboardPanelController'
 	],
 	config: {
-		name: null,
+		robot: null,
 		colors: null
 	},
 	viewModel: {
