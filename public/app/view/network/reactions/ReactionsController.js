@@ -52,10 +52,10 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	 * @param robot The robot record from the robot store.
 	 */
 	onRemoveRobot: function (robot) {
-		var robotIP = robot.get('ipAddress');
-		var grid = this.grids[robotIP];
+		var key = robot.get('ipAddress');
+		var grid = this.grids[key];
 		this.getView().remove(grid);
-		delete this.grids[robotIP];
+		delete this.grids[key];
 	},
 
 	/**

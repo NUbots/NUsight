@@ -12,28 +12,61 @@ Ext.define('NU.view.StatusBarController', {
 	},
 	init: function () {
 		this.panels = {};
-		NU.Network.on('packet', this.onPacket.bind(this));
-		this.addRobots();
-	},
-	addRobots: function () {
-		var view = this.getView();
-		var store = Ext.getStore('Robots');
-		store.on('add', function (store, robots) {
-			Ext.each(robots, function(robot) {
-				var name = robot.get('name');
-				var robotIP = robot.get('ipAddress');
-				this.panels[robotIP] = view.insert(this.getInsertIndex(), {
-					xtype: 'panel',
-					tpl: '{name}: {count}',
-					data: {
-						name: name,
-						count: 0
-					}
-				});
-				this.insertIndex++;
-			}, this);
+		NU.Network.on({
+			addRobot: this.onAddRobot,
+			removeRobot: this.onRemoveRobot,
+			packet: this.onPacket,
+			scope: this
+		});
+		// Iterate through each robot and create the panel for it.
+		NU.Network.getRobotStore().each(function (robot) {
+			this.createPanel(robot);
 		}, this);
 	},
+
+	/**
+	 * Creates the panel associated with a robot.
+	 *
+	 * @param robot The robot record from the robot store.
+	 */
+	createPanel: function (robot) {
+		var view = this.getView();
+		var name = robot.get('name') || 'Unknown';
+		var robotIP = robot.get('ipAddress');
+		this.panels[robotIP] = view.insert(this.getInsertIndex(), {
+			xtype: 'panel',
+			tpl: '{name}: {count}',
+			data: {
+				name: name,
+				count: 0
+			}
+		});
+		this.insertIndex++;
+	},
+
+	/**
+	 * An event triggered when the Network class receives a new robot. This method creates the panel associated with
+	 * the robot that was added to the network.
+	 *
+	 * @param robot The robot record from the robot store.
+	 */
+	onAddRobot: function (robot) {
+		this.createPanel(robot);
+	},
+
+	/**
+	 * An event triggered when the Network class deletes a robot. This method removes the panel associated with the
+	 * robot that was removed from the network.
+	 *
+	 * @param robot The robot record from the robot store.
+	 */
+	onRemoveRobot: function (robot) {
+		var key = robot.get('ipAddress');
+		var panel = this.panels[key];
+		this.getView().remove(panel);
+		delete this.panels[key];
+	},
+
 	onPacket: function (robot, type, packet) {
 		this.incPacketCounter();
 		var panel = this.panels[robot.get('ipAddress')];
@@ -48,7 +81,9 @@ Ext.define('NU.view.StatusBarController', {
 			count: count + 1
 		}, this.getUpdateRate());
 	},
+
 	incPacketCounter: function () {
 		this.packetCounter++;
 	}
+	
 });

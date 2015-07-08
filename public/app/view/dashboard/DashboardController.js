@@ -61,10 +61,10 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 * @param robot The robot record from the robot store.
 	 */
 	onRemoveRobot: function (robot) {
-		var robotIP = robot.get('ipAddress');
-		var dashboardPanel = this.dashboardPanels[robotIP];
+		var key = robot.get('ipAddress');
+		var dashboardPanel = this.dashboardPanels[key];
 		this.getView().remove(dashboardPanel);
-		delete this.dashboardPanels[robotIP];
+		delete this.dashboardPanels[key];
 	},
 
 	/**
