@@ -30,6 +30,9 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 		update: 'onUpdate'
 	},
 	hideHeaders: true,
+	viewConfig:{
+		markDirty:false
+	},
 	tools: [{
 		xtype: 'checkbox',
 		bind: {
