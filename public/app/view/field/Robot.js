@@ -3,7 +3,7 @@ Ext.define('NU.view.field.Robot', {
 	alias: ['widget.nu_field_robot'],
 	requires: ['Ext.util.TaskManager'],
 	config: {
-		robotIP: null,
+		robotId: null,
 		showOrientation: false
 	},
 	darwinModels: [],

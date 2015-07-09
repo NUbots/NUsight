@@ -2,7 +2,7 @@ Ext.define('NU.view.robot.SelectorController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.RobotSelector',
     config: {
-        robotIP: null
+        robotId: null
     },
     init: function () {
         // select first value by default
@@ -13,13 +13,11 @@ Ext.define('NU.view.robot.SelectorController', {
             combo.fireEvent('select', combo, [recordSelected]);
         }
     },
+
     onSelectRobot: function (combo, records) {
-        // get the first robot ip
-		var robotIP = records[0].get('ipAddress');
-        // set the robot ip
-		this.setRobotIP(robotIP);
-        // fire an event
-        combo.fireEvent('selectRobot', robotIP);
+		var robotId = records[0].get('id');
+		this.setRobotId(robotId);
+        combo.fireEvent('selectRobot', robotId);
 	}
 });
 

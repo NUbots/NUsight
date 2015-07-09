@@ -25,31 +25,31 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 	onClearStateLog: function () {
 		this.logs.removeAll();
 	},
-	onSubsumption: function (robotIP, event, timestamp) {
+	onSubsumption: function (robotId, event, timestamp) {
 		// TODO: remove
-		if (robotIP !== this.getRobotIP()) {
+		if (robotId !== this.getRobotId()) {
 			return;
 		}
 
 		var type = event.getType();
 		switch (type) {
 			case API.Subsumption.Type.ACTION_REGISTER:
-				this.onActionRegister(robotIP, event.getActionRegister(), timestamp);
+				this.onActionRegister(robotId, event.getActionRegister(), timestamp);
 				break;
 			case API.Subsumption.Type.ACTION_STATE:
-				this.onActionStateChange(robotIP, event.getActionStateChange(), timestamp);
+				this.onActionStateChange(robotId, event.getActionStateChange(), timestamp);
 				break;
 			default:
 				console.error('Unknown behaviour type: ', type);
 		}
 	},
-	onActionRegister: function (robotIP, actionRegister, timestamp) {
+	onActionRegister: function (robotId, actionRegister, timestamp) {
 		var id = actionRegister.getId();
 		var name = actionRegister.getName();
 		Ext.each(actionRegister.getLimbSet(), function (limbSet) {
 			this.actions.add({
 				actionId: id,
-				robotIP: robotIP,
+				robotId: robotId,
 				time: timestamp,
 				name: name,
 				limbs: limbSet.getLimbs(),
@@ -57,9 +57,9 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 			});
 		}, this);
 	},
-	onActionStateChange: function (robotIP, stateActionChange, timestamp) {
+	onActionStateChange: function (robotId, stateActionChange, timestamp) {
 		this.logs.add({
-			robotIP: robotIP,
+			robotId: robotId,
 			time: timestamp,
 			name: stateActionChange.getName(),
 			limbs: stateActionChange.getLimbs(),

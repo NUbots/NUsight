@@ -1,34 +1,26 @@
 var RobotFinder = require('./RobotFinder');
 var Robot = require('./Robot');
+var RobotList = require('./RobotList');
 var Client = require('./Client');
 var fs = require('fs');
 var util = require('util');
 var events = require('events');
+var yaml = require('js-yaml');
 
 function NUsight (io) {
 
 	this.io = io;
-	this.robots = [];
 	this.clients = [];
 	this.files = [];
+	this.robots = new RobotList();
 
-	this.robotFinder = new RobotFinder('238.158.129.230', 7447);
-	this.robotFinder.listen();
-	this.robotFinder.on('robotIP', function (robotIP) {
-		this.addRobot(robotIP);
-	}.bind(this));
-	this.addRobot('127.0.0.1', 'Virtual Machine');
-	 //this.addRobot('127.0.0.1', 'Robot Simulator', 14000);
-	//this.addRobot('10.1.1.1', 'Robot #1');
-	//this.addRobot('10.1.2.1', 'Robot #1e');
-	//this.addRobot('10.1.1.2', 'Robot #2');
-	//this.addRobot('10.1.2.2', 'Robot #2e');
-	this.addRobot('10.1.1.3', 'Robot #3');
-	//this.addRobot('10.1.2.3', 'Robot #3e');
-	//this.addRobot('10.1.1.4', 'Robot #4');
-	//this.addRobot('10.1.2.4', 'Robot #4e');
-	this.addRobot('10.1.1.5', 'Robot #5');
-	//this.addRobot('10.1.2.5', 'Robot #5e');
+	//this.robotFinder = new RobotFinder('238.158.129.230', 7447);
+	//this.robotFinder.listen();
+	//this.robotFinder.on('robotIP', function (robotIP) {
+	//	this.addRobot(robotIP);
+	//}.bind(this));
+
+	this.loadConfig('app/configuration.yaml');
 
 	this.io.sockets.on('connection', function (socket) {
 
@@ -37,13 +29,13 @@ function NUsight (io) {
 		this.clients.push(client);
 
 		this.robots.forEach(function (robot) {
-			socket.emit('robotIP', robot.host, robot.name);
-		}.bind(this));
+			socket.emit('addRemoteRobot', robot.getModel());
+		}, this);
 
 		console.log('New web client', this.clients.length);
 
-		socket.on('message', function (robotIP, message) {
-			var robot = this.getRobot(robotIP);
+		socket.on('message', function (robotId, message) {
+			var robot = this.robots.getRobot(robotId);
 			if (robot !== null) {
 				robot.send(message);
 			}
@@ -55,29 +47,41 @@ function NUsight (io) {
 			});
 		}.bind(this));
 
-		socket.on('addRobot', function (robotIP, robotName) {
-			if (this.getRobot(robotIP) === null) {
-				this.addRobot(robotIP, robotName);
+		socket.on('addRobot', function (robotId, robotIP, robotPort, robotName) {
+			if (this.robots.getRobot(robotId) === null) {
+				this.robots.addRobot(robotId, robotIP, robotPort, robotName);
 			}
 		}.bind(this));
 
-		socket.on('removeRobot', function (robotIP) {
-			if (this.getRobot(robotIP) !== null) {
-				this.removeRobot(robotIP);
-			}
+		socket.on('removeRobot', function (robotId) {
+			this.robots.removeRobot(robotId);
 		}.bind(this));
 
-		socket.on('enableRobot', function (robotIP, robotName) {
-			var robot = this.getRobot(robotIP);
-			if (robot === null) {
-				robot.connect();
-			}
-		}.bind(this));
-
-		socket.on('disableRobot', function (robotIP) {
-			var robot = this.getRobot(robotIP);
+		socket.on('enableRobot', function (robotId) {
+			var robot = this.robots.getRobot(robotId);
 			if (robot !== null) {
-				robot.disconnect();
+				robot.enable();
+			}
+		}.bind(this));
+
+		socket.on('disableRobot', function (robotId) {
+			var robot = this.robots.getRobot(robotId);
+			if (robot !== null) {
+				robot.disable();
+			}
+		}.bind(this));
+
+		socket.on('startRecording', function (robotId) {
+			var robot = this.robots.getRobot(robotId);
+			if (robot !== null) {
+				robot.startRecording();
+			}
+		}.bind(this));
+
+		socket.on('stopRecording', function (robotId) {
+			var robot = this.robots.getRobot(robotId);
+			if (robot !== null) {
+				robot.stopRecording();
 			}
 		}.bind(this));
 
@@ -94,123 +98,38 @@ function NUsight (io) {
 
 	}.bind(this));
 
-	this.on('message', function (robotIP, message) {
-		this.onMessage(robotIP, message);
-	}.bind(this));
-
 }
 
 util.inherits(NUsight, events.EventEmitter);
 
-NUsight.prototype.getRobot = function (robotIP) {
-	var result = null;
-	this.robots.forEach(function (robot) {
-		if (robot.host === robotIP) {
-			result = robot;
-			return false;
-		}
-	}.bind(this));
-	return result;
+NUsight.prototype.loadConfig = function (filename) {
+
+	var config = yaml.safeLoad(fs.readFileSync(filename, 'utf8'));
+
+	config.robots.forEach(function (robotConfig) {
+
+		var address = robotConfig.addresses[robotConfig.defaultAddress || 'wifi'];
+		var robotName = robotConfig.name;
+
+		var robot = this.robots.addRobot(robotConfig.id, address.host, address.port || 12000, robotName);
+		robot.on('message', function (message) {
+			this.onMessage(robot.id, message);
+		}.bind(this));
+
+		//this.clients.forEach(function (client) {
+		//	client.socket.emit('robotIP', robotIP, robotName);
+		//});
+
+	}, this);
+
 };
 
-NUsight.prototype.removeRobot = function (robotIP) {
-	this.robots.forEach(function (robot, index) {
-		if (robot.host === robotIP) {
-			try {
-				robot.disconnect();
-			} catch (e) {
-				console.log('Error disconnecting to:', robotIP);
-			}
-			this.robots.splice(index, 1);
-			return false;
-		}
-	}.bind(this));
-};
 
-NUsight.prototype.addRobot = function (robotIP, robotName, port) {
-
-	var robot = new Robot(robotIP, port, robotName);
-	try {
-		robot.connect();
-	} catch(e) {
-		console.log(e);
-		console.log('Error connecting to:', robotIP);
-	}
-	robot.on('message', function (message) {
-
-		this.emit('message', robotIP, message);
-
-	}.bind(this));
+NUsight.prototype.onMessage = function (robotId, message) {
 
 	this.clients.forEach(function (client) {
-		client.socket.emit('robotIP', robotIP, robotName);
-	});
-
-	this.robots.push(robot);
-
-};
-
-NUsight.prototype.addRobots = function (robotIPs)
-{
-	if (!Array.isArray(robotIPs)) {
-		robotIPs = [robotIPs];
-	}
-
-	robotIPs.forEach(function (robotIP) {
-		this.addRobot(robotIP);
-	}.bind(this));
-};
-
-NUsight.prototype.onMessage = function (robotIP, message) {
-
-	// Save the file! Yay?
-	if (false) {
-		// If our file is not yet open
-		if(this.files[robotIP] === undefined) {
-			try { fs.mkdirSync('logs'); } catch(e) {}
-			try { fs.mkdirSync('logs/' + robotIP); } catch(e) {}
-
-			this.files[robotIP] = fs.createWriteStream('logs/' + robotIP + '/' + Date.now() + '.nbs');
-		}
-
-		// Get our output
-		var out = this.files[robotIP];
-
-		// Get the data portion of our stream
-		data = message.slice(2);
-
-		// Get the length of the data
-		len = new Buffer(4);
-		len.writeUInt32LE(data.length, 0);
-
-		// // Write the two to the stream
-		out.write(len);
-		out.write(data);
-	}
-
-	this.clients.forEach(function (client) {
-
-		var type = message[0];
-		var filterId = message[1];
-		if (filterId === 0) {
-			client.socket.emit('message', robotIP, message);
-		} else {
-			var hash = type + ':' + filterId + ':' + robotIP;
-			var now = Date.now();
-			var timeout = 1000 * 2;
-			var timedOut = client.cache[hash] !== undefined && client.cache[hash] + timeout < now;
-			if (client.cache[hash] === undefined || timedOut) {
-				if (timedOut) {
-					console.warn('ACK not received for:', hash);
-				}
-				client.cache[hash] = now;
-				client.socket.emit('message', robotIP, message, function () {
-					delete client.cache[hash];
-				}.bind(this));
-			}
-		}
-
-	}.bind(this));
+		client.sendMessage(robotId, message);
+	}, this);
 
 };
 

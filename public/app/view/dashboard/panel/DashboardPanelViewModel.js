@@ -8,7 +8,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		'NU.util.TypeMap'
 	],
 	data: {
-		name: null,
+		robot: null,
 		roleName: null,
 		localisation: null,
 		battery: null,
@@ -78,16 +78,21 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		return ((value - min) / (max - min)) + min;
 	},
 	formulas: {
+		name: function (get) {
+			return get('robot.name') || 'Unknown';
+		},
 		role: function (get) {
 			return get('roleName') || 'Unknown';
 		},
-		maskBackground: function (get) {
+		disabled: function (get) {
 			var elapsed = get('elapsedBackground');
-			return elapsed === this.getView().getColors().DANGER ? 'white' : '';
+			return elapsed === this.getView().getColors().DANGER;
+		},
+		maskBackground: function (get) {
+			return get('disabled') ? 'white' : '';
 		},
 		maskOpacity: function (get) {
-			var elapsed = get('elapsedBackground');
-			return elapsed === this.getView().getColors().DANGER ? 0.25 : 1;
+			return get('disabled') ? 0.25 : 1;
 		},
 		batteryPercentage: function (get) {
 			return (get('battery') * 100).toFixed(2);

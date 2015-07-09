@@ -14,23 +14,22 @@ Ext.define('NU.view.window.NUClearController', {
         // update default
         this.lookupReference('updatespeed').setRawValue(this.getUpdateSpeed());
 
-		var view = this.getView();
-        view.mon(NU.Network, 'reaction_statistics', this.onReactionStatistics, this);
+        NU.Network.on('reaction_statistics', this.onReactionStatistics, this);
 
         this.callParent(arguments);
 
     },
-    onSelectRobot: function (robotIP) {
+    onSelectRobot: function (robotId) {
         this.lookupReference('display').getRootNode().removeAll();
         this.callParent(arguments);
     },
     onUpdateSpeedChange: function (field, newValue, oldValue, eOpts) {
 		this.setUpdateSpeed(newValue);
 	},
-    onReactionStatistics: function (robotIP, reactionStatistics) {
+    onReactionStatistics: function (robotId, reactionStatistics) {
 
         // TODO: remove
-        if (robotIP !== this.getRobotIP()) {
+        if (robotId !== this.getRobotId()) {
             return;
         }
 

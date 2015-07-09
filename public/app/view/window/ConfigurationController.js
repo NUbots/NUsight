@@ -23,20 +23,20 @@ Ext.define('NU.view.window.ConfigurationController', {
     /**
      * A function that is called when the user selects a robot. It then sends the command to get the configuration state with this IP address.
      *
-     * @param robotIP The robot IP address selected by the user.
+     * @param robotId The robot id selected by the user.
      */
-    onSelectRobot: function (robotIP) {
-        this.setRobotIP(robotIP);
+    onSelectRobot: function (robotId) {
+        this.setRobotId(robotId);
         this.sendCommand();
     },
     /**
      * An event fired when the network has received the configuration state message.
      *
-     * @param robotIP The robot IP address.
+     * @param robotId The robot id.
      * @param configurationState The configuration state protocol buffer.
      */
-    onConfigurationState: function (robotIP, configurationState) {
-        if (robotIP !== this.getRobotIP()) {
+    onConfigurationState: function (robotId, configurationState) {
+        if (robotId !== this.getRobotId()) {
             return;
         }
         // Retrieve the root from the buffer.
@@ -48,7 +48,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Sends a command to the network requesting the configuration state.
      */
     sendCommand: function () {
-        NU.Network.sendCommand(this.getRobotIP(), 'get_configuration_state');
+        NU.Network.sendCommand(this.getRobotId(), 'get_configuration_state');
     },
     /**
      * An event triggered when the current mode display has rendered.
@@ -609,7 +609,7 @@ Ext.define('NU.view.window.ConfigurationController', {
             // Set the configuration state of the message.
             message.setConfigurationState(this.getConfigurationState(tree));
             // Send the message over the network.
-            NU.Network.send(this.getRobotIP(), message);
+            NU.Network.send(this.getRobotId(), message);
         }
         // Reset the current tree.
         this.currentTree = null;

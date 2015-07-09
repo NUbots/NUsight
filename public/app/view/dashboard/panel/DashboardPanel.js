@@ -13,7 +13,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		'NU.view.dashboard.panel.DashboardPanelController'
 	],
 	config: {
-		name: null,
+		robot: null,
 		colors: null
 	},
 	viewModel: {
@@ -24,8 +24,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		title: '{name} - {role}',
 		style: {
 			background: '{maskBackground}',
-			opacity: '{maskOpacity}',
-			marginRight: '2px'
+			opacity: '{maskOpacity}'
 		}
 	},
 	listeners: {
@@ -38,7 +37,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		type: 'vbox',
 		align: 'stretch'
 	},
-	columnWidth: 0.33,
+	columnWidth: 0.333,
 	border: true,
 	tools:[{
 		xtype: 'container',
@@ -60,6 +59,14 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			style: {
 				backgroundColor: '{elapsedBackground}'
 			}
+		}
+	}, {
+		xtype: 'checkbox',
+		bind: {
+			value: '{robot.enabled}'
+		},
+		style: {
+			marginLeft: '5px'
 		}
 	}],
 	items: [

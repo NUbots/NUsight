@@ -68,6 +68,7 @@ Ext.define('NU.view.Toolbar', {
 	}, {
         xtype: 'tool',
         type: 'refresh',
-        callback: 'onReconnect'
+        callback: 'onReconnect',
+        tooltip: 'Reconnect robots'
     }]
 });

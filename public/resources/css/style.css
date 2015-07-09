@@ -54,6 +54,18 @@ div.crosshair {
 	margin: 1px 4px !important;
 }
 
+.x-tool-start-recording {
+	background: url('../svg/record.svg') !important;
+	background-size: 100% !important;
+	opacity: 1 !important;
+}
+
+.x-tool-stop-recording {
+	background: url('../svg/stop.svg') !important;
+	background-size: 100% !important;
+	opacity: 1 !important;
+}
+
 .dashboard-panel .x-panel-header {
 	background: #50b6d3 !important;
 }

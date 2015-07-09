@@ -11,13 +11,14 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		this.dashboardPanels = {};
 		// Listen to the network events.
 		NU.Network.on({
-			robotIP: this.onRobotIP,
+			addRobot: this.onAddRobot,
+			removeRobot: this.onRemoveRobot,
 			overview: this.onOverview,
 			scope: this
 		});
 		// Iterate through each robot and create the dashboard panel for it.
-		NU.Network.getRobotIPs().forEach(function (robotIP) {
-			this.createDashboardPanel(robotIP, robotIP);
+		NU.Network.getRobotStore().each(function (robot) {
+			this.createDashboardPanel(robot);
 		}, this);
 	},
 
@@ -32,13 +33,13 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	/**
 	 * Creates the dashboard panel for a certain robot.
 	 *
-	 * @param robotIP The IP address of the robot.
-	 * @param robotName The name of the robot.
+	 * @param robot The robot record from the robot store.
 	 */
-	createDashboardPanel: function (robotIP, robotName) {
+	createDashboardPanel: function (robot) {
+		var robotId = robot.get('id');
 		// Add a mapping from the robot name to the view so it can be updated later.
-		this.dashboardPanels[robotName] = this.getView().add(Ext.widget('nu_dashboard_panel', {
-			name: robotName
+		this.dashboardPanels[robotId] = this.getView().add(Ext.widget('nu_dashboard_panel', {
+			robot: robot
 		}));
 	},
 
@@ -46,23 +47,35 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 * An event triggered when the Network class receives a new robot. This method creates the dashboard panel
 	 * associated with the robot that was added to the network.
 	 *
-	 * @param robotIP The IP address of the robot.
-	 * @param robotName The name of the robot.
+	 * @param robot The robot record from the robot store.
 	 */
-	onRobotIP: function (robotIP, robotName) {
-		this.createDashboardPanel(robotIP, robotName);
+	onAddRobot: function (robot) {
+		this.createDashboardPanel(robot);
+	},
+
+	/**
+	 * An event triggered when the Network class deletes a robot. This method removes the dashboard panel associated
+	 * with the robot that was removed from the network.
+	 *
+	 * @param robot The robot record from the robot store.
+	 */
+	onRemoveRobot: function (robot) {
+		var key = robot.get('id');
+		var dashboardPanel = this.dashboardPanels[key];
+		this.getView().remove(dashboardPanel);
+		delete this.dashboardPanels[key];
 	},
 
 	/**
 	 * An event triggered when the Network class receives an Overview protocol buffer. This method fires the update
 	 * event on the dashboard panel view associated with the IP address of a robot.
 	 *
-	 * @param robotIP The IP address of the robot.
+	 * @param robotId The id of the robot.
 	 * @param overview The protocol buffer data.
 	 * @param timestamp The time the data was received.
 	 */
-	onOverview: function (robotIP, overview, timestamp) {
-		this.dashboardPanels[robotIP].fireEvent('update', overview, timestamp);
+	onOverview: function (robotId, overview, timestamp) {
+		this.dashboardPanels[robotId].fireEvent('update', overview, timestamp);
 	},
 
 	/**

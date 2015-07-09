@@ -12,7 +12,7 @@ Ext.define('NU.view.window.subsumption.SubsumptionViewModel', {
 			fields: [
 				{name: 'actionId', type: 'int'},
 				{name: 'name', type: 'string'},
-				{name: 'robotIP', type: 'string'},
+				{name: 'robotId', type: 'int'},
 				{name: 'time', type: 'date'},
 				{name: 'limbs', type: 'auto'}, // array
 				{name: 'priority', type: 'int'}
