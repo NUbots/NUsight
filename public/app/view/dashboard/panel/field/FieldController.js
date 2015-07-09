@@ -25,6 +25,10 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 		this.ball = {
 			radius: 4
 		};
+		this.pathPlan = {
+			color: '#ff7fff',
+			width: 2
+		}
 	},
 
 	/**
@@ -339,6 +343,33 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	},
 
 	/**
+	 * Draws the robot's path plan on the field.
+	 *
+	 * @param context The canvas context.
+	 * @param pathPlan The list of path plan points.
+	 */
+	drawPathPlan: function (context, pathPlan) {
+		// Get the color and line width of the path plan.
+		var color = this.pathPlan.color;
+		var lineWidth = this.pathPlan.lineWidth;
+		// Get the first point of the path plan and then check if it exists.
+		var start = pathPlan[0];
+		if (start) {
+			// Instantiate the origin to the start value in screen coordinates.
+			var origin = this.worldToScreen(context, vec2.fromValues(start.x, start.y));
+			// Iterate from the first point to the end of the path plan.
+			for (var i = 1, len = pathPlan.length; i < len; i++) {
+				// Get the current point and initialise it as the target in screen coordinates.
+				var point = pathPlan[i];
+				var target = this.worldToScreen(context, vec2.fromValues(point.x, point.y));
+				// Draw the line from the origin to the target and set the new origin to the target.
+				this.drawLine(context, origin, target, color, lineWidth);
+				origin = target;
+			}
+		}
+	},
+
+	/**
 	 * Checks if a particular position is in the bounds of the canvas.
 	 *
 	 * @param context The canvas context.
@@ -357,8 +388,9 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * @param robotPositionCovariance The certainty of the robot position.
 	 * @param robotHeading The direction the robot is facing in local space.
 	 * @param ballPosition The position of the ball in world space.
+	 * @param pathPlan The walk path plan.
 	 */
-	onUpdate: function (robotPosition, robotPositionCovariance, robotHeading, ballPosition) {
+	onUpdate: function (robotPosition, robotPositionCovariance, robotHeading, ballPosition, pathPlan) {
 		// Get the context and check if it exists.
 		var context = this.context;
 		if (context) {
@@ -381,6 +413,10 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 			if (ballPosition) {
 				// Convert the ball position to a vector and draw it on the field.
 				this.drawBall(context, vec2.fromValues(ballPosition.x, ballPosition.y));
+			}
+			// Check if a path plan exists and then draw it.
+			if (pathPlan) {
+				this.drawPathPlan(context, pathPlan);
 			}
 		}
 	}

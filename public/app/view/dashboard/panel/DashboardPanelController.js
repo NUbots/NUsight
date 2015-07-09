@@ -54,7 +54,6 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		viewModel.set('robotHeading', robotHeading);
 		viewModel.set('ballPosition', data.getBallPosition());
 		viewModel.set('ballWorldPosition', ballWorldPosition);
-		this.field.fireEvent('update', robotPosition, robotPositionCovariance, robotHeading, ballWorldPosition);
 		// Update the game controller details in the view model.
 		viewModel.set('behaviourState', data.getBehaviourState());
 		viewModel.set('gameMode', data.getGameMode());
@@ -66,6 +65,8 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		viewModel.set('lastSeenGoal', data.getLastSeenGoal());
 		// Update the timestamp value in the view model.
 		viewModel.set('timestamp', timestamp);
+
+		this.field.fireEvent('update', robotPosition, robotPositionCovariance, robotHeading, ballWorldPosition, data.getPathPlan());
 	},
 
 	/**
