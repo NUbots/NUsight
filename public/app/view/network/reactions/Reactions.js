@@ -11,5 +11,5 @@ Ext.define('NU.view.network.reactions.Reactions', {
 	controller: 'NetworkReactions',
 	title: 'Reactions',
 	layout: 'column',
-	overflowY: 'scroll'
+	autoScroll: true
 });

@@ -14,7 +14,7 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 		type: 'vbox',
 		align: 'stretch'
 	},
-	columnWidth: 0.325,
+	columnWidth: 0.333,
 	config: {
 		robot: null
 	},
