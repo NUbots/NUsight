@@ -35,7 +35,8 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 	},
 	tools: [{
 		bind: {
-			type: '{record}'
+			type: '{record}',
+			tooltip: '{recordTooltip}'
 		},
 		callback: 'onRecord',
 		style: {

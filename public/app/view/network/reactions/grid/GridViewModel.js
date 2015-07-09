@@ -20,11 +20,15 @@ Ext.define('NU.view.network.reactions.grid.GridViewModel', {
 	},
 	formulas: {
 		name: function (get) {
-			return get('robot').get('name') || 'Unknown';
+			return get('robot.name') || 'Unknown';
 		},
 		record: function (get) {
 			var recording = get('robot.recording');
 			return recording ? 'stop-recording' : 'start-recording';
+		},
+		recordTooltip: function (get) {
+			var recording = get('robot.recording');
+			return recording ? 'Stop recording' : 'Start recording';
 		}
 	}
 });

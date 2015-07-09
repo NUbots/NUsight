@@ -24,8 +24,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		title: '{name} - {role}',
 		style: {
 			background: '{maskBackground}',
-			opacity: '{maskOpacity}',
-			marginRight: '2px'
+			opacity: '{maskOpacity}'
 		}
 	},
 	listeners: {
@@ -38,7 +37,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		type: 'vbox',
 		align: 'stretch'
 	},
-	columnWidth: 0.33,
+	columnWidth: 0.333,
 	border: true,
 	tools:[{
 		xtype: 'container',

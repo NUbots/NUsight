@@ -79,7 +79,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 	},
 	formulas: {
 		name: function (get) {
-			return get('robot').get('name') || 'Unknown';
+			return get('robot.name') || 'Unknown';
 		},
 		role: function (get) {
 			return get('roleName') || 'Unknown';
