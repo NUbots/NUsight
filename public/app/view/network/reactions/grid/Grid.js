@@ -14,7 +14,7 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 		type: 'vbox',
 		align: 'stretch'
 	},
-	columnWidth: 0.325,
+	columnWidth: 0.333,
 	config: {
 		robot: null
 	},
@@ -30,7 +30,18 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 		update: 'onUpdate'
 	},
 	hideHeaders: true,
+	viewConfig:{
+		markDirty:false
+	},
 	tools: [{
+		bind: {
+			type: '{record}'
+		},
+		callback: 'onRecord',
+		style: {
+			marginRight: '5px'
+		}
+	}, {
 		xtype: 'checkbox',
 		bind: {
 			value: '{robot.enabled}'

@@ -32,8 +32,8 @@ Ext.define('NU.view.StatusBarController', {
 	createPanel: function (robot) {
 		var view = this.getView();
 		var name = robot.get('name') || 'Unknown';
-		var robotIP = robot.get('ipAddress');
-		this.panels[robotIP] = view.insert(this.getInsertIndex(), {
+		var key = robot.get('id');
+		this.panels[key] = view.insert(this.getInsertIndex(), {
 			xtype: 'panel',
 			tpl: '{name}: {count}',
 			data: {
@@ -61,7 +61,7 @@ Ext.define('NU.view.StatusBarController', {
 	 * @param robot The robot record from the robot store.
 	 */
 	onRemoveRobot: function (robot) {
-		var key = robot.get('ipAddress');
+		var key = robot.get('id');
 		var panel = this.panels[key];
 		this.getView().remove(panel);
 		delete this.panels[key];
@@ -69,7 +69,7 @@ Ext.define('NU.view.StatusBarController', {
 
 	onPacket: function (robot, type, packet) {
 		this.incPacketCounter();
-		var panel = this.panels[robot.get('ipAddress')];
+		var panel = this.panels[robot.get('id')];
 		var count = panel.getData().count;
 
 		NU.util.Display.updateDelayed(this.lookupReference('packetCount'), {

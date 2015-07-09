@@ -460,14 +460,22 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.selectionClassifier.updateLut(lut);
 
 			this.testDrawImage(function () {
-				this.mon(NU.Network, 'image', this.onImage, this);
-				this.mon(NU.Network, 'lookup_table', this.onLookUpTable, this);
-				this.mon(NU.Network, 'lookup_table_diff', this.onLookUpTableDiff, this);
+				this.addEvents();
 			});
 
 			//this.testClassifier();
 		}.bind(this));
 	},
+
+	addEvents: function () {
+		NU.Network.on({
+			image: this.onImage,
+			lookup_table: this.onLookUpTable,
+			lookup_table_diff: this.onLookUpTableDiff,
+			scope: this
+		});
+	},
+
 	testClassifier: function () {
 
 		if (this.lastIndex === 0) {
@@ -544,7 +552,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setLookupVertexBuffer(vertices);
 	},
 	download: function () {
-		NU.Network.sendCommand(this.getRobotIP(), "download_lut");
+		NU.Network.sendCommand(this.getRobotId(), "download_lut");
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
@@ -556,7 +564,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
 		lookupTable.setSave(save);
 		message.setLookupTable(lookupTable);
-		NU.Network.send(this.getRobotIP(), message);
+		NU.Network.send(this.getRobotId(), message);
 	},
 	getLUTIndex: function (ycbcr) {
 		var bitsY = this.self.LutBitsPerColorY;
@@ -610,10 +618,10 @@ Ext.define('NU.view.window.ClassifierController', {
 			}
 		}
 	},
-	onLookUpTable: function (robotIP, lookuptable) {
+	onLookUpTable: function (robotId, lookuptable) {
 
 		// TODO: remove
-		if (robotIP !== this.getRobotIP()) {
+		if (robotId !== this.getRobotId()) {
 			return;
 		}
 
@@ -626,10 +634,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
-	onLookUpTableDiff: function (robotIP, tableDiff) {
+	onLookUpTableDiff: function (robotId, tableDiff) {
 
 		// TODO: remove
-		if (robotIP !== this.getRobotIP()) {
+		if (robotId !== this.getRobotId()) {
 			return;
 		}
 
@@ -654,10 +662,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
-	onImage: function (robotIP, image) {
+	onImage: function (robotId, image) {
 
 		// TODO: remove
-		if (robotIP !== this.getRobotIP()) {
+		if (robotId !== this.getRobotId()) {
 			return;
 		}
 
@@ -1500,7 +1508,7 @@ Ext.define('NU.view.window.ClassifierController', {
 				y: imageObj.height
 			});
 			image.setFormat(API.Image.Format.YCbCr444);
-			this.onImage(this.getRobotIP(), image);
+			this.onImage(this.getRobotId(), image);
 			callback.call(this);
 		}.bind(this);
 		imageObj.load(uri);

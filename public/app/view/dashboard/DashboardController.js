@@ -11,7 +11,6 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		this.dashboardPanels = {};
 		// Listen to the network events.
 		NU.Network.on({
-			robotIP: this.onAddRobot,
 			addRobot: this.onAddRobot,
 			removeRobot: this.onRemoveRobot,
 			overview: this.onOverview,
@@ -37,9 +36,9 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 * @param robot The robot record from the robot store.
 	 */
 	createDashboardPanel: function (robot) {
-		var robotIP = robot.get('ipAddress');
+		var robotId = robot.get('id');
 		// Add a mapping from the robot name to the view so it can be updated later.
-		this.dashboardPanels[robotIP] = this.getView().add(Ext.widget('nu_dashboard_panel', {
+		this.dashboardPanels[robotId] = this.getView().add(Ext.widget('nu_dashboard_panel', {
 			robot: robot
 		}));
 	},
@@ -61,7 +60,7 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 * @param robot The robot record from the robot store.
 	 */
 	onRemoveRobot: function (robot) {
-		var key = robot.get('ipAddress');
+		var key = robot.get('id');
 		var dashboardPanel = this.dashboardPanels[key];
 		this.getView().remove(dashboardPanel);
 		delete this.dashboardPanels[key];
@@ -71,12 +70,12 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 * An event triggered when the Network class receives an Overview protocol buffer. This method fires the update
 	 * event on the dashboard panel view associated with the IP address of a robot.
 	 *
-	 * @param robotIP The IP address of the robot.
+	 * @param robotId The id of the robot.
 	 * @param overview The protocol buffer data.
 	 * @param timestamp The time the data was received.
 	 */
-	onOverview: function (robotIP, overview, timestamp) {
-		this.dashboardPanels[robotIP].fireEvent('update', overview, timestamp);
+	onOverview: function (robotId, overview, timestamp) {
+		this.dashboardPanels[robotId].fireEvent('update', overview, timestamp);
 	},
 
 	/**

@@ -4,7 +4,8 @@ Ext.define('NU.model.Robot', {
         {name: 'id', type: 'int'},
         {name: 'ipAddress', type: 'string'},
         {name: 'name', type: 'string'},
-        {name: 'enabled', type: 'boolean', defaultValue: true}
+        {name: 'enabled', type: 'boolean', defaultValue: true},
+        {name: 'recording', type: 'boolean', defaultValue: false}
     ],
     identifier: 'sequential',
     validators: [

@@ -61,6 +61,14 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 				backgroundColor: '{elapsedBackground}'
 			}
 		}
+	}, {
+		xtype: 'checkbox',
+		bind: {
+			value: '{robot.enabled}'
+		},
+		style: {
+			marginLeft: '5px'
+		}
 	}],
 	items: [
 	/*{

@@ -46,8 +46,7 @@ Ext.define('NU.util.Network', {
 	},
 
 	processPacket: function (packet) {
-		var robotIP = packet.robotIP;
-		var robot = this.getRobot(robotIP);
+		var robot = this.getRobot(packet.robotId);
 		var message = new Uint8ClampedArray(packet.message);
 		var type = message[0];
 		var eventName = this.typeMap[type];
@@ -55,12 +54,12 @@ Ext.define('NU.util.Network', {
 
 		event = {
 			name: eventName,
-			robotIP: robotIP,
+			robotId: robot.id,
 			message: packet.message.slice(2)
 		};
 
 		if (filterId > 0) {
-			var hash = eventName + ':' + filterId + ':' + robotIP;
+			var hash = eventName + ':' + filterId + ':' + robot.id;
 			this.cache[hash] = event;
 		} else {
 			if (this.hasListener(event.name)) {
@@ -75,13 +74,13 @@ Ext.define('NU.util.Network', {
 		var api_message = API.Message.decode(event.message);
 		var api_event = api_message[event.name];
 		var time = new Date(api_message.getUtcTimestamp().toNumber());
-		this.fireEvent(event.name, event.robotIP, api_event, time);
+		this.fireEvent(event.name, event.robotId, api_event, time);
 		//console.log(event.robotIP, event.name);
 	},
 
 	setupSocket: function () {
 		var socket = io.connect(document.location.origin);
-		socket.on('robotIP', this.onRobotIP.bind(this));
+		socket.on('addRemoteRobot', this.onAddRemoteRobot.bind(this));
 		socket.on('message', this.onMessage.bind(this));
 		this.socket = socket;
 	},
@@ -114,38 +113,47 @@ Ext.define('NU.util.Network', {
 	onAddRobot: function (store, records, index, eOpts) {
 		Ext.each(records, function (record) {
 			if (record.get('ipAddress') !== '') {
-				this.socket.emit('addRobot', record.get('ipAddress'), record.get('name'));
+				this.socket.emit('addRobot', record.get('id'), record.get('ipAddress'), record.get('port'), record.get('name'));
 				this.fireEvent('addRobot', record);
 			}
 		}, this);
 	},
 
 	onUpdateRobot: function (store, record, operation, modifiedFieldNames) {
-		var robotIP = record.get('ipAddress');
+		var robotId = record.get('id');
 		// Check if the IP address of the robot was modified.
 		if (modifiedFieldNames.indexOf('ipAddress') !== -1) {
-			if (robotIP !== '') {
-				this.socket.emit('addRobot', robotIP);
-				this.fireEvent('addRobot', record);
+			if (robotId !== '') {
+				// TODO
+				//this.socket.emit('addRobot', robotIP);
+				//this.fireEvent('addRobot', record);
 			}
 		}
 		// Check if the enabled flag of the robot was modified.
 		if (modifiedFieldNames.indexOf('enabled') !== -1) {
 			var enabled = record.get('enabled');
 			if (enabled) {
-				this.socket.emit('enableRobot', robotIP);
+				this.socket.emit('enableRobot', robotId);
 				this.fireEvent('enableRobot', record);
 			} else {
-				this.socket.emit('disableRobot', robotIP);
+				this.socket.emit('disableRobot', robotId);
 				this.fireEvent('disableRobot', record);
+			}
+		}
+		// Check if the recording flag of the robot was modified.
+		if (modifiedFieldNames.indexOf('recording') !== -1) {
+			var recording = record.get('recording');
+			if (recording) {
+				this.socket.emit('startRecording', robotId);
+			} else {
+				this.socket.emit('stopRecording', robotId);
 			}
 		}
 	},
 
 	onRemoveRobot: function (store, records, indexes, isMove, eOpts) {
 		Ext.each(records, function (record) {
-			var robotIP = record.get('ipAddress');
-			this.socket.emit('removeRobot', robotIP);
+			this.socket.emit('removeRobot', record.get('id'));
 			this.fireEvent('removeRobot', record);
 		}, this);
 	},
@@ -154,31 +162,27 @@ Ext.define('NU.util.Network', {
 		this.socket.emit('reconnectRobots');
 	},
 
-	onRobotIP: function (robotIP, robotName) {
+	onAddRemoteRobot: function (robot) {
 		var robotsStore = Ext.getStore('Robots');
-		var robotIndex = robotsStore.find('ipAddress', robotIP);
+		var robotIndex = robotsStore.find('id', robot.id);
 		if (robotIndex === -1) {
-			robotsStore.add({
-				ipAddress: robotIP,
-				name: robotName !== undefined ? robotName : robotIP
-			});
+			robotsStore.add(robot);
 		}
 	},
 
-	onMessage: function (robotIP, message, callback) {
-		var packet = {
-			robotIP: robotIP,
+	onMessage: function (robotId, message, callback) {
+		this.processPacket({
+			robotId: robotId,
 			message: message
-		};
+		});
 
-		this.processPacket(packet);
 		if (callback) {
 			callback();
 		}
 	},
 
-	send: function (robotIP, message) {
-		this.socket.emit('message', robotIP, message.encode().toArrayBuffer());
+	send: function (robotId, message) {
+		this.socket.emit('message', robotId, message.encode().toArrayBuffer());
 	},
 
 	broadcast: function (message) {
@@ -193,13 +197,16 @@ Ext.define('NU.util.Network', {
 		});
 		return result;
 	},
+
 	getRobotStore: function () {
 		return Ext.getStore('Robots');
 	},
+
 	getRobot: function (robotId) {
 		var store = this.getRobotStore();
-		return store.findRecord('ipAddress', robotId);
+		return store.findRecord('id', robotId);
 	},
+
 	/**
 	 * Creates a message of a particular type and filter identifier that can be used to send over the network.
 	 *
@@ -220,11 +227,11 @@ Ext.define('NU.util.Network', {
 	/**
 	 * Creates a message and command of a particular name to send over the network.
 	 *
-	 * @param robotIP The IP address of the robot associated with the command.
+	 * @param robotId The id of the robot associated with the command.
 	 * @param commandName The name of the command.
 	 * @param [filterId] The filter identifier for the message.
 	 */
-	sendCommand: function (robotIP, commandName, filterId) {
+	sendCommand: function (robotId, commandName, filterId) {
 		// Create the message of type command.
 		var message = this.createMessage(API.Message.Type.COMMAND, filterId || 0);
 		// Create the command and set its name.
@@ -233,6 +240,6 @@ Ext.define('NU.util.Network', {
 		// Set the command of the message
 		message.setCommand(command);
 		// Send the command message over the network.
-		this.send(robotIP, message);
+		this.send(robotId, message);
 	}
 });

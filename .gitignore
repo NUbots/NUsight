@@ -3,3 +3,4 @@ logs/
 .idea/
 public/lib/
 *.sublime-workspace
+app/configuration.yaml

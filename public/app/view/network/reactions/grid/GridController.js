@@ -38,6 +38,14 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 	},
 
 	/**
+	 * An event triggered when the user selects the record button. It sets the robot record to either recording or
+	 * not recording based on its previous state.
+	 */
+	onRecord: function () {
+		this.robot.set('recording', !this.robot.get('recording'));
+	},
+
+	/**
 	 * An event triggered when the user changes the enabled state of a reactions handle.
 	 *
 	 * @param column The checkcolumn that was altered.
@@ -57,17 +65,17 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		});
 		message.setReactionHandles(reactionHandles);
 		// Send the message.
-		NU.Network.send(this.robot.get('ipAddress'), message);
+		NU.Network.send(this.robot.get('id'), message);
 	},
 
 	/**
 	 * An event triggered when the reaction handles command is received.
 	 *
-	 * @param robotIP The IP address of the robot.
+	 * @param robotId The id of the robot.
 	 * @param reactionHandles The reaction handles data.
 	 * @param timestamp The time the command was received.
 	 */
-	onReactionHandles: function (robotIP, reactionHandles, timestamp) {
+	onReactionHandles: function (robotId, reactionHandles, timestamp) {
 		var handles = reactionHandles.handles;
 		Ext.each(handles, function (handle) {
 			var message = this.messages[NU.Network.typeMap[handle.type]];
