@@ -102,7 +102,7 @@ Robot.prototype.onMessage = function (data) {
 Robot.prototype.getModel = function () {
 	return {
 		id: this.id,
-		ipAddress: this.host,
+		host: this.host,
 		port: this.port,
 		name: this.name,
 		enabled: this.enabled,

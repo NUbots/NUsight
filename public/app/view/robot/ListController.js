@@ -13,10 +13,13 @@ Ext.define('NU.view.robot.ListController', {
     onAddRobot: function (button) {
 	    var grid = this.grid;
 		var rowEditing = grid.getPlugin('rowEditing');
+		var store = grid.getStore();
+		var id = store.max('id') + 1;
 		rowEditing.cancelEdit();
-		grid.getStore().insert(0, {
+		store.insert(0, {
+			id: id,
 			name: '',
-			ipAddress: ''
+			host: ''
 		});
 		rowEditing.startEdit(0, 0);
 	},

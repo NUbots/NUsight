@@ -9,7 +9,7 @@ Ext.define('NU.view.robot.Selector', {
 	forceSelection: true,
 	editable: false,
 	displayField: 'name',
-	valueField: 'ipAddress',
+	valueField: 'host',
 	emptyText: 'No Robot Selected',
 	store: 'Robots',
 	listeners: {

@@ -112,8 +112,8 @@ Ext.define('NU.util.Network', {
 
 	onAddRobot: function (store, records, index, eOpts) {
 		Ext.each(records, function (record) {
-			if (record.get('ipAddress') !== '') {
-				this.socket.emit('addRobot', record.get('id'), record.get('ipAddress'), record.get('port'), record.get('name'));
+			if (record.get('host') !== '') {
+				this.socket.emit('addRobot', record.get('id'), record.get('host'), record.get('port'), record.get('name'));
 				this.fireEvent('addRobot', record);
 			}
 		}, this);
@@ -121,34 +121,11 @@ Ext.define('NU.util.Network', {
 
 	onUpdateRobot: function (store, record, operation, modifiedFieldNames) {
 		var robotId = record.get('id');
-		// Check if the IP address of the robot was modified.
-		if (modifiedFieldNames.indexOf('ipAddress') !== -1) {
-			if (robotId !== '') {
-				// TODO
-				//this.socket.emit('addRobot', robotIP);
-				//this.fireEvent('addRobot', record);
-			}
-		}
-		// Check if the enabled flag of the robot was modified.
-		if (modifiedFieldNames.indexOf('enabled') !== -1) {
-			var enabled = record.get('enabled');
-			if (enabled) {
-				this.socket.emit('enableRobot', robotId);
-				this.fireEvent('enableRobot', record);
-			} else {
-				this.socket.emit('disableRobot', robotId);
-				this.fireEvent('disableRobot', record);
-			}
-		}
-		// Check if the recording flag of the robot was modified.
-		if (modifiedFieldNames.indexOf('recording') !== -1) {
-			var recording = record.get('recording');
-			if (recording) {
-				this.socket.emit('startRecording', robotId);
-			} else {
-				this.socket.emit('stopRecording', robotId);
-			}
-		}
+		var values = {};
+		Ext.each(modifiedFieldNames, function (fieldName) {
+			values[fieldName] = record.get(fieldName);
+		});
+		this.socket.emit('updateRobot', robotId, values);
 	},
 
 	onRemoveRobot: function (store, records, indexes, isMove, eOpts) {
@@ -193,7 +170,7 @@ Ext.define('NU.util.Network', {
 		var result = [];
 		var robotsStore = Ext.getStore('Robots');
 		robotsStore.each(function (record) {
-			result.push(record.get('ipAddress'));
+			result.push(record.get('host'));
 		});
 		return result;
 	},

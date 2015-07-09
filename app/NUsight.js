@@ -13,6 +13,7 @@ function NUsight (io) {
 	this.clients = [];
 	this.files = [];
 	this.robots = new RobotList();
+	this.config = 'app/configuration.yaml';
 
 	//this.robotFinder = new RobotFinder('238.158.129.230', 7447);
 	//this.robotFinder.listen();
@@ -20,7 +21,7 @@ function NUsight (io) {
 	//	this.addRobot(robotIP);
 	//}.bind(this));
 
-	this.loadConfig('app/configuration.yaml');
+	this.loadConfig(this.config);
 
 	this.io.sockets.on('connection', function (socket) {
 
@@ -49,39 +50,20 @@ function NUsight (io) {
 
 		socket.on('addRobot', function (robotId, robotIP, robotPort, robotName) {
 			if (this.robots.getRobot(robotId) === null) {
-				this.robots.addRobot(robotId, robotIP, robotPort, robotName);
+				this.addRobot(robotId, robotIP, robotPort, robotName);
 			}
 		}.bind(this));
 
 		socket.on('removeRobot', function (robotId) {
-			this.robots.removeRobot(robotId);
+			this.removeRobot(robotId);
 		}.bind(this));
 
-		socket.on('enableRobot', function (robotId) {
+		socket.on('updateRobot', function (robotId, values) {
 			var robot = this.robots.getRobot(robotId);
-			if (robot !== null) {
-				robot.enable();
-			}
-		}.bind(this));
-
-		socket.on('disableRobot', function (robotId) {
-			var robot = this.robots.getRobot(robotId);
-			if (robot !== null) {
-				robot.disable();
-			}
-		}.bind(this));
-
-		socket.on('startRecording', function (robotId) {
-			var robot = this.robots.getRobot(robotId);
-			if (robot !== null) {
-				robot.startRecording();
-			}
-		}.bind(this));
-
-		socket.on('stopRecording', function (robotId) {
-			var robot = this.robots.getRobot(robotId);
-			if (robot !== null) {
-				robot.stopRecording();
+			if (robot === null) {
+				this.addRobot(robotId, values.host, values.port, values.name);
+			} else {
+				this.updateRobot(robot, values);
 			}
 		}.bind(this));
 
@@ -105,7 +87,6 @@ util.inherits(NUsight, events.EventEmitter);
 NUsight.prototype.loadConfig = function (filename) {
 
 	var config = yaml.safeLoad(fs.readFileSync(filename, 'utf8'));
-
 	config.robots.forEach(function (robotConfig) {
 
 		var address = robotConfig.addresses[robotConfig.defaultAddress || 'wifi'];
@@ -122,6 +103,97 @@ NUsight.prototype.loadConfig = function (filename) {
 
 	}, this);
 
+};
+
+NUsight.prototype.addRobot = function (robotId, robotIP, robotPort, robotName) {
+	var robot = this.robots.addRobot(robotId, robotIP, robotPort, robotName);
+	var config = this.loadDefaultConfig();
+	var found = false;
+	var robots = config.robots;
+	robots.forEach(function (robotConfig) {
+		if (robotId === robotConfig.id) {
+			found = true;
+			return false;
+		}
+	});
+	if (!found) {
+		this.addRobotConfig(robots, robot);
+		this.saveDefaultConfig(config);
+	}
+};
+
+NUsight.prototype.addRobotConfig = function (robots, robot) {
+	robots.push({
+		id: robot.id,
+		name: robot.name,
+		enabled: robot.enabled,
+		recording: robot.recording,
+		defaultAddress: 'wifi',
+		addresses: {
+			wifi: {
+				host: robot.host,
+				port: robot.port
+			}
+		}
+	});
+};
+
+NUsight.prototype.removeRobot = function (robotId) {
+	this.robots.removeRobot(robotId);
+	var config = this.loadDefaultConfig();
+	var robots = config.robots;
+	robots.forEach(function (robotConfig, i) {
+		if (robotId === robotConfig.id) {
+			robots.splice(i, 1);
+			return false;
+		}
+	});
+	this.saveDefaultConfig(config);
+};
+
+NUsight.prototype.updateRobot = function (robot, values) {
+	var robotId = robot.id;
+	var config = this.loadDefaultConfig();
+	config.robots.forEach(function (robotConfig) {
+		if (robotId === robot.id) {
+			for (var key in values) {
+				if (values.hasOwnProperty(key)) {
+					this.updateRobotValue(robot, robotConfig, key, values[key]);
+				}
+			}
+			return false;
+		}
+	}, this);
+	this.saveDefaultConfig(config);
+};
+
+NUsight.prototype.updateRobotValue = function (robot, robotConfig, key, value) {
+	if (key === 'host' || key === 'port') {
+		robotConfig.addresses[robotConfig.defaultAddress][key] = value;
+	} else {
+		robotConfig[key] = value;
+		if (key === 'enabled') {
+			if (value) {
+				robot.enable();
+			} else {
+				robot.disable();
+			}
+		} else if (key === 'recording') {
+			if (value) {
+				robot.startRecording();
+			} else {
+				robot.stopRecording();
+			}
+		}
+	}
+};
+
+NUsight.prototype.loadDefaultConfig = function () {
+	return yaml.safeLoad(fs.readFileSync(this.config, 'utf8'));
+};
+
+NUsight.prototype.saveDefaultConfig = function (config) {
+	fs.writeFile(this.config, yaml.safeDump(config));
 };
 
 
