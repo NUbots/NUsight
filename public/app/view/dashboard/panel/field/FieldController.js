@@ -399,6 +399,15 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 			this.context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 			// Draw the field.
 			this.drawField(context);
+			// Check if a path plan exists and then draw it.
+			if (pathPlan) {
+				this.drawPathPlan(context, pathPlan);
+			}
+			// Check if a ball position exists.
+			if (ballPosition) {
+				// Convert the ball position to a vector and draw it on the field.
+				this.drawBall(context, vec2.fromValues(ballPosition.x, ballPosition.y));
+			}
 			// Check the robot position and robot heading exist.
 			if (robotPosition && robotHeading) {
 				// Convert the robot position and robot heading to vectors.
@@ -408,15 +417,6 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 				robotHeading = this.localToWorld(robotPosition, robotHeading);
 				// Draw the robot and the ball on the field.
 				this.drawRobot(context, robotPosition, robotHeading);
-			}
-			// Check if a ball position exists.
-			if (ballPosition) {
-				// Convert the ball position to a vector and draw it on the field.
-				this.drawBall(context, vec2.fromValues(ballPosition.x, ballPosition.y));
-			}
-			// Check if a path plan exists and then draw it.
-			if (pathPlan) {
-				this.drawPathPlan(context, pathPlan);
 			}
 		}
 	}
