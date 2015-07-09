@@ -18,7 +18,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 			});
 		}
 		// Set the name of the robot and the localisation default value on the view model.
-		viewModel.set('name', view.getRobot().get('name'));
+		viewModel.set('robot', view.getRobot());
 		viewModel.set('localisation', true);
 		// Store the field view so items can be rendered.
 		this.field = view.lookupReference('field');
