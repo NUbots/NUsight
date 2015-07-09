@@ -363,7 +363,6 @@ Ext.define('NU.view.window.VisionController', {
 		if (robotIP !== this.getRobotIP()) {
 			return;
 		}
-
 		switch (visionObjects.getType()) {
 			case 0: // Goal
 				this.drawGoals(visionObjects.getGoal());
@@ -406,6 +405,24 @@ Ext.define('NU.view.window.VisionController', {
 			context.lineWidth = 2;
 
 			context.stroke();
+
+			var measurements = goal.getMeasurement();
+
+			// Calculate our error!
+			context.fillStyle = "rgba(255, 255, 255, 1)";
+			var mX = (quad.tl.x + quad.tr.x + quad.br.x + quad.bl.x) / 4.0;
+			var mY = (quad.tl.y + quad.tr.y + quad.br.y + quad.bl.y) / 4.0;
+
+			for(var j = 0; j < measurements.length; ++j) {
+
+				var m = measurements[j];
+
+				var d = Math.sqrt(m.position.x);
+				var dE = Math.sqrt(m.covariance.x.x);
+
+				context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", mX, mY+j*15);
+			}
+
 		}
 	},
 	drawBalls: function (balls) {
@@ -428,6 +445,21 @@ Ext.define('NU.view.window.VisionController', {
 			context.strokeStyle = "rgba(255, 255, 255, 1)";
 			context.lineWidth = 2;
 			context.stroke();
+
+			var measurements = ball.getMeasurement();
+
+			// Calculate our error!
+			context.fillStyle = "rgba(255, 255, 255, 1)";
+
+			for(var j = 0; j < measurements.length; ++j) {
+
+				var m = measurements[j];
+
+				var d = Math.sqrt(m.position.x);
+				var dE = Math.sqrt(m.covariance.x.x);
+
+				context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", ball.circle.centre.x, ball.circle.centre.y+j*15);
+			}
 		}
 	},
 	drawLines: function (lines) {
