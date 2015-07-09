@@ -105,19 +105,31 @@ Robot.prototype.getModel = function () {
 		ipAddress: this.host,
 		port: this.port,
 		name: this.name,
-		enabled: this.enabled
+		enabled: this.enabled,
+		recording: this.recording
 	}
 };
 
-Robot.prototype.record = function (data) {
+Robot.prototype.startRecording = function () {
+	this.recording = true;
 	// If our file is not yet open
-	if (this.recordingFile === undefined) {
+	if (this.recordingFile === null) {
 		try { fs.mkdirSync('logs'); } catch(e) {}
 		try { fs.mkdirSync('logs/' + this.host + "_" + this.port); } catch(e) {}
 
 		this.recordingFile = fs.createWriteStream('logs/' + this.host + "_" + this.port + '/' + Date.now() + '.nbs');
 	}
+};
 
+Robot.prototype.stopRecording = function () {
+	this.recording = false;
+	if (this.recordingFile) {
+		this.recordingFile.end();
+		this.recordingFile = null;
+	}
+};
+
+Robot.prototype.record = function (data) {
 	// Get the data portion of our stream
 	data = message.slice(2);
 

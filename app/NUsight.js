@@ -71,6 +71,20 @@ function NUsight (io) {
 			}
 		}.bind(this));
 
+		socket.on('startRecording', function (robotId) {
+			var robot = this.robots.getRobot(robotId);
+			if (robot !== null) {
+				robot.startRecording();
+			}
+		}.bind(this));
+
+		socket.on('stopRecording', function (robotId) {
+			var robot = this.robots.getRobot(robotId);
+			if (robot !== null) {
+				robot.stopRecording();
+			}
+		}.bind(this));
+
 		socket.on('disconnect', function () {
 			this.clients.splice(this.clients.indexOf(client), 1);
 			console.log('Lost web client', this.clients.length);

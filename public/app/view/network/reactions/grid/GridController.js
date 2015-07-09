@@ -38,6 +38,14 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 	},
 
 	/**
+	 * An event triggered when the user selects the record button. It sets the robot record to either recording or
+	 * not recording based on its previous state.
+	 */
+	onRecord: function () {
+		this.robot.set('recording', !this.robot.get('recording'));
+	},
+
+	/**
 	 * An event triggered when the user changes the enabled state of a reactions handle.
 	 *
 	 * @param column The checkcolumn that was altered.

@@ -123,7 +123,7 @@ Ext.define('NU.util.Network', {
 		var robotId = record.get('id');
 		// Check if the IP address of the robot was modified.
 		if (modifiedFieldNames.indexOf('ipAddress') !== -1) {
-			if (robotIP !== '') {
+			if (robotId !== '') {
 				// TODO
 				//this.socket.emit('addRobot', robotIP);
 				//this.fireEvent('addRobot', record);
@@ -138,6 +138,15 @@ Ext.define('NU.util.Network', {
 			} else {
 				this.socket.emit('disableRobot', robotId);
 				this.fireEvent('disableRobot', record);
+			}
+		}
+		// Check if the recording flag of the robot was modified.
+		if (modifiedFieldNames.indexOf('recording') !== -1) {
+			var recording = record.get('recording');
+			if (recording) {
+				this.socket.emit('startRecording', robotId);
+			} else {
+				this.socket.emit('stopRecording', robotId);
 			}
 		}
 	},

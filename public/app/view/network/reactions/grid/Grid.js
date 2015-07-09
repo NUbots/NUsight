@@ -34,6 +34,14 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 		markDirty:false
 	},
 	tools: [{
+		bind: {
+			type: '{record}'
+		},
+		callback: 'onRecord',
+		style: {
+			marginRight: '5px'
+		}
+	}, {
 		xtype: 'checkbox',
 		bind: {
 			value: '{robot.enabled}'

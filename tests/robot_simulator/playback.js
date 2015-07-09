@@ -3,12 +3,12 @@ var fs = require('fs');
 var zmq = require('zmq');
 
 var builder = ProtoBuf.loadProtoFile({
-	root: 'public/resources/js/proto',
+	root: '../../public/resources/js/proto',
 	file: 'messages/support/nubugger/proto/Message.proto'
 });
 var API = builder.build('messages.support.nubugger.proto');
 
-var file = 'logs/10.1.2.3/1434957219766.nbs';
+var file = '../../logs/StillGoalBalls.nbs';
 
 var socket = zmq.socket('pub');
 socket.bindSync('tcp://0.0.0.0:14000');
