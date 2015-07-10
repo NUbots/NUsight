@@ -11,7 +11,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		this.store = viewModel.getStore('grid');
 		viewModel.set('robot', robot);
 		this.addData(this.store);
-		NU.Network.sendCommand(robot.get('host'), 'get_reaction_handles');
+		NU.Network.sendCommand(robot.get('id'), 'get_reaction_handles');
 		NU.Network.on('reaction_handles', this.onReactionHandles, this);
 	},
 
