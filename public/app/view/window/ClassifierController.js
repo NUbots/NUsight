@@ -811,9 +811,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.selectionClassifier.updateColour(colour);
 		this.selectionClassifier.updateTolerance(tolerance);
 	},
-	hashPoint: function (point) {
-		return point[0] + "," + point[1];
-	},
 	magicWandClassify: function (x, y) {
 		var lut = this.getLookup();
 		var typeId = this.self.Target[this.getTarget()];
@@ -947,172 +944,16 @@ Ext.define('NU.view.window.ClassifierController', {
 			var x = point[0];
 			var y = point[1];
 
-			if (x < minX) {
-				minX = x;
-			}
-			if (x > maxX) {
-				maxX = x;
-			}
-			if (y < minY) {
-				minY = y;
-			}
-			if (y > maxY) {
-				maxY = y;
-			}
+			if (x < minX) { minX = x; }
+			if (x > maxX) { maxX = x; }
+			if (y < minY) { minY = y; }
+			if (y > maxY) { maxY = y; }
 		});
 
 		return [
 			[minX, minY],
 			[maxX, maxY]
 		];
-	},
-	classifyPoints: function (points, target, doRender, range) {
-		if (target === undefined) {
-			target = this.getTarget();
-		}
-		if (range === undefined) {
-			range = this.getRange();
-		}
-
-		// create sphere 'lookup table'
-		var rangeSqr = range * range;
-		var pointDiffs = [];
-		for (var y = -range; y <= range; y+=2) {
-			for (var cb = -range; cb <= range; cb+=2) {
-				for (var cr = -range; cr <= range; cr+=2) {
-					var pointDiff = [y, cb, cr];
-					var dist = y * y + cb * cb + cr * cr;
-					if (dist <= rangeSqr) {
-						pointDiffs.push(pointDiff);
-					}
-				}
-			}
-		}
-
-		var overwrite = this.getOverwrite();
-		var targetId = this.self.Target[target];
-		var lookup = this.getLookup();
-		var min = 0;
-		var max = Math.pow(2, 8) - 1;
-		var map = {};
-		var unclassified = this.self.Target.Unclassified;
-		for (var i = 0; i < points.length; i++) {
-			var point = points[i];
-			for (var x = 0; x < pointDiffs.length; x++) {
-				var pointDiff = pointDiffs[x];
-				var newPoint = [point[0] + pointDiff[0], point[1] + pointDiff[1], point[2] + pointDiff[2]];
-				if (newPoint[0] < min || newPoint[0] > max || newPoint[1] < min || newPoint[1] > max || newPoint[2] < min || newPoint[2] > max) {
-					continue;
-				}
-//				var index = this.getLUTIndex(newPoint);
-				var index = ((newPoint[0] >> 1) << 14) | ((newPoint[1] >> 1) << 7) | (newPoint[2] >> 1);
-				if (map[index] === undefined) {
-					if (overwrite || lookup[index] === unclassified) {
-						lookup[index] = targetId;
-					}
-					map[index] = true;
-				}
-			}
-		}
-
-		if (doRender === undefined || doRender) {
-			this.updateClassifiedData();
-			this.renderClassifiedImage();
-		}
-	},
-	classifyPoints2: function (coordPoints, target, doRender, range) {
-
-		if (target === undefined) {
-			target = this.getTarget();
-		}
-		if (range === undefined) {
-			range = this.getRange();
-		}
-		// iterate bounding box with a border margin of range
-		// check if point is within range of any point
-		// use quicktest to remove negatives, use better test to confirm positive
-		// if positive, move point to start of points array as nearby points are likely within range
-
-		var points = [];
-		var map = {};
-		var bounds = { y: { min: Infinity, max: -Infinity }, cb: { min: Infinity, max: -Infinity }, cr: { min: Infinity, max: -Infinity } };
-		for (var i = 0; i < coordPoints.length; i++) {
-			var coordPoint = coordPoints[i];
-			var ycbcr = this.getColour(coordPoint[0], coordPoint[1]);
-			var y = ycbcr[0];
-			var cb = ycbcr[1];
-			var cr = ycbcr[2];
-
-			if ( y > bounds.y.max)  { bounds.y.max  = y;  }
-			if ( y < bounds.y.min)  { bounds.y.min  = y;  }
-			if (cb > bounds.cb.max) { bounds.cb.max = cb; }
-			if (cb < bounds.cb.min) { bounds.cb.min = cb; }
-			if (cr > bounds.cr.max) { bounds.cr.max = cr; }
-			if (cr < bounds.cr.min) { bounds.cr.min = cr; }
-
-			// cache points
-			// TODO: only add non-duplicates
-
-			var index = this.getLUTIndex(ycbcr);
-			if (map[index] === undefined) {
-				points.push(ycbcr);
-				map[index] = true;
-			}
-//			points.push(ycbcr);
-		}
-		var min = 0;
-		var max = Math.pow(2, 8) - 1;
-		// add margin border
-		bounds.y.max = Math.min(max, bounds.y.max + range);
-		bounds.y.min = Math.max(min, bounds.y.min - range);
-		bounds.cb.max = Math.min(max, bounds.cb.max + range);
-		bounds.cb.min = Math.max(min, bounds.cb.min - range);
-		bounds.cr.max = Math.min(max, bounds.cr.max + range);
-		bounds.cr.min = Math.max(min, bounds.cr.min - range);
-
-		var overwrite = this.getOverwrite();
-		var targetId = this.self.Target[target];
-		var lookup = this.getLookup();
-		var step = 1;//1 << (8 - this.self.LutBitsPerColor);
-		var rangeSqr = Math.pow(range, 2);
-		for (var y = bounds.y.min; y <= bounds.y.max; y += step) {
-			for (var cb = bounds.cb.min; cb <= bounds.cb.max; cb += step) {
-				for (var cr = bounds.cr.min; cr <= bounds.cr.max; cr += step) {
-					var testPoint = [y, cb, cr];
-					for (var i = 0; i < points.length; i++) {
-						var point = points[i];
-						// use rough test first
-//						var maxDist = Math.abs(testPoint[0] - point[0]) + Math.abs(testPoint[1] - point[1]) + Math.abs(testPoint[2] - point[2]);
-//						if (maxDist > range) {
-//							continue;
-//						} else {
-							// use proper test if testPoint passes rough test
-							var dist = Math.pow(testPoint[0] - point[0], 2) + Math.pow(testPoint[1] - point[1], 2) + Math.pow(testPoint[2] - point[2], 2);
-							if (dist <= rangeSqr) {
-								// definitely in the range!
-								var index = this.getLUTIndex(testPoint);
-								if (overwrite || lookup[index] === this.self.Target.Unclassified) {
-									lookup[index] = targetId;
-								}
-								if (i > 0) {
-									// move point to the top for next test!
-									for (var x = i; x >= 1; x--) {
-										points[x] = points[x - 1];
-									}
-									points[0] = point;
-								}
-								break;
-							}
-//						}
-					}
-				}
-			}
-		}
-
-		if (doRender === undefined || doRender) {
-			this.updateClassifiedData();
-			this.renderClassifiedImage();
-		}
 	},
 	classifyPoint: function (x, y, target, doRender, range) {
 		var ycbcr = this.getColour(x, y);
@@ -1148,11 +989,7 @@ Ext.define('NU.view.window.ClassifierController', {
 					}
 					var dist = Math.pow(ycbcr[0] - y, 2) + Math.pow(ycbcr[1] - cb, 2) + Math.pow(ycbcr[2] - cr, 2);
 					if (dist <= Math.pow(range, 2)) {
-						var nearYcbcr = [
-							y,
-							cb,
-							cr,
-						];
+						var nearYcbcr = [y, cb, cr];
 						var index = this.getLUTIndex(nearYcbcr);
 						var typeId = this.self.Target[type];
 						if (overwrite || lookup[index] === this.self.Target.Unclassified) {
@@ -1178,7 +1015,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.renderEllipseOverlay(selectionContext);
 		this.renderRectangleOverlay(selectionContext);
 		this.renderPolygonOverlay(selectionContext);
-		this.renderMagicWandOverlay(selectionContext);
 	},
 	renderClassifiedImage: function () {
 		var layeredCanvas = this.getClassifiedLayeredCanvas();
@@ -1188,11 +1024,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.renderEllipseOverlay(selectionContext);
 		this.renderRectangleOverlay(selectionContext);
 		this.renderPolygonOverlay(selectionContext);
-		this.renderMagicWandOverlay(selectionContext);
-	},
-	renderPolygonOverlays: function () {
-		this.renderPolygonOverlay(this.getClassifiedContext());
-		this.renderPolygonOverlay(this.getRawContext());
 	},
 	renderRectangleOverlay: function (ctx) {
 		if (this.getSelectionTool() !== 'rectangle') {
@@ -1269,51 +1100,6 @@ Ext.define('NU.view.window.ClassifierController', {
 			ctx.stroke();
 		}
 	},
-	renderMagicWandOverlay: function (ctx) {
-		var imageWidth = this.getImageWidth();
-		var imageHeight = this.getImageHeight();
-		var bitsPerPixel = this.getBitsPerPixel();
-		var data = ctx.getImageData(0, 0, imageWidth, imageHeight);
-		var points = this.getMagicWandPoints();
-//		var colours = [];
-		points.forEach(function (point) {
-			var x = point[0];
-			var y = point[1];
-			var offset = bitsPerPixel * (imageWidth * y + x);
-//			colours.push([
-//				data.data[offset + 0],
-//				data.data[offset + 1],
-//				data.data[offset + 2],
-//				data.data[offset + 3]
-//			]);
-
-			data.data[offset] = 255;
-			data.data[offset + 1] = 0;
-			data.data[offset + 2] = 0;
-			data.data[offset + 3] = 255;
-		}, this);
-
-		// TODO: make this more efficient
-//		for (var y = 0; y < 240; y++) {
-//			for (var x = 0; x < 320; x++) {
-//				colours.forEach(function (colour) {
-//					var offset = 4 * 320 * y + 4 * x;
-//					if (
-//						   colour[0] == data.data[offset + 0]
-//						&& colour[1] == data.data[offset + 1]
-//						&& colour[2] == data.data[offset + 2]
-//						&& colour[3] == data.data[offset + 3]
-//					) {
-//						data.data[offset] = 255;
-//						data.data[offset + 1] = 0;
-//						data.data[offset + 2] = 0;
-//						data.data[offset + 3] = 255;
-//					}
-//				});
-//			}
-//		}
-		ctx.putImageData(data, 0, 0);
-	},
 	updateClassifiedData: function () {
 		var lut = new Uint8Array(this.getLookup().buffer);
 		this.classifiedRenderer.updateLut(lut);
@@ -1357,42 +1143,18 @@ Ext.define('NU.view.window.ClassifierController', {
 				throw new Error('Unsupported format');
 		}
 	},
-	getRGBfromType: function (typeId) {
-		var Target = this.self.Target;
-		switch (typeId) {
-			case Target.Unclassified:
-				return [0, 0, 0];
-			case Target.Line:
-				return [255, 255, 255];
-			case Target.Ball:
-				return [255, 144, 0];
-			case Target.Field:
-				return [0, 255, 0];
-			case Target.Goal:
-				return [255, 255, 0];
-			case Target.Cyan:
-				return [0, 255, 255];
-			case Target.Magenta:
-				return [255, 0, 255];
-			default:
-				return [0, 0, 0];
-		}
-	},
 	drawImage: function (image, callback, thisArg) {
 		var Format = API.Image.Format;
 		this.setImageFormat(image.format);
 		switch (image.format) {
 			case Format.JPEG:
-				//this.drawImageB64(image, callback, thisArg);
-				this.drawImageB64YUV(image, callback, thisArg);
+				this.drawImageJPEG(image, callback, thisArg);
 				break;
 			case Format.YCbCr422:
-				//this.drawImageYbCr444(image, callback, thisArg);
 				this.drawImageYbCr422(image, callback, thisArg);
 				break;
 			case Format.YCbCr444:
-				//this.drawImageYbCr444(image, callback, thisArg);
-				this.drawImageYbCr444WebGL(image, callback, thisArg);
+				this.drawImageYbCr444(image, callback, thisArg);
 				break;
 			default:
 				throw 'Unsupported Format';
@@ -1418,33 +1180,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
-	drawImageYbCr444: function (image, callback, thisArg) {
-		var width = this.getImageWidth();
-		var height = this.getImageHeight();
-		var ctx = this.getRawContext();
-		var imageData = ctx.createImageData(width, height);
-		var data = new Uint8ClampedArray(image.data.toArrayBuffer());
-		var bitsPerPixel = this.getBitsPerPixel();
-		var bitsPerPixel2 = 3;
-		var total = width * height * bitsPerPixel2;
-		for (var i = 0; i < data.length / bitsPerPixel2; i++) {
-			var offset = bitsPerPixel * i;
-			var offset2 = bitsPerPixel2 * i;
-			var rgb = NU.util.Vision.YCbCrtoRGB([
-				data[offset2 + 0],
-				data[offset2 + 1],
-				data[offset2 + 2]
-			]);
-			imageData.data[offset + 0] = rgb[0];
-			imageData.data[offset + 1] = rgb[1];
-			imageData.data[offset + 2] = rgb[2];
-			imageData.data[offset + 3] = 255;
-		}
-		ctx.putImageData(imageData, 0, 0);
-		this.setRawImageComponents(data);
-		callback.call(thisArg, ctx);
-	},
-	drawImageYbCr444WebGL: function (image) {
+	drawImageYbCr444: function (image) {
 		var width = this.getImageWidth();
 		var height = this.getImageHeight();
 		var data = new Uint8Array(image.data.toArrayBuffer());
@@ -1458,21 +1194,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
 		this.setRawImageComponents(data);
 	},
-	drawImageB64: function (image, callback, thisArg) {
-		var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
-		var uri = 'data:image/jpeg;base64,' + btoa(data);
-		var imageObj = new Image();
-		var ctx = this.getRawContext();
-		imageObj.src = uri;
-		imageObj.onload = function () {
-			ctx.drawImage(imageObj, 0, 0, image.width, image.height);
-			callback.call(thisArg, ctx);
-		};
-	},
-	drawImageB64YUV: function (image, callback, thisArg) {
-//        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
+	drawImageJPEG: function (image, callback, thisArg) {
 		var d2 = new Uint8ClampedArray(image.data.toArrayBuffer());
-//        var uri = 'data:image/jpeg;base64,' + btoa(data);
 		var imageObj = new JpegImage();
 		imageObj.parse(d2);
 		var ctx = this.getRawContext();
