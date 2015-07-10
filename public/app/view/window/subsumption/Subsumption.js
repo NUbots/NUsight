@@ -18,22 +18,28 @@ Ext.define('NU.view.window.subsumption.Subsumption', {
 		type: 'vbox',
 		align: 'stretch'
 	},
-	tbar: [{
-		xtype: 'robot_selector',
-		listeners: {
-			selectRobot: 'onSelectRobot'
-		}
-	}, '->', {
-		text: 'Clear Action Table',
-		listeners: {
-			click: 'onClearActionTable'
-		}
-	}, {
-		text: 'Clear State Log',
-		listeners: {
-			click: 'onClearStateLog'
-		}
-	}],
+	tbar: {
+		xtype: 'toolbar',
+		layout: {
+			overflowHandler: 'Menu'
+		},
+		items: [{
+			xtype: 'robot_selector',
+			listeners: {
+				selectRobot: 'onSelectRobot'
+			}
+		}, '->', {
+			text: 'Clear Action Table',
+			listeners: {
+				click: 'onClearActionTable'
+			}
+		}, {
+			text: 'Clear State Log',
+			listeners: {
+				click: 'onClearStateLog'
+			}
+		}]
+	},
 	items: [{
 		xtype: 'grid',
 		title: 'Action Table',

@@ -64,7 +64,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			'Magenta': 'm'.charCodeAt(0) // 109
 		},
 		/**
-		 * Classifcation tools
+		 * Classification tools
 		 */
 		Tool: {
 			'Point': 0,

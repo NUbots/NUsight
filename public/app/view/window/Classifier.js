@@ -23,47 +23,53 @@ Ext.define('NU.view.window.Classifier', {
 		afterrender: 'onAfterRender',
 		esc: 'onEsc'
 	},
-	tbar: [{
-		xtype: 'robot_selector',
-		listeners: {
-			selectRobot: 'onSelectRobot'
-		}
-	}, '->', {
-		text: 'Undo',
-		listeners: {
-			click: 'onUndo'
-		}
-	}, {
-		text: 'Redo',
-		listeners: {
-			click: 'onRedo'
-		}
-	}, {
-		text: 'Reset',
-		listeners: {
-			click: 'onReset'
-		}
-	}, {
-		text: 'Download',
-		listeners: {
-			click: 'onDownload'
-		}
-	}, {
-		text: 'Upload',
-		listeners: {
-			click: 'onUpload'
-		}
-	}, {
-		text: 'Upload & Save',
-		listeners: {
-			click: 'onUploadSave'
-		}
-	}, {
-		text: 'Refresh',
-		listeners: {
-			click: 'onRefresh'
-		}
-	}],
+	tbar: {
+		xtype: 'toolbar',
+		layout: {
+			overflowHandler: 'Menu'
+		},
+		items: [{
+			xtype: 'robot_selector',
+			listeners: {
+				selectRobot: 'onSelectRobot'
+			}
+		}, '->', {
+			text: 'Undo',
+			listeners: {
+				click: 'onUndo'
+			}
+		}, {
+			text: 'Redo',
+			listeners: {
+				click: 'onRedo'
+			}
+		}, {
+			text: 'Reset',
+			listeners: {
+				click: 'onReset'
+			}
+		}, {
+			text: 'Download',
+			listeners: {
+				click: 'onDownload'
+			}
+		}, {
+			text: 'Upload',
+			listeners: {
+				click: 'onUpload'
+			}
+		}, {
+			text: 'Upload & Save',
+			listeners: {
+				click: 'onUploadSave'
+			}
+		}, {
+			text: 'Refresh',
+			listeners: {
+				click: 'onRefresh'
+			}
+		}]
+	},
 	dockedItems: [{
 		xtype: 'toolbar',
 		dock: 'left',

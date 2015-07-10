@@ -11,12 +11,18 @@ Ext.define('NU.view.window.Display', {
     constrain: true,
     maximizable: true,
 	onEsc: Ext.emptyFn,
-    tbar: [{
-        xtype: 'robot_selector',
-        listeners: {
-            selectRobot: 'onSelectRobot'
-        }
-    }],
+    tbar: {
+        xtype: 'toolbar',
+        layout: {
+            overflowHandler: 'Menu'
+        },
+        items: [{
+            xtype: 'robot_selector',
+            listeners: {
+                selectRobot: 'onSelectRobot'
+            }
+        }]
+    },
 	layout: 'fit',
     listeners: {
         maximize: 'onMaximize'

@@ -14,17 +14,23 @@ Ext.define('NU.view.window.GameState', {
 	initComponent: function () {
 		var me = this;
 		Ext.apply(this, {
-			tbar: [{
-				xtype: 'robot_selector',
-				listeners: {
-					selectRobot: 'onSelectRobot'
-				}
-			}, '->', {
-				text: 'Clear Log',
-				listeners: {
-					click: 'onClearStateLog'
-				}
-			}],
+			tbar: {
+				xtype: 'toolbar',
+				layout: {
+					overflowHandler: 'Menu'
+				},
+				items: [{
+					xtype: 'robot_selector',
+					listeners: {
+						selectRobot: 'onSelectRobot'
+					}
+				}, '->', {
+					text: 'Clear Log',
+					listeners: {
+						click: 'onClearStateLog'
+					}
+				}]
+			},
 			items: [{
 				reference: 'gameStates',
 				xtype: 'grid',

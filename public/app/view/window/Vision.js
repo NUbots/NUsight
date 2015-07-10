@@ -19,17 +19,23 @@ Ext.define('NU.view.window.Vision', {
     listeners: {
         afterrender: 'onAfterRender'
     },
-	tbar: [{
-		xtype: 'robot_selector',
-        listeners: {
-            selectRobot: 'onSelectRobot'
-        }
-	}, {
-		xtype: 'camera_selector',
-        listeners: {
-            selectCamera: 'onSelectCamera'
-        }
-	}],
+	tbar: {
+        xtype: 'toolbar',
+        layout: {
+            overflowHandler: 'Menu'
+        },
+        items: [{
+            xtype: 'robot_selector',
+            listeners: {
+                selectRobot: 'onSelectRobot'
+            }
+        }, {
+            xtype: 'camera_selector',
+            listeners: {
+                selectCamera: 'onSelectCamera'
+            }
+        }]
+    },
     items: [{
         xtype: 'nu_layered_canvas',
         region: 'center',

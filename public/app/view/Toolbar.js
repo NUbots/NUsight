@@ -3,6 +3,9 @@ Ext.define('NU.view.Toolbar', {
     alias: 'widget.nu_toolbar',
     requires: 'NU.view.ToolbarController',
     controller: 'Toolbar',
+    layout: {
+        overflowHandler: 'Menu'
+    },
     items: [{
         text: 'Dashboard',
         listeners: {
