@@ -301,6 +301,7 @@ Ext.define('NU.view.window.Classifier', {
 					},
 					items: [{
 						xtype: 'numberfield',
+						reference: 'bitsR',
 						fieldLabel: 'Y Bits',
 						labelWidth: 50,
 						value: 6,
@@ -311,6 +312,7 @@ Ext.define('NU.view.window.Classifier', {
 						}
 					}, {
 						xtype: 'numberfield',
+						reference: 'bitsG',
 						fieldLabel: 'Cb Bits',
 						labelWidth: 50,
 						value: 6,
@@ -322,6 +324,7 @@ Ext.define('NU.view.window.Classifier', {
 						}
 					}, {
 						xtype: 'numberfield',
+						reference: 'bitsB',
 						fieldLabel: 'Cr Bits',
 						labelWidth: 50,
 						value: 6,

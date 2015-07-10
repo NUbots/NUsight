@@ -630,7 +630,14 @@ Ext.define('NU.view.window.ClassifierController', {
 		// TODO: validate?
 		var lut = new Uint8ClampedArray(table.toArrayBuffer());
 		this.addHistory();
+
+		// TODO: unhack
+		this.lookupReference('bitsR').setValue(lookuptable.getBitsY());
+		this.lookupReference('bitsG').setValue(lookuptable.getBitsCb());
+		this.lookupReference('bitsB').setValue(lookuptable.getBitsCr());
 		this.setLookup(lut);
+		this.selectionRenderer.render();
+
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
