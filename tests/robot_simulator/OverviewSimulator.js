@@ -41,6 +41,6 @@ OverviewSimulator.prototype.run = function () {
 	this.sendMessage(message);
 };
 
-if (!module.parent) {
+if (require.main === module) {
 	new OverviewSimulator().runEvery(1000);
 }

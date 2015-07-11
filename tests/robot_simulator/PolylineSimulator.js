@@ -37,6 +37,6 @@ PolylineSimulator.prototype.run = function () {
 	this.sendMessage(message);
 };
 
-if (!module.parent) {
+if (require.main === module) {
 	new PolylineSimulator().runEvery(5000);
 }

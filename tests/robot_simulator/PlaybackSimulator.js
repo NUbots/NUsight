@@ -65,7 +65,7 @@ PlaybackSimulator.prototype.run = function () {
 
 };
 
-if (!module.parent) {
+if (require.main === module) {
 	var loop = true;
 	var speed = 1;
 	new PlaybackSimulator('../../logs/10.1.2.3/1435023512834.nbs', loop, speed).run();

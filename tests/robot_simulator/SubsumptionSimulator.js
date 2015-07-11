@@ -32,7 +32,7 @@ SubsumptionSimulator.prototype.run = function () {
 
 };
 
-if (!module.parent) {
+if (require.main === module) {
 	new SubsumptionSimulator().runEvery(5000);
 }
 

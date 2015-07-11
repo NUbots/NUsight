@@ -78,6 +78,6 @@ ClassifierSimulator.prototype.vec3mod = function (out, a, n) {
 	if (out[2] < 0) out[2] = n - out[2];
 };
 
-if (!module.parent) {
+if (require.main === module) {
 	new ClassifierSimulator().runEvery(50);
 }

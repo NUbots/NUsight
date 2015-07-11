@@ -34,6 +34,6 @@ VisionLinesSimulator.prototype.run = function () {
 
 };
 
-if (!module.parent) {
+if (require.main === module) {
 	new VisionLinesSimulator().runEvery(100);
 }
