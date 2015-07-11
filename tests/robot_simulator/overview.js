@@ -24,20 +24,19 @@ function randFloat(min, max) {
 setInterval(function () {
 	var now = Date.now();
 	var robotHeading = {
-		x: 0,//Math.random() * 2 - 1,
-		y: 1//Math.random() * 2 - 1
+		x: Math.random() * 2 - 1,
+		y: Math.random() * 2 - 1
 	};
+	var robotHeadingLength = Math.sqrt(robotHeading.x * robotHeading.x + robotHeading.y * robotHeading.y);
+	robotHeading.x /= robotHeadingLength;
+	robotHeading.y /= robotHeadingLength;
 
 	var fieldWidth = 6;
 	var fieldLength = 9;
 	var robotPosition = {x: Math.random() * fieldLength - (fieldLength * 0.5), y: Math.random() * fieldWidth - (fieldWidth * 0.5)};
-	var robotHeadingLength = Math.sqrt(robotHeading.x * robotHeading.x + robotHeading.y * robotHeading.y);
 
-	robotHeading.x /= robotHeadingLength;
-	robotHeading.y /= robotHeadingLength;
-
-	var ballPosition = {x: 1, y: 1};
-	var ballWorldPosition = {x: 0.5, y: -0.5};
+	var ballPosition = {x: Math.random() * fieldLength - (fieldLength * 0.5), y: Math.random() * fieldWidth - (fieldWidth * 0.5)};
+	var ballWorldPosition = {x: Math.random() * fieldLength - (fieldLength * 0.5), y: Math.random() * fieldWidth - (fieldWidth * 0.5)};
 
 	var message = new API.Message({
 		type: type,
