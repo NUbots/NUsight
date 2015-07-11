@@ -700,7 +700,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	onMouseWheel: function (e) {
 		var direction = Math.sign(e.event.wheelDelta);
 		var speed = 2;
-		var tolerance = this.lookupReference('tolerance')
+		var tolerance = this.lookupReference('tolerance');
 		tolerance.setValue(tolerance.getValue() + speed * direction);
 	},
 	onImageMouseMove: function (x, y) {

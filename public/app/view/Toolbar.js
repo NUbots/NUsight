@@ -69,9 +69,12 @@ Ext.define('NU.view.Toolbar', {
             click: 'onNetworkSettings'
         }
 	}, {
-        xtype: 'tool',
         type: 'refresh',
-        callback: 'onReconnect',
-        tooltip: 'Reconnect robots'
+        iconCls: 'x-tool-img x-tool-refresh',
+        tooltip: 'Reconnect robots',
+        overflowText: 'Reconnect',
+        listeners: {
+            click: 'onReconnect'
+        }
     }]
 });
