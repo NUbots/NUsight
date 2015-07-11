@@ -28,7 +28,12 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 		this.pathPlan = {
 			color: '#ff7fff',
 			width: 2
-		}
+		};
+		this.kickTarget = {
+			color: '#ff0000',
+			width: 2,
+			size: 0.2
+		};
 	},
 
 	/**
@@ -368,6 +373,27 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 			}
 		}
 	},
+	/**
+	 * Draws the robot's kick target on the field.
+	 *
+	 * @param context The canvas context.
+	 * @param kickTarget The kick target.
+	 */
+	drawKickTarget: function (context, kickTarget) {
+		// Get the color and line width of the path plan.
+		var color = this.kickTarget.color;
+		var lineWidth = this.kickTarget.lineWidth;
+		var size = this.kickTarget.size;
+		// Get the first point of the path plan and then check if it exists.
+		var diff = vec2.fromValues(size, size);
+		var tl = vec2.sub(vec2.create(), kickTarget, diff);
+		var br = vec2.add(vec2.create(), kickTarget, diff);
+		this.drawLine(context, this.worldToScreen(context, tl), this.worldToScreen(context, br), color, lineWidth);
+		var diff2 = vec2.fromValues(-size, size);
+		var tr = vec2.sub(vec2.create(), kickTarget, diff2);
+		var bl = vec2.add(vec2.create(), kickTarget, diff2);
+		this.drawLine(context, this.worldToScreen(context, tr), this.worldToScreen(context, bl), color, lineWidth);
+	},
 
 	/**
 	 * Checks if a particular position is in the bounds of the canvas.
@@ -389,8 +415,9 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 	 * @param robotHeading The direction the robot is facing in local space.
 	 * @param ballPosition The position of the ball in world space.
 	 * @param pathPlan The walk path plan.
+	 * @param kickTarget The kick target.
 	 */
-	onUpdate: function (robotPosition, robotPositionCovariance, robotHeading, ballPosition, pathPlan) {
+	onUpdate: function (robotPosition, robotPositionCovariance, robotHeading, ballPosition, pathPlan, kickTarget) {
 		// Get the context and check if it exists.
 		var context = this.context;
 		if (context) {
@@ -417,6 +444,9 @@ Ext.define('NU.view.dashboard.panel.field.FieldController', {
 				robotHeading = this.localToWorld(robotPosition, robotHeading);
 				// Draw the robot and the ball on the field.
 				this.drawRobot(context, robotPosition, robotHeading);
+			}
+			if (kickTarget) {
+				this.drawKickTarget(context, vec2.fromValues(kickTarget.x, kickTarget.y));
 			}
 		}
 	}

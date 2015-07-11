@@ -44,6 +44,7 @@ setInterval(function () {
 		filter_id: filterId,
 		utc_timestamp: Date.now(),
 		overview: {
+			role_name: 'Overview Simulator',
 			voltage: randFloat(10, 13),
 			battery: Math.random(),
 			behaviour_state: API.Behaviour.State.INIT,
@@ -67,7 +68,11 @@ setInterval(function () {
 			}, {
 				x: Math.random() * fieldLength - (fieldLength * 0.5),
 				y: Math.random() * fieldWidth - (fieldWidth * 0.5)
-			}, ballWorldPosition]
+			}, ballWorldPosition],
+			kick_target: {
+				x: Math.random() * fieldLength - (fieldLength * 0.5),
+				y: Math.random() * fieldWidth - (fieldWidth * 0.5)
+			}
 		}
 	});
 

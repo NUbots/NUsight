@@ -31,7 +31,8 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		lastSeenGoal: null,
 		// Timestamp
 		timestamp: null,
-		currentTime: null
+		currentTime: null,
+		kickTarget: null
 	},
 	getUninitialised: function () {
 		return 'NO DATA';
