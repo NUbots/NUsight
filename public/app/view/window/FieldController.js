@@ -353,7 +353,7 @@ Ext.define('NU.view.window.FieldController', {
 			direction: this.toVec3(object.getDirection()),
 			length: object.getLength(),
 			depth: object.getDepth(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -371,7 +371,7 @@ Ext.define('NU.view.window.FieldController', {
 			width: object.getWidth(),
 			height: object.getHeight(),
 			depth: object.getDepth(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -389,7 +389,7 @@ Ext.define('NU.view.window.FieldController', {
 			width: object.getWidth(),
 			height: object.getHeight(),
 			rotation: this.toVec3(object.getRotation()),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -408,7 +408,7 @@ Ext.define('NU.view.window.FieldController', {
 			bottomRadius: object.getBottomRadius(),
 			height: object.getHeight(),
 			rotation: this.toVec3(object.getRotation()),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -424,7 +424,7 @@ Ext.define('NU.view.window.FieldController', {
 			name: object.getName(),
 			path: object.getPath(),
 			width: object.getWidth(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -443,7 +443,7 @@ Ext.define('NU.view.window.FieldController', {
 			height: object.getHeight(),
 			faces: object.getFaces(),
 			rotation: this.toVec3(object.getRotation()),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -461,7 +461,7 @@ Ext.define('NU.view.window.FieldController', {
 			rotation: this.toEuler(object.getRotation()),
 			width: object.getWidth(),
 			length: object.getLength(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -477,7 +477,7 @@ Ext.define('NU.view.window.FieldController', {
 			name: object.getName(),
 			position: this.toVec3(object.getPosition()),
 			radius: object.getRadius(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
