@@ -45,6 +45,9 @@ Ext.define('NU.view.window.subsumption.Subsumption', {
 		title: 'Action Table',
 		flex: 1,
 		bind: '{ActionRegister}',
+		viewConfig: {
+			markDirty: false
+		},
 		columns: [{
 			text: 'Name',
 			dataIndex: 'name',
