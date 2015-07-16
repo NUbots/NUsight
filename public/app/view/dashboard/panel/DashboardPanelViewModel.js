@@ -86,14 +86,17 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return get('roleName') || 'Unknown';
 		},
 		disabled: function (get) {
+			return !get('robot.enabled');
+		},
+		mask: function (get) {
 			var elapsed = get('elapsedBackground');
 			return elapsed === this.getView().getColors().DANGER;
 		},
 		maskBackground: function (get) {
-			return get('disabled') ? 'white' : '';
+			return get('mask') ? 'white' : '';
 		},
 		maskOpacity: function (get) {
-			return get('disabled') ? 0.25 : 1;
+			return get('mask') ? 0.25 : 1;
 		},
 		batteryPercentage: function (get) {
 			return (get('battery') * 100).toFixed(2);

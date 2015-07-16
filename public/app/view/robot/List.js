@@ -8,6 +8,22 @@ Ext.define('NU.view.robot.List', {
 	],
     controller: 'List',
     store: 'Robots',
+    viewConfig:{
+        markDirty: false
+    },
+    plugins: [{
+        ptype: 'rowediting',
+        pluginId: 'rowEditing'
+    }],
+    tbar: [{
+        text: 'Add Robot',
+        iconCls: 'icon-add',
+        handler: 'onAddRobot'
+    }, {
+        text: 'Remove Robot',
+        iconCls: 'icon-cross',
+        handler: 'onRemoveRobot'
+    }],
     columns: [{
         text: 'Name',
         dataIndex: 'name',
@@ -25,18 +41,5 @@ Ext.define('NU.view.robot.List', {
         listeners: {
             checkChange: 'onCheckChange'
         }
-    }],
-    plugins: [{
-        ptype: 'rowediting',
-        pluginId: 'rowEditing'
-    }],
-    tbar: [{
-        text: 'Add Robot',
-        iconCls: 'icon-add',
-        handler: 'onAddRobot'
-    }, {
-        text: 'Remove Robot',
-        iconCls: 'icon-cross',
-        handler: 'onRemoveRobot'
     }]
 });

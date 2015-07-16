@@ -22,6 +22,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 	controller: 'DashboardPanel',
 	bind: {
 		title: '{name} - {role}',
+		hidden: '{disabled}',
 		style: {
 			background: '{maskBackground}',
 			opacity: '{maskOpacity}'

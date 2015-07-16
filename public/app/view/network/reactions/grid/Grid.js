@@ -31,7 +31,7 @@ Ext.define('NU.view.network.reactions.grid.Grid', {
 	},
 	hideHeaders: true,
 	viewConfig:{
-		markDirty:false
+		markDirty: false
 	},
 	tools: [{
 		bind: {
