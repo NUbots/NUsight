@@ -23,6 +23,7 @@ Ext.define('NU.view.window.ChartController', {
     },
     init: function () {
         this.setStreams([]);
+        this.paused = false;
         this.addEvents();
     },
 
@@ -48,18 +49,22 @@ Ext.define('NU.view.window.ChartController', {
         var view = this.getView();
         this.onResize(view, view.getWidth(), view.getHeight());
     },
+
     onMinChange: function (field, newValue, oldValue, eOpts) {
 		var smoothie = this.getSmoothie();
 		smoothie.options.minValue = newValue;
 	},
+
     onMaxChange: function (field, newValue, oldValue, eOpts) {
         var smoothie = this.getSmoothie();
         smoothie.options.maxValue = newValue;
     },
+
     onPeriodChange: function (field, newValue, oldValue, eOpts) {
         var smoothie = this.getSmoothie();
         smoothie.options.millisPerPixel = newValue === null ? 20 : newValue / this.getView().getWidth() * 1000;
     },
+
     onStreamSelect: function (obj, newValue, oldValue, e) {
         var colours = this.getColours();
         var numColours = colours.length;
@@ -98,6 +103,7 @@ Ext.define('NU.view.window.ChartController', {
             }
         }, this);
     },
+
     onResize: function (obj, width, height) {
 
         var canvas = this.lookupReference('canvas');
@@ -114,6 +120,7 @@ Ext.define('NU.view.window.ChartController', {
         }
 
     },
+
     onSensorData: function (robotId, sensorData, timestamp) {
 
         // Accelerometer
@@ -261,6 +268,7 @@ Ext.define('NU.view.window.ChartController', {
 
         }, this);
     },
+
     onDataPoint: function (robotId, dataPoint, timestamp) {
 
         // TODO: remove
@@ -293,7 +301,8 @@ Ext.define('NU.view.window.ChartController', {
             stream.series[i].append(new Date(timestamp.getTime() + stream.offset), value);
         }, this);
     },
-    getStream: function(label, values) {
+
+    getStream: function (label, values) {
         var value = null;
         Ext.each(this.getStreams(), function (stream) {
             if (stream.label == label) {
@@ -323,5 +332,17 @@ Ext.define('NU.view.window.ChartController', {
         this.getStreams().push(value);
         this.lookupReference('streampicker').getStore().add(value);
         return value;
+    },
+
+    onPause: function (button) {
+        var smoothie = this.getSmoothie();
+        if (this.paused) {
+            smoothie.start();
+        } else {
+            smoothie.stop();
+        }
+        this.paused = !this.paused;
+        button.setPressed(this.paused);
     }
+
 });

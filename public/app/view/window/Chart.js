@@ -67,6 +67,10 @@ Ext.define('NU.view.window.Chart', {
 			value: 0,
 			readOnly: true,
 			disabled: true
+		}, {
+			xtype: 'button',
+			text: 'Pause',
+			handler: 'onPause'
 		}]
 	},
 	initComponent: function () {
