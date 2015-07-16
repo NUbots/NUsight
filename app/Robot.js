@@ -129,7 +129,7 @@ Robot.prototype.stopRecording = function () {
 	}
 };
 
-Robot.prototype.record = function (data) {
+Robot.prototype.record = function (message) {
 	// Get the data portion of our stream
 	data = message.slice(2);
 
