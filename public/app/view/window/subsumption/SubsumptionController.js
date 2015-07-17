@@ -5,7 +5,8 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 		var viewModel = this.getViewModel();
 		this.actions = viewModel.getStore('ActionRegister');
 		this.logs = viewModel.getStore('ActionStateChange');
-		NU.Network.on('subsumption', this.onSubsumption.bind(this));
+		NU.Network.sendCommand(this.getRobotId(), 'get_subsumption');
+		this.mon(NU.Network, 'subsumption', this.onSubsumption, this);
 	},
 
 	getCellClass: function (value, record, index) {
@@ -19,6 +20,11 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 		} else {
 			return '';
 		}
+	},
+
+	onClose: function () {
+		this.onClearActionTable();
+		this.onClearStateLog();
 	},
 
 	onClearActionTable: function () {
@@ -35,23 +41,19 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 			return;
 		}
 
-		var type = event.getType();
-		switch (type) {
-			case API.Subsumption.Type.ACTION_REGISTER:
-				this.onActionRegister(robotId, event.getActionRegister(), timestamp);
-				break;
-			case API.Subsumption.Type.ACTION_STATE:
-				this.onActionStateChange(robotId, event.getActionStateChange(), timestamp);
-				break;
-			case API.Subsumption.Type.ACTION_PRIORITY_CHANGE:
-				this.onActionPriorityChange(robotId, event.getActionPriorityChange(), timestamp);
-				break;
-			default:
-				console.error('Unknown behaviour type: ', type);
-		}
+		this.processActionRegisters(robotId, event.getActionRegister(), timestamp);
+		this.processActionStateChanges(robotId, event.getActionStateChange(), timestamp);
+		this.processActionPriorityChanges(robotId, event.getActionPriorityChange(), timestamp);
+
 	},
 
-	onActionRegister: function (robotId, actionRegister, timestamp) {
+	processActionRegisters: function (robotId, actionRegisters, timestamp) {
+		Ext.each(actionRegisters, function (actionRegister) {
+			this.addActionRegister(robotId, actionRegister, timestamp);
+		}, this);
+	},
+
+	addActionRegister: function (robotId, actionRegister, timestamp) {
 		var id = actionRegister.getId();
 		var name = actionRegister.getName();
 		Ext.each(actionRegister.getLimbSet(), function (limbSet) {
@@ -66,23 +68,36 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 		}, this);
 	},
 
-	onActionStateChange: function (robotId, stateActionChange, timestamp) {
+	processActionStateChanges: function (robotId, actionStateChanges, timestamp) {
+		Ext.each(actionStateChanges, function (actionStateChange) {
+			this.addActionStateChange(robotId, actionStateChange, timestamp);
+		}, this);
+	},
+
+	addActionStateChange: function (robotId, actionStateChange, timestamp) {
 		this.logs.add({
 			robotId: robotId,
 			time: timestamp,
-			name: stateActionChange.getName(),
-			limbs: stateActionChange.getLimbs(),
-			state: stateActionChange.getState()
+			name: actionStateChange.getName(),
+			limbs: actionStateChange.getLimbs(),
+			state: actionStateChange.getState()
 		});
 	},
 
-	onActionPriorityChange: function (robotId, actionPriorityChange, timestamp) {
-		console.log('priotity change', actionPriorityChange.getId());
-		var priorities = actionPriorityChange.getPriorities();
-		var actions = this.actions.query('actionId', actionPriorityChange.getId());
-		actions.each(function (action, i) {
-			action.set('priority', priorities[i]);
+	processActionPriorityChanges: function (robotId, actionPriorityChanges, timestamp) {
+		Ext.each(actionPriorityChanges, function (actionPriorityChange) {
+			this.addActionPriorityChange(robotId, actionPriorityChange, timestamp);
 		}, this);
+	},
+
+	addActionPriorityChange: function (robotId, actionPriorityChange, timestamp) {
+		if (this.actions.getCount() > 0) {
+			var priorities = actionPriorityChange.getPriorities();
+			var actions = this.actions.query('actionId', actionPriorityChange.getId());
+			actions.each(function (action, i) {
+				action.set('priority', priorities[i]);
+			}, this);
+		}
 	},
 
 	onRenderState: function (value, metaData, record) {

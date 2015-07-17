@@ -4,11 +4,9 @@
 Ext.define('NU.view.window.subsumption.SubsumptionViewModel', {
 	extend: 'Ext.app.ViewModel',
 	alias: 'viewmodel.Subsumption',
-	requires: [
-		'NU.model.ActionStateChange'
-	],
+	// TODO fix horrible hackery
 	stores: {
-		ActionRegister: {
+		ActionRegister: Ext.create('Ext.data.Store', {
 			fields: [
 				{name: 'actionId', type: 'int'},
 				{name: 'name', type: 'string'},
@@ -31,9 +29,9 @@ Ext.define('NU.view.window.subsumption.SubsumptionViewModel', {
 				property: 'priority',
 				direction: 'asc'
 			}]
-		},
-		ActionStateChange: {
-			model: 'NU.model.ActionStateChange',
+		}),
+		ActionStateChange: Ext.create('Ext.data.Store', {
+			model: Ext.create('NU.model.ActionStateChange'),
 			proxy: {
 				type: 'memory',
 				reader: {
@@ -48,6 +46,6 @@ Ext.define('NU.view.window.subsumption.SubsumptionViewModel', {
 				property: 'state',
 				direction: 'asc'
 			}]
-		}
+		})
 	}
 });

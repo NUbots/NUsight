@@ -42,7 +42,6 @@ SubsumptionSimulator.prototype.run = function () {
 
 	var index = this.randInt(0, actions.length);
 	var action = actions[index];
-	message.subsumption['type'] = index + 1;
 	message.subsumption[action.name] = action.data;
 	this.sendMessage(message);
 

@@ -3,6 +3,7 @@ Ext.define('NU.view.window.subsumption.Subsumption', {
 	requires: [
 		'Ext.grid.Panel',
 		'Ext.grid.column.Date',
+		'NU.model.ActionStateChange',
 		'NU.view.window.subsumption.SubsumptionViewModel',
 		'NU.view.window.subsumption.SubsumptionController'
 	],
@@ -17,6 +18,9 @@ Ext.define('NU.view.window.subsumption.Subsumption', {
 	layout: {
 		type: 'vbox',
 		align: 'stretch'
+	},
+	listeners: {
+		close: 'onClose'
 	},
 	tbar: {
 		xtype: 'toolbar',
