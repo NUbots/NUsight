@@ -60,6 +60,8 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		viewModel.set('gameMode', data.getGameMode());
 		viewModel.set('gamePhase', data.getGamePhase());
 		viewModel.set('penaltyReason', data.getPenaltyReason());
+		// Update the walk engine details in the view model.
+		viewModel.set('walkCommand', data.getWalkCommand());
 		// Update the hardware and vision details in the view model.
 		viewModel.set('lastCameraImage', data.getLastCameraImage());
 		viewModel.set('lastSeenBall', data.getLastSeenBall());

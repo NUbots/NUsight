@@ -144,7 +144,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 					backgroundColor: '{penaltyBackground}',
 					color: '{penaltyColor}'
 				}
-
+			}
+		}, {
+			bind: {
+				html:  '<strong>Walk command:</strong> {walk}'
 			}
 		}]
 	}, /*{

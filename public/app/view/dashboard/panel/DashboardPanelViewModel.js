@@ -20,6 +20,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		ballWorldPosition: null,
 		// Behaviour
 		behaviourState: null,
+		kickTarget: null,
 		// Game controller
 		gameMode: null,
 		gamePhase: null,
@@ -29,10 +30,11 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		// Vision
 		lastSeenBall: null,
 		lastSeenGoal: null,
+		// Walk engine
+		walkCommand: null,
 		// Timestamp
 		timestamp: null,
-		currentTime: null,
-		kickTarget: null
+		currentTime: null
 	},
 	getUninitialised: function () {
 		return 'NO DATA';
@@ -164,6 +166,9 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		penaltyColor: function (get) {
 			return this.getFontColor(get('penaltyBackground'));
+		},
+		walk: function (get) {
+			return get('walkCommand') || this.getUninitialised();
 		},
 		cameraImage: function (get) {
 			var lastCameraImage = get('lastCameraImage');
