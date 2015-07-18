@@ -69,3 +69,15 @@ div.crosshair {
 .dashboard-panel .x-panel-header {
 	background: #50b6d3 !important;
 }
+
+@keyframes flash {
+	from {background-color: #50b6d3 !important;}
+	to {background-color: red !important;}
+}
+
+.dashboard-panel.danger .x-panel-header {
+	animation-name: flash;
+	animation-duration: 500ms;
+	animation-delay: 0s;
+	animation-iteration-count: infinite;
+}

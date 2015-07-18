@@ -104,7 +104,18 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return (get('battery') * 100).toFixed(2);
 		},
 		batteryColor: function (get) {
-			return this.getColor(1 - get('battery'));
+			var cls = 'danger';
+			var view = this.getView();
+			var color = this.getColor(1 - get('battery'));
+			if (color === view.getColors().DANGER) {
+				if (!get('mask')) {
+					view.addCls(cls);
+					color = view.getColors().WARNING;
+				}
+			} else {
+				view.removeCls(cls);
+			}
+			return color;
 		},
 		elapsed: function (get) {
 			var timestamp = get('timestamp');

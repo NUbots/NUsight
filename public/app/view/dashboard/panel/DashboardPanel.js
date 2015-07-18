@@ -5,6 +5,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 	extend : 'Ext.panel.Panel',
 	alias: 'widget.nu_dashboard_panel',
 	requires: [
+		'Ext.form.field.Checkbox',
 		'NU.view.dashboard.panel.title.Title',
 		'NU.view.dashboard.panel.tool.Battery',
 		'NU.view.dashboard.panel.tool.Packet',
@@ -70,11 +71,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			marginLeft: '5px'
 		}
 	}],
-	items: [
-	/*{
-	 xtype: 'nu_dashboard_panel_title',
-	 html: 'Robot Localisation'
-	 }, */{
+	items: [{
 		xtype: 'container',
 		bind: {
 			hidden: '{localisation}'
@@ -120,10 +117,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 		bind: {
 			hidden: '{!localisation}'
 		}
-	}, /*{
-	 xtype: 'nu_dashboard_panel_title',
-	 html: 'Behaviour'
-	 }, */{
+	}, {
 		xtype: 'container',
 		defaults: {
 			xtype: 'container',
@@ -144,16 +138,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 					backgroundColor: '{penaltyBackground}',
 					color: '{penaltyColor}'
 				}
-			}
-		}, {
-			bind: {
-				html:  '<strong>Walk command:</strong> {walk}'
+
 			}
 		}]
-	}, /*{
-	 xtype: 'nu_dashboard_panel_title',
-	 html: 'Last seen'
-	 }, */{
+	}, {
 		xtype: 'container',
 		defaults: {
 			xtype: 'container',
