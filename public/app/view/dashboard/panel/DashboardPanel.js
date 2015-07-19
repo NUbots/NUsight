@@ -32,8 +32,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 	listeners: {
 		destroy: 'onDestroy',
 		update: 'onUpdate',
-		toggleLocalisation: 'onToggleLocalisation',
-		record: 'onRecord'
+		toggleLocalisation: 'onToggleLocalisation'
 	},
 	cls: 'dashboard-panel',
 	layout: {

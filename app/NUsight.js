@@ -63,7 +63,7 @@ function NUsight (io) {
 			if (robot === null) {
 				this.addRobot(robotId, values.host, values.port, values.name);
 			} else {
-				this.updateRobot(robot, values);
+				this.saveDefaultConfig(this.updateRobot(this.loadDefaultConfig(), robot, values));
 			}
 		}.bind(this));
 
@@ -76,6 +76,16 @@ function NUsight (io) {
 			this.robots.forEach(function (robot) {
 				robot.reconnect();
 			}, this);
+		}.bind(this));
+
+		socket.on('recordRobots', function (robotIds, recording) {
+			var config = this.loadDefaultConfig();
+			var values = {recording: recording};
+			robotIds.forEach(function (robotId) {
+				var robot = this.robots.getRobot(robotId);
+				config = this.updateRobot(config, robot, values);
+			}, this);
+			this.saveDefaultConfig(config);
 		}.bind(this));
 
 	}.bind(this));
@@ -142,29 +152,39 @@ NUsight.prototype.removeRobot = function (robotId) {
 	this.robots.removeRobot(robotId);
 	var config = this.loadDefaultConfig();
 	var robots = config.robots;
-	robots.forEach(function (robotConfig, i) {
+	for (var i = 0, len = robots.length; i < len; i++) {
+		var robotConfig = robots[i];
 		if (robotId === robotConfig.id) {
 			robots.splice(i, 1);
-			return false;
+			break;
 		}
-	});
+	}
 	this.saveDefaultConfig(config);
 };
 
-NUsight.prototype.updateRobot = function (robot, values) {
-	var robotId = robot.id;
-	var config = this.loadDefaultConfig();
-	config.robots.forEach(function (robotConfig) {
-		if (robotId === robot.id) {
-			for (var key in values) {
-				if (values.hasOwnProperty(key)) {
-					this.updateRobotValue(robot, robotConfig, key, values[key]);
+NUsight.prototype.updateRobot = function (originalConfig, robot, values) {
+	if (originalConfig) {
+		try {
+			var robotId = robot.id;
+			var config = originalConfig;
+			var robotsConfig = config.robots;
+			for (var i = 0, len = robotsConfig.length; i < len; i++) {
+				var robotConfig = robotsConfig[i];
+				if (robotId === robotConfig.id) {
+					for (var key in values) {
+						if (values.hasOwnProperty(key)) {
+							this.updateRobotValue(robot, robotConfig, key, values[key]);
+						}
+					}
+					break;
 				}
 			}
-			return false;
+			return config;
+		} catch (e) {
+			console.error(e, ': Could not update robot values.');
 		}
-	}, this);
-	this.saveDefaultConfig(config);
+	}
+	return originalConfig;
 };
 
 NUsight.prototype.updateRobotValue = function (robot, robotConfig, key, value) {
@@ -193,7 +213,12 @@ NUsight.prototype.loadDefaultConfig = function () {
 };
 
 NUsight.prototype.saveDefaultConfig = function (config) {
-	fs.writeFile(this.config, yaml.safeDump(config));
+	if (config) {
+		fs.writeFile(this.config, yaml.safeDump(config));
+		console.log('Saving config');
+	} else {
+		console.error('Config cannot be saved.');
+	}
 };
 
 

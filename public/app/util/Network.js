@@ -139,6 +139,21 @@ Ext.define('NU.util.Network', {
 		this.socket.emit('reconnectRobots');
 	},
 
+	recordRobots: function (recording) {
+		var robotStore = this.getRobotStore();
+		var robotIds = [];
+		robotStore.un('update', this.onUpdateRobot, this);
+		robotStore.each(function (robot) {
+			var isRecording = robot.get('recording');
+			if (recording !== isRecording) {
+				robotIds.push(robot.id);
+				robot.set('recording', recording);
+			}
+		}, this);
+		this.socket.emit('recordRobots', robotIds, recording);
+		robotStore.on('update', this.onUpdateRobot, this);
+	},
+
 	onAddRemoteRobot: function (robot) {
 		var robotsStore = Ext.getStore('Robots');
 		var robotIndex = robotsStore.find('id', robot.id);

@@ -35,15 +35,14 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		view.setBox(newBox)
 	},
 
+	/**
+	 * An event triggered when the user presses the record all button.
+	 */
 	onRecord: function () {
 		var viewModel = this.getViewModel();
 		var recording = !viewModel.get('recording');
 		viewModel.set('recording', recording);
-		Ext.Object.each(this.dashboardPanels, function (key, dashboardPanel) {
-			if (dashboardPanel.getRobot().get('enabled')) {
-				dashboardPanel.fireEvent('record', recording);
-			}
-		}, this);
+		NU.Network.recordRobots(recording);
 	},
 
 	/**
