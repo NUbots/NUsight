@@ -133,6 +133,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanel', {
 			}
 		}, {
 			bind: {
+				html: '<strong>Walk command:</strong> [{walk.x}, {walk.y}, {walk.z}]'
+			}
+		}, {
+			bind: {
 				html:  '<strong>Penalty:</strong> {penalty}',
 				style: {
 					backgroundColor: '{penaltyBackground}',

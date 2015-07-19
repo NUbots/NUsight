@@ -36,13 +36,26 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		timestamp: null,
 		currentTime: null
 	},
+
 	getUninitialised: function () {
 		return 'NO DATA';
 	},
+
 	getFontColor: function (color) {
 		var colors = this.getView().getColors();
 		return color === colors.NEUTRAL ? 'black' : 'white';
 	},
+
+	roundObject: function (object, precision) {
+		Ext.Object.each(object, function (key, value) {
+			if (typeof value === 'object') {
+				return this.roundObject(value, precision);
+			}
+			object[key] = value ? value.toFixed(precision) : 'N/A';
+		}, this);
+		return object;
+	},
+
 	/**
 	 * Retrieves the colour assicated with a value between 0 and 1.
 	 *
@@ -126,10 +139,10 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return elapsed ? this.getColor(this.easeOutCubic(this.normalize(0, 10, elapsed)), true) : this.getColor(1);
 		},
 		position: function (get) {
-			var position = get('robotPosition') || {x: 0, y: 0};
+			var position = this.roundObject(get('robotPosition')) || {x: 'N/A', y: 'N/A'};
 			return {
-				x: position.x.toFixed(2),
-				y: position.y.toFixed(2)
+				x: position.x,
+				y: position.y
 			};
 		},
 		positionBackground: function (get) {
@@ -142,18 +155,18 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			return this.getFontColor(get('positionBackground'));
 		},
 		covariance: function (get) {
-			var covariance = get('robotPositionCovariance') || {x: {x: 0, y: 0}, y: {x: 0, y: 0}};
-			return {xx: covariance.x.x.toFixed(4), xy: covariance.x.y.toFixed(4), yy: covariance.y.y.toFixed(4)};
+			var covariance = this.roundObject(get('robotPositionCovariance'), 4) || {x: {x: 'N/A', y: 'N/A'}, y: {x: 'N/A', y: 'N/A'}};
+			return {xx: covariance.x.x, xy: covariance.x.y, yy: covariance.y.y};
 		},
 		heading: function (get) {
 			var heading = get('robotHeading') || {};
 			return (Math.atan2(heading.y, heading.x) * 180 / Math.PI).toFixed(2);
 		},
 		ball: function (get) {
-			var position = get('ballPosition') || {x: 0, y: 0};
+			var position = this.roundObject(get('ballPosition'), 2) || {x: 'N/A', y: 'N/A'};
 			return {
-				x: position.x.toFixed(2),
-				y: position.y.toFixed(2)
+				x: position.x,
+				y: position.y
 			};
 		},
 		state: function (get) {
@@ -164,6 +177,14 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		phase: function (get) {
 			return NU.TypeMap.get(API.GameState.Data.Phase)[get('gamePhase')] || this.getUninitialised();
+		},
+		walk: function (get) {
+			var walkCommand = this.roundObject(get('walkCommand'), 2) || {x: 'N/A', y: 'N/A', z: 'N/A'};
+			return {
+				x: walkCommand.x,
+				y: walkCommand.y,
+				z: walkCommand.z
+			};
 		},
 		penalty: function (get) {
 			return NU.TypeMap.get(API.GameState.Data.PenaltyReason)[get('penaltyReason')] || this.getUninitialised();
@@ -177,9 +198,6 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		penaltyColor: function (get) {
 			return this.getFontColor(get('penaltyBackground'));
-		},
-		walk: function (get) {
-			return get('walkCommand') || this.getUninitialised();
 		},
 		cameraImage: function (get) {
 			var lastCameraImage = get('lastCameraImage');
