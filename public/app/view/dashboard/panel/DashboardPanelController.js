@@ -4,6 +4,7 @@
 Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.DashboardPanel',
+
 	init: function () {
 		var view = this.getView();
 		var viewModel = this.getViewModel();
@@ -87,6 +88,15 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelController', {
 		var viewModel = this.getViewModel();
 		// Toggle the localisation attribute on the view model.
 		viewModel.set('localisation', !viewModel.get('localisation'));
+	},
+
+	onRecord: function (recording) {
+		var viewModel = this.getViewModel();
+		var isRecording = viewModel.get('robot.recording');
+		debugger;
+		if (recording !== isRecording) {
+			viewModel.set('robot.recording', recording);
+		}
 	}
 
 });

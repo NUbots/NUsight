@@ -6,8 +6,12 @@ Ext.define('NU.view.dashboard.Dashboard', {
 	alias: 'widget.nu_dashboard_window',
 	requires: [
 		'Ext.layout.container.Column',
+		'NU.view.dashboard.DashboardViewModel',
 		'NU.view.dashboard.DashboardController'
 	],
+	viewModel: {
+		type: 'Dashboard'
+	},
 	controller: 'Dashboard',
 	title: 'Dashboard',
 	autoShow: true,
@@ -27,5 +31,11 @@ Ext.define('NU.view.dashboard.Dashboard', {
 		xtype: 'button',
 		text: 'Toggle localisation',
 		handler: 'onToggle'
+	}, {
+		bind: {
+			type: '{record}',
+			tooltip: '{recordTooltip}'
+		},
+		callback: 'onRecord'
 	}]
 });

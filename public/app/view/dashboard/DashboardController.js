@@ -7,19 +7,24 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	requires: [
 		'NU.view.dashboard.panel.DashboardPanel'
 	],
+
 	init: function () {
 		this.dashboardPanels = {};
-		// Listen to the network events.
+		this.getViewModel().set('recording', false);
+		this.addEvents();
+		// Iterate through each robot and create the dashboard panel for it.
+		NU.Network.getRobotStore().each(function (robot) {
+			this.createDashboardPanel(robot);
+		}, this);
+	},
+
+	addEvents: function () {
 		NU.Network.on({
 			addRobot: this.onAddRobot,
 			removeRobot: this.onRemoveRobot,
 			overview: this.onOverview,
 			scope: this
 		});
-		// Iterate through each robot and create the dashboard panel for it.
-		NU.Network.getRobotStore().each(function (robot) {
-			this.createDashboardPanel(robot);
-		}, this);
 	},
 
 	onMaximize: function (view) {
@@ -28,6 +33,17 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		newBox.x = 0;
 		newBox.y = 0;
 		view.setBox(newBox)
+	},
+
+	onRecord: function () {
+		var viewModel = this.getViewModel();
+		var recording = !viewModel.get('recording');
+		viewModel.set('recording', recording);
+		Ext.Object.each(this.dashboardPanels, function (key, dashboardPanel) {
+			if (dashboardPanel.getRobot().get('enabled')) {
+				dashboardPanel.fireEvent('record', recording);
+			}
+		}, this);
 	},
 
 	/**
