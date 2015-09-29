@@ -2,6 +2,7 @@ function Client(socket) {
 	
 	this.socket = socket;
 	this.cache = [];
+	this.listeners = {};
 	
 }
 
