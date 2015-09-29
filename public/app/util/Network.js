@@ -135,10 +135,6 @@ Ext.define('NU.util.Network', {
 		}, this);
 	},
 
-	reconnect: function () {
-		this.socket.emit('reconnectRobots');
-	},
-
 	recordRobots: function (recording) {
 		var robotStore = this.getRobotStore();
 		var robotIds = [];

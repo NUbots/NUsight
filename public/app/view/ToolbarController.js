@@ -91,9 +91,6 @@ Ext.define('NU.view.ToolbarController', {
 			}]
 		});
     },
-	onReconnect: function () {
-		NU.Network.reconnect();
-	},
     getDisplay: function () {
         return Ext.getCmp('main_display').getEl();
     }
