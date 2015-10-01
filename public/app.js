@@ -25,14 +25,17 @@ Ext.Loader.setConfig({
     disableCaching : false
 });
 
-Ext.require('Ext.mixin.Observable', function () {
-    Ext.Function.interceptBefore(Ext.mixin.Observable.prototype, 'addListener', function (eventName) {
-        this.fireEvent('addListener', eventName);
-    });
-
-    Ext.Function.interceptAfter(Ext.mixin.Observable.prototype, 'removeListener', function (eventName) {
-        this.fireEvent('removeListener', eventName);
-    });
+Ext.define('NU.mixin.Observable', {
+	override: 'Ext.mixin.Observable',
+	addListener: function (eventName) {
+		this.fireEvent('addListener', eventName);
+		return this.callParent(arguments);
+	},
+	removeListener: function (eventName) {
+		var result = this.callParent(arguments);
+		this.fireEvent('removeListener', eventName);
+		return result;
+	}
 });
 
 Ext.onReady(function() {
