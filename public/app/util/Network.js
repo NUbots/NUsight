@@ -26,7 +26,7 @@ Ext.define('NU.util.Network', {
 		this.on('removeListener', this.removeHandler.bind(this));
 
 		// We use the command protocol buffer
-		this.addProtocolBuffer('messages.support.nubugger.proto.Command');
+		this.loadProto('messages.support.nubugger.proto.Command');
 
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
 	},
@@ -46,7 +46,7 @@ Ext.define('NU.util.Network', {
 		}, this);
 	},
 
-	addProtocolBuffer: function (protocolBuffer) {
+	loadProto: function (protocolBuffer) {
 		// Load the protocol buffer file and build it
 		dcodeIO.ProtoBuf.loadProtoFile({
 			root: 'resources/js/proto',
@@ -86,7 +86,7 @@ Ext.define('NU.util.Network', {
 				key !== 'removeRobot' &&
 				!this.hasListener(key.toLowerCase())) {
 
-				var proto = this.addProtocolBuffer(key);
+				var proto = this.loadProto(key);
 
 				// Add a deserialiser for this
 				this.deserialisers[key] = function (data) {

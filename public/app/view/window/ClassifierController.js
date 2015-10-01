@@ -332,6 +332,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setLookupBackwardHistory([]);
 	},
 	init: function () {
+		// Load the protocol buffers we use
+		NU.Network.loadProto('messages.input.proto.Image');
+		NU.Network.loadProto('messages.vision.proto.LookUpTable');
+
 		// these must initialized here so there is an object per-controller
 		this.resetLUT();
 		this.setLookupForwardHistory([]);
