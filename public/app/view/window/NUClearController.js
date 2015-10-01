@@ -14,7 +14,7 @@ Ext.define('NU.view.window.NUClearController', {
         // update default
         this.lookupReference('updatespeed').setRawValue(this.getUpdateSpeed());
 
-        NU.Network.on('reaction_statistics', this.onReactionStatistics, this);
+        this.mon(NU.Network, 'messages.support.nuclear.proto.ReactionStatistics', this.onReactionStatistics, this);
 
         this.callParent(arguments);
 

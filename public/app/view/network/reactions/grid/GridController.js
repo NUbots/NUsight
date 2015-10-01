@@ -12,7 +12,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		viewModel.set('robot', robot);
 		this.addData(this.store);
 		NU.Network.sendCommand(robot.get('id'), 'get_reaction_handles');
-		NU.Network.on('reaction_handles', this.onReactionHandles, this);
+		this.mon(NU.Network, 'messages.support.nubugger.proto.ReactionHandles', this.onReactionHandles, this);
 	},
 
 	/**

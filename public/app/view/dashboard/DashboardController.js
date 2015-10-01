@@ -19,10 +19,10 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	},
 
 	addEvents: function () {
-		NU.Network.on({
+		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
 			removeRobot: this.onRemoveRobot,
-			overview: this.onOverview,
+			'messages.support.nubugger.proto.Overview': this.onOverview,
 			scope: this
 		});
 	},

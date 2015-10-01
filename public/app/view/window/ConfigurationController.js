@@ -18,7 +18,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         this.store = this.getViewModel().getStore('tree');
         this.type = API.ConfigurationState.Node.Type;
         this.mode = this.Modes.STANDARD;
-        NU.Network.on('configuration_state', this.onConfigurationState, this);
+        this.mon(NU.Network, 'messages.support.nubugger.proto.ConfigurationState', this.onConfigurationState, this);
     },
     /**
      * A function that is called when the user selects a robot. It then sends the command to get the configuration state with this IP address.

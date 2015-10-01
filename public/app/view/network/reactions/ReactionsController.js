@@ -9,7 +9,7 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	],
 	init: function () {
 		this.grids = {};
-		NU.Network.on({
+		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
 			removeRobot: this.onRemoveRobot,
 			packet: this.onPacket,

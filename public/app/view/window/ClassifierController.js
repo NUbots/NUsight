@@ -468,10 +468,10 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 
 	addEvents: function () {
-		NU.Network.on({
-			image: this.onImage,
-			lookup_table: this.onLookUpTable,
-			lookup_table_diff: this.onLookUpTableDiff,
+		this.mon(NU.Network, {
+			'messages.input.proto.Image': this.onImage,
+			'messages.vision.proto.LookUpTable': this.onLookUpTable,
+			'messages.vision.proto.LookUpTableDiff': this.onLookUpTableDiff,
 			scope: this
 		});
 	},
@@ -556,15 +556,13 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
-		var message = NU.util.Network.createMessage(API.Message.Type.LOOKUP_TABLE, 0);
-		var lookupTable = new API.Vision.LookUpTable();
+		var lookupTable = new API.messages.vision.proto.LookUpTable();
 		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
 		lookupTable.setSave(save);
-		message.setLookupTable(lookupTable);
-		NU.Network.send(this.getRobotId(), message);
+		NU.Network.send(this.getRobotId(), lookupTable);
 	},
 	getLUTIndex: function (ycbcr) {
 		var bitsY = this.self.LutBitsPerColorY;

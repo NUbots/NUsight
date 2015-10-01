@@ -4,29 +4,31 @@ var Client = require('./Client');
 var NUClearNet = require('nuclearnet.js');
 var fs = require('fs');
 var util = require('util');
+var ref = require('ref');
 
 function NUsight (io) {
 
 	this.io = io;
 	this.clients = [];
 	this.files = [];
-	this.robots = [];
+	this.robots = {};
 	this.recordings = {};
 	this.network = new NUClearNet('nusight', '238.158.129.230', 7447);
 
 	// Robot joined
-	this.network.on('nuclear_join', function (name) {
+	this.network.on('nuclear_join', function (name, address) {
 		console.log('Robot', name, 'connected.');
 
 		var robot;
 
 		// If we have never seen this robot before
 		if (this.robots[name] === undefined) {
-			robot = { name: name, enabled: true, recording: false };
-			this.robots.push(robot);
+			robot = { id: name, host: address, enabled: true, recording: false };
+			this.robots[name] = robot;
 		}
 		else {
-			this.robots[name].enabled = true;
+			robot = this.robots[name];
+			robot.enabled = true;
 		}
 
 		this.clients.forEach(function (client) {
@@ -38,14 +40,26 @@ function NUsight (io) {
 	this.network.on('nuclear_leave', function (name) {
 		console.log('Robot', name, 'disconnected.');
 
+		var robot = this.robots[name];
+
 		// This robot is no longer active
-		this.robots[name].enabled = false;
+		robot.enabled = false;
 
 		// Send a message to all clients that this disconnected
 		this.clients.forEach(function (client) {
 			client.socket.emit('updateRobot', robot);
 		});
 	}.bind(this));
+
+	// We started listening to a type
+	this.network.on('nuclear_listen', function (event) {
+		console.log('Started listening to', event);
+	});
+
+	// We stopped listening to a type
+	this.network.on('nuclear_unlisten', function (event) {
+		console.log('Stopped listening to', event);
+	});
 
 	this.io.sockets.on('connection', function (socket) {
 
@@ -56,8 +70,8 @@ function NUsight (io) {
 		this.clients.push(client);
 
 		// Send all of our current robots
-		this.robots.forEach(function (robot) {
-			socket.emit('updateRobot', robot);
+		Object.keys(this.robots).forEach(function (key) {
+			socket.emit('updateRobot', this.robots[key]);
 		}, this);
 
 		socket.on('message', function (typeName, data, target, reliable) {
@@ -72,25 +86,32 @@ function NUsight (io) {
 
 			// Remove all our listeners
 			Object.keys(client[0].listeners).forEach(function (key) {
-				this.network.removeListener(key, client[0].listeners[key]);
+				this.network.removeListener('NUsight<' + key + '>', client[0].listeners[key]);
 			}, this);
 		}.bind(this));
 
-		socket.on('addListener', function (socket, messageType) {
+		socket.on('addType', function (socket, messageType) {
 			// Add a callback function for this
 			client.listeners[messageType] = function (source, data) {
-				this.socket.emit('message', source.name, messageType, data);
+				var filterId = data.readUInt8(0);
+				var timestamp = data.readUInt64LE(1);
+				var protobuf = data.slice(9);
+
+				this.sendMessage({ id: source.name, host: source.address }, messageType, protobuf, filterId, timestamp);
 			}.bind(client);
 
-			// Link it to the NUClear networking
-			this.network.on(messageType, client.listeners[messageType]);
+			// Link it to the NUClear networking using the NUsight wrapper
+			this.network.on('NUsight<' + messageType + '>', client.listeners[messageType]);
 		}.bind(this, client));
 
-		socket.on('removeListener', function (socket, messageType) {
+		socket.on('dropType', function (client, messageType) {
 			// Remove listeners and stop sending stuff
-			this.network.removeListener(messageType, client.listeners[messageType]);
-			delete client.listeners[messageType];
-		}.bind(this, socket));
+			var func = client.listeners[messageType];
+			if(func) {
+				this.network.removeListener('NUsight<' + messageType + '>', func);
+				delete client.listeners[messageType];
+			}
+		}.bind(this, client));
 
 		socket.on('recordRobots', function (robotIds, recording) {
 			robotIds.forEach(function (robotId) {

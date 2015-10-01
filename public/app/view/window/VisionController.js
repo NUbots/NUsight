@@ -71,10 +71,10 @@ Ext.define('NU.view.window.VisionController', {
     },
 
 	addEvents: function () {
-		NU.Network.on({
-			image: this.onImage,
-			classified_image: this.onClassifiedImage,
-			vision_object: this.onVisionObjects,
+		this.mon(NU.Network, {
+			'messages.input.proto.Image': this.onImage,
+			'messages.vision.proto.ClassifiedImage': this.onClassifiedImage,
+			'messages.vision.proto.VisionObjects': this.onVisionObjects,
 			scope: this
 		});
 	},

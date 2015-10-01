@@ -6,86 +6,102 @@ Ext.define('NU.util.Network', {
 	},
 	socket: null,
 	cache: null,
+	deserialisers: null,
+	protoBuilder: null,
 
 	constructor: function (config) {
 		this.mixins.observable.constructor.call(this, config);
 		this.initConfig(config);
 		this.cache = [];
+		this.deserialisers = {};
 	},
 
 	init: function () {
 
 		this.setupSocket();
-		this.setupAPI();
-		this.setupTypeMap();
 
-		Ext.getStore('Robots').on({
-			add: this.onAddRobot,
-			update: this.onUpdateRobot,
-			remove: this.onRemoveRobot,
-			scope: this
-		});
+		this.protoBuilder = dcodeIO.ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
+
+		this.on('addListener', this.addHandler.bind(this));
+		this.on('removeListener', this.removeHandler.bind(this));
 
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
-
-	},
-
-	getTypeMap: function () {
-		return this.typeMap;
 	},
 
 	onAnimationFrame: function () {
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
 
 		Ext.Object.each(this.cache, function (hash, event) {
+
 			if (this.hasListener(event.name)) {
 				delete this.cache[hash];
-				this.processMessage(event);
+				this.fireEvent(event.messageType
+					, event.robot
+					, this.deserialisers[event.messageType](event.protobuf)
+					, event.timestamp);
 			}
 		}, this);
 	},
 
-	processPacket: function (packet) {
-		var robot = this.getRobot(packet.robotId);
-		var message = new Uint8ClampedArray(packet.message);
-		var type = message[0];
-		var eventName = this.typeMap[type];
-		var filterId = message[1];
-
-		event = {
-			name: eventName,
-			robotId: robot.id,
-			message: packet.message.slice(2)
-		};
-
-		if (filterId > 0) {
-			var hash = eventName + ':' + filterId + ':' + robot.id;
-			this.cache[hash] = event;
-		} else {
-			if (this.hasListener(event.name)) {
-				this.processMessage(event);
-			}
-		}
-
-		this.fireEvent('packet', robot, type, packet);
-	},
-
-	processMessage: function (event) {
-		var api_message = API.Message.decode(event.message);
-		var api_event = api_message[event.name];
-		var time = new Date(api_message.getUtcTimestamp().toNumber());
-		this.fireEvent(event.name, event.robotId, api_event, time);
-		//console.log(event.robotIP, event.name);
-	},
-
 	setupSocket: function () {
 		var socket = io.connect(document.location.origin);
-		socket.on('addRemoteRobot', this.onAddRemoteRobot.bind(this));
+		socket.on('updateRobot', this.updateRobot.bind(this));
 		socket.on('message', this.onMessage.bind(this));
 		this.socket = socket;
 	},
 
+	addHandler: function(messageType) {
+
+		// TODO NUCLEARNET EVERYWHERE WE HAVE if(this.robotID == robotID is wrong)
+		// TODO BECAUSE WE ADDED ADDRESS INFORMATION
+
+		// If it's a string, make it an object
+		if (typeof messageType === 'string') {
+			var tmp = {};
+			tmp[messageType] = null;
+			messageType = tmp;
+		}
+
+		Object.keys(messageType).forEach(function (key) {
+			// If we need to tell node.js to start listening for this
+			if(key !== 'scope' &&
+				key !== 'packet' &&
+				key !== 'addListener' &&
+				key !== 'removeListener' &&
+				key !== 'addRobot' &&
+				key !== 'removeRobot' &&
+				!this.hasListener(key)) {
+
+				// Load the protocol buffer file and build it
+				dcodeIO.ProtoBuf.loadProtoFile({
+					root: 'resources/js/proto',
+					file: key.replace(/\./g, '/') + '.proto'
+				}, this.protoBuilder);
+				var proto = this.protoBuilder.build(key);
+
+				// Update our API
+				window.API = this.protoBuilder.build();
+
+				// Add a deserialiser for this
+				this.deserialisers[key] = function (data) {
+					return proto.decode(data);
+				};
+
+				this.socket.emit('addType', key);
+			}
+		}, this);
+	},
+	removeHandler: function (messageType) {
+		// If this was the last one
+		// Send a message to unbind the reaction on the node.js side
+		if(!this.hasListener(messageType)) {
+			delete this.deserialisers[messageType];
+			this.socket.emit('dropType', messageType);
+		}
+	},
+
 	setupAPI: function () {
+		// TODO NUCLEARNET DELETE THIS
 		var builder = this.builder = dcodeIO.ProtoBuf.loadProtoFile({
 			root: 'resources/js/proto',
 			file: 'messages/support/nubugger/proto/Message.proto'
@@ -102,43 +118,10 @@ Ext.define('NU.util.Network', {
 		window.API.Vision = builder.build('messages.vision.proto');
 	},
 
-	setupTypeMap: function () {
-		var typeMap = {};
-		Ext.iterate(API.Message.Type, function (key, type) {
-			typeMap[type] = key.toLowerCase();
-		}, this);
-		this.typeMap = typeMap;
-	},
-
-	onAddRobot: function (store, records, index, eOpts) {
-		Ext.each(records, function (record) {
-			if (record.get('host') !== '') {
-				this.socket.emit('addRobot', record.get('id'), record.get('host'), record.get('port'), record.get('name'));
-				this.fireEvent('addRobot', record);
-			}
-		}, this);
-	},
-
-	onUpdateRobot: function (store, record, operation, modifiedFieldNames) {
-		var robotId = record.get('id');
-		var values = {};
-		Ext.each(modifiedFieldNames, function (fieldName) {
-			values[fieldName] = record.get(fieldName);
-		});
-		this.socket.emit('updateRobot', robotId, values);
-	},
-
-	onRemoveRobot: function (store, records, indexes, isMove, eOpts) {
-		Ext.each(records, function (record) {
-			this.socket.emit('removeRobot', record.get('id'));
-			this.fireEvent('removeRobot', record);
-		}, this);
-	},
-
 	recordRobots: function (recording) {
 		var robotStore = this.getRobotStore();
 		var robotIds = [];
-		robotStore.un('update', this.onUpdateRobot, this);
+
 		robotStore.each(function (robot) {
 			var isRecording = robot.get('recording');
 			if (recording !== isRecording) {
@@ -146,44 +129,47 @@ Ext.define('NU.util.Network', {
 				robot.set('recording', recording);
 			}
 		}, this);
+
 		this.socket.emit('recordRobots', robotIds, recording);
-		robotStore.on('update', this.onUpdateRobot, this);
 	},
 
-	onAddRemoteRobot: function (robot) {
-		var robotsStore = Ext.getStore('Robots');
-		var robotIndex = robotsStore.find('id', robot.id);
-		if (robotIndex === -1) {
-			robotsStore.add(robot);
+	updateRobot: function (robot) {
+		// Try to find this robot
+		if (this.getRobotStore().find('id', robot.id) === -1) {
+
+			this.getRobotStore().add(robot);
+
+			// TODO ADD AN ADD ROBOT EVENT
+			this.fireEvent('addRobot', robot);
+		}
+		else {
+			// TODO NUCLEARNET LEARN HOW TO UPDATE A RECORD
 		}
 	},
 
-	onMessage: function (robotId, message, callback) {
-		this.processPacket({
-			robotId: robotId,
-			message: message
-		});
+	onMessage: function (robot, messageType, protobuf, filterId, timestamp, callback) {
 
-		if (callback) {
+		if (filterId > 0) {
+			// Store in the cache for the next animation frame
+			var hash = messageType + ':' + filterId + ':' + robot.id;
+			this.cache[hash] = { messageType: messageType, robot: robot, protobuf: protobuf, timestamp: new Date(timestamp) };
+		}
+		else {
+			// Do it right away
+			this.fireEvent(messageType, robot, this.deserialisers[messageType](protobuf), new Date(timestamp));
+		}
+
+		this.fireEvent('packet', robot, messageType, protobuf);
+
+		if(callback) {
 			callback();
 		}
 	},
 
 	send: function (robotId, message) {
+		// TODO NUCLEARNET UPGRADE THIS TO HAVE TARGET, AND RELIABLE
+		// TODO emit('message', MESSAGENAME, message.toArrayBuffer(), TARGET, RELIABLE);
 		this.socket.emit('message', robotId, message.encode().toArrayBuffer());
-	},
-
-	broadcast: function (message) {
-		this.socket.emit('broadcast', message.encode().toArrayBuffer());
-	},
-
-	getRobotIPs: function () {
-		var result = [];
-		var robotsStore = Ext.getStore('Robots');
-		robotsStore.each(function (record) {
-			result.push(record.get('host'));
-		});
-		return result;
 	},
 
 	getRobotStore: function () {
@@ -202,6 +188,7 @@ Ext.define('NU.util.Network', {
 	 * @param filterId The filter identifier for the message.
 	 */
 	createMessage: function (type, filterId) {
+		// TODO NUCLEARNET DELETE THIS
 		// Create the message.
 		var message = new API.Message();
 		// Set the type, filter identifier and timestamp of the message.
@@ -220,6 +207,7 @@ Ext.define('NU.util.Network', {
 	 * @param [filterId] The filter identifier for the message.
 	 */
 	sendCommand: function (robotId, commandName, filterId) {
+		// TODO NUCLEARNET DELETE THIS
 		// Create the message of type command.
 		var message = this.createMessage(API.Message.Type.COMMAND, filterId || 0);
 		// Create the command and set its name.

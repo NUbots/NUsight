@@ -28,9 +28,9 @@ Ext.define('NU.view.window.ChartController', {
     },
 
     addEvents: function () {
-        NU.Network.on({
-            data_point: this.onDataPoint,
-            sensor_data: this.onSensorData,
+        this.mon(NU.Network, {
+            'messages.support.nubugger.proto.DataPoint': this.onDataPoint,
+            'messages.input.proto.Sensors': this.onSensorData,
             scope: this
         });
     },
@@ -269,10 +269,10 @@ Ext.define('NU.view.window.ChartController', {
         }, this);
     },
 
-    onDataPoint: function (robotId, dataPoint, timestamp) {
+    onDataPoint: function (robot, dataPoint, timestamp) {
 
         // TODO: remove
-        if (robotId !== this.getRobotId()) {
+        if (robot.id !== this.getRobotId()) {
             return;
         }
 

@@ -2,7 +2,7 @@ Ext.define('NU.view.window.GameStateController', {
 	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.GameState',
 	init: function () {
-		NU.Network.on('game_state', this.onGameState, this);
+		this.mon(NU.Network, 'messages.input.proto.GameState', this.onGameState, this);
 	},
 	onSelectRobot: function (robotId) {
 		var store = this.getStore();
