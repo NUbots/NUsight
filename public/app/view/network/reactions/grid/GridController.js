@@ -11,7 +11,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		this.store = viewModel.getStore('grid');
 		viewModel.set('robot', robot);
 		this.addData(this.store);
-		NU.Network.sendCommand(robot.get('id'), 'get_reaction_handles');
+		NU.Network.sendCommand('get_reaction_handles', robot.get('id'));
 		this.mon(NU.Network, 'messages.support.nubugger.proto.ReactionHandles', this.onReactionHandles, this);
 	},
 
@@ -56,16 +56,16 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		var record = this.store.getAt(rowIndex);
 		// Update the state of the record enabled field.
 		record.set('enabled', checked);
+
 		// Create the reaction handles message and add the record data.
-		var message = NU.Network.createMessage(API.Message.Type.REACTION_HANDLES, 0);
-		var reactionHandles = new API.Message.ReactionHandles();
+		var reactionHandles = new API.messages.support.nubugger.proto.ReactionHandles();
 		reactionHandles.handles.push({
 			type: record.get('type'),
 			enabled: record.get('enabled')
 		});
-		message.setReactionHandles(reactionHandles);
+
 		// Send the message.
-		NU.Network.send(this.robot.get('id'), message);
+		NU.Network.send(reactionHandles, this.robot.get('id'), true);
 	},
 
 	/**

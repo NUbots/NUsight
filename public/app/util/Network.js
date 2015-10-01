@@ -25,6 +25,9 @@ Ext.define('NU.util.Network', {
 		this.on('addListener', this.addHandler.bind(this));
 		this.on('removeListener', this.removeHandler.bind(this));
 
+		// We use the command protocol buffer
+		this.addProtocolBuffer('messages.support.nubugger.proto.Command');
+
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
 	},
 
@@ -41,6 +44,20 @@ Ext.define('NU.util.Network', {
 					, event.timestamp);
 			}
 		}, this);
+	},
+
+	addProtocolBuffer: function (protocolBuffer) {
+		// Load the protocol buffer file and build it
+		dcodeIO.ProtoBuf.loadProtoFile({
+			root: 'resources/js/proto',
+			file: protocolBuffer.replace(/\./g, '/') + '.proto'
+		}, this.protoBuilder);
+		var proto = this.protoBuilder.build(protocolBuffer);
+
+		// Update our API
+		window.API = this.protoBuilder.build();
+
+		return proto;
 	},
 
 	setupSocket: function () {
@@ -69,15 +86,7 @@ Ext.define('NU.util.Network', {
 				key !== 'removeRobot' &&
 				!this.hasListener(key.toLowerCase())) {
 
-				// Load the protocol buffer file and build it
-				dcodeIO.ProtoBuf.loadProtoFile({
-					root: 'resources/js/proto',
-					file: key.replace(/\./g, '/') + '.proto'
-				}, this.protoBuilder);
-				var proto = this.protoBuilder.build(key);
-
-				// Update our API
-				window.API = this.protoBuilder.build();
+				var proto = this.addProtocolBuffer(key);
 
 				// Add a deserialiser for this
 				this.deserialisers[key] = function (data) {
@@ -152,56 +161,32 @@ Ext.define('NU.util.Network', {
 		}
 	},
 
-	send: function (robotId, message) {
-		// TODO NUCLEARNET UPGRADE THIS TO HAVE TARGET, AND RELIABLE
-		// TODO emit('message', MESSAGENAME, message.toArrayBuffer(), TARGET, RELIABLE);
-		this.socket.emit('message', robotId, message.encode().toArrayBuffer());
+	send: function (message, target, reliable) {
+
+		// Shunt up our types
+		if(typeof target === 'boolean') {
+			reliable = target;
+			target = undefined;
+		}
+
+		this.socket.emit('message', message.$type.toString().substr(1), message.toArrayBuffer(), target, reliable);
 	},
 
 	getRobotStore: function () {
 		return Ext.getStore('Robots');
 	},
 
-	getRobot: function (robotId) {
-		var store = this.getRobotStore();
-		return store.findRecord('id', robotId);
-	},
-
-	/**
-	 * Creates a message of a particular type and filter identifier that can be used to send over the network.
-	 *
-	 * @param type The type of message being created.
-	 * @param filterId The filter identifier for the message.
-	 */
-	createMessage: function (type, filterId) {
-		// TODO NUCLEARNET DELETE THIS
-		// Create the message.
-		var message = new API.Message();
-		// Set the type, filter identifier and timestamp of the message.
-		message.setType(type);
-		message.setFilterId(filterId);
-		message.setUtcTimestamp(Date.now() / 1000);
-		// Return the message that was created].
-		return message;
-	},
-
 	/**
 	 * Creates a message and command of a particular name to send over the network.
 	 *
-	 * @param robotId The id of the robot associated with the command.
-	 * @param commandName The name of the command.
-	 * @param [filterId] The filter identifier for the message.
+	 * @param command The name of the command.
+	 * @param target The id of the robot associated with the command.
 	 */
-	sendCommand: function (robotId, commandName, filterId) {
-		// TODO NUCLEARNET DELETE THIS
-		// Create the message of type command.
-		var message = this.createMessage(API.Message.Type.COMMAND, filterId || 0);
-		// Create the command and set its name.
-		var command = new API.Message.Command();
-		command.setCommand(commandName);
-		// Set the command of the message
-		message.setCommand(command);
-		// Send the command message over the network.
-		this.send(robotId, message);
+	sendCommand: function (command, target) {
+
+		var msg = new API.messages.support.nubugger.proto.Command();
+		msg.setCommand(command);
+
+		this.send(msg, target, true);
 	}
 });

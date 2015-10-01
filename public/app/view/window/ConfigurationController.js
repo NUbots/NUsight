@@ -48,7 +48,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Sends a command to the network requesting the configuration state.
      */
     sendCommand: function () {
-        NU.Network.sendCommand(this.getRobotId(), 'get_configuration_state');
+        NU.Network.sendCommand('get_configuration_state', this.getRobotId());
     },
     /**
      * An event triggered when the current mode display has rendered.
@@ -605,7 +605,7 @@ Ext.define('NU.view.window.ConfigurationController', {
     send: function (tree) {
         if (tree !== null) {
             // Send the message over the network.
-            NU.Network.send(this.getRobotId(), this.getConfigurationState(tree));
+            NU.Network.send(this.getConfigurationState(tree), this.getRobotId(), true);
         }
         // Reset the current tree.
         this.currentTree = null;

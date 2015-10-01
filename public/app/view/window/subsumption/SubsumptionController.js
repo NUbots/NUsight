@@ -5,7 +5,7 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 		var viewModel = this.getViewModel();
 		this.actions = viewModel.getStore('ActionRegister');
 		this.logs = viewModel.getStore('ActionStateChange');
-		NU.Network.sendCommand(this.getRobotId(), 'get_subsumption');
+		NU.Network.sendCommand('get_subsumption', this.getRobotId());
 		this.mon(NU.Network, 'subsumption', this.onSubsumption, this);
 	},
 

@@ -552,7 +552,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setLookupVertexBuffer(vertices);
 	},
 	download: function () {
-		NU.Network.sendCommand(this.getRobotId(), "download_lut");
+		NU.Network.sendCommand("download_lut", this.getRobotId());
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
@@ -562,7 +562,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
 		lookupTable.setSave(save);
-		NU.Network.send(this.getRobotId(), lookupTable);
+		NU.Network.send(lookupTable, this.getRobotId(), true);
 	},
 	getLUTIndex: function (ycbcr) {
 		var bitsY = this.self.LutBitsPerColorY;
