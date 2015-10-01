@@ -8,7 +8,7 @@ Ext.define('NU.view.robot.SelectorController', {
         // select first value by default
         var combo = this.getView();
         var recordSelected = combo.getStore().getAt(0);
-        if (recordSelected !== undefined) {
+        if (recordSelected) {
             combo.select(recordSelected);
             combo.fireEvent('select', combo, [recordSelected]);
         }

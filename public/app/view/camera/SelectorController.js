@@ -9,7 +9,7 @@ Ext.define('NU.view.camera.SelectorController', {
 		var combo = this.getView();
 		var recordSelected = combo.getStore().getAt(0);
 		// check if exists
-		if (recordSelected !== undefined) {
+		if (recordSelected) {
 			// select record
             combo.select(recordSelected);
             combo.fireEvent('select', combo, [recordSelected]);

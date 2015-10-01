@@ -17,7 +17,7 @@
     "nuclearnet.js": "0.0.3"
   },
   "engines": {
-    "node": "0.12.x"
+    "node": "4.1.x"
   },
   "devDependencies": {
     "gl-matrix": "^2.3.0",
