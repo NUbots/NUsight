@@ -11,7 +11,7 @@ Ext.define('NU.model.ActionStateChange', {
 	getStateDescription: function () {
 		var result = "unknown";
 		var state = this.get('state');
-		var State = API.Subsumption.ActionStateChange.State;
+		var State = API.messages.behaviour.proto.Subsumption.ActionStateChange.State;
 		Ext.Object.each(State, function (name, value) {
 			if (state === value) {
 				result = name;
@@ -32,7 +32,7 @@ Ext.define('NU.model.ActionStateChange', {
 		return this.arrayToSentence(output);
 	},
 	getLimbName: function (limbID) {
-		var Limb = API.Subsumption.Limb;
+		var Limb = API.messages.behaviour.proto.Subsumption.Limb;
 		switch (limbID) {
 			case Limb.LEFT_LEG: return 'Left Leg';
 			case Limb.RIGHT_LEG: return 'Right Leg';

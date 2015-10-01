@@ -311,7 +311,7 @@ Ext.define('NU.view.window.FieldController', {
 
 	createModel: function (robot, object) {
 		// Create a new shape onto the specified robot.
-		var Shape = API.DrawObject.Shape;
+		var Shape = API.messages.support.nubugger.proto.Shape;
 		switch (object.getShape()) {
 			case Shape.ARROW:
 				return this.createArrowModel(robot, object);

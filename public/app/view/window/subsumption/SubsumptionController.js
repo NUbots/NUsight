@@ -12,7 +12,7 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 	getCellClass: function (value, record, index) {
 		var state = record.get('state');
 		if (value.indexOf(index) >= 0) {
-			if (state === API.Subsumption.ActionStateChange.State.START || record.store === this.actions) {
+			if (state === API.messages.behaviour.proto.Subsumption.ActionStateChange.State.START || record.store === this.actions) {
 				return 'action-start';
 			} else {
 				return 'action-kill';
@@ -110,23 +110,23 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 	},
 
 	onRenderLeftLeg: function (value, metaData, record) {
-		this.renderColumn(value, metaData, record, API.Subsumption.Limb.LEFT_LEG);
+		this.renderColumn(value, metaData, record, API.messages.behaviour.proto.Subsumption.Limb.LEFT_LEG);
 	},
 
 	onRenderRightLeg: function (value, metaData, record) {
-		this.renderColumn(value, metaData, record, API.Subsumption.Limb.RIGHT_LEG);
+		this.renderColumn(value, metaData, record, API.messages.behaviour.proto.Subsumption.Limb.RIGHT_LEG);
 	},
 
 	onRenderLeftArm: function (value, metaData, record) {
-		this.renderColumn(value, metaData, record, API.Subsumption.Limb.LEFT_ARM);
+		this.renderColumn(value, metaData, record, API.messages.behaviour.proto.Subsumption.Limb.LEFT_ARM);
 	},
 
 	onRenderRightArm: function (value, metaData, record) {
-		this.renderColumn(value, metaData, record, API.Subsumption.Limb.RIGHT_ARM);
+		this.renderColumn(value, metaData, record, API.messages.behaviour.proto.Subsumption.Limb.RIGHT_ARM);
 	},
 
 	onRenderHead: function (value, metaData, record) {
-		this.renderColumn(value, metaData, record, API.Subsumption.Limb.HEAD);
+		this.renderColumn(value, metaData, record, API.messages.behaviour.proto.Subsumption.Limb.HEAD);
 	}
 
 });

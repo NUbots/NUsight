@@ -100,24 +100,6 @@ Ext.define('NU.util.Network', {
 		}
 	},
 
-	setupAPI: function () {
-		// TODO NUCLEARNET DELETE THIS
-		var builder = this.builder = dcodeIO.ProtoBuf.loadProtoFile({
-			root: 'resources/js/proto',
-			file: 'messages/support/nubugger/proto/Message.proto'
-		});
-
-		window.API = builder.build('messages.support.nubugger.proto');
-		// cry :'(
-		window.API.Behaviour = builder.build('messages.behaviour.proto.Behaviour');
-		window.API.Configuration = builder.build('messages.support.nubugger.proto.ConfigurationState');
-		window.API.GameState = builder.build('messages.input.proto.GameState');
-		window.API.Image = builder.build('messages.input.proto.Image');
-		window.API.Sensors = builder.build('messages.input.proto.Sensors');
-		window.API.Subsumption = builder.build('messages.behaviour.proto.Subsumption');
-		window.API.Vision = builder.build('messages.vision.proto');
-	},
-
 	recordRobots: function (recording) {
 		var robotStore = this.getRobotStore();
 		var robotIds = [];

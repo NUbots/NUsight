@@ -1121,7 +1121,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		//x = imageWidth - x - 1;
 		//y = imageHeight - y - 1;
 
-		var Format = API.Image.Format;
+		var Format = API.messages.input.proto.Image.Format;
 		switch (this.getImageFormat()) {
 			case Format.JPEG:
 				var offset = 3 * (y * imageWidth + x);
@@ -1149,7 +1149,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		}
 	},
 	drawImage: function (image, callback, thisArg) {
-		var Format = API.Image.Format;
+		var Format = API.messages.input.proto.Image.Format;
 		this.setImageFormat(image.format);
 		switch (image.format) {
 			case Format.JPEG:
@@ -1176,13 +1176,13 @@ Ext.define('NU.view.window.ClassifierController', {
 			var renderer = renderers[i];
 			renderer.resize(width, height);
 			renderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-			renderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+			renderer.updateUniform('imageFormat', API.messages.input.proto.Image.Format.YCbCr422);
 			renderer.updateUniform('imageWidth', width);
 			renderer.updateUniform('imageHeight', height);
 			renderer.render();
 		}
 		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
+		this.selectionClassifier.updateRawImage(API.messages.input.proto.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageYbCr444: function (image) {
@@ -1196,7 +1196,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			renderer.render();
 		}
 		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
+		this.selectionClassifier.updateRawImage(API.messages.input.proto.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageJPEG: function (image, callback, thisArg) {
@@ -1228,14 +1228,14 @@ Ext.define('NU.view.window.ClassifierController', {
 				imageObj.adobe.transformCode = false;
 			}
 			var rawData = imageObj.getData(imageObj.width, imageObj.height);
-			var image = new API.Image();
+			var image = new API.messages.input.proto.Image();
 			image.setData(rawData);
 			image.setCameraId(0);
 			image.setDimensions({
 				x: imageObj.width,
 				y: imageObj.height
 			});
-			image.setFormat(API.Image.Format.YCbCr444);
+			image.setFormat(API.messages.input.proto.Image.Format.YCbCr444);
 			this.onImage(this.getRobotId(), image);
 			callback.call(this);
 		}.bind(this);
