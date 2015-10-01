@@ -138,7 +138,8 @@ Ext.define('NU.util.Network', {
 			this.fireEvent('addRobot', robot);
 		}
 		else {
-			// TODO NUCLEARNET LEARN HOW TO UPDATE A RECORD
+			var record = this.getRobotStore().findRecord('id', robot.id);
+			record.set(robot);
 		}
 	},
 
