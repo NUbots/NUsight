@@ -33,13 +33,11 @@ Ext.define('NU.util.Network', {
 
 		Ext.Object.each(this.cache, function (hash, event) {
 
-			if (this.hasListener(event.name)) {
-				delete this.cache[hash];
-				this.fireEvent(event.messageType
-					, event.robot
-					, this.deserialisers[event.messageType](event.protobuf)
-					, event.timestamp);
-			}
+			delete this.cache[hash];
+			this.fireEvent(event.messageType
+				, event.robot
+				, this.deserialisers[event.messageType](event.protobuf)
+				, event.timestamp);
 		}, this);
 	},
 
