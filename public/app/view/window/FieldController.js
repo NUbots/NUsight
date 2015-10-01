@@ -156,18 +156,18 @@ Ext.define('NU.view.window.FieldController', {
 	},
 
 	onAddRobot: function (robotId) {
-		var robot = this.getRobot(robotId);
+		var robot = this.getRobot(robotId.id);
 
 		if (robot !== null) {
 			return; // TODO: already exists
 		}
 
 		robot = Ext.create('NU.view.field.Robot', {
-			robotId: robotId
+			robotId: robotId.id
 		});
 
 		robot.on('loaded', function () {
-			if (robotId !== this.getRobotId()) {
+			if (robotId.id !== this.getRobotId()) {
 				robot.darwinModels.forEach(function (model) {
 					model.traverse(function (object) {
 						object.visible = false;
@@ -262,7 +262,7 @@ Ext.define('NU.view.window.FieldController', {
 
 	onDrawObjects: function (robotId, event, timestamp) {
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robotId.id !== this.getRobotId()) {
 			return;
 		}
 		// Get the robot from the IP sent from the network.

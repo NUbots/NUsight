@@ -35,15 +35,15 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 		this.logs.removeAll();
 	},
 
-	onSubsumption: function (robotId, event, timestamp) {
+	onSubsumption: function (robot, event, timestamp) {
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robot.id !== this.getRobotId()) {
 			return;
 		}
 
-		this.processActionRegisters(robotId, event.getActionRegister(), timestamp);
-		this.processActionStateChanges(robotId, event.getActionStateChange(), timestamp);
-		this.processActionPriorityChanges(robotId, event.getActionPriorityChange(), timestamp);
+		this.processActionRegisters(robot.id, event.getActionRegister(), timestamp);
+		this.processActionStateChanges(robot.id, event.getActionStateChange(), timestamp);
+		this.processActionPriorityChanges(robot.id, event.getActionPriorityChange(), timestamp);
 
 	},
 

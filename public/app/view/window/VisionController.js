@@ -366,9 +366,9 @@ Ext.define('NU.view.window.VisionController', {
             context.stroke();
         }
     },
-	onVisionObjects: function (robotId, visionObjects) {
+	onVisionObjects: function (robot, visionObjects) {
 
-		if (robotId !== this.getRobotId()) {
+		if (robot.id !== this.getRobotId()) {
 			return;
 		}
 		switch (visionObjects.getType()) {

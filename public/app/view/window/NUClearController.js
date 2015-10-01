@@ -26,10 +26,10 @@ Ext.define('NU.view.window.NUClearController', {
     onUpdateSpeedChange: function (field, newValue, oldValue, eOpts) {
 		this.setUpdateSpeed(newValue);
 	},
-    onReactionStatistics: function (robotId, reactionStatistics) {
+    onReactionStatistics: function (robot, reactionStatistics) {
 
         // TODO: remove
-        if (robotId !== this.getRobotId()) {
+        if (robot.id !== this.getRobotId()) {
             return;
         }
 

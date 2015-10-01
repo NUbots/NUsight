@@ -616,10 +616,10 @@ Ext.define('NU.view.window.ClassifierController', {
 			}
 		}
 	},
-	onLookUpTable: function (robotId, lookuptable) {
+	onLookUpTable: function (robot, lookuptable) {
 
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robot.id !== this.getRobotId()) {
 			return;
 		}
 
@@ -639,10 +639,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
-	onLookUpTableDiff: function (robotId, tableDiff) {
+	onLookUpTableDiff: function (robot, tableDiff) {
 
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robot.id !== this.getRobotId()) {
 			return;
 		}
 
@@ -667,10 +667,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
-	onImage: function (robotId, image) {
+	onImage: function (robot, image) {
 
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robot.id !== this.getRobotId()) {
 			return;
 		}
 
