@@ -8,14 +8,14 @@ Ext.define('NU.view.robot.SelectorController', {
         // select first value by default
         var combo = this.getView();
         var recordSelected = combo.getStore().getAt(0);
+        // check if exists
         if (recordSelected) {
-            combo.select(recordSelected);
-            combo.fireEvent('select', combo, [recordSelected]);
+            combo.select(recordSelected, true);
         }
     },
 
-    onSelectRobot: function (combo, records) {
-		var robotId = records[0].get('id');
+    onSelectRobot: function (combo, record) {
+		var robotId = record.get('id');
 		this.setRobotId(robotId);
         combo.fireEvent('selectRobot', robotId);
 	}
