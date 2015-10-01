@@ -61,7 +61,7 @@ function NUsight (io) {
 		console.log('Stopped listening to', event);
 	});
 
-	this.io.sockets.on('connection', function (socket) {
+	this.io.on('connection', function (socket) {
 
 		console.log('New web client', this.clients.length);
 
@@ -105,6 +105,7 @@ function NUsight (io) {
 		}.bind(this, client));
 
 		socket.on('dropType', function (client, messageType) {
+
 			// Remove listeners and stop sending stuff
 			var func = client.listeners[messageType];
 			if(func) {

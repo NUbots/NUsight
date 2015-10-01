@@ -1,6 +1,9 @@
 Ext.define('NU.view.window.ChartController', {
     extend: 'NU.view.window.DisplayController',
     alias: 'controller.Chart',
+    requires: [
+        'NU.util.TypeMap'
+    ],
     config: {
         colours: [
             // 8 distinct colours from http://colorbrewer2.org/
@@ -19,7 +22,8 @@ Ext.define('NU.view.window.ChartController', {
         ty: null,
         tz: null,
         lastDraw: 0,
-        streams: null
+        streams: null,
+        servoMap: null
     },
     init: function () {
         this.setStreams([]);
@@ -33,6 +37,7 @@ Ext.define('NU.view.window.ChartController', {
             'messages.input.proto.Sensors': this.onSensorData,
             scope: this
         });
+        this.servoMap = NU.TypeMap.get(API.messages.input.proto.Sensors.ServoID);
     },
 
     onAfterRender: function () {
@@ -197,8 +202,7 @@ Ext.define('NU.view.window.ChartController', {
         // Servos
         Ext.each(sensorData.servo, function(servo) {
 
-            var id = servo.getId();
-            var name = id; // TODO use the ID to get a name from a cache
+            var name = this.servoMap[servo.getId()]; // TODO use the ID to get a name from a cache
 
             // PID gain
             this.onDataPoint(robotId, {

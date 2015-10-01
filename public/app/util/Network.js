@@ -34,10 +34,12 @@ Ext.define('NU.util.Network', {
 		Ext.Object.each(this.cache, function (hash, event) {
 
 			delete this.cache[hash];
-			this.fireEvent(event.messageType
-				, event.robot
-				, this.deserialisers[event.messageType](event.protobuf)
-				, event.timestamp);
+			if(this.hasListener(event.messageType.toLowerCase())) {
+				this.fireEvent(event.messageType
+					, event.robot
+					, this.deserialisers[event.messageType](event.protobuf)
+					, event.timestamp);
+			}
 		}, this);
 	},
 
@@ -49,9 +51,6 @@ Ext.define('NU.util.Network', {
 	},
 
 	addHandler: function(messageType) {
-
-		// TODO NUCLEARNET EVERYWHERE WE HAVE if(this.robotID == robotID is wrong)
-		// TODO BECAUSE WE ADDED ADDRESS INFORMATION
 
 		// If it's a string, make it an object
 		if (typeof messageType === 'string') {
@@ -68,7 +67,7 @@ Ext.define('NU.util.Network', {
 				key !== 'removeListener' &&
 				key !== 'addRobot' &&
 				key !== 'removeRobot' &&
-				!this.hasListener(key)) {
+				!this.hasListener(key.toLowerCase())) {
 
 				// Load the protocol buffer file and build it
 				dcodeIO.ProtoBuf.loadProtoFile({
@@ -90,9 +89,16 @@ Ext.define('NU.util.Network', {
 		}, this);
 	},
 	removeHandler: function (messageType) {
+
 		// If this was the last one
 		// Send a message to unbind the reaction on the node.js side
-		if(!this.hasListener(messageType)) {
+		if(messageType !== 'scope' &&
+			messageType !== 'packet' &&
+			messageType !== 'addListener' &&
+			messageType !== 'removeListener' &&
+			messageType !== 'addRobot' &&
+			messageType !== 'removeRobot' &&
+			!this.hasListener(messageType.toLowerCase())) {
 			delete this.deserialisers[messageType];
 			this.socket.emit('dropType', messageType);
 		}
@@ -134,7 +140,7 @@ Ext.define('NU.util.Network', {
 			var hash = messageType + ':' + filterId + ':' + robot.id;
 			this.cache[hash] = { messageType: messageType, robot: robot, protobuf: protobuf, timestamp: new Date(timestamp) };
 		}
-		else {
+		else if (this.hasListener(messageType.toLowerCase())) {
 			// Do it right away
 			this.fireEvent(messageType, robot, this.deserialisers[messageType](protobuf), new Date(timestamp));
 		}
