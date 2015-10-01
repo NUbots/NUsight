@@ -8,11 +8,11 @@
     "postinstall": "node node_modules/bower/bin/bower install"
   },
   "dependencies": {
-    "bower": "1.3.x",
-    "compression": "1.0.7",
+    "bower": "1.5.3",
+    "compression": "1.6.0",
     "ref": "1.1.3",
-    "express": "4.4.3",
-    "serve-favicon": "2.0.1",
+    "express": "4.13.3",
+    "serve-favicon": "2.3.0",
     "socket.io": "1.3.7",
     "nuclearnet.js": "0.0.3"
   },

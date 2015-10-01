@@ -119,14 +119,21 @@ function NUsight (io) {
 				var robot = this.robots[robotId];
 
 				if(!robot.recording && recording) {
+					console.log('Started recording', robotId);
+					robot.recording = true;
+
 					// Make our log directory
 					try { fs.mkdirSync('logs'); } catch(e) {}
-					try { fs.mkdirSync('logs/' + this.host + "_" + this.port); } catch(e) {}
+					try { fs.mkdirSync('logs/' + robotId); } catch(e) {}
 
 					// Create a recording file
-					this.recordings[robotId] = fs.createWriteStream('logs/' + this.host + "_" + this.port + '/' + Date.now() + '.nbs');
+					this.recordings[robotId] = fs.createWriteStream('logs/' + robotId + '/' + Date.now() + '.nbs');
+
+					// TODO make a callback that gets all network data from this robot
 				}
 				else if(robot.recording && !recording) {
+					console.log('Stopped recording', robotId);
+					robot.recording = false;
 					// End our recording file and delete the reference to it
 					this.recordings[robotId].end();
 					delete this.recordings[robotId];
