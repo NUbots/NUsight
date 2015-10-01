@@ -16,6 +16,7 @@ Ext.define('NU.view.window.ConfigurationController', {
     mode: null,                         // The current updating mode.
     init: function () {
         this.store = this.getViewModel().getStore('tree');
+        NU.Network.loadProto('messages.support.nubugger.proto.ConfigurationState');
         this.type = API.messages.support.nubugger.proto.ConfigurationState.Node.Type;
         this.mode = this.Modes.STANDARD;
         this.mon(NU.Network, 'messages.support.nubugger.proto.ConfigurationState', this.onConfigurationState, this);
