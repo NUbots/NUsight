@@ -5,6 +5,8 @@ var RobotSimulator = require('./RobotSimulator');
 function ClassifierSimulator () {
 	RobotSimulator.call(this);
 
+	this.loadProto('messages.vision.proto.LookUpTableDiff');
+
 	this.classifications = [119, 103, 121, 111, 99, 109];
 	this.numPoints = 10;
 	this.speed = 10;
@@ -29,7 +31,7 @@ ClassifierSimulator.prototype.run = function () {
 		glm.vec3.scaleAndAdd(point.velocity, point.velocity, point.force, timeDelta);
 		this.vec3mod(point.position, point.position, 256);
 		diffs.push({
-			lut_index: this.getLUTIndex(point.position),
+			lutIndex: this.getLUTIndex(point.position),
 			classification: point.classification
 		});
 		if (timeElapsed > 2) {
@@ -38,13 +40,8 @@ ClassifierSimulator.prototype.run = function () {
 		}
 	}
 
-	var message = new this.API.Message({
-		type: this.API.Message.Type.LOOKUP_TABLE_DIFF,
-		filter_id: 0,
-		utc_timestamp: Date.now(),
-		lookup_table_diff: {
-			diff: diffs
-		}
+	var message = new this.API.messages.vision.proto.LookUpTableDiff({
+		diff: diffs
 	});
 
 	this.sendMessage(message);

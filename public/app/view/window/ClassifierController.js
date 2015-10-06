@@ -1240,7 +1240,8 @@ Ext.define('NU.view.window.ClassifierController', {
 				y: imageObj.height
 			});
 			image.setFormat(API.messages.input.proto.Image.Format.YCbCr444);
-			this.onImage(this.getRobotId(), image);
+			var record = NU.Network.getRobotStore().findRecord('id', this.getRobotId());
+			this.onImage(record, image);
 			callback.call(this);
 		}.bind(this);
 		imageObj.load(uri);
