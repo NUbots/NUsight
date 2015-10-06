@@ -14,8 +14,12 @@ Ext.define('NU.view.robot.SelectorController', {
         }
     },
 
-    onSelectRobot: function (combo, record) {
-		var robotId = record.get('id');
+    onSelectRobot: function (combo, records) {
+        if (!Array.isArray(records)) {
+            records = [records];
+        }
+
+		var robotId = records[0].get('id');
 		this.setRobotId(robotId);
         combo.fireEvent('selectRobot', robotId);
 	}
