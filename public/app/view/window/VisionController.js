@@ -129,9 +129,9 @@ Ext.define('NU.view.window.VisionController', {
 		this.setHeight(height);
 		this.getLayeredCanvas().setCanvasSize(width, height);
 	},
-    onImage: function (robotId, image) {
+    onImage: function (robot, image) {
 
-        if (robotId != this.getRobotId() || image === null) {
+        if (robot.id != this.getRobotId()) {
             return;
         }
 
@@ -226,9 +226,9 @@ Ext.define('NU.view.window.VisionController', {
 		}
 		return window.btoa(binary);
 	},
-    onClassifiedImage: function (robotId, image) {
+    onClassifiedImage: function (robot, image) {
 
-        if(robotId != this.getRobotId()) {
+        if (robot.id != this.getRobotId()) {
             return;
         }
 
