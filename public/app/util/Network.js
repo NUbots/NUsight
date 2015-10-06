@@ -43,6 +43,9 @@ Ext.define('NU.util.Network', {
 					, this.deserialisers[event.messageType](event.protobuf)
 					, event.timestamp);
 			}
+
+			// Tell socket.io it can send a new packet
+			event.ackCallback();
 		}, this);
 	},
 
@@ -143,12 +146,18 @@ Ext.define('NU.util.Network', {
 		}
 	},
 
-	onMessage: function (robot, messageType, protobuf, filterId, timestamp, callback) {
+	onMessage: function (robot, messageType, protobuf, filterId, timestamp, ackCallback) {
 
 		if (filterId > 0) {
 			// Store in the cache for the next animation frame
 			var hash = messageType + ':' + filterId + ':' + robot.id;
-			this.cache[hash] = { messageType: messageType, robot: robot, protobuf: protobuf, timestamp: new Date(timestamp) };
+			this.cache[hash] = {
+				messageType: messageType,
+				robot: robot,
+				protobuf: protobuf,
+				timestamp: new Date(timestamp),
+				ackCallback: ackCallback
+			};
 		}
 		else if (this.hasListener(messageType.toLowerCase())) {
 			// Do it right away
@@ -156,10 +165,6 @@ Ext.define('NU.util.Network', {
 		}
 
 		this.fireEvent('packet', robot, messageType, protobuf);
-
-		if(callback) {
-			callback();
-		}
 	},
 
 	send: function (message, target, reliable) {

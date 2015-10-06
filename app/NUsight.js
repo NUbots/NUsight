@@ -13,7 +13,7 @@ function NUsight (io) {
 	this.files = [];
 	this.robots = {};
 	this.recordings = {};
-	this.network = new NUClearNet('nusight', '238.158.129.230', 7447);
+	this.network = new NUClearNet('nusight', '239.226.152.162', 7447);
 
 	// Robot joined
 	this.network.on('nuclear_join', function (name, address) {
