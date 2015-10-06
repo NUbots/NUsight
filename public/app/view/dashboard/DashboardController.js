@@ -85,12 +85,12 @@ Ext.define('NU.view.dashboard.DashboardController', {
 	 * An event triggered when the Network class receives an Overview protocol buffer. This method fires the update
 	 * event on the dashboard panel view associated with the IP address of a robot.
 	 *
-	 * @param robotId The id of the robot.
+	 * @param robot The robot record.
 	 * @param overview The protocol buffer data.
 	 * @param timestamp The time the data was received.
 	 */
-	onOverview: function (robotId, overview, timestamp) {
-		this.dashboardPanels[robotId].fireEvent('update', overview, timestamp);
+	onOverview: function (robot, overview, timestamp) {
+		this.dashboardPanels[robot.get('id')].fireEvent('update', overview, timestamp);
 	},
 
 	/**
