@@ -371,18 +371,19 @@ Ext.define('NU.view.window.VisionController', {
 		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
-		switch (visionObjects.getType()) {
-			case 0: // Goal
-				this.drawGoals(visionObjects.getGoal());
-				break;
-			case 1: // Ball
-				this.drawBalls(visionObjects.getBall());
-				break;
-			case 3: // Lines
-				this.drawLines(visionObjects.getLine());
-				break;
-		}
-
+		visionObjects.objects.forEach(function (visionObject) {
+			switch (visionObject.getType()) {
+				case 0: // Goal
+					this.drawGoals(visionObject.getGoal());
+					break;
+				case 1: // Ball
+					this.drawBalls(visionObject.getBall());
+					break;
+				case 3: // Lines
+					this.drawLines(visionObject.getLine());
+					break;
+			}
+		}, this);
 	},
 	drawGoals: function (goals) {
 

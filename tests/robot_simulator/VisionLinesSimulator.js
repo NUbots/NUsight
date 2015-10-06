@@ -21,10 +21,12 @@ VisionLinesSimulator.prototype.run = function () {
 		});
 	}
 
-	var message = new this.API.messages.vision.proto.VisionObject({
-		cameraId: 0,
-		type: this.API.messages.vision.proto.VisionObject.ObjectType.LINE,
-		line: lines
+	var message = new this.API.messages.vision.proto.VisionObjects({
+		objects: [{
+			cameraId: 0,
+			type: this.API.messages.vision.proto.VisionObject.ObjectType.LINE,
+			line: lines
+		}]
 	});
 
 	this.sendMessage(message);
