@@ -276,7 +276,7 @@ Ext.define('NU.view.window.ChartController', {
     onDataPoint: function (robot, dataPoint, timestamp) {
 
         // TODO: remove
-        if (robot.id !== this.getRobotId()) {
+        if (robot.get('id') !== this.getRobotId()) {
             return;
         }
 

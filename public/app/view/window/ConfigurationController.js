@@ -37,7 +37,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param configurationState The configuration state protocol buffer.
      */
     onConfigurationState: function (robot, configurationState) {
-        if (robot.id !== this.getRobotId()) {
+        if (robot.get('id') !== this.getRobotId()) {
             return;
         }
         // Retrieve the root from the buffer.

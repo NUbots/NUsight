@@ -18,14 +18,14 @@ Ext.define('NU.view.window.GameStateController', {
 	},
 	onGameState: function (robot, gameState, timestamp) {
 		// TODO: remove
-		if (robot.id !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
 		var store = this.getStore();
 		store.add({
 			time: timestamp,
-			robotId: robot.id,
+			robotId: robot.get('id'),
 			eventName: gameState.getEvent(),
 			state: gameState.getData()
 		});

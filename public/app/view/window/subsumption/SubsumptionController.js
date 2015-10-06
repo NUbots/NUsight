@@ -37,13 +37,13 @@ Ext.define('NU.view.window.subsumption.SubsumptionController', {
 
 	onSubsumption: function (robot, event, timestamp) {
 		// TODO: remove
-		if (robot.id !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
-		this.processActionRegisters(robot.id, event.getActionRegister(), timestamp);
-		this.processActionStateChanges(robot.id, event.getActionStateChange(), timestamp);
-		this.processActionPriorityChanges(robot.id, event.getActionPriorityChange(), timestamp);
+		this.processActionRegisters(robot.get('id'), event.getActionRegister(), timestamp);
+		this.processActionStateChanges(robot.get('id'), event.getActionStateChange(), timestamp);
+		this.processActionPriorityChanges(robot.get('id'), event.getActionPriorityChange(), timestamp);
 
 	},
 

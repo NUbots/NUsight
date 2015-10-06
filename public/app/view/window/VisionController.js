@@ -131,7 +131,7 @@ Ext.define('NU.view.window.VisionController', {
 	},
     onImage: function (robot, image) {
 
-        if (robot.id != this.getRobotId()) {
+        if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
@@ -228,7 +228,7 @@ Ext.define('NU.view.window.VisionController', {
 	},
     onClassifiedImage: function (robot, image) {
 
-        if (robot.id != this.getRobotId()) {
+        if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
@@ -368,7 +368,7 @@ Ext.define('NU.view.window.VisionController', {
     },
 	onVisionObjects: function (robot, visionObjects) {
 
-		if (robot.id !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 		switch (visionObjects.getType()) {

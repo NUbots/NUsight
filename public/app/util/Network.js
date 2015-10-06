@@ -123,7 +123,7 @@ Ext.define('NU.util.Network', {
 		robotStore.each(function (robot) {
 			var isRecording = robot.get('recording');
 			if (recording !== isRecording) {
-				robotIds.push(robot.id);
+				robotIds.push(robot.get('id'));
 				robot.set('recording', recording);
 			}
 		}, this);
@@ -135,10 +135,9 @@ Ext.define('NU.util.Network', {
 		// Try to find this robot
 		if (this.getRobotStore().find('id', robot.id) === -1) {
 
-			this.getRobotStore().add(robot);
+			var record = this.getRobotStore().add(robot)[0];
 
-			// TODO ADD AN ADD ROBOT EVENT
-			this.fireEvent('addRobot', robot);
+			this.fireEvent('addRobot', record);
 		}
 		else {
 			var record = this.getRobotStore().findRecord('id', robot.id);
@@ -147,24 +146,26 @@ Ext.define('NU.util.Network', {
 	},
 
 	onMessage: function (robot, messageType, protobuf, filterId, timestamp, ackCallback) {
+		var record = this.getRobotStore().findRecord('id', robot.id);
+		if(record) {
+			if (filterId > 0) {
+				// Store in the cache for the next animation frame
+				var hash = messageType + ':' + filterId + ':' + record.get('id');
+				this.cache[hash] = {
+					messageType: messageType,
+					robot: record,
+					protobuf: protobuf,
+					timestamp: new Date(timestamp),
+					ackCallback: ackCallback
+				};
+			}
+			else if (this.hasListener(messageType.toLowerCase())) {
+				// Do it right away
+				this.fireEvent(messageType, record, this.deserialisers[messageType](protobuf), new Date(timestamp));
+			}
 
-		if (filterId > 0) {
-			// Store in the cache for the next animation frame
-			var hash = messageType + ':' + filterId + ':' + robot.id;
-			this.cache[hash] = {
-				messageType: messageType,
-				robot: robot,
-				protobuf: protobuf,
-				timestamp: new Date(timestamp),
-				ackCallback: ackCallback
-			};
+			this.fireEvent('packet', record, messageType, protobuf);
 		}
-		else if (this.hasListener(messageType.toLowerCase())) {
-			// Do it right away
-			this.fireEvent(messageType, robot, this.deserialisers[messageType](protobuf), new Date(timestamp));
-		}
-
-		this.fireEvent('packet', robot, messageType, protobuf);
 	},
 
 	send: function (message, target, reliable) {

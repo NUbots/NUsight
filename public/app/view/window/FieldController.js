@@ -122,7 +122,7 @@ Ext.define('NU.view.window.FieldController', {
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 
 		NU.Network.getRobotStore().each(function (robot) {
-			this.onAddRobot(robot.get('id'));
+			this.onAddRobot(robot);
 		}, this);
 	},
 
@@ -155,19 +155,20 @@ Ext.define('NU.view.window.FieldController', {
 		this.setRobotId(robotId);
 	},
 
-	onAddRobot: function (robotId) {
-		var robot = this.getRobot(robotId.id);
+	onAddRobot: function (newRobot) {
+		var robot = this.getRobot(newRobot.id);
 
 		if (robot !== null) {
 			return; // TODO: already exists
 		}
 
 		robot = Ext.create('NU.view.field.Robot', {
-			robotId: robotId.id
+			robotId: newRobot.id
 		});
 
 		robot.on('loaded', function () {
-			if (robotId.id !== this.getRobotId()) {
+			// Hide if we are not currently selected
+			if (newRobot.id !== this.getRobotId()) {
 				robot.darwinModels.forEach(function (model) {
 					model.traverse(function (object) {
 						object.visible = false;
@@ -242,8 +243,8 @@ Ext.define('NU.view.window.FieldController', {
 		//todo this.addObject(robot.ballModels);
 	},
 
-	onSensorData: function (robotId, api_sensor_data) {
-		var robot = this.getRobot(robotId);
+	onSensorData: function (rInfo, api_sensor_data) {
+		var robot = this.getRobot(rInfo.get('id'));
 		if (robot == null) {
 			// TODO: console.log('error', robotIP);
 			return;
@@ -251,22 +252,22 @@ Ext.define('NU.view.window.FieldController', {
 		robot.onSensorData(api_sensor_data);
 	},
 
-	onLocalisation: function (robotId, api_localisation) {
-		var robot = this.getRobot(robotId);
+	onLocalisation: function (rInfo, api_localisation) {
+		var robot = this.getRobot(rInfo.get('id'));
 		if (robot == null) {
-			console.log('error', robotId);
+			console.log('error', rInfo);
 			return;
 		}
 		robot.onLocalisation(api_localisation);
 	},
 
-	onDrawObjects: function (robotId, event, timestamp) {
+	onDrawObjects: function (rInfo, event, timestamp) {
 		// TODO: remove
-		if (robotId.id !== this.getRobotId()) {
+		if (rInfo.get('id') !== this.getRobotId()) {
 			return;
 		}
 		// Get the robot from the IP sent from the network.
-		var robot = this.getRobot(robotId);
+		var robot = this.getRobot(rInfo.get('id'));
 		// Iterate through each of the objects being added to the field.
 		Ext.each(event.getObjects(), function (object) {
 			// Get the field object from the objects on the field.

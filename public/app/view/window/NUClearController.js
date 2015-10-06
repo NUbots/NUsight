@@ -29,7 +29,7 @@ Ext.define('NU.view.window.NUClearController', {
     onReactionStatistics: function (robot, reactionStatistics) {
 
         // TODO: remove
-        if (robot.id !== this.getRobotId()) {
+        if (robot.get('id') !== this.getRobotId()) {
             return;
         }
 

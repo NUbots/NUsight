@@ -623,7 +623,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	onLookUpTable: function (robot, lookuptable) {
 
 		// TODO: remove
-		if (robot.id !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
@@ -646,7 +646,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	onLookUpTableDiff: function (robot, tableDiff) {
 
 		// TODO: remove
-		if (robot.id !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
@@ -674,7 +674,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	onImage: function (robot, image) {
 
 		// TODO: remove
-		if (robot.id !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
