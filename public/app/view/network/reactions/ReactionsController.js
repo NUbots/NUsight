@@ -67,8 +67,7 @@ Ext.define('NU.view.network.reactions.ReactionsController', {
 	onPacket: function (robot, type, packet) {
 		// Obtain the grid and the key, then fire the update event.
 		var grid = this.grids[robot.get('id')];
-		var key = NU.Network.getTypeMap()[type];
-		grid.fireEvent('update', key);
+		grid.fireEvent('update', type);
 	}
 
 });

@@ -85,6 +85,8 @@ Ext.define('NU.util.Network', {
 				key !== 'packet' &&
 				key !== 'addListener' &&
 				key !== 'removeListener' &&
+				key !== 'addType' &&
+				key !== 'dropType' &&
 				key !== 'addRobot' &&
 				key !== 'removeRobot' &&
 				!this.hasListener(key.toLowerCase())) {
@@ -95,6 +97,8 @@ Ext.define('NU.util.Network', {
 				this.deserialisers[key] = function (data) {
 					return proto.decode(data);
 				};
+
+				this.fireEvent('addType', key);
 
 				this.socket.emit('addType', key);
 			}
@@ -108,10 +112,13 @@ Ext.define('NU.util.Network', {
 			messageType !== 'packet' &&
 			messageType !== 'addListener' &&
 			messageType !== 'removeListener' &&
+			messageType !== 'addType' &&
+			messageType !== 'dropType' &&
 			messageType !== 'addRobot' &&
 			messageType !== 'removeRobot' &&
 			!this.hasListener(messageType.toLowerCase())) {
 			delete this.deserialisers[messageType];
+			this.fireEvent('dropType', messageType);
 			this.socket.emit('dropType', messageType);
 		}
 	},

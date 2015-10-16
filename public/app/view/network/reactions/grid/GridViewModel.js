@@ -20,7 +20,7 @@ Ext.define('NU.view.network.reactions.grid.GridViewModel', {
 	},
 	formulas: {
 		name: function (get) {
-			return get('robot.name') || 'Unknown';
+			return get('robot.id') || 'Unknown';
 		},
 		record: function (get) {
 			var recording = get('robot.recording');
