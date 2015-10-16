@@ -20,30 +20,30 @@ Ext.define('NU.view.field.Robot', {
 			var api_motor_data = api_sensor_data.servo;
 
 			var PI2 = Math.PI/2;
-			var ServoID = API.Sensors.ServoID;
+			var ServoID = API.messages.input.proto.Sensors.ServoID;
 			var model = darwin.object;
 
 			if (api_motor_data.length > 0) {
-				model.rightShoulder.setAngle(api_motor_data[ServoID.R_SHOULDER_PITCH].present_position - PI2);
-				model.leftShoulder.setAngle(api_motor_data[ServoID.L_SHOULDER_PITCH].present_position - PI2);
-				model.rightUpperArm.setAngle(api_motor_data[ServoID.R_SHOULDER_ROLL].present_position);
-				model.leftUpperArm.setAngle(api_motor_data[ServoID.L_SHOULDER_ROLL].present_position);
-				model.rightLowerArm.setAngle(api_motor_data[ServoID.R_ELBOW].present_position);
-				model.leftLowerArm.setAngle(api_motor_data[ServoID.L_ELBOW].present_position);
-				model.rightPelvisY.setAngle(api_motor_data[ServoID.R_HIP_YAW].present_position);
-				model.leftPelvisY.setAngle(api_motor_data[ServoID.L_HIP_YAW].present_position);
-				model.rightPelvis.setAngle(api_motor_data[ServoID.R_HIP_ROLL].present_position);
-				model.leftPelvis.setAngle(api_motor_data[ServoID.L_HIP_ROLL].present_position);
-				model.rightUpperLeg.setAngle(api_motor_data[ServoID.R_HIP_PITCH].present_position);
-				model.leftUpperLeg.setAngle(api_motor_data[ServoID.L_HIP_PITCH].present_position);
-				model.rightLowerLeg.setAngle(api_motor_data[ServoID.R_KNEE].present_position);
-				model.leftLowerLeg.setAngle(api_motor_data[ServoID.L_KNEE].present_position);
-				model.rightAnkle.setAngle(api_motor_data[ServoID.R_ANKLE_PITCH].present_position);
-				model.leftAnkle.setAngle(api_motor_data[ServoID.L_ANKLE_PITCH].present_position);
-				model.rightFoot.setAngle(api_motor_data[ServoID.R_ANKLE_ROLL].present_position);
-				model.leftFoot.setAngle(api_motor_data[ServoID.L_ANKLE_ROLL].present_position);
-				model.neck.setAngle(api_motor_data[ServoID.HEAD_PAN].present_position);
-				model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].present_position);
+				model.rightShoulder.setAngle(api_motor_data[ServoID.R_SHOULDER_PITCH].presentPosition - PI2);
+				model.leftShoulder.setAngle(api_motor_data[ServoID.L_SHOULDER_PITCH].presentPosition - PI2);
+				model.rightUpperArm.setAngle(api_motor_data[ServoID.R_SHOULDER_ROLL].presentPosition);
+				model.leftUpperArm.setAngle(api_motor_data[ServoID.L_SHOULDER_ROLL].presentPosition);
+				model.rightLowerArm.setAngle(api_motor_data[ServoID.R_ELBOW].presentPosition);
+				model.leftLowerArm.setAngle(api_motor_data[ServoID.L_ELBOW].presentPosition);
+				model.rightPelvisY.setAngle(api_motor_data[ServoID.R_HIP_YAW].presentPosition);
+				model.leftPelvisY.setAngle(api_motor_data[ServoID.L_HIP_YAW].presentPosition);
+				model.rightPelvis.setAngle(api_motor_data[ServoID.R_HIP_ROLL].presentPosition);
+				model.leftPelvis.setAngle(api_motor_data[ServoID.L_HIP_ROLL].presentPosition);
+				model.rightUpperLeg.setAngle(api_motor_data[ServoID.R_HIP_PITCH].presentPosition);
+				model.leftUpperLeg.setAngle(api_motor_data[ServoID.L_HIP_PITCH].presentPosition);
+				model.rightLowerLeg.setAngle(api_motor_data[ServoID.R_KNEE].presentPosition);
+				model.leftLowerLeg.setAngle(api_motor_data[ServoID.L_KNEE].presentPosition);
+				model.rightAnkle.setAngle(api_motor_data[ServoID.R_ANKLE_PITCH].presentPosition);
+				model.leftAnkle.setAngle(api_motor_data[ServoID.L_ANKLE_PITCH].presentPosition);
+				model.rightFoot.setAngle(api_motor_data[ServoID.R_ANKLE_ROLL].presentPosition);
+				model.leftFoot.setAngle(api_motor_data[ServoID.L_ANKLE_ROLL].presentPosition);
+				model.neck.setAngle(api_motor_data[ServoID.HEAD_PAN].presentPosition);
+				model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].presentPosition);
 			}
 
 			if (this.getShowOrientation()) {

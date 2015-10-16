@@ -71,10 +71,10 @@ Ext.define('NU.view.window.VisionController', {
     },
 
 	addEvents: function () {
-		NU.Network.on({
-			image: this.onImage,
-			classified_image: this.onClassifiedImage,
-			vision_object: this.onVisionObjects,
+		this.mon(NU.Network, {
+			'messages.input.proto.Image': this.onImage,
+			'messages.vision.proto.ClassifiedImage': this.onClassifiedImage,
+			'messages.vision.proto.VisionObjects': this.onVisionObjects,
 			scope: this
 		});
 	},
@@ -129,9 +129,9 @@ Ext.define('NU.view.window.VisionController', {
 		this.setHeight(height);
 		this.getLayeredCanvas().setCanvasSize(width, height);
 	},
-    onImage: function (robotId, image) {
+    onImage: function (robot, image) {
 
-        if (robotId != this.getRobotId() || image === null) {
+        if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
@@ -142,7 +142,7 @@ Ext.define('NU.view.window.VisionController', {
 		var width = image.dimensions.x;
 		var height = image.dimensions.y;
 		this.autoSize(width, height);
-		var Format = API.Image.Format;
+		var Format = API.messages.input.proto.Image.Format;
 
 		switch (image.format) {
 			case Format.JPEG:
@@ -182,14 +182,14 @@ Ext.define('NU.view.window.VisionController', {
 		var bytesPerPixel = 2;
 		this.imageRenderer.resize(width, height);
 		this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageRenderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+		this.imageRenderer.updateUniform('imageFormat', API.messages.input.proto.Image.Format.YCbCr422);
 		this.imageRenderer.updateUniform('imageWidth', width);
 		this.imageRenderer.updateUniform('imageHeight', height);
 		this.imageRenderer.render();
 
 		this.imageDiffRenderer.resize(width, height);
 		this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageDiffRenderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+		this.imageDiffRenderer.updateUniform('imageFormat', API.messages.input.proto.Image.Format.YCbCr422);
 		this.imageDiffRenderer.updateUniform('imageWidth', width);
 		this.imageDiffRenderer.updateUniform('imageHeight', height);
 		this.imageDiffRenderer.render();
@@ -226,9 +226,9 @@ Ext.define('NU.view.window.VisionController', {
 		}
 		return window.btoa(binary);
 	},
-    onClassifiedImage: function (robotId, image) {
+    onClassifiedImage: function (robot, image) {
 
-        if(robotId != this.getRobotId()) {
+        if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
@@ -366,23 +366,24 @@ Ext.define('NU.view.window.VisionController', {
             context.stroke();
         }
     },
-	onVisionObjects: function (robotId, visionObjects) {
+	onVisionObjects: function (robot, visionObjects) {
 
-		if (robotId !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
-		switch (visionObjects.getType()) {
-			case 0: // Goal
-				this.drawGoals(visionObjects.getGoal());
-				break;
-			case 1: // Ball
-				this.drawBalls(visionObjects.getBall());
-				break;
-			case 3: // Lines
-				this.drawLines(visionObjects.getLine());
-				break;
-		}
-
+		visionObjects.objects.forEach(function (visionObject) {
+			switch (visionObject.getType()) {
+				case 0: // Goal
+					this.drawGoals(visionObject.getGoal());
+					break;
+				case 1: // Ball
+					this.drawBalls(visionObject.getBall());
+					break;
+				case 3: // Lines
+					this.drawLines(visionObject.getLine());
+					break;
+			}
+		}, this);
 	},
 	drawGoals: function (goals) {
 

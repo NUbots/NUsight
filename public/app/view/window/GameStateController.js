@@ -2,7 +2,7 @@ Ext.define('NU.view.window.GameStateController', {
 	extend: 'NU.view.window.DisplayController',
 	alias: 'controller.GameState',
 	init: function () {
-		NU.Network.on('game_state', this.onGameState, this);
+		this.mon(NU.Network, 'messages.input.proto.GameState', this.onGameState, this);
 	},
 	onSelectRobot: function (robotId) {
 		var store = this.getStore();
@@ -16,16 +16,16 @@ Ext.define('NU.view.window.GameStateController', {
 		var store = this.getStore();
 		store.remove(store.query('robotId', this.getRobotId()).items);
 	},
-	onGameState: function (robotId, gameState, timestamp) {
+	onGameState: function (robot, gameState, timestamp) {
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
 		var store = this.getStore();
 		store.add({
 			time: timestamp,
-			robotId: robotId,
+			robotId: robot.get('id'),
 			eventName: gameState.getEvent(),
 			state: gameState.getData()
 		});

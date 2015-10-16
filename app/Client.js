@@ -2,19 +2,18 @@ function Client(socket) {
 	
 	this.socket = socket;
 	this.cache = [];
+	this.listeners = {};
 	
 }
 
-Client.prototype.sendMessage = function (robotId, message) {
+Client.prototype.sendMessage = function (robot, messageType, protobuf, filterId, timestamp) {
 
 	// This code throttles packets that are marked as filterable.
 	// It waits for the client to send back an acknowledgement after each message (of each particular type) before sending another.
-	var type = message[0];
-	var filterId = message[1];
 	if (filterId === 0) {
-		this.socket.emit('message', robotId, message);
+		this.socket.emit('message', robot, messageType, protobuf, filterId, timestamp);
 	} else {
-		var hash = type + ':' + filterId + ':' + robotId;
+		var hash = messageType + ':' + filterId + ':' + robot.id;
 		var now = Date.now();
 		var timeout = 1000 * 2;
 		var timedOut = this.cache[hash] !== undefined && this.cache[hash] + timeout < now;
@@ -23,7 +22,7 @@ Client.prototype.sendMessage = function (robotId, message) {
 				console.warn('ACK not received for:', hash);
 			}
 			this.cache[hash] = now;
-			this.socket.emit('message', robotId, message, function () {
+			this.socket.emit('message', robot, messageType, protobuf, filterId, timestamp, function () {
 				delete this.cache[hash];
 			}.bind(this));
 		}

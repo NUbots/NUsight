@@ -30,7 +30,7 @@
 			// Obtain the node and its information.
 			var node = path[i];
 			var position = node.position;
-			var parentIndex = node.parent_index;
+			var parentIndex = node.parentIndex;
 			// Check if the parentIndex has a parent of itself.
 			if (parentIndex === i) {
 				// Create the circle and merge it with the base geometry.

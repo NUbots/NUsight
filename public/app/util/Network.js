@@ -6,232 +6,201 @@ Ext.define('NU.util.Network', {
 	},
 	socket: null,
 	cache: null,
+	deserialisers: null,
+	protoBuilder: null,
 
 	constructor: function (config) {
 		this.mixins.observable.constructor.call(this, config);
 		this.initConfig(config);
 		this.cache = [];
+		this.deserialisers = {};
 	},
 
 	init: function () {
 
 		this.setupSocket();
-		this.setupAPI();
-		this.setupTypeMap();
 
-		Ext.getStore('Robots').on({
-			add: this.onAddRobot,
-			update: this.onUpdateRobot,
-			remove: this.onRemoveRobot,
-			scope: this
-		});
+		this.protoBuilder = dcodeIO.ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
+
+		this.on('addListener', this.addHandler.bind(this));
+		this.on('removeListener', this.removeHandler.bind(this));
+
+		// We use the command protocol buffer
+		this.loadProto('messages.support.nubugger.proto.Command');
 
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
-
-	},
-
-	getTypeMap: function () {
-		return this.typeMap;
 	},
 
 	onAnimationFrame: function () {
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
 
 		Ext.Object.each(this.cache, function (hash, event) {
-			if (this.hasListener(event.name)) {
-				delete this.cache[hash];
-				this.processMessage(event);
+
+			delete this.cache[hash];
+			if(this.hasListener(event.messageType.toLowerCase())) {
+				this.fireEvent(event.messageType
+					, event.robot
+					, this.deserialisers[event.messageType](event.protobuf)
+					, event.timestamp);
 			}
+
+			// Tell socket.io it can send a new packet
+			event.ackCallback();
 		}, this);
 	},
 
-	processPacket: function (packet) {
-		var robot = this.getRobot(packet.robotId);
-		var message = new Uint8ClampedArray(packet.message);
-		var type = message[0];
-		var eventName = this.typeMap[type];
-		var filterId = message[1];
+	loadProto: function (protocolBuffer) {
+		// Load the protocol buffer file and build it
+		dcodeIO.ProtoBuf.loadProtoFile({
+			root: 'resources/js/proto',
+			file: protocolBuffer.replace(/\./g, '/') + '.proto'
+		}, this.protoBuilder);
+		var proto = this.protoBuilder.build(protocolBuffer);
 
-		event = {
-			name: eventName,
-			robotId: robot.id,
-			message: packet.message.slice(2)
-		};
+		// Update our API
+		window.API = this.protoBuilder.build();
 
-		if (filterId > 0) {
-			var hash = eventName + ':' + filterId + ':' + robot.id;
-			this.cache[hash] = event;
-		} else {
-			if (this.hasListener(event.name)) {
-				this.processMessage(event);
-			}
-		}
-
-		this.fireEvent('packet', robot, type, packet);
-	},
-
-	processMessage: function (event) {
-		var api_message = API.Message.decode(event.message);
-		var api_event = api_message[event.name];
-		var time = new Date(api_message.getUtcTimestamp().toNumber());
-		this.fireEvent(event.name, event.robotId, api_event, time);
-		//console.log(event.robotIP, event.name);
+		return proto;
 	},
 
 	setupSocket: function () {
 		var socket = io.connect(document.location.origin);
-		socket.on('addRemoteRobot', this.onAddRemoteRobot.bind(this));
+		socket.on('updateRobot', this.updateRobot.bind(this));
 		socket.on('message', this.onMessage.bind(this));
 		this.socket = socket;
 	},
 
-	setupAPI: function () {
-		var builder = this.builder = dcodeIO.ProtoBuf.loadProtoFile({
-			root: 'resources/js/proto',
-			file: 'messages/support/nubugger/proto/Message.proto'
-		});
+	addHandler: function(messageType) {
 
-		window.API = builder.build('messages.support.nubugger.proto');
-		// cry :'(
-		window.API.Behaviour = builder.build('messages.behaviour.proto.Behaviour');
-		window.API.Configuration = builder.build('messages.support.nubugger.proto.ConfigurationState');
-		window.API.GameState = builder.build('messages.input.proto.GameState');
-		window.API.Image = builder.build('messages.input.proto.Image');
-		window.API.Sensors = builder.build('messages.input.proto.Sensors');
-		window.API.Subsumption = builder.build('messages.behaviour.proto.Subsumption');
-		window.API.Vision = builder.build('messages.vision.proto');
-	},
+		// If it's a string, make it an object
+		if (typeof messageType === 'string') {
+			var tmp = {};
+			tmp[messageType] = null;
+			messageType = tmp;
+		}
 
-	setupTypeMap: function () {
-		var typeMap = {};
-		Ext.iterate(API.Message.Type, function (key, type) {
-			typeMap[type] = key.toLowerCase();
-		}, this);
-		this.typeMap = typeMap;
-	},
+		Object.keys(messageType).forEach(function (key) {
+			// If we need to tell node.js to start listening for this
+			if(key !== 'scope' &&
+				key !== 'packet' &&
+				key !== 'addListener' &&
+				key !== 'removeListener' &&
+				key !== 'addType' &&
+				key !== 'dropType' &&
+				key !== 'addRobot' &&
+				key !== 'removeRobot' &&
+				!this.hasListener(key.toLowerCase())) {
 
-	onAddRobot: function (store, records, index, eOpts) {
-		Ext.each(records, function (record) {
-			if (record.get('host') !== '') {
-				this.socket.emit('addRobot', record.get('id'), record.get('host'), record.get('port'), record.get('name'));
-				this.fireEvent('addRobot', record);
+				var proto = this.loadProto(key);
+
+				// Add a deserialiser for this
+				this.deserialisers[key] = function (data) {
+					return proto.decode(data);
+				};
+
+				this.fireEvent('addType', key);
+
+				this.socket.emit('addType', key);
 			}
 		}, this);
 	},
+	removeHandler: function (messageType) {
 
-	onUpdateRobot: function (store, record, operation, modifiedFieldNames) {
-		var robotId = record.get('id');
-		var values = {};
-		Ext.each(modifiedFieldNames, function (fieldName) {
-			values[fieldName] = record.get(fieldName);
-		});
-		this.socket.emit('updateRobot', robotId, values);
-	},
-
-	onRemoveRobot: function (store, records, indexes, isMove, eOpts) {
-		Ext.each(records, function (record) {
-			this.socket.emit('removeRobot', record.get('id'));
-			this.fireEvent('removeRobot', record);
-		}, this);
-	},
-
-	reconnect: function () {
-		this.socket.emit('reconnectRobots');
+		// If this was the last one
+		// Send a message to unbind the reaction on the node.js side
+		if(messageType !== 'scope' &&
+			messageType !== 'packet' &&
+			messageType !== 'addListener' &&
+			messageType !== 'removeListener' &&
+			messageType !== 'addType' &&
+			messageType !== 'dropType' &&
+			messageType !== 'addRobot' &&
+			messageType !== 'removeRobot' &&
+			!this.hasListener(messageType.toLowerCase())) {
+			delete this.deserialisers[messageType];
+			this.fireEvent('dropType', messageType);
+			this.socket.emit('dropType', messageType);
+		}
 	},
 
 	recordRobots: function (recording) {
 		var robotStore = this.getRobotStore();
 		var robotIds = [];
-		robotStore.un('update', this.onUpdateRobot, this);
+
 		robotStore.each(function (robot) {
 			var isRecording = robot.get('recording');
 			if (recording !== isRecording) {
-				robotIds.push(robot.id);
+				robotIds.push(robot.get('id'));
 				robot.set('recording', recording);
 			}
 		}, this);
+
 		this.socket.emit('recordRobots', robotIds, recording);
-		robotStore.on('update', this.onUpdateRobot, this);
 	},
 
-	onAddRemoteRobot: function (robot) {
-		var robotsStore = Ext.getStore('Robots');
-		var robotIndex = robotsStore.find('id', robot.id);
-		if (robotIndex === -1) {
-			robotsStore.add(robot);
+	updateRobot: function (robot) {
+		// Try to find this robot
+		if (this.getRobotStore().find('id', robot.id) === -1) {
+
+			var record = this.getRobotStore().add(robot)[0];
+
+			this.fireEvent('addRobot', record);
+		}
+		else {
+			var record = this.getRobotStore().findRecord('id', robot.id);
+			record.set(robot);
 		}
 	},
 
-	onMessage: function (robotId, message, callback) {
-		this.processPacket({
-			robotId: robotId,
-			message: message
-		});
+	onMessage: function (robot, messageType, protobuf, filterId, timestamp, ackCallback) {
+		var record = this.getRobotStore().findRecord('id', robot.id);
+		if(record) {
+			if (filterId > 0) {
+				// Store in the cache for the next animation frame
+				var hash = messageType + ':' + filterId + ':' + record.get('id');
+				this.cache[hash] = {
+					messageType: messageType,
+					robot: record,
+					protobuf: protobuf,
+					timestamp: new Date(timestamp),
+					ackCallback: ackCallback
+				};
+			}
+			else if (this.hasListener(messageType.toLowerCase())) {
+				// Do it right away
+				this.fireEvent(messageType, record, this.deserialisers[messageType](protobuf), new Date(timestamp));
+			}
 
-		if (callback) {
-			callback();
+			this.fireEvent('packet', record, messageType, protobuf);
 		}
 	},
 
-	send: function (robotId, message) {
-		this.socket.emit('message', robotId, message.encode().toArrayBuffer());
-	},
+	send: function (message, target, reliable) {
 
-	broadcast: function (message) {
-		this.socket.emit('broadcast', message.encode().toArrayBuffer());
-	},
+		// Shunt up our types
+		if(typeof target === 'boolean') {
+			reliable = target;
+			target = undefined;
+		}
 
-	getRobotIPs: function () {
-		var result = [];
-		var robotsStore = Ext.getStore('Robots');
-		robotsStore.each(function (record) {
-			result.push(record.get('host'));
-		});
-		return result;
+		this.socket.emit('message', message.$type.toString().substr(1), message.toArrayBuffer(), target, reliable);
 	},
 
 	getRobotStore: function () {
 		return Ext.getStore('Robots');
 	},
 
-	getRobot: function (robotId) {
-		var store = this.getRobotStore();
-		return store.findRecord('id', robotId);
-	},
-
-	/**
-	 * Creates a message of a particular type and filter identifier that can be used to send over the network.
-	 *
-	 * @param type The type of message being created.
-	 * @param filterId The filter identifier for the message.
-	 */
-	createMessage: function (type, filterId) {
-		// Create the message.
-		var message = new API.Message();
-		// Set the type, filter identifier and timestamp of the message.
-		message.setType(type);
-		message.setFilterId(filterId);
-		message.setUtcTimestamp(Date.now() / 1000);
-		// Return the message that was created].
-		return message;
-	},
-
 	/**
 	 * Creates a message and command of a particular name to send over the network.
 	 *
-	 * @param robotId The id of the robot associated with the command.
-	 * @param commandName The name of the command.
-	 * @param [filterId] The filter identifier for the message.
+	 * @param command The name of the command.
+	 * @param target The id of the robot associated with the command.
 	 */
-	sendCommand: function (robotId, commandName, filterId) {
-		// Create the message of type command.
-		var message = this.createMessage(API.Message.Type.COMMAND, filterId || 0);
-		// Create the command and set its name.
-		var command = new API.Message.Command();
-		command.setCommand(commandName);
-		// Set the command of the message
-		message.setCommand(command);
-		// Send the command message over the network.
-		this.send(robotId, message);
+	sendCommand: function (command, target) {
+
+		var msg = new API.messages.support.nubugger.proto.Command();
+		msg.setCommand(command);
+
+		this.send(msg, target, true);
 	}
 });

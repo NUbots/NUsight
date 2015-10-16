@@ -332,6 +332,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setLookupBackwardHistory([]);
 	},
 	init: function () {
+		// Load the protocol buffers we use
+		NU.Network.loadProto('messages.input.proto.Image');
+		NU.Network.loadProto('messages.vision.proto.LookUpTable');
+
 		// these must initialized here so there is an object per-controller
 		this.resetLUT();
 		this.setLookupForwardHistory([]);
@@ -468,10 +472,10 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 
 	addEvents: function () {
-		NU.Network.on({
-			image: this.onImage,
-			lookup_table: this.onLookUpTable,
-			lookup_table_diff: this.onLookUpTableDiff,
+		this.mon(NU.Network, {
+			'messages.input.proto.Image': this.onImage,
+			'messages.vision.proto.LookUpTable': this.onLookUpTable,
+			'messages.vision.proto.LookUpTableDiff': this.onLookUpTableDiff,
 			scope: this
 		});
 	},
@@ -552,19 +556,17 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setLookupVertexBuffer(vertices);
 	},
 	download: function () {
-		NU.Network.sendCommand(this.getRobotId(), "download_lut");
+		NU.Network.sendCommand("download_lut", this.getRobotId());
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
-		var message = NU.util.Network.createMessage(API.Message.Type.LOOKUP_TABLE, 0);
-		var lookupTable = new API.Vision.LookUpTable();
+		var lookupTable = new API.messages.vision.proto.LookUpTable();
 		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
 		lookupTable.setSave(save);
-		message.setLookupTable(lookupTable);
-		NU.Network.send(this.getRobotId(), message);
+		NU.Network.send(lookupTable, this.getRobotId(), true);
 	},
 	getLUTIndex: function (ycbcr) {
 		var bitsY = this.self.LutBitsPerColorY;
@@ -618,10 +620,10 @@ Ext.define('NU.view.window.ClassifierController', {
 			}
 		}
 	},
-	onLookUpTable: function (robotId, lookuptable) {
+	onLookUpTable: function (robot, lookuptable) {
 
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
@@ -641,10 +643,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
-	onLookUpTableDiff: function (robotId, tableDiff) {
+	onLookUpTableDiff: function (robot, tableDiff) {
 
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
@@ -669,10 +671,10 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.updateClassifiedData();
 		this.renderClassifiedImage();
 	},
-	onImage: function (robotId, image) {
+	onImage: function (robot, image) {
 
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
 
@@ -1123,7 +1125,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		//x = imageWidth - x - 1;
 		//y = imageHeight - y - 1;
 
-		var Format = API.Image.Format;
+		var Format = API.messages.input.proto.Image.Format;
 		switch (this.getImageFormat()) {
 			case Format.JPEG:
 				var offset = 3 * (y * imageWidth + x);
@@ -1151,7 +1153,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		}
 	},
 	drawImage: function (image, callback, thisArg) {
-		var Format = API.Image.Format;
+		var Format = API.messages.input.proto.Image.Format;
 		this.setImageFormat(image.format);
 		switch (image.format) {
 			case Format.JPEG:
@@ -1178,13 +1180,13 @@ Ext.define('NU.view.window.ClassifierController', {
 			var renderer = renderers[i];
 			renderer.resize(width, height);
 			renderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-			renderer.updateUniform('imageFormat', API.Image.Format.YCbCr422);
+			renderer.updateUniform('imageFormat', API.messages.input.proto.Image.Format.YCbCr422);
 			renderer.updateUniform('imageWidth', width);
 			renderer.updateUniform('imageHeight', height);
 			renderer.render();
 		}
 		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
+		this.selectionClassifier.updateRawImage(API.messages.input.proto.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageYbCr444: function (image) {
@@ -1198,7 +1200,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			renderer.render();
 		}
 		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(API.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
+		this.selectionClassifier.updateRawImage(API.messages.input.proto.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageJPEG: function (image, callback, thisArg) {
@@ -1230,15 +1232,16 @@ Ext.define('NU.view.window.ClassifierController', {
 				imageObj.adobe.transformCode = false;
 			}
 			var rawData = imageObj.getData(imageObj.width, imageObj.height);
-			var image = new API.Image();
+			var image = new API.messages.input.proto.Image();
 			image.setData(rawData);
 			image.setCameraId(0);
 			image.setDimensions({
 				x: imageObj.width,
 				y: imageObj.height
 			});
-			image.setFormat(API.Image.Format.YCbCr444);
-			this.onImage(this.getRobotId(), image);
+			image.setFormat(API.messages.input.proto.Image.Format.YCbCr444);
+			var record = NU.Network.getRobotStore().findRecord('id', this.getRobotId());
+			this.onImage(record, image);
 			callback.call(this);
 		}.bind(this);
 		imageObj.load(uri);

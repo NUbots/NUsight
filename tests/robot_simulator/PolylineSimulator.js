@@ -3,35 +3,32 @@ var RobotSimulator = require('./RobotSimulator');
 
 function PolylineSimulator () {
 	RobotSimulator.call(this);
+
+	this.loadProto('messages.support.nubugger.proto.DrawObjects');
 }
 util.inherits(PolylineSimulator, RobotSimulator);
 
 PolylineSimulator.prototype.run = function () {
-	var message = new this.API.Message({
-		type: this.API.Message.Type.DRAW_OBJECTS,
-		filter_id: 0,
-		utc_timestamp: Date.now(),
-		draw_objects: {
-			objects: [{
-				shape: 'POLYLINE',
-				path: [{
-					position: this.randomFieldPosition(),
-					parent_index: 0
-				}, {
-					position: this.randomFieldPosition(),
-					parent_index: 0
-				}, {
-					position: this.randomFieldPosition(),
-					parent_index: 0
-				}, {
-					position: this.randomFieldPosition(),
-					parent_index: 2
-				}, {
-					position: this.randomFieldPosition(),
-					parent_index: 0
-				}]
+	var message = new this.API.messages.support.nubugger.proto.DrawObjects({
+		objects: [{
+			shape: 'POLYLINE',
+			path: [{
+				position: this.randomFieldPosition(),
+				parentIndex: 0
+			}, {
+				position: this.randomFieldPosition(),
+				parentIndex: 0
+			}, {
+				position: this.randomFieldPosition(),
+				parentIndex: 0
+			}, {
+				position: this.randomFieldPosition(),
+				parentIndex: 2
+			}, {
+				position: this.randomFieldPosition(),
+				parentIndex: 0
 			}]
-		}
+		}]
 	});
 
 	this.sendMessage(message);

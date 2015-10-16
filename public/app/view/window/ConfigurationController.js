@@ -16,9 +16,10 @@ Ext.define('NU.view.window.ConfigurationController', {
     mode: null,                         // The current updating mode.
     init: function () {
         this.store = this.getViewModel().getStore('tree');
-        this.type = API.ConfigurationState.Node.Type;
+        NU.Network.loadProto('messages.support.nubugger.proto.ConfigurationState');
+        this.type = API.messages.support.nubugger.proto.ConfigurationState.Node.Type;
         this.mode = this.Modes.STANDARD;
-        NU.Network.on('configuration_state', this.onConfigurationState, this);
+        this.mon(NU.Network, 'messages.support.nubugger.proto.ConfigurationState', this.onConfigurationState, this);
     },
     /**
      * A function that is called when the user selects a robot. It then sends the command to get the configuration state with this IP address.
@@ -35,8 +36,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param robotId The robot id.
      * @param configurationState The configuration state protocol buffer.
      */
-    onConfigurationState: function (robotId, configurationState) {
-        if (robotId !== this.getRobotId()) {
+    onConfigurationState: function (robot, configurationState) {
+        if (robot.get('id') !== this.getRobotId()) {
             return;
         }
         // Retrieve the root from the buffer.
@@ -48,7 +49,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * Sends a command to the network requesting the configuration state.
      */
     sendCommand: function () {
-        NU.Network.sendCommand(this.getRobotId(), 'get_configuration_state');
+        NU.Network.sendCommand('get_configuration_state', this.getRobotId());
     },
     /**
      * An event triggered when the current mode display has rendered.
@@ -432,7 +433,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param [path] The path to the file or directory.
      */
     createKeyPair: function (name, value, path) {
-        var keyPair = new API.Configuration.KeyPair;
+        var keyPair = new API.messages.support.nubugger.proto.ConfigurationState.KeyPair;
         keyPair.setName(name);
         if (value) {
             keyPair.setValue(value);
@@ -449,7 +450,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A ConfigurationState Node.
      */
     createNode: function (type) {
-        var node = new API.Configuration.Node;
+        var node = new API.messages.support.nubugger.proto.ConfigurationState.Node;
         node.setType(type);
         return node;
     },
@@ -461,7 +462,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     createFileNode: function (record) {
         var node = this.createNode(this.type.FILE);
-        var map = new API.Configuration.KeyPair;
+        var map = new API.messages.support.nubugger.proto.ConfigurationState.KeyPair;
         map.setName(record.get('name'));
         map.setPath(record.get('path'));
         node.getMapValue().push(map);
@@ -604,12 +605,8 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     send: function (tree) {
         if (tree !== null) {
-            // Create the configuration state message.
-            var message = NU.Network.createMessage(API.Message.Type.CONFIGURATION_STATE, 0);
-            // Set the configuration state of the message.
-            message.setConfigurationState(this.getConfigurationState(tree));
             // Send the message over the network.
-            NU.Network.send(this.getRobotId(), message);
+            NU.Network.send(this.getConfigurationState(tree), this.getRobotId(), true);
         }
         // Reset the current tree.
         this.currentTree = null;
@@ -621,7 +618,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {Window.API.Configuration} The ConfigurationState message.
      */
     getConfigurationState: function (tree) {
-        var configuration = new API.Configuration();
+        var configuration = new API.messages.support.nubugger.proto.ConfigurationState();
         configuration.setRoot(tree.root);
         return configuration;
     }

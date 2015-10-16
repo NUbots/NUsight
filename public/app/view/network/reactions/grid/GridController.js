@@ -10,31 +10,31 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		this.messages = {};
 		this.store = viewModel.getStore('grid');
 		viewModel.set('robot', robot);
+
+		this.mon(NU.Network, {
+			addType: this.addType,
+			dropType: this.dropType,
+			scope: this
+		});
+
 		this.addData(this.store);
-		NU.Network.sendCommand(robot.get('id'), 'get_reaction_handles');
-		NU.Network.on('reaction_handles', this.onReactionHandles, this);
+		NU.Network.sendCommand('get_reaction_handles', robot.get('id'));
+		this.mon(NU.Network, 'messages.support.nubugger.proto.ReactionHandles', this.onReactionHandles, this);
 	},
 
-	/**
-	 * Add the data dynamically to the view model based off the message type enumeration.
-	 *
-	 * @param store The grid store in the view model.
-	 */
-	addData: function (store) {
-		// Iterate through every message type.
-		Ext.Object.each(API.Message.Type, function (key, value) {
-			if (value !== API.Message.Type.PING) {
-				// Capitalise the first letter and replace each underscore with a space.
-				var name = key.substring(0, 1).toUpperCase() + key.substring(1).toLowerCase().replace(/_/g, ' ');
-				// Add the key to the data and initialise its value.
-				this.messages[key.toLowerCase()] = store.add({
-					name: name,
-					type: value,
-					packets: 0,
-					enabled: true
-				})[0];
-			}
-		}, this);
+	addType: function (type) {
+		var i = type.lastIndexOf('.');
+		var name = i === -1 ? type : type.substr(i + 1);
+		this.messages[type.toLowerCase()] = this.store.add({
+			name: name,
+			type: type,
+			packets: 0,
+			enabled: true
+		})[0];
+	},
+
+	dropType: function (type) {
+
 	},
 
 	/**
@@ -56,16 +56,16 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		var record = this.store.getAt(rowIndex);
 		// Update the state of the record enabled field.
 		record.set('enabled', checked);
+
 		// Create the reaction handles message and add the record data.
-		var message = NU.Network.createMessage(API.Message.Type.REACTION_HANDLES, 0);
-		var reactionHandles = new API.Message.ReactionHandles();
+		var reactionHandles = new API.messages.support.nubugger.proto.ReactionHandles();
 		reactionHandles.handles.push({
 			type: record.get('type'),
 			enabled: record.get('enabled')
 		});
-		message.setReactionHandles(reactionHandles);
+
 		// Send the message.
-		NU.Network.send(this.robot.get('id'), message);
+		NU.Network.send(reactionHandles, this.robot.get('id'), true);
 	},
 
 	/**
@@ -75,7 +75,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 	 * @param reactionHandles The reaction handles data.
 	 * @param timestamp The time the command was received.
 	 */
-	onReactionHandles: function (robotId, reactionHandles, timestamp) {
+	onReactionHandles: function (robot, reactionHandles, timestamp) {
 		var handles = reactionHandles.handles;
 		Ext.each(handles, function (handle) {
 			var message = this.messages[NU.Network.typeMap[handle.type]];
@@ -91,7 +91,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 	 * @param key The store key.
 	 */
 	onUpdate: function (key) {
-		var message = this.messages[key];
+		var message = this.messages[key.toLowerCase()];
 		if (message) {
 			message.set('packets', message.get('packets') + 1);
 		}

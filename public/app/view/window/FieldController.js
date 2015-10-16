@@ -32,11 +32,11 @@ Ext.define('NU.view.window.FieldController', {
 	},
 
 	addEvents: function () {
-		NU.Network.on({
-			localisation: this.onLocalisation,
+		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
-			draw_objects: this.onDrawObjects,
-			sensor_data: this.onSensorData,
+			'messages.localisation.proto.Localisation': this.onLocalisation,
+			'messages.support.nubugger.proto.DrawObjects': this.onDrawObjects,
+			'messages.input.proto.Sensors': this.onSensorData,
 			scope: this
 		});
 	},
@@ -122,7 +122,7 @@ Ext.define('NU.view.window.FieldController', {
 		controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
 
 		NU.Network.getRobotStore().each(function (robot) {
-			this.onAddRobot(robot.get('id'));
+			this.onAddRobot(robot);
 		}, this);
 	},
 
@@ -155,19 +155,20 @@ Ext.define('NU.view.window.FieldController', {
 		this.setRobotId(robotId);
 	},
 
-	onAddRobot: function (robotId) {
-		var robot = this.getRobot(robotId);
+	onAddRobot: function (newRobot) {
+		var robot = this.getRobot(newRobot.id);
 
 		if (robot !== null) {
 			return; // TODO: already exists
 		}
 
 		robot = Ext.create('NU.view.field.Robot', {
-			robotId: robotId
+			robotId: newRobot.id
 		});
 
 		robot.on('loaded', function () {
-			if (robotId !== this.getRobotId()) {
+			// Hide if we are not currently selected
+			if (newRobot.id !== this.getRobotId()) {
 				robot.darwinModels.forEach(function (model) {
 					model.traverse(function (object) {
 						object.visible = false;
@@ -242,8 +243,8 @@ Ext.define('NU.view.window.FieldController', {
 		//todo this.addObject(robot.ballModels);
 	},
 
-	onSensorData: function (robotId, api_sensor_data) {
-		var robot = this.getRobot(robotId);
+	onSensorData: function (rInfo, api_sensor_data) {
+		var robot = this.getRobot(rInfo.get('id'));
 		if (robot == null) {
 			// TODO: console.log('error', robotIP);
 			return;
@@ -251,22 +252,22 @@ Ext.define('NU.view.window.FieldController', {
 		robot.onSensorData(api_sensor_data);
 	},
 
-	onLocalisation: function (robotId, api_localisation) {
-		var robot = this.getRobot(robotId);
+	onLocalisation: function (rInfo, api_localisation) {
+		var robot = this.getRobot(rInfo.get('id'));
 		if (robot == null) {
-			console.log('error', robotId);
+			console.log('error', rInfo);
 			return;
 		}
 		robot.onLocalisation(api_localisation);
 	},
 
-	onDrawObjects: function (robotId, event, timestamp) {
+	onDrawObjects: function (rInfo, event, timestamp) {
 		// TODO: remove
-		if (robotId !== this.getRobotId()) {
+		if (rInfo.get('id') !== this.getRobotId()) {
 			return;
 		}
 		// Get the robot from the IP sent from the network.
-		var robot = this.getRobot(robotId);
+		var robot = this.getRobot(rInfo.get('id'));
 		// Iterate through each of the objects being added to the field.
 		Ext.each(event.getObjects(), function (object) {
 			// Get the field object from the objects on the field.
@@ -311,7 +312,7 @@ Ext.define('NU.view.window.FieldController', {
 
 	createModel: function (robot, object) {
 		// Create a new shape onto the specified robot.
-		var Shape = API.DrawObject.Shape;
+		var Shape = API.messages.support.nubugger.proto.DrawObject.Shape;
 		switch (object.getShape()) {
 			case Shape.ARROW:
 				return this.createArrowModel(robot, object);
@@ -353,7 +354,7 @@ Ext.define('NU.view.window.FieldController', {
 			direction: this.toVec3(object.getDirection()),
 			length: object.getLength(),
 			depth: object.getDepth(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -371,7 +372,7 @@ Ext.define('NU.view.window.FieldController', {
 			width: object.getWidth(),
 			height: object.getHeight(),
 			depth: object.getDepth(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -389,7 +390,7 @@ Ext.define('NU.view.window.FieldController', {
 			width: object.getWidth(),
 			height: object.getHeight(),
 			rotation: this.toVec3(object.getRotation()),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -408,7 +409,7 @@ Ext.define('NU.view.window.FieldController', {
 			bottomRadius: object.getBottomRadius(),
 			height: object.getHeight(),
 			rotation: this.toVec3(object.getRotation()),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -424,7 +425,7 @@ Ext.define('NU.view.window.FieldController', {
 			name: object.getName(),
 			path: object.getPath(),
 			width: object.getWidth(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -443,7 +444,7 @@ Ext.define('NU.view.window.FieldController', {
 			height: object.getHeight(),
 			faces: object.getFaces(),
 			rotation: this.toVec3(object.getRotation()),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -461,7 +462,7 @@ Ext.define('NU.view.window.FieldController', {
 			rotation: this.toEuler(object.getRotation()),
 			width: object.getWidth(),
 			length: object.getLength(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 
@@ -477,7 +478,7 @@ Ext.define('NU.view.window.FieldController', {
 			name: object.getName(),
 			position: this.toVec3(object.getPosition()),
 			radius: object.getRadius(),
-			color: this.toColor(object.getColor())
+			color: this.toColor(object.getColour())
 		});
 	},
 

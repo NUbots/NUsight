@@ -25,6 +25,19 @@ Ext.Loader.setConfig({
     disableCaching : false
 });
 
+Ext.define('NU.mixin.Observable', {
+	override: 'Ext.mixin.Observable',
+	addListener: function (eventName) {
+		this.fireEvent('addListener', eventName);
+		return this.callParent(arguments);
+	},
+	removeListener: function (eventName) {
+		var result = this.callParent(arguments);
+		this.fireEvent('removeListener', eventName);
+		return result;
+	}
+});
+
 Ext.onReady(function() {
     Ext.application({
         name: 'NU',

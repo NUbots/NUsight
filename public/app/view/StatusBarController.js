@@ -12,9 +12,10 @@ Ext.define('NU.view.StatusBarController', {
 	},
 	init: function () {
 		this.panels = {};
-		NU.Network.on({
+		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
 			removeRobot: this.onRemoveRobot,
+			'messages.support.nubugger.proto.Ping': function () {},
 			packet: this.onPacket,
 			scope: this
 		});
@@ -31,9 +32,8 @@ Ext.define('NU.view.StatusBarController', {
 	 */
 	createPanel: function (robot) {
 		var view = this.getView();
-		var name = robot.get('name') || 'Unknown';
-		var key = robot.get('id');
-		this.panels[key] = view.insert(this.getInsertIndex(), {
+		var name = robot.get('id');
+		this.panels[name] = view.insert(this.getInsertIndex(), {
 			xtype: 'panel',
 			tpl: '{name}: {count}',
 			data: {
@@ -77,7 +77,7 @@ Ext.define('NU.view.StatusBarController', {
 		}, this.getUpdateRate());
 
 		NU.util.Display.updateDelayed(panel, {
-			name: robot.get('name'),
+			name: robot.get('id'),
 			count: count + 1
 		}, this.getUpdateRate());
 	},

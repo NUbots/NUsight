@@ -8,8 +8,8 @@ Ext.define('NU.view.robot.Selector', {
 	queryMode: 'local',
 	forceSelection: true,
 	editable: false,
-	displayField: 'name',
-	valueField: 'host',
+	displayField: 'id',
+	valueField: 'id',
 	emptyText: 'No Robot Selected',
 	store: 'Robots',
 	listeners: {

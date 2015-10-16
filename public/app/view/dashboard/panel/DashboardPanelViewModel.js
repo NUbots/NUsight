@@ -170,13 +170,13 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			};
 		},
 		state: function (get) {
-			return NU.TypeMap.get(API.Behaviour.State)[get('behaviourState')] || this.getUninitialised();
+			return NU.TypeMap.get(API.messages.behaviour.proto.Behaviour.State)[get('behaviourState')] || this.getUninitialised();
 		},
 		mode: function (get) {
-			return NU.TypeMap.get(API.GameState.Data.Mode)[get('gameMode')] || this.getUninitialised();
+			return NU.TypeMap.get(API.messages.input.proto.GameState.Data.Mode)[get('gameMode')] || this.getUninitialised();
 		},
 		phase: function (get) {
-			return NU.TypeMap.get(API.GameState.Data.Phase)[get('gamePhase')] || this.getUninitialised();
+			return NU.TypeMap.get(API.messages.input.proto.GameState.Data.Phase)[get('gamePhase')] || this.getUninitialised();
 		},
 		walk: function (get) {
 			var walkCommand = this.roundObject(get('walkCommand'), 2) || {x: 'N/A', y: 'N/A', z: 'N/A'};
@@ -187,14 +187,14 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 			};
 		},
 		penalty: function (get) {
-			return NU.TypeMap.get(API.GameState.Data.PenaltyReason)[get('penaltyReason')] || this.getUninitialised();
+			return NU.TypeMap.get(API.messages.input.proto.GameState.Data.PenaltyReason)[get('penaltyReason')] || this.getUninitialised();
 		},
 		penaltyBackground: function (get) {
 			var penaltyReason = get('penaltyReason');
 			if (penaltyReason === null && get('elapsed') === null) {
 				return this.getColor(0);
 			}
-			return this.getColor(penaltyReason === API.GameState.Data.PenaltyReason.UNPENALISED);
+			return this.getColor(penaltyReason === API.messages.input.proto.GameState.Data.PenaltyReason.UNPENALISED);
 		},
 		penaltyColor: function (get) {
 			return this.getFontColor(get('penaltyBackground'));

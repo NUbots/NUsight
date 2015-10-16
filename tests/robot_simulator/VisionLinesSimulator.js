@@ -3,6 +3,8 @@ var RobotSimulator = require('./RobotSimulator');
 
 function VisionLinesSimulator () {
 	RobotSimulator.call(this);
+
+	this.loadProto('messages.vision.proto.VisionObjects');
 }
 util.inherits(VisionLinesSimulator, RobotSimulator);
 
@@ -19,15 +21,12 @@ VisionLinesSimulator.prototype.run = function () {
 		});
 	}
 
-	var message = new this.API.Message({
-		type: this.API.Message.Type.VISION_OBJECT,
-		filter_id: 0,
-		utc_timestamp: Date.now(),
-		vision_object: {
-			camera_id: 0,
-			type: this.API.VisionObject.ObjectType.LINE,
+	var message = new this.API.messages.vision.proto.VisionObjects({
+		objects: [{
+			cameraId: 0,
+			type: this.API.messages.vision.proto.VisionObject.ObjectType.LINE,
 			line: lines
-		}
+		}]
 	});
 
 	this.sendMessage(message);

@@ -1,28 +1,25 @@
 var ProtoBuf = require('protobufjs');
-var zmq = require('zmq');
+var NUClearNet = require('nuclearnet.js');
+var ref = require('ref');
 
 function RobotSimulator () {
-	this.port = 14000;
-	this.socket = zmq.socket('pub');
-	this.socket.bindSync('tcp://0.0.0.0:' + this.port);
-	this.builder = ProtoBuf.loadProtoFile({
+	this.net = new NUClearNet(this.constructor.name, '239.226.152.162', 7447);
+	this.protoBuilder = ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
+}
+
+RobotSimulator.prototype.loadProto = function (protocolBuffer) {
+	// Load the protocol buffer file and build it
+	ProtoBuf.loadProtoFile({
 		root: '../../public/resources/js/proto',
-		file: 'messages/support/nubugger/proto/Message.proto'
-	});
-	this.API = this.builder.build('messages.support.nubugger.proto');
-	this.API.Overview = this.builder.build('messages.support.nubugger.proto.Overview');
-	this.API.Behaviour = this.builder.build('messages.behaviour.proto.Behaviour');
-	this.API.GameState = this.builder.build('messages.input.proto.GameState');
-	this.API.Configuration = this.builder.build('messages.support.nubugger.proto.ConfigurationState');
-	this.API.GameState = this.builder.build('messages.input.proto.GameState');
-	this.API.Image = this.builder.build('messages.input.proto.Image');
-	this.API.Sensors = this.builder.build('messages.input.proto.Sensors');
-	this.API.Subsumption = this.builder.build('messages.behaviour.proto.Subsumption');
-	this.API.Vision = this.builder.build('messages.vision.proto');
-	this.API.LookUpTableDiff = this.builder.build('messages.vision.proto.LookUpTableDiff');
-	this.API.SensorData = this.builder.build('messages.input.proto.Sensors');
-	this.API.VisionObject = this.builder.build('messages.vision.proto.VisionObject');
-	this.API.DrawObjects = this.builder.build('messages.support.nubugger.proto.DrawObjects');
+		file: protocolBuffer.replace(/\./g, '/') + '.proto'
+	}, this.protoBuilder);
+
+	var proto = this.protoBuilder.build(protocolBuffer);
+
+	// Update our API
+	this.API = this.protoBuilder.build();
+
+	return proto;
 }
 
 RobotSimulator.prototype.randFloat =  function (min, max) {
@@ -84,13 +81,17 @@ RobotSimulator.prototype.getLUTIndex = function (ycbcr, bitsY, bitsCb, bitsCr) {
 	return index;
 };
 
-RobotSimulator.prototype.sendMessage = function (message) {
-	var buffer = message.toBuffer();
-	var finalBuffer = new Buffer(buffer.length + 2);
-	finalBuffer.writeUInt8(message.getType(), 0);
-	finalBuffer.writeUInt8(message.getFilterId(), 1);
-	buffer.copy(finalBuffer, 2);
-	this.socket.send(finalBuffer);
+RobotSimulator.prototype.sendMessage = function (message, reliable) {
+
+	// Our message type
+	var messageType = 'NUsight<' + message.$type.toString().substr(1) + '>';
+
+	// Make our buffer for our metadata
+	var header = new Buffer(9);
+	header.writeUInt8(0, 0);
+	header.writeUInt64LE(Date.now(), 1)
+
+	this.net.send(messageType, Buffer.concat([header, message.toBuffer()]), 'nusight', reliable);
 };
 
 RobotSimulator.prototype.run = function () {};
