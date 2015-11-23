@@ -4,7 +4,7 @@ var Client = require('./Client');
 var NUClearNet = require('nuclearnet.js');
 var fs = require('fs');
 var util = require('util');
-var ref = require('ref');
+var int53 = require('int53');
 
 function NUsight (io) {
 
@@ -94,7 +94,7 @@ function NUsight (io) {
 			// Add a callback function for this
 			client.listeners[messageType] = function (source, data) {
 				var filterId = data.readUInt8(0);
-				var timestamp = data.readUInt64LE(1);
+				var timestamp = int53.readUInt64LE(data, 1);
 				var protobuf = data.slice(9);
 
 				this.sendMessage({ id: source.name, host: source.address }, messageType, protobuf, filterId, timestamp);
