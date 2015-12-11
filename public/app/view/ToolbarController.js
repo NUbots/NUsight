@@ -19,6 +19,9 @@ Ext.define('NU.view.ToolbarController', {
 	onChartDisplay: function () {
 		this.create('NU.view.window.Chart');
 	},
+	onScatterDisplay: function() { 
+		this.create('NU.view.window.ScatterPlot');
+	},
 	onNUClearDisplay: function () {
 		this.create('NU.view.window.NUClear');
 	},

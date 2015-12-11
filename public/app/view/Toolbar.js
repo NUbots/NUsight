@@ -27,6 +27,11 @@ Ext.define('NU.view.Toolbar', {
             click: 'onChartDisplay'
         }
     }, {
+        text: 'Scatter Plot',
+        listeners: {
+            click: 'onScatterDisplay'
+        }
+    }, {
         text: 'NUClear',
         listeners: {
             click: 'onNUClearDisplay'
@@ -52,7 +57,7 @@ Ext.define('NU.view.Toolbar', {
             click: 'onVisualise'
         }
     }, {
-		text: 'Close All',
+        text: 'Close All',
         listeners: {
             click: 'onCloseAll'
         }
@@ -62,11 +67,11 @@ Ext.define('NU.view.Toolbar', {
         listeners: {
             click: 'onConfiguration'
         }
-	}, {
-		text: 'Settings',
-		iconCls: 'icon-cog',
+    }, {
+        text: 'Settings',
+        iconCls: 'icon-cog',
         listeners: {
             click: 'onNetworkSettings'
         }
-	}]
+    }]
 });

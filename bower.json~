@@ -14,7 +14,7 @@
   "dependencies": {
     "threejs": "r70",
     "extjs": "~5.0.x",
-    "protobuf": "~5.0",
+    "protobuf": "~4.1.1",
     "smoothie": "*",
     "jpgjs": "notmasteryet/jpgjs",
     "numericjs": "~1.2.6",
@@ -23,6 +23,6 @@
     "svg.js": "*",
     "gl-matrix": "*",
     "d3": "*",
-    "nvd3": "*"
+    "c3": "*"
   }
 }
