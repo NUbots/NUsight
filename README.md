@@ -64,7 +64,7 @@ A visual real-time web-based debugging environment used to understand and improv
 - If running robot code on a virtual machine and the robot connects to NUsight but no data is recieved, run the following command on the virtual machine:
 
 	```bash 
-	sudo route add -net 224.0.0.0 netmask 240.0.0.0 eth0
+	sudo route add -net 224.0.0.0 netmask 240.0.0.0 eth1
 	```
 	
 - This is particularly a common problem when using virtualbox. The command forces multicast packets over the bridged interface.
