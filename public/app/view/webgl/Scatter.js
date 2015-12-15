@@ -35,9 +35,6 @@ function ScatterPlotGraph(id) {
 
   	var vboData = new VBO(gl, shaderProgram, gl.POINTS);
 
-  	var vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "a_position");
-  	var colourAttribute = gl.getAttribLocation(shaderProgram, "a_colour");
-	
 	var elapsedTime = 0;
 	var frameCount = 0;
 	var lastTime = 0;
