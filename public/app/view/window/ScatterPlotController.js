@@ -27,67 +27,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
         servoMap: null
     },
     init: function () {
-        var data = [
-                        {
-                            key: "test",
-                            values: [
-                                {x: 0, y: 10, size: 2},
-                                {x: 1, y: 20, size: 2},
-                                {x: 2, y: 30, size: 2}
-                            ]
-                        }
-                    ];
 
-        this.setData(data);
-        var that = this;
-        var chart;        
-        
-
-        nv.addGraph(function() {
-            chart = nv.models.scatterChart()
-                            .showDistX(true)
-                            .showDistY(true)
-                            .color(d3.scale.category10().range());
-            that.setChart(chart);
-
-            chart.xAxis.tickFormat(d3.format('.02f'));
-            chart.yAxis.tickFormat(d3.format('.02f'));
-            // d3.select('#component-1022')
-
-            d3.select('#' + that.lookupReference('scatter').getEl().id)
-                    .datum(data)
-                    .transition().duration(500)
-                    .call(chart);
-
-            nv.utils.windowResize(chart.update);
-
-            return chart;
-        });
-
-        //testing real time
-        setInterval(function(){
-          var random = d3.random.normal();
-          that.onDataPoint(-1,
-              {
-                  label: name + " Load",
-                  value: [
-                      random() * 10, random() * 10
-                  ]
-              }, 1);
-
-            /*data[0].values.push({
-              x: random() * 10,
-              y: random() * 10
-            });
-            console.log(data.length);
-            //console.log(data[0].values.length);
-              if (data[0].values.length > 500) {
-                //data[0].values = [];
-                //console.log("reset data");
-                //data[0].values.shift();
-              }*/
-            //chart.update();
-        }, 1000 / 90);
     },
 
     addEvents: function () {
@@ -103,7 +43,22 @@ Ext.define('NU.view.window.ScatterPlotController', {
         //TODO: remove #component-1023 to the correct code
 
         //var element = this.lookupReference('scatter').getEl();
-        
+        var chart = new ScatterPlotGraph(this.lookupReference('scatter').getEl().id);
+
+        this.setChart(chart);
+        //testing real time
+        var that = this;
+        setInterval(function(){
+            var random = d3.random.normal();
+            that.onDataPoint(-1,
+                {
+                    label: name + " Load",
+                    value: [
+                        20 + Math.random() * 600, 20 + Math.random() * 440
+                    ]
+                }, 1);
+        }, 1000 / 90);
+        chart.render();
     },
 
     onMinChange: function (field, newValue, oldValue, eOpts) {
@@ -119,15 +74,17 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onResize: function (obj, width, height) {
-        var canvas = this.lookupReference('scatter');
-        var canvasEl = canvas.getEl();
+        /*        var canvas = this.lookupReference('scatter');
+         var canvasEl = canvas.getEl();
 
-        var chart = this.getChart();
+         var chart = this.getChart();
 
-        nv.utils.windowResize(function() {
-            chart.width(canvasEl.getWidth());
-            chart.height(canvasEl.getHeight());
-        });
+         nv.utils.windowResize(function() {
+         chart.width(canvasEl.getWidth());
+         chart.height(canvasEl.getHeight());
+         });*/
+
+        this.getChart().resize();
     },
 
     onSensorData: function (robotId, sensorData, timestamp) {
@@ -245,9 +202,9 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
     onDataPoint: function (robot, dataPoint, timestamp) {
         // TODO: remove
-      /*  if (robot.get('id') !== this.getRobotId()) {
-          return;
-        }*/
+        /*  if (robot.get('id') !== this.getRobotId()) {
+         return;
+         }*/
         console.log('adding data');
         var label = dataPoint.label;
         var values = dataPoint.value;
@@ -255,29 +212,36 @@ Ext.define('NU.view.window.ScatterPlotController', {
         var data = this.getData();
         var dataSet = null;
 
-        for(var i = 0; i < data.length; i++) {
-            if(data[i].key === label) {
-                dataSet = data[i];
-                break;
-            }
-        }
+        /*
+         for(var i = 0; i < data.length; i++) {
+         if(data[i].key === label) {
+         dataSet = data[i];
+         break;
+         }
+         }
+         */
 
-        if(dataSet == null) {
-            data.push({
-                            key: label,
-                            values: [
-                                {x: values[0], y: values[1], size: 1}
-                            ]
-                        }
-                    );
-        }else {
+        //if(values[0] !== null && values[1] !== null) {
+        var chart = this.getChart();
+        chart.addData(Math.random() * 1240, Math.random() * 680);
+        //chart.addData(values[0], values[1]);
+        chart.render();
+        //}
+        /*        if(dataSet == null) {
+         data.push({
+         key: label,
+         values: [
+         {x: values[0], y: values[1], size: 1}
+         ]
+         }
+         );
+         }else {
 
-            dataSet.values.push({
-                  x: values[0], y: values[1], size: 1
-            });
-        }  
+         dataSet.values.push({
+         x: values[0], y: values[1], size: 1
+         });
+         }  */
 
-        this.getChart().update();
 
     },
 

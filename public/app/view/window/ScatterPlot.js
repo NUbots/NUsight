@@ -1,12 +1,12 @@
 Ext.define('NU.view.window.ScatterPlot', {
-    extend : 'NU.view.window.Display',
-    alias: 'widget.nu_scatterplot_window',
-    requires: [
-        'NU.view.window.ScatterPlotController',
-        'Ext.ux.form.MultiSelect',
+	extend : 'NU.view.window.Display',
+	alias: 'widget.nu_scatterplot_window',
+	requires: [
+		'NU.view.window.ScatterPlotController',
+		'Ext.ux.form.MultiSelect',
 		'Ext.layout.container.Anchor',
-        'NU.store.Streams'
-	], 
+		'NU.store.Streams'
+	],
 	controller: 'ScatterPlot',
 	width: 720,
 	height: 240,
@@ -81,12 +81,12 @@ Ext.define('NU.view.window.ScatterPlot', {
 				width: 320,
 				height: 240,
 				autoEl: {
-					tag: 'svg',
-					width: 320,
-					height: 240
+					tag: 'canvas',
+					width: 1280,
+					height: 720
 				},
 				style: {
-							backgroundColor: '#FFFFFF'
+					backgroundColor: '#FFFFFF'
 				},
 				reference: 'scatter',
 				layout: 'fit'
