@@ -8,7 +8,7 @@
  * will then be used as the new lookup table.
  */
 
-#include "Vision.h"
+#include "Vision.glsl"
 
 /**
  * The width/height of the square lut texture

@@ -213,8 +213,8 @@ Ext.define('NU.view.webgl.WebGL', {
 		loadShaders: function (shader) {
 			var basePath = Ext.Loader.getPath('NU') + '/shader';
 			return Promise.all([
-				NU.view.webgl.WebGL.loadShader(basePath, basePath + '/' + shader + 'Vertex.c'),
-				NU.view.webgl.WebGL.loadShader(basePath, basePath + '/' + shader + 'Fragment.c')
+				NU.view.webgl.WebGL.loadShader(basePath, basePath + '/' + shader + '.vert'),
+				NU.view.webgl.WebGL.loadShader(basePath, basePath + '/' + shader + '.frag')
 			]);
 		},
 		/**

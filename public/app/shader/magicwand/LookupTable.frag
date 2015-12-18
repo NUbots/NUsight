@@ -1,4 +1,4 @@
-#include "Vision.h"
+#include "Vision.glsl"
 
 /**
  * The square lut texture
