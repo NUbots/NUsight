@@ -1,4 +1,4 @@
-#include "Vision.h"
+#include "Vision.glsl"
 
 uniform sampler2D lut;
 uniform float lutSize;

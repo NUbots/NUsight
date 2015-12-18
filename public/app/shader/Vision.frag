@@ -2,7 +2,7 @@
  * @author Brendan Annable
  */
 
-#include "Vision.h"
+#include "Vision.glsl"
 
 /**
  * The raw (e.g. YCbCr) image
