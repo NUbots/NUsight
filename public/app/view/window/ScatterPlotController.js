@@ -16,6 +16,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
             '#a65628',
             '#f781bf'
         ],
+        pause: false,
         chart: null,
         data: null,
         context: null,
@@ -27,7 +28,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
         servoMap: null
     },
     init: function () {
-
+        //this.addEvents();
     },
 
     addEvents: function () {
@@ -40,25 +41,49 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onAfterRender: function () {
-        //TODO: remove #component-1023 to the correct code
+        var divName = this.lookupReference('scatter').getEl().id;
+        var div = document.getElementById(divName);
+        div.style.width = "100%";
+        div.style.height = "100%";
+        var trace1 = {
+            x: [1, 2, 3, 4, 5],
+            y: [1, 6, 3, 6, 1],
+            mode: 'markers',
+            type: 'scattergl',
+            marker: { size: 12 },
+            stream: { maxpoints: 1}
+        };
 
-        //var element = this.lookupReference('scatter').getEl();
-        var chart = new ScatterPlotGraph(this.lookupReference('scatter').getEl().id);
+        var data = [ trace1 ];
 
-        this.setChart(chart);
-        //testing real time
+        var layout = {
+            width: div.width,
+            height: div.height,
+            xaxis: {
+                range: [ 0, 50 ]
+            },
+            yaxis: {
+                range: [0, 20]
+            }
+            //title:'Data Labels Hover'
+        };
+
+        Plotly.newPlot(divName, data, layout);
+
+        var start = new Date().getTime();
+        var b = 0;
         var that = this;
-        setInterval(function(){
-            var random = d3.random.normal();
+
+
+        setInterval(function() {
             that.onDataPoint(-1,
                 {
-                    label: name + " Load",
+                    label: name + "Load",
                     value: [
-                        20 + Math.random() * 600, 20 + Math.random() * 440
+                        Math.random() * 40, Math.random() * 20
                     ]
-                }, 1);
-        }, 1000 / 90);
-        chart.render();
+                }, new Date().getTime());
+        }, 20);
     },
 
     onMinChange: function (field, newValue, oldValue, eOpts) {
@@ -74,22 +99,12 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onResize: function (obj, width, height) {
-        /*        var canvas = this.lookupReference('scatter');
-         var canvasEl = canvas.getEl();
 
-         var chart = this.getChart();
-
-         nv.utils.windowResize(function() {
-         chart.width(canvasEl.getWidth());
-         chart.height(canvasEl.getHeight());
-         });*/
-
-        this.getChart().resize();
     },
 
     onSensorData: function (robotId, sensorData, timestamp) {
         // Accelerometer
-        var accel = sensorData.getAccelerometer();
+/*        var accel = sensorData.getAccelerometer();
         this.onDataPoint(robotId, {
             label: "Accelerometer",
             value: [
@@ -125,7 +140,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 orientation.yz,
                 orientation.zz
             ]
-        }, timestamp);
+        }, timestamp);*/
 
         Ext.each(sensorData.servo, function(servo) {
 
@@ -201,54 +216,33 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onDataPoint: function (robot, dataPoint, timestamp) {
-        // TODO: remove
-        /*  if (robot.get('id') !== this.getRobotId()) {
-         return;
-         }*/
-        console.log('adding data');
-        var label = dataPoint.label;
-        var values = dataPoint.value;
+        if(!this.getPause()) {
+            // TODO: remove
+            /*  if (robot.get('id') !== this.getRobotId()) {
+             return;
+             }*/
+            //console.log('adding data');
+            var label = dataPoint.label;
+            var values = dataPoint.value;
 
-        var data = this.getData();
-        var dataSet = null;
+            var data = this.getData();
+            var dataSet = null;
 
-        /*
-         for(var i = 0; i < data.length; i++) {
-         if(data[i].key === label) {
-         dataSet = data[i];
-         break;
-         }
-         }
-         */
+            var update = {
+                x: [[values[0]]],
+                y: [[values[1]]]
+            };
 
-        //if(values[0] !== null && values[1] !== null) {
-        var chart = this.getChart();
-        chart.addData(Math.random() * 1240, Math.random() * 680);
-        //chart.addData(values[0], values[1]);
-        chart.render();
-        //}
-        /*        if(dataSet == null) {
-         data.push({
-         key: label,
-         values: [
-         {x: values[0], y: values[1], size: 1}
-         ]
-         }
-         );
-         }else {
-
-         dataSet.values.push({
-         x: values[0], y: values[1], size: 1
-         });
-         }  */
-
-
+            if (values[0] !== null && values[1] !== null && values.length === 2) {
+                Plotly.extendTraces(this.lookupReference('scatter').getEl().id, update, [0], 100);
+            }
+        }
     },
 
     getStream: function (label, values) {
     },
 
     onPause: function (button) {
+        this.setPause(!this.getPause());
     }
-
 });

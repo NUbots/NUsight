@@ -81,7 +81,7 @@ Ext.define('NU.view.window.ScatterPlot', {
 				width: 320,
 				height: 240,
 				autoEl: {
-					tag: 'canvas',
+					tag: 'div',
 					width: 1280,
 					height: 720
 				},
