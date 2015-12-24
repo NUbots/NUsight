@@ -16,7 +16,8 @@ Ext.define('NU.view.window.ScatterPlotController', {
             '#a65628',
             '#f781bf'
         ],
-        pause: false,
+        traceID: null,
+        pause: null,
         chart: null,
         data: null,
         context: null,
@@ -27,8 +28,12 @@ Ext.define('NU.view.window.ScatterPlotController', {
         streams: null,
         servoMap: null
     },
+
     init: function () {
-        //this.addEvents();
+        this.setTraceID([]);
+        this.setStreams([]);
+        this.setPause(false);
+        this.addEvents();
     },
 
     addEvents: function () {
@@ -41,49 +46,46 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onAfterRender: function () {
-        var divName = this.lookupReference('scatter').getEl().id;
+        var divElement = this.lookupReference('scatter');
+        var divName = divElement.getEl().id;
         var div = document.getElementById(divName);
-        div.style.width = "100%";
-        div.style.height = "100%";
+
         var trace1 = {
             x: [1, 2, 3, 4, 5],
-            y: [1, 6, 3, 6, 1],
+            y: [4, 4, 4, 4, 4],
             mode: 'markers',
             type: 'scattergl',
             marker: { size: 12 },
-            stream: { maxpoints: 1}
+            stream: { maxpoints: 1},
+            hoverinfo:"x+y"
         };
 
-        var data = [ trace1 ];
+        var trace2 = {
+            x: [1, 2, 3, 4, 5],
+            y: [1, 1, 1, 1, 1],
+            mode: 'markers',
+            type: 'scattergl',
+            marker: { size: 12 },
+            stream: { maxpoints: 1},
+            hoverinfo:"x+y"
+        };
+
+        var data = [trace1, trace2];
 
         var layout = {
-            width: div.width,
-            height: div.height,
-            xaxis: {
-                range: [ 0, 50 ]
-            },
-            yaxis: {
-                range: [0, 20]
+            autosize: false,
+            height: 163,
+            width: 560,
+            margin: {
+                l: 50,
+                r: 50,
+                b: 30,
+                t: 40,
+                pad: 4
             }
-            //title:'Data Labels Hover'
         };
 
         Plotly.newPlot(divName, data, layout);
-
-        var start = new Date().getTime();
-        var b = 0;
-        var that = this;
-
-
-        setInterval(function() {
-            that.onDataPoint(-1,
-                {
-                    label: name + "Load",
-                    value: [
-                        Math.random() * 40, Math.random() * 20
-                    ]
-                }, new Date().getTime());
-        }, 20);
     },
 
     onMinChange: function (field, newValue, oldValue, eOpts) {
@@ -99,12 +101,19 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onResize: function (obj, width, height) {
+        var divElement = this.lookupReference('scatter').getEl();
 
+        var update = {
+            width: divElement.getWidth(),
+            height: divElement.getHeight()
+        };
+
+        Plotly.relayout(divElement.id, update);
     },
 
     onSensorData: function (robotId, sensorData, timestamp) {
         // Accelerometer
-/*        var accel = sensorData.getAccelerometer();
+        var accel = sensorData.getAccelerometer();
         this.onDataPoint(robotId, {
             label: "Accelerometer",
             value: [
@@ -140,7 +149,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 orientation.yz,
                 orientation.zz
             ]
-        }, timestamp);*/
+        }, timestamp);
 
         Ext.each(sensorData.servo, function(servo) {
 
@@ -217,29 +226,54 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
     onDataPoint: function (robot, dataPoint, timestamp) {
         if(!this.getPause()) {
-            // TODO: remove
-            /*  if (robot.get('id') !== this.getRobotId()) {
-             return;
-             }*/
-            //console.log('adding data');
+            if (robot.get('id') !== this.getRobotId()) {
+                return;
+            }
             var label = dataPoint.label;
             var values = dataPoint.value;
+            var divID = this.lookupReference('scatter').getEl().id;
 
-            var data = this.getData();
-            var dataSet = null;
 
-            var update = {
-                x: [[values[0]]],
-                y: [[values[1]]]
-            };
+            var id = null;
+            var traces = this.getTraceID();
 
-            if (values[0] !== null && values[1] !== null && values.length === 2) {
-                Plotly.extendTraces(this.lookupReference('scatter').getEl().id, update, [0], 100);
+            for(var i = 0; i < traces.length; i++) {
+                if(traces[i] === label) {
+                    id = i;
+                    break;
+                }
+            }
+
+            if(id === null) {
+                var trace = {
+                    x: [values[0]],
+                    y: [values[1]],
+                    mode: 'markers',
+                    type: 'scattergl',
+                    hoverinfo:"x+y",
+                    marker: { size: 12 },
+                    name: label
+                };
+                id = this.getTraceID().push(label) - 1;
+                Plotly.addTraces(divID, trace);
+            }else {
+                var data = this.getData();
+                var dataSet = null;
+
+                var update = {
+                    x: [[values[0]]],
+                    y: [[values[1]]]
+                };
+
+                if (values[0] !== null && values[1] !== null) {
+                    Plotly.extendTraces(divID, update, [id], 100);
+                }
             }
         }
     },
 
     getStream: function (label, values) {
+
     },
 
     onPause: function (button) {

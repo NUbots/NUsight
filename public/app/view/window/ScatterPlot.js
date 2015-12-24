@@ -70,7 +70,8 @@ Ext.define('NU.view.window.ScatterPlot', {
 		}, {
 			xtype: 'button',
 			text: 'Pause',
-			handler: 'onPause'
+			handler: 'onPause',
+			reference: 'pause'
 		}]
 	},
 	initComponent: function () {
@@ -78,32 +79,18 @@ Ext.define('NU.view.window.ScatterPlot', {
 			items: [{
 				xtype: 'component',
 				region: 'center',
-				width: 320,
+				width: 470,
 				height: 240,
 				autoEl: {
 					tag: 'div',
-					width: 1280,
-					height: 720
+					width: 320,
+					height: 240
 				},
 				style: {
 					backgroundColor: '#FFFFFF'
 				},
 				reference: 'scatter',
 				layout: 'fit'
-			}, {
-				region: 'east',
-				layout: 'fit',
-				width: 150,
-				items: [{
-					xtype: 'multiselect',
-					reference: 'streampicker',
-					width: 148,
-					displayField: 'label',
-					store: Ext.create('NU.store.Streams'),
-					listeners: {
-						change: 'onStreamSelect'
-					}
-				}]
 			}]
 		});
 
