@@ -88,6 +88,37 @@ Ext.define('NU.view.window.FieldController', {
 		controls.inverted = newValue;
 	},
 
+	onOrthographic: function (obj, newValue, oldValue, eOpts) {
+		var aspectRatio = window.innerWidth / window.innerHeight;
+
+		var cameraSize = 2;
+
+		var newCamera;
+
+		var mainScene = this.lookupReference('mainscene');
+
+		if(newValue) {
+			newCamera = new THREE.OrthographicCamera(-aspectRatio / cameraSize, aspectRatio / cameraSize, 1 / cameraSize, -1 /cameraSize, -5, 50);
+		}else {
+			newCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50);
+		}
+
+		
+		mainScene
+			.setComponents(this.mainScene.scene, this.mainScene.renderer, newCamera, this.mainScene.effect)
+			.enableControls({
+				movementSpeed: 2
+			}, this.objectsList, this.lookupReference('coordinates'));
+
+		if(!newValue) {
+			//hawk eye
+			var controls = this.lookupReference('mainscene').controls;
+			controls.yawObject.position.set(0, 4.5, 0);
+			controls.yawObject.rotation.set(0, 0, 0);
+			controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
+		}
+	},
+
 	onDisplayCrosshair: function (obj, newValue, oldValue, eOpt) {
 		var crosshair = this.getCrosshair();
 		crosshair.setVisible(crosshair.isHidden() ? true : false);

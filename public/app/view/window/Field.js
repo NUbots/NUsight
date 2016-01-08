@@ -88,6 +88,13 @@ Ext.define('NU.view.window.Field', {
 					listeners: {
 						change: 'onDisplayCrosshair'
 					}
+				}, {
+					xtype: 'checkbox',
+					fieldLabel: 'Orthographic',
+					checked: false,
+					listeners: {
+						change: 'onOrthographic'
+					}
 				}]
 			}
 		}]
