@@ -90,11 +90,8 @@ Ext.define('NU.view.window.FieldController', {
 
 	onOrthographic: function (obj, newValue, oldValue, eOpts) {
 		var aspectRatio = window.innerWidth / window.innerHeight;
-
 		var cameraSize = 2;
-
 		var newCamera;
-
 		var mainScene = this.lookupReference('mainscene');
 
 		if(newValue) {
@@ -103,7 +100,6 @@ Ext.define('NU.view.window.FieldController', {
 			newCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50);
 		}
 
-		
 		mainScene
 			.setComponents(this.mainScene.scene, this.mainScene.renderer, newCamera, this.mainScene.effect)
 			.enableControls({
@@ -111,11 +107,7 @@ Ext.define('NU.view.window.FieldController', {
 			}, this.objectsList, this.lookupReference('coordinates'));
 
 		if(!newValue) {
-			//hawk eye
-			var controls = this.lookupReference('mainscene').controls;
-			controls.yawObject.position.set(0, 4.5, 0);
-			controls.yawObject.rotation.set(0, 0, 0);
-			controls.pitchObject.rotation.set(-Math.PI / 2, 0, 0);
+			this.onHawkEye();
 		}
 	},
 
