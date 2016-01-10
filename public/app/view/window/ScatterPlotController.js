@@ -5,33 +5,19 @@ Ext.define('NU.view.window.ScatterPlotController', {
         'NU.util.TypeMap'
     ],
     config: {
-        colours: [
-            // 8 distinct colours from http://colorbrewer2.org/
-            '#e41a1c',
-            '#4daf4a',
-            '#377eb8',
-            '#984ea3',
-            '#ff7f00',
-            '#ffff33',
-            '#a65628',
-            '#f781bf'
-        ],
+        maxPoints: 100,
+        yMin: null,
+        yMax: null,
+        xMin: null,
+        xMax: null,
         traceID: null,
         pause: null,
-        chart: null,
-        data: null,
         context: null,
-        tx: null,
-        ty: null,
-        tz: null,
-        lastDraw: 0,
-        streams: null,
         servoMap: null
     },
 
     init: function () {
         this.setTraceID([]);
-        this.setStreams([]);
         this.setPause(false);
         this.addEvents();
     },
@@ -46,36 +32,16 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onAfterRender: function () {
-        var divElement = this.lookupReference('scatter');
-        var divName = divElement.getEl().id;
+        var divElement = this.lookupReference('scatter').getEl();
+        var divName = divElement.id;
         var div = document.getElementById(divName);
 
-        var trace1 = {
-            x: [1, 2, 3, 4, 5],
-            y: [4, 4, 4, 4, 4],
-            mode: 'markers',
-            type: 'scattergl',
-            marker: { size: 12 },
-            stream: { maxpoints: 1},
-            hoverinfo:"x+y"
-        };
-
-        var trace2 = {
-            x: [1, 2, 3, 4, 5],
-            y: [1, 1, 1, 1, 1],
-            mode: 'markers',
-            type: 'scattergl',
-            marker: { size: 12 },
-            stream: { maxpoints: 1},
-            hoverinfo:"x+y"
-        };
-
-        var data = [trace1, trace2];
+        var data = [];
 
         var layout = {
             autosize: false,
-            height: 163,
-            width: 560,
+            height: divElement.getWidth(),
+            width: divElement.getHeight(),
             margin: {
                 l: 50,
                 r: 50,
@@ -88,16 +54,54 @@ Ext.define('NU.view.window.ScatterPlotController', {
         Plotly.newPlot(divName, data, layout);
     },
 
-    onMinChange: function (field, newValue, oldValue, eOpts) {
+    onYMinChange: function (field, newValue, oldValue, eOpts) {
+        var divID = this.lookupReference('scatter').getEl().id;
+        this.setYMin(newValue);
+        var update = {
+            yaxis: {
+                range: [newValue, this.getYMax()]
+            }
+        };
+
+        Plotly.relayout(divID, update);
     },
 
-    onMaxChange: function (field, newValue, oldValue, eOpts) {
+    onYMaxChange: function (field, newValue, oldValue, eOpts) {
+        var divID = this.lookupReference('scatter').getEl().id;
+        this.setYMax(newValue);
+        var update = {
+            yaxis: {
+                range: [this.getYMin(), newValue]
+            }
+        };
+        Plotly.relayout(divID, update)
     },
 
-    onPeriodChange: function (field, newValue, oldValue, eOpts) {
+    onXMinChange: function (field, newValue, oldValue, eOpts) {
+        var divID = this.lookupReference('scatter').getEl().id;
+        this.setXMin(newValue);
+        var update = {
+            yaxis: {
+                range: [newValue, this.getXMax()]
+            }
+        };
+
+        Plotly.relayout(divID, update);
     },
 
-    onStreamSelect: function (obj, newValue, oldValue, e) {
+    onXMaxChange: function (field, newValue, oldValue, eOpts) {
+        var divID = this.lookupReference('scatter').getEl().id;
+        this.setXMax(newValue);
+        var update = {
+            xaxis: {
+                range: [this.getXMin(), newValue]
+            }
+        };
+        Plotly.relayout(divID, update)
+    },
+
+    onPointsChange: function (field, newValue, oldValue, eOpts) {
+        this.setMaxPoints(newValue);
     },
 
     onResize: function (obj, width, height) {
@@ -109,6 +113,23 @@ Ext.define('NU.view.window.ScatterPlotController', {
         };
 
         Plotly.relayout(divElement.id, update);
+    },
+
+    onLineGraph: function (obj, newValue, oldValue, eOpts) {
+        var divID = this.lookupReference('scatter').getEl().id;
+
+        var update;
+
+        if (newValue) {
+            update = {
+                mode: 'lines+markers'
+            };
+        }else {
+            update = {
+                mode: 'markers'
+            };
+        }
+        Plotly.restyle(divID, update);
     },
 
     onSensorData: function (robotId, sensorData, timestamp) {
@@ -225,6 +246,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onDataPoint: function (robot, dataPoint, timestamp) {
+        //TODO: Check Plotly.JS changelog for multi axes to allow a TimeStamp axis for single value
         if(!this.getPause()) {
             if (robot.get('id') !== this.getRobotId()) {
                 return;
@@ -238,42 +260,68 @@ Ext.define('NU.view.window.ScatterPlotController', {
             var traces = this.getTraceID();
 
             for(var i = 0; i < traces.length; i++) {
-                if(traces[i] === label) {
+                if(traces[i].label === label) {
                     id = i;
                     break;
                 }
             }
 
             if(id === null) {
-                var trace = {
-                    x: [values[0]],
-                    y: [values[1]],
-                    mode: 'markers',
-                    type: 'scattergl',
-                    hoverinfo:"x+y",
-                    marker: { size: 12 },
-                    name: label
+                var trace = null;
+
+                if(values.length == 1) {
+                    trace = {
+                        x: [0],
+                        y: [values[0]],
+                        mode: 'markers',
+                        type: 'scattergl',
+                        hoverinfo: "x+y",
+                        marker: {size: 12},
+                        name: label
+                    };
+                }else {
+                    trace = {
+                        x: [values[0]],
+                        y: [values[1]],
+                        mode: 'markers',
+                        type: 'scattergl',
+                        hoverinfo: "x+y",
+                        marker: {size: 12},
+                        name: label
+                    };
+                }
+
+                var info = {
+                    label: label,
+                    xVal: 0
                 };
-                id = this.getTraceID().push(label) - 1;
+
+                id = this.getTraceID().push(info) - 1;
                 Plotly.addTraces(divID, trace);
             }else {
-                var data = this.getData();
-                var dataSet = null;
+                var update = null;
+                if(values.length == 1) {
+                    //cant support multiple axis to show a timestamp for traces that use a TimeStamp
+                    //for now just increase by 1
+                    traces[id].xVal += 1;
 
-                var update = {
-                    x: [[values[0]]],
-                    y: [[values[1]]]
-                };
-
-                if (values[0] !== null && values[1] !== null) {
-                    Plotly.extendTraces(divID, update, [id], 100);
+                    update = {
+                        x: [[traces[id].xVal]],
+                        y: [[values[0]]]
+                    };
+                }else {
+                    if(values[0] !== null && values[1]) {
+                        update = {
+                            x: [[values[0]]],
+                            y: [[1]]
+                        };
+                    }
+                }
+                if (update != null) {
+                    Plotly.extendTraces(divID, update, [id], this.getMaxPoints());
                 }
             }
         }
-    },
-
-    getStream: function (label, values) {
-
     },
 
     onPause: function (button) {

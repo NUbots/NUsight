@@ -31,31 +31,48 @@ Ext.define('NU.view.window.ScatterPlot', {
 			}
 		}, {
 			xtype: 'numberfield',
-			fieldLabel: 'Min',
+			fieldLabel: 'Y Min',
 			labelStyle: 'white-space: nowrap',
-			labelWidth: 30,
+			labelWidth: 35,
 			width: 100,
 			listeners: {
-				change: 'onMinChange'
+				change: 'onYMinChange'
 			}
 		}, {
 			xtype: 'numberfield',
-			fieldLabel: 'Max',
+			fieldLabel: 'Y Max',
 			labelStyle: 'white-space: nowrap',
-			labelWidth: 30,
+			labelWidth: 35,
 			width: 100,
 			listeners: {
-				change: 'onMaxChange'
+				change: 'onYMaxChange'
 			}
 		}, {
 			xtype: 'numberfield',
-			reference: 'period',
-			fieldLabel: 'Seconds',
+			fieldLabel: 'X Min',
 			labelStyle: 'white-space: nowrap',
-			labelWidth: 55,
+			labelWidth: 35,
 			width: 100,
 			listeners: {
-				change: 'onPeriodChange'
+				change: 'onXMinChange'
+			}
+		}, {
+			xtype: 'numberfield',
+			fieldLabel: 'X Max',
+			labelStyle: 'white-space: nowrap',
+			labelWidth: 35,
+			width: 100,
+			listeners: {
+				change: 'onXMaxChange'
+			}
+		}, {
+			xtype: 'numberfield',
+			fieldLabel: 'Max Points',
+			labelStyle: 'white-space: nowrap',
+			labelWidth: 70,
+			width: 150,
+			listeners: {
+				change: 'onPointsChange'
 			}
 		}, {
 			xtype: 'numberfield',
@@ -72,6 +89,18 @@ Ext.define('NU.view.window.ScatterPlot', {
 			text: 'Pause',
 			handler: 'onPause',
 			reference: 'pause'
+		}, '->', {
+			text: 'Settings',
+			menu: {
+				items: [{
+					xtype: 'checkbox',
+					fieldLabel: 'Line Graph',
+					checked: false,
+					listeners: {
+						change: 'onLineGraph'
+					}
+				}]
+			}
 		}]
 	},
 	initComponent: function () {
