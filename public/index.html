@@ -10,6 +10,10 @@
         <link rel="stylesheet" type="text/css" href="/resources/css/style.css">
         <link rel="stylesheet" type="text/css" href="/resources/css/icons.css">
         <link rel="stylesheet" type="text/css" href="/lib/extjs/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all-debug.css">
+
+        <!-- Plot.ly JS needs to be loaded early to avoid break Promise's .spread method -->
+        <script type="text/javascript" src="/lib/plotly.js/dist/plotly.js"></script>
+        
         <script type="text/javascript" src="/lib/extjs/ext-all-debug.js"></script>
         <script type="text/javascript" src="/lib/extjs/packages/ext-theme-neptune/build/ext-theme-neptune-debug.js"></script>
         <script type="text/javascript" src="/lib/threejs/build/three.js"></script>
@@ -42,8 +46,6 @@
         <script type="text/javascript" src="/resources/js/lib/ThreeJS_Sencha/ThreeJS.js"></script>
         <!--<script type="text/javascript" src="/resources/js/lib/webgl-2d.js"></script>-->
         <script type="text/javascript" src="/app.js"></script>
-
-        <script type="text/javascript" src="/lib/plotly.js/dist/plotly.js"></script>
     </head>
     <body></body>
 </html>
