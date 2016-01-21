@@ -12,7 +12,7 @@
   "private": false,
   "ignore": [],
   "dependencies": {
-    "threejs": "r70",
+    "threejs": "r72",
     "extjs": "~5.0.x",
     "protobuf": "~5.0.0",
     "smoothie": "*",
