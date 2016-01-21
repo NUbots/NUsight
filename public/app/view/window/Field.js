@@ -95,6 +95,13 @@ Ext.define('NU.view.window.Field', {
 					listeners: {
 						change: 'onOrthographic'
 					}
+				}, {
+					xtype: 'checkbox',
+					fieldLabel: 'Robot Grid',
+					checked: false,
+					listeners: {
+						change: 'onRobotGrid'
+					}
 				}]
 			}
 		}]
