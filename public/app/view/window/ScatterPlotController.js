@@ -310,7 +310,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                         y: [[values[0]]]
                     };
                 }else {
-                    if(values[0] !== null && values[1]) {
+                    if(values[0] !== null && values[1] !== null) {
                         update = {
                             x: [[values[0]]],
                             y: [[values[1]]]
