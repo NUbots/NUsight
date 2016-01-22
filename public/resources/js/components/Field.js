@@ -247,7 +247,7 @@
         FIELD_LENGTH: 9,
         FIELD_WIDTH: 6,
         GOAL_DEPTH: 0.5,
-        GOAL_WIDTH: 2.25,
+        GOAL_WIDTH: 1.8,
         GOAL_AREA_LENGTH: 0.6,
         GOAL_AREA_WIDTH: 3.45,
         GOAL_CROSSBAR_HEIGHT: 1.1,
