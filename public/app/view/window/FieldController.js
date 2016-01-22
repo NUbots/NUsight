@@ -17,7 +17,6 @@ Ext.define('NU.view.window.FieldController', {
 		SPHERE:     {name: 'Sphere'}
 	},
 	config: {
-		grid: null,
 		closeDistance: 0.4,
 		closeHeight: 0.2
 	},
@@ -114,46 +113,13 @@ Ext.define('NU.view.window.FieldController', {
 
 	onRobotGrid: function (obj, newValue, oldValue, eOpts) {
 		if(newValue) {
-			var sideLength = 0.1; //the length that each side of the cube is
-			var width = 0.5; //the width of the grid
-			var height = 0.5; //the height of the grid
-			var depth = 0.5; //the depth of the grid
-
-			var geometry = new THREE.Geometry();
-			var material = new THREE.LineBasicMaterial( { color: 0xffffff} );
-
-			for(var z = 0; z < height + sideLength; z += sideLength) {
-				for(var y = 0; y < depth + sideLength; y += sideLength) {
-					geometry.vertices.push(new THREE.Vector3(0, y, z));
-					geometry.vertices.push(new THREE.Vector3(width, y, z));
-				}
-			}
-
-			for(var x = 0; x < width + sideLength; x += sideLength) {
-				for(var y = 0; y < depth + sideLength; y += sideLength) {
-					geometry.vertices.push(new THREE.Vector3(x, y, 0));
-					geometry.vertices.push(new THREE.Vector3(x, y, height));
-				}
-			}
-
-			for(var x = 0; x < width + sideLength; x += sideLength) {
-				for(var z = 0; z < height + sideLength; z += sideLength) {
-					geometry.vertices.push(new THREE.Vector3(x, 0, z));
-					geometry.vertices.push(new THREE.Vector3(x, depth, z));
-				}
-			}
-
-			geometry.translate(-(width / 2), - (depth / 2), 0);
-
-			var line = new THREE.Line(geometry, material, THREE.LinePieces );
-			line.name = 'roboGrid';
-			this.mainScene.scene.add(line);
-
-			this.setGrid(line);
-
+			this.robots.forEach(function (robot) {
+				robot.addModel(robot.createRobotGrid(null), false);
+			});
 		}else {
-			this.mainScene.scene.remove(this.mainScene.scene.getObjectByName('roboGrid'));
-			this.setGrid(null);
+			this.robots.forEach(function (robot) {
+				robot.removeModel(robot.robotGrid, false);
+			});
 		}
 	},
 

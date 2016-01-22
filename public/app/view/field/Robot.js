@@ -301,6 +301,13 @@ Ext.define('NU.view.field.Robot', {
 	createSphereModel: function (parameters) {
 		return new Sphere(parameters);
 	},
+
+	createRobotGrid: function(parameters) {
+		var test = new CubeGrid(parameters);
+		this.robotGrid = test;
+		return test;
+	},
+
 	vectorToArray: function (vector, type) {
 		var arr = [];
 		var values = vector[type + "_value"];
