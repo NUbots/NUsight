@@ -166,6 +166,7 @@ Ext.define('NU.view.webgl.WebGL', {
 				format || THREE.LuminanceFormat, THREE.UnsignedByteType, THREE.Texture.DEFAULT_MAPPING,
 				THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter
 			);
+			texture.flipY = true;
 			material.uniforms[name].value = texture;
 		} else {
 			texture.image.data = data;
