@@ -118,7 +118,10 @@ Ext.define('NU.view.window.FieldController', {
 			});
 		}else {
 			this.robots.forEach(function (robot) {
-				robot.removeModel(robot.robotGrid, false);
+				if(robot.robotGrid !== null) {
+					robot.removeModel(robot.robotGrid, false);
+					robot.robotGrid = null;
+				}
 			});
 		}
 	},
