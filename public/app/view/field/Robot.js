@@ -303,9 +303,9 @@ Ext.define('NU.view.field.Robot', {
 	},
 
 	createRobotGrid: function(parameters) {
-		var test = new CubeGrid(parameters);
-		this.robotGrid = test;
-		return test;
+		var grid = new CubeGrid(parameters);
+		this.robotGrid = grid;
+		return grid;
 	},
 
 	vectorToArray: function (vector, type) {
