@@ -102,21 +102,28 @@ Ext.define('NU.view.window.Field', {
 					listeners: {
 						change: 'onRobotGrid'
 					}
+				}, {
+					xtype: 'checkbox',
+					fieldLabel: 'Skybox',
+					checked: true,
+					listeners: {
+						change: 'onSkybox'
+					}
 				}]
 			}
 		}]
 	},
-    bbar: [{
-        xtype: 'component',
-        reference: 'coordinates',
-        height: 15,
-        tpl: 'X: {x}, Y: {y}, Z: {z}',
-        data: {
-            x: 0,
-            y: 0,
-            z: 0
-        }
-    }],
+	bbar: [{
+		xtype: 'component',
+		reference: 'coordinates',
+		height: 15,
+		tpl: 'X: {x}, Y: {y}, Z: {z}',
+		data: {
+			x: 0,
+			y: 0,
+			z: 0
+		}
+	}],
 	items: [{
 		xtype: 'threejs',
 		reference: 'mainscene'

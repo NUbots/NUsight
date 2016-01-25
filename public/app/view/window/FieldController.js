@@ -17,6 +17,10 @@ Ext.define('NU.view.window.FieldController', {
 		SPHERE:     {name: 'Sphere'}
 	},
 	config: {
+		sun: null,
+		sky: null,
+		ground: null,
+		hemisphereLight: null,
 		closeDistance: 0.4,
 		closeHeight: 0.2
 	},
@@ -123,6 +127,17 @@ Ext.define('NU.view.window.FieldController', {
 					robot.robotGrid = null;
 				}
 			});
+		}
+	},
+
+	onSkybox: function (obj, newValue, oldValue, eOpts) {
+		var mainScene = this.lookupReference('mainscene');
+		if(newValue) {
+			this.createSkybox(this.mainScene.scene, this.mainScene.renderer, this.mainScene.camera);
+		}else {
+			mainScene.scene.remove(this.getSky());
+			mainScene.scene.remove(this.getSun());
+			mainScene.scene.remove(this.getGround());
 		}
 	},
 
@@ -630,6 +645,74 @@ Ext.define('NU.view.window.FieldController', {
 		return foundRobot;
 	},
 
+	//reference: http://threejs.org/examples/#webgl_shaders_sky
+	createSkybox: function(scene, renderer, camera) {
+		var sky = new THREE.Sky();
+		sky.mesh.name = 'skyboxSky';
+		scene.add( sky.mesh );
+		this.setSky(sky.mesh);
+
+		// Add Sun Helper
+		sunSphere = new THREE.Mesh(
+			new THREE.SphereBufferGeometry( 40, 16, 8 ),
+			new THREE.MeshBasicMaterial( { color: 0xffffff } )
+		);
+
+		sunSphere.position.y = - 49;
+		sunSphere.visible = false;
+		sunSphere.name = 'skyboxSun';
+		scene.add( sunSphere );
+		this.setSun(sunSphere);
+		/// GUI
+
+		// GROUND
+		var groundGeo = new THREE.PlaneBufferGeometry( 40, 40 );
+		var groundMat = new THREE.MeshBasicMaterial( { color: 0x613610 } );
+
+		var ground = new THREE.Mesh( groundGeo, groundMat );
+		ground.name = 'skyboxGround';
+
+		//move the ground slightly under the field
+		ground.position.z = -0.01;
+
+		scene.add( ground );
+		this.setGround(ground);
+
+		var effectController  = {
+			turbidity: 10,
+			reileigh: 2,
+			mieCoefficient: 0.005,
+			mieDirectionalG: 0.53, //default 0.8
+			luminance: 1,
+			inclination: 0.49, // elevation / inclination
+			azimuth: 0.25, // Facing front,
+			sun: ! true
+		};
+
+		var distance = 40;
+
+		var uniforms = sky.uniforms;
+		uniforms.turbidity.value = effectController.turbidity;
+		uniforms.reileigh.value = effectController.reileigh;
+		uniforms.luminance.value = effectController.luminance;
+		uniforms.mieCoefficient.value = effectController.mieCoefficient;
+		uniforms.mieDirectionalG.value = effectController.mieDirectionalG;
+
+		var theta = Math.PI * ( effectController.inclination - 0.5 );
+		var phi = 2 * Math.PI * ( effectController.azimuth - 0.5 );
+
+		sunSphere.position.x = distance * Math.cos( phi );
+		sunSphere.position.y = distance * Math.sin( phi ) * Math.sin( theta );
+		sunSphere.position.z = distance * Math.sin( phi ) * Math.cos( theta );
+
+		sunSphere.visible = effectController.sun;
+
+		sky.uniforms.sunPosition.value.copy( sunSphere.position );
+
+		renderer.render( scene, camera );
+	},
+
+
 	createMainScene: function () {
 		var field, camera, scene, renderer;
 		scene = new THREE.Scene();
@@ -710,6 +793,8 @@ Ext.define('NU.view.window.FieldController', {
 
 		var effect = new THREE.AnaglyphEffect(renderer);
 		effect.setSize(window.innerWidth, window.innerHeight);
+
+		this.createSkybox(scene, renderer, camera);
 
 		return {
 			scene: scene,
