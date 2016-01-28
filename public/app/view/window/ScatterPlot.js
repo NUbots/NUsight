@@ -1,4 +1,5 @@
 Ext.define('NU.view.window.ScatterPlot', {
+	id: 'scatterPlotWindow',
 	extend : 'NU.view.window.Display',
 	alias: 'widget.nu_scatterplot_window',
 	requires: [

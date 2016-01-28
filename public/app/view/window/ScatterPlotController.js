@@ -52,6 +52,9 @@ Ext.define('NU.view.window.ScatterPlotController', {
         };
 
         Plotly.newPlot(divName, data, layout);
+        this.addConfigOption('test', 0, 4);
+        this.addConfigOption('test', 1, 2);
+        this.addConfigOption('test', 2, 3);
     },
 
     onYMinChange: function (field, newValue, oldValue, eOpts) {
@@ -293,11 +296,15 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
                 var info = {
                     label: label,
-                    xVal: 0
+                    xVal: 0,
+                    xLocation: 0,
+                    yLocation: 1,
                 };
 
                 id = this.getTraceID().push(info) - 1;
                 Plotly.addTraces(divID, trace);
+
+                this.addConfigOption(label, id, values.length);
             }else {
                 var update = null;
                 if(values.length == 1) {
@@ -326,5 +333,36 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
     onPause: function (button) {
         this.setPause(!this.getPause());
+    },
+
+    addConfigOption: function(name, traceLocation, componentLength) {
+        var myWindow = Ext.ComponentQuery.query('window[id=scatterPlotWindow]')[0];
+
+        var checkboxes = [];
+
+        for(var i = 0; i < componentLength; i++) {
+            checkboxes.push({
+                xtype: 'checkbox',
+                fieldLabel: String(i),
+                checked: false,
+                listeners: {
+                    change: 'updateTraceXY'
+                },
+                traceLocation: traceLocation,
+                componentLocation: i
+            });
+        }
+
+        myWindow.down('toolbar').add({
+            text: 'Config - ' + name,
+            menu: {
+                items: checkboxes,
+            }
+        });
+    },
+
+    updateTraceXY: function(obj, newValue, oldValue, eOpts) {
+        //console.log(obj.traceLocation);
+        //console.log(obj.componentLocation);
     }
 });
