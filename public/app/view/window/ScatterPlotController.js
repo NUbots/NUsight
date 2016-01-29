@@ -338,12 +338,23 @@ Ext.define('NU.view.window.ScatterPlotController', {
     addConfigOption: function(name, traceLocation, componentLength) {
         var myWindow = Ext.ComponentQuery.query('window[id=scatterPlotWindow]')[0];
 
-        var checkboxes = [];
+        var checkboxesX = [];
+        var checkboxesY = [];
 
         for(var i = 0; i < componentLength; i++) {
-            checkboxes.push({
+            checkboxesX.push({
                 boxLabel: String(i),
                 name: name + ' X',
+                inputValue: String(i),
+                listeners: {
+                    change: 'updateTraceXY'
+                },
+                traceLocation: traceLocation,
+                componentLocation: i
+            });
+            checkboxesY.push({
+                boxLabel: String(i),
+                name: name + ' Y',
                 inputValue: String(i),
                 listeners: {
                     change: 'updateTraceXY'
@@ -357,10 +368,25 @@ Ext.define('NU.view.window.ScatterPlotController', {
             text: 'Config - ' + name,
             menu: [
                 {
-                    xtype: 'radiogroup',
-                    columns: 1,
-                    vertical: true,
-                    items: checkboxes
+                    text: 'X',
+                    menu: [
+                        {
+                            xtype: 'radiogroup',
+                            columns: 1,
+                            vertical: true,
+                            items: checkboxesX
+                        }
+                    ]
+                }, {
+                    text: 'Y',
+                    menu: [
+                        {
+                            xtype: 'radiogroup',
+                            columns: 1,
+                            vertical: true,
+                            items: checkboxesY
+                        }
+                    ]
                 }
             ]
         });
