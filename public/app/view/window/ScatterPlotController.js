@@ -336,13 +336,16 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     addConfigOption: function(name, traceLocation, componentLength) {
-        var myWindow = Ext.ComponentQuery.query('window[id=scatterPlotWindow]')[0];
+        //gets the ScatterPlot window view
+        var scatterPlotWindow = Ext.ComponentQuery.query('window[id=scatterPlotWindow]')[0];
 
-        var checkboxesX = [];
-        var checkboxesY = [];
+        var radiobuttonX = [];
+        var radiobuttonY = [];
 
+        //create the radio buttons
         for(var i = 0; i < componentLength; i++) {
-            checkboxesX.push({
+            //menu for X config
+            radiobuttonX.push({
                 boxLabel: String(i),
                 name: name + ' X',
                 inputValue: String(i),
@@ -352,7 +355,9 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 traceLocation: traceLocation,
                 componentLocation: i
             });
-            checkboxesY.push({
+
+            //menu for Y config
+            radiobuttonY.push({
                 boxLabel: String(i),
                 name: name + ' Y',
                 inputValue: String(i),
@@ -364,7 +369,8 @@ Ext.define('NU.view.window.ScatterPlotController', {
             });
         }
 
-        myWindow.down('toolbar').add({
+        //get the toolbar for the window and add our radio buttons
+        scatterPlotWindow.down('toolbar').add({
             text: 'Config - ' + name,
             menu: [
                 {
@@ -374,7 +380,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                             xtype: 'radiogroup',
                             columns: 1,
                             vertical: true,
-                            items: checkboxesX
+                            items: radiobuttonX
                         }
                     ]
                 }, {
@@ -384,7 +390,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                             xtype: 'radiogroup',
                             columns: 1,
                             vertical: true,
-                            items: checkboxesY
+                            items: radiobuttonY
                         }
                     ]
                 }
