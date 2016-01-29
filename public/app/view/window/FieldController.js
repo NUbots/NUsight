@@ -38,9 +38,9 @@ Ext.define('NU.view.window.FieldController', {
 	addEvents: function () {
 		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
-			'messages.localisation.proto.Localisation': this.onLocalisation,
-			'messages.support.nubugger.proto.DrawObjects': this.onDrawObjects,
-			'messages.input.proto.Sensors': this.onSensorData,
+			'message.localisation.proto.Localisation': this.onLocalisation,
+			'message.support.nubugger.proto.DrawObjects': this.onDrawObjects,
+			'message.input.proto.Sensors': this.onSensorData,
 			scope: this
 		});
 	},
@@ -365,7 +365,7 @@ Ext.define('NU.view.window.FieldController', {
 
 	createModel: function (robot, object) {
 		// Create a new shape onto the specified robot.
-		var Shape = API.messages.support.nubugger.proto.DrawObject.Shape;
+		var Shape = API.message.support.nubugger.proto.DrawObject.Shape;
 		switch (object.getShape()) {
 			case Shape.ARROW:
 				return this.createArrowModel(robot, object);

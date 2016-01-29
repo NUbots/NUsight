@@ -19,7 +19,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 
 		this.addData(this.store);
 		NU.Network.sendCommand('get_reaction_handles', robot.get('id'));
-		this.mon(NU.Network, 'messages.support.nubugger.proto.ReactionHandles', this.onReactionHandles, this);
+		this.mon(NU.Network, 'message.support.nubugger.proto.ReactionHandles', this.onReactionHandles, this);
 	},
 
 	addType: function (type) {
@@ -58,7 +58,7 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 		record.set('enabled', checked);
 
 		// Create the reaction handles message and add the record data.
-		var reactionHandles = new API.messages.support.nubugger.proto.ReactionHandles();
+		var reactionHandles = new API.message.support.nubugger.proto.ReactionHandles();
 		reactionHandles.handles.push({
 			type: record.get('type'),
 			enabled: record.get('enabled')

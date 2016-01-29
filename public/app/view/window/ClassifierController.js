@@ -333,8 +333,8 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	init: function () {
 		// Load the protocol buffers we use
-		NU.Network.loadProto('messages.input.proto.Image');
-		NU.Network.loadProto('messages.vision.proto.LookUpTable');
+		NU.Network.loadProto('message.input.proto.Image');
+		NU.Network.loadProto('message.vision.proto.LookUpTable');
 
 		// these must initialized here so there is an object per-controller
 		this.resetLUT();
@@ -473,9 +473,9 @@ Ext.define('NU.view.window.ClassifierController', {
 
 	addEvents: function () {
 		this.mon(NU.Network, {
-			'messages.input.proto.Image': this.onImage,
-			'messages.vision.proto.LookUpTable': this.onLookUpTable,
-			'messages.vision.proto.LookUpTableDiff': this.onLookUpTableDiff,
+			'message.input.proto.Image': this.onImage,
+			'message.vision.proto.LookUpTable': this.onLookUpTable,
+			'message.vision.proto.LookUpTableDiff': this.onLookUpTableDiff,
 			scope: this
 		});
 	},
@@ -560,7 +560,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
-		var lookupTable = new API.messages.vision.proto.LookUpTable();
+		var lookupTable = new API.message.vision.proto.LookUpTable();
 		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
@@ -1125,7 +1125,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		//x = imageWidth - x - 1;
 		//y = imageHeight - y - 1;
 
-		var Format = API.messages.input.proto.Image.Format;
+		var Format = API.message.input.proto.Image.Format;
 		switch (this.getImageFormat()) {
 			case Format.JPEG:
 				var offset = 3 * (y * imageWidth + x);
@@ -1153,7 +1153,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		}
 	},
 	drawImage: function (image, callback, thisArg) {
-		var Format = API.messages.input.proto.Image.Format;
+		var Format = API.message.input.proto.Image.Format;
 		this.setImageFormat(image.format);
 		switch (image.format) {
 			case Format.JPEG:
@@ -1180,13 +1180,13 @@ Ext.define('NU.view.window.ClassifierController', {
 			var renderer = renderers[i];
 			renderer.resize(width, height);
 			renderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-			renderer.updateUniform('imageFormat', API.messages.input.proto.Image.Format.YCbCr422);
+			renderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr422);
 			renderer.updateUniform('imageWidth', width);
 			renderer.updateUniform('imageHeight', height);
 			renderer.render();
 		}
 		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(API.messages.input.proto.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
+		this.selectionClassifier.updateRawImage(API.message.input.proto.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageYbCr444: function (image) {
@@ -1200,7 +1200,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			renderer.render();
 		}
 		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(API.messages.input.proto.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
+		this.selectionClassifier.updateRawImage(API.message.input.proto.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageJPEG: function (image, callback, thisArg) {
@@ -1232,14 +1232,14 @@ Ext.define('NU.view.window.ClassifierController', {
 				imageObj.adobe.transformCode = false;
 			}
 			var rawData = imageObj.getData(imageObj.width, imageObj.height);
-			var image = new API.messages.input.proto.Image();
+			var image = new API.message.input.proto.Image();
 			image.setData(rawData);
 			image.setCameraId(0);
 			image.setDimensions({
 				x: imageObj.width,
 				y: imageObj.height
 			});
-			image.setFormat(API.messages.input.proto.Image.Format.YCbCr444);
+			image.setFormat(API.message.input.proto.Image.Format.YCbCr444);
 			var record = NU.Network.getRobotStore().findRecord('id', this.getRobotId());
 			this.onImage(record, image);
 			callback.call(this);

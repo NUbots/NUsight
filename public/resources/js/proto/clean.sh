@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Delete non proto files
-find messages -not -name "*.proto" -type f -delete
+find message -not -name "*.proto" -type f -delete
 
 # Delete empty directories
-find messages -type d -empty -delete 
+find message -type d -empty -delete 

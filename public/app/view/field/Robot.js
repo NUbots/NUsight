@@ -20,7 +20,7 @@ Ext.define('NU.view.field.Robot', {
 			var api_motor_data = api_sensor_data.servo;
 
 			var PI2 = Math.PI/2;
-			var ServoID = API.messages.input.proto.Sensors.ServoID;
+			var ServoID = API.message.input.proto.Sensors.ServoID;
 			var model = darwin.object;
 
 			if (api_motor_data.length > 0) {

@@ -72,9 +72,9 @@ Ext.define('NU.view.window.VisionController', {
 
 	addEvents: function () {
 		this.mon(NU.Network, {
-			'messages.input.proto.Image': this.onImage,
-			'messages.vision.proto.ClassifiedImage': this.onClassifiedImage,
-			'messages.vision.proto.VisionObjects': this.onVisionObjects,
+			'message.input.proto.Image': this.onImage,
+			'message.vision.proto.ClassifiedImage': this.onClassifiedImage,
+			'message.vision.proto.VisionObjects': this.onVisionObjects,
 			scope: this
 		});
 	},
@@ -142,7 +142,7 @@ Ext.define('NU.view.window.VisionController', {
 		var width = image.dimensions.x;
 		var height = image.dimensions.y;
 		this.autoSize(width, height);
-		var Format = API.messages.input.proto.Image.Format;
+		var Format = API.message.input.proto.Image.Format;
 
 		switch (image.format) {
 			case Format.JPEG:
@@ -182,14 +182,14 @@ Ext.define('NU.view.window.VisionController', {
 		var bytesPerPixel = 2;
 		this.imageRenderer.resize(width, height);
 		this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageRenderer.updateUniform('imageFormat', API.messages.input.proto.Image.Format.YCbCr422);
+		this.imageRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr422);
 		this.imageRenderer.updateUniform('imageWidth', width);
 		this.imageRenderer.updateUniform('imageHeight', height);
 		this.imageRenderer.render();
 
 		this.imageDiffRenderer.resize(width, height);
 		this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageDiffRenderer.updateUniform('imageFormat', API.messages.input.proto.Image.Format.YCbCr422);
+		this.imageDiffRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr422);
 		this.imageDiffRenderer.updateUniform('imageWidth', width);
 		this.imageDiffRenderer.updateUniform('imageHeight', height);
 		this.imageDiffRenderer.render();

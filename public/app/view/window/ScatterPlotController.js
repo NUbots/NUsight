@@ -24,11 +24,11 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
     addEvents: function () {
         this.mon(NU.Network, {
-            'messages.support.nubugger.proto.DataPoint': this.onDataPoint,
-            'messages.input.proto.Sensors': this.onSensorData,
+            'message.support.nubugger.proto.DataPoint': this.onDataPoint,
+            'message.input.proto.Sensors': this.onSensorData,
             scope: this
         });
-        this.servoMap = NU.TypeMap.get(API.messages.input.proto.Sensors.ServoID);
+        this.servoMap = NU.TypeMap.get(API.message.input.proto.Sensors.ServoID);
     },
 
     onAfterRender: function () {
