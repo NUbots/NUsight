@@ -342,9 +342,9 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
         for(var i = 0; i < componentLength; i++) {
             checkboxes.push({
-                xtype: 'checkbox',
-                fieldLabel: String(i),
-                checked: false,
+                boxLabel: String(i),
+                name: name + ' X',
+                inputValue: String(i),
                 listeners: {
                     change: 'updateTraceXY'
                 },
@@ -355,9 +355,14 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
         myWindow.down('toolbar').add({
             text: 'Config - ' + name,
-            menu: {
-                items: checkboxes,
-            }
+            menu: [
+                {
+                    xtype: 'radiogroup',
+                    columns: 1,
+                    vertical: true,
+                    items: checkboxes
+                }
+            ]
         });
     },
 
