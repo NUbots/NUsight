@@ -52,9 +52,6 @@ Ext.define('NU.view.window.ScatterPlotController', {
         };
 
         Plotly.newPlot(divName, data, layout);
-        this.addConfigOption('test', 0, 4);
-        this.addConfigOption('test', 1, 2);
-        this.addConfigOption('test', 2, 3);
     },
 
     onYMinChange: function (field, newValue, oldValue, eOpts) {
@@ -304,6 +301,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 id = this.getTraceID().push(info) - 1;
                 Plotly.addTraces(divID, trace);
 
+                //add config option to the toolbar to allow selection of X and Y
                 this.addConfigOption(label, id, values.length);
             }else {
                 var update = null;
@@ -314,13 +312,13 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
                     update = {
                         x: [[traces[id].xVal]],
-                        y: [[values[0]]]
+                        y: [[values[traces[id].yLocation]]]
                     };
                 }else {
                     if(values[0] !== null && values[1] !== null) {
                         update = {
-                            x: [[values[0]]],
-                            y: [[values[1]]]
+                            x: [[values[traces[id].xLocation]]],
+                            y: [[values[traces[id].yLocation]]]
                         };
                     }
                 }
@@ -352,6 +350,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 listeners: {
                     change: 'updateTraceXY'
                 },
+                axis: 'x',
                 traceLocation: traceLocation,
                 componentLocation: i
             });
@@ -364,6 +363,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 listeners: {
                     change: 'updateTraceXY'
                 },
+                axis: 'y',
                 traceLocation: traceLocation,
                 componentLocation: i
             });
@@ -399,7 +399,12 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     updateTraceXY: function(obj, newValue, oldValue, eOpts) {
-        //console.log(obj.traceLocation);
-        //console.log(obj.componentLocation);
+        if(newValue){
+            if(obj.axis === 'x') {
+                this.getTraceID()[obj.traceLocation].xLocation = obj.componentLocation;
+            }else {
+                this.getTraceID()[obj.traceLocation].yLocation = obj.componentLocation;
+            }
+        }
     }
 });
