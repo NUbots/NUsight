@@ -4,7 +4,7 @@ var RobotSimulator = require('./RobotSimulator');
 function VisionLinesSimulator () {
 	RobotSimulator.call(this);
 
-	this.loadProto('messages.vision.proto.VisionObjects');
+	this.loadProto('message.vision.proto.VisionObjects');
 }
 util.inherits(VisionLinesSimulator, RobotSimulator);
 
@@ -21,10 +21,10 @@ VisionLinesSimulator.prototype.run = function () {
 		});
 	}
 
-	var message = new this.API.messages.vision.proto.VisionObjects({
+	var message = new this.API.message.vision.proto.VisionObjects({
 		objects: [{
 			cameraId: 0,
-			type: this.API.messages.vision.proto.VisionObject.ObjectType.LINE,
+			type: this.API.message.vision.proto.VisionObject.ObjectType.LINE,
 			line: lines
 		}]
 	});

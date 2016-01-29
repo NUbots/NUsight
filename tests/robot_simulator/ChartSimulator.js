@@ -3,7 +3,7 @@ var RobotSimulator = require('./RobotSimulator');
 
 function ChartSimulator () {
 	RobotSimulator.call(this);
-	this.loadProto('messages.support.nubugger.proto.DataPoint');
+	this.loadProto('message.support.nubugger.proto.DataPoint');
 }
 util.inherits(ChartSimulator, RobotSimulator);
 

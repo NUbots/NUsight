@@ -5,7 +5,7 @@ var RobotSimulator = require('./RobotSimulator');
 function ClassifierSimulator () {
 	RobotSimulator.call(this);
 
-	this.loadProto('messages.vision.proto.LookUpTableDiff');
+	this.loadProto('message.vision.proto.LookUpTableDiff');
 
 	this.classifications = [119, 103, 121, 111, 99, 109];
 	this.numPoints = 10;
@@ -40,7 +40,7 @@ ClassifierSimulator.prototype.run = function () {
 		}
 	}
 
-	var message = new this.API.messages.vision.proto.LookUpTableDiff({
+	var message = new this.API.message.vision.proto.LookUpTableDiff({
 		diff: diffs
 	});
 

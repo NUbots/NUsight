@@ -4,9 +4,9 @@ var RobotSimulator = require('./RobotSimulator');
 function SensorDataSimulator () {
 	RobotSimulator.call(this);
 
-	this.loadProto('messages.input.proto.Sensors');
+	this.loadProto('message.input.proto.Sensors');
 
-	this.message = new this.API.messages.input.proto.Sensors({
+	this.message = new this.API.message.input.proto.Sensors({
 		timestamp: Date.now(),
 		voltage: 12,
 		battery: Math.random(),
