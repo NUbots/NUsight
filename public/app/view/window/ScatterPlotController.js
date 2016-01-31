@@ -81,7 +81,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
         var divID = this.lookupReference('scatter').getEl().id;
         this.setXMin(newValue);
         var update = {
-            yaxis: {
+            xaxis: {
                 range: [newValue, this.getXMax()]
             }
         };
