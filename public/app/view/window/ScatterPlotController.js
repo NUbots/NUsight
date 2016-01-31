@@ -5,6 +5,8 @@ Ext.define('NU.view.window.ScatterPlotController', {
         'NU.util.TypeMap'
     ],
     config: {
+        divID: null,
+        nextTraceID: 0,
         maxPoints: 100,
         yMin: null,
         yMax: null,
@@ -34,6 +36,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
     onAfterRender: function () {
         var divElement = this.lookupReference('scatter').getEl();
         var divName = divElement.id;
+        this.setDivID(divName);
         var div = document.getElementById(divName);
 
         var data = [];
@@ -246,84 +249,85 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onDataPoint: function (robot, dataPoint, timestamp) {
-        //TODO: Check Plotly.JS changelog for multi axes to allow a TimeStamp axis for single value
         if(!this.getPause()) {
             if (robot.get('id') !== this.getRobotId()) {
                 return;
             }
             var label = dataPoint.label;
             var values = dataPoint.value;
-            var divID = this.lookupReference('scatter').getEl().id;
-
 
             var id = null;
-            var traces = this.getTraceID();
 
-            for(var i = 0; i < traces.length; i++) {
-                if(traces[i].label === label) {
-                    id = i;
-                    break;
-                }
-            }
+            var trace = this.getTraceID()[label];
 
-            if(id === null) {
-                var trace = null;
-
-                if(values.length == 1) {
-                    trace = {
-                        x: [0],
-                        y: [values[0]],
-                        mode: 'markers',
-                        type: 'scattergl',
-                        hoverinfo: "x+y",
-                        marker: {size: 12},
-                        name: label
-                    };
-                }else {
-                    trace = {
-                        x: [values[0]],
-                        y: [values[1]],
-                        mode: 'markers',
-                        type: 'scattergl',
-                        hoverinfo: "x+y",
-                        marker: {size: 12},
-                        name: label
-                    };
-                }
-
+            if(trace === undefined) {
+                console.log(label + ' ' + trace);
                 var info = {
                     label: label,
                     xVal: 0,
                     xLocation: 0,
                     yLocation: 1,
+                    id: null,
+                    display: false,
+                    shouldAddTrace: false
                 };
-
-                id = this.getTraceID().push(info) - 1;
-                Plotly.addTraces(divID, trace);
-
+                this.getTraceID()[label] = info;
                 //add config option to the toolbar to allow selection of X and Y
                 this.addConfigOption(label, id, values.length);
             }else {
-                var update = null;
-                if(values.length == 1) {
-                    //cant support multiple axis to show a timestamp for traces that use a TimeStamp
-                    //for now just increase by 1
-                    traces[id].xVal += 1;
+                if (trace.shouldAddTrace) {
+                    trace.shouldAddTrace = false;
+                    trace.displayed = true;
+                    trace.id = this.getNextTraceID();
+                    this.setNextTraceID(trace.id + 1);
 
-                    update = {
-                        x: [[traces[id].xVal]],
-                        y: [[values[traces[id].yLocation]]]
-                    };
-                }else {
-                    if(values[0] !== null && values[1] !== null) {
-                        update = {
-                            x: [[values[traces[id].xLocation]]],
-                            y: [[values[traces[id].yLocation]]]
+                    var newTrace = null;
+
+                    if (values.length == 1) {
+                        newTrace = {
+                            x: [0],
+                            y: [values[trace.yLocation]],
+                            mode: 'markers',
+                            type: 'scattergl',
+                            hoverinfo: "x+y",
+                            marker: {size: 12},
+                            name: label
+                        };
+                    } else {
+                        newTrace = {
+                            x: [values[trace.xLocation]],
+                            y: [values[trace.yLocation]],
+                            mode: 'markers',
+                            type: 'scattergl',
+                            hoverinfo: "x+y",
+                            marker: {size: 12},
+                            name: label
                         };
                     }
-                }
-                if (update != null) {
-                    Plotly.extendTraces(divID, update, [id], this.getMaxPoints());
+                    Plotly.addTraces(this.getDivID(), newTrace);
+                } else if(trace.display) {
+                    var update = null;
+                    if (values.length == 1) {
+                        //cant support multiple axis to show a timestamp for traces that use a TimeStamp
+                        //for now just increase by 1
+                        trace.xVal += 1;
+
+                        update = {
+                            x: [[trace.xVal]],
+                            y: [[values[trace.yLocation]]]
+                        };
+                        Plotly.extendTraces(this.getDivID(), update, [trace.id], this.getMaxPoints());
+                    } else {
+                        var x = values[trace.xLocation];
+                        var y = values[trace.yLocation];
+                        if (x !== null && y !== null) {
+                            update = {
+                                x: [[x]],
+                                y: [[y]]
+                            };
+                            Plotly.extendTraces(this.getDivID(), update, [trace.id], this.getMaxPoints());
+                        }
+                    }
                 }
             }
         }
@@ -351,7 +355,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                     change: 'updateTraceXY'
                 },
                 axis: 'x',
-                traceLocation: traceLocation,
+                traceLocation: name,
                 componentLocation: i
             });
 
@@ -364,7 +368,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                     change: 'updateTraceXY'
                 },
                 axis: 'y',
-                traceLocation: traceLocation,
+                traceLocation: name,
                 componentLocation: i
             });
         }
@@ -393,6 +397,14 @@ Ext.define('NU.view.window.ScatterPlotController', {
                             items: radiobuttonY
                         }
                     ]
+                }, {
+                    xtype: 'checkbox',
+                    fieldLabel: 'Display',
+                    checked: false,
+                    listeners: {
+                        change: 'displayTrace'
+                    },
+                    traceLocation: name
                 }
             ]
         });
@@ -405,6 +417,18 @@ Ext.define('NU.view.window.ScatterPlotController', {
             }else {
                 this.getTraceID()[obj.traceLocation].yLocation = obj.componentLocation;
             }
+        }
+    },
+
+    displayTrace: function(obj, newValue, oldValue, eOpts) {
+        trace = this.getTraceID()[obj.traceLocation];
+        if(newValue) {
+            trace.shouldAddTrace = true;
+            trace.display = true;
+        }else {
+            trace.display = false;
+            //Plotly.deleteTraces(this.getDivID(), trace.id);
+            //this.setNextTraceID(this.getNextTraceID() - 1);
         }
     }
 });
