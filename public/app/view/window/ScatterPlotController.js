@@ -118,23 +118,6 @@ Ext.define('NU.view.window.ScatterPlotController', {
         Plotly.relayout(divElement.id, update);
     },
 
-    onLineGraph: function (obj, newValue, oldValue, eOpts) {
-        var divID = this.lookupReference('scatter').getEl().id;
-
-        var update;
-
-        if (newValue) {
-            update = {
-                mode: 'lines+markers'
-            };
-        }else {
-            update = {
-                mode: 'markers'
-            };
-        }
-        Plotly.restyle(divID, update);
-    },
-
     onSensorData: function (robotId, sensorData, timestamp) {
         // Accelerometer
         var accel = sensorData.getAccelerometer();
@@ -261,7 +244,6 @@ Ext.define('NU.view.window.ScatterPlotController', {
             var trace = this.getTraceID()[label];
 
             if(trace === undefined) {
-                console.log(label + ' ' + trace);
                 var info = {
                     label: label,
                     xVal: 0,
@@ -405,6 +387,14 @@ Ext.define('NU.view.window.ScatterPlotController', {
                         change: 'displayTrace'
                     },
                     traceLocation: name
+                }, {
+                    xtype: 'checkbox',
+                    fieldLabel: 'Line Graph',
+                    checked: false,
+                    listeners: {
+                        change: 'onLineGraph'
+                    },
+                    traceLocation: name
                 }
             ]
         });
@@ -430,5 +420,19 @@ Ext.define('NU.view.window.ScatterPlotController', {
             //Plotly.deleteTraces(this.getDivID(), trace.id);
             //this.setNextTraceID(this.getNextTraceID() - 1);
         }
-    }
+    },
+
+    onLineGraph: function (obj, newValue, oldValue, eOpts) {
+        var update;
+        if (newValue) {
+            update = {
+                mode: 'lines+markers'
+            };
+        }else {
+            update = {
+                mode: 'markers'
+            };
+        }
+        Plotly.restyle(this.getDivID(), update, [this.getTraceID()[obj.traceLocation].id]);
+    },
 });

@@ -91,18 +91,6 @@ Ext.define('NU.view.window.ScatterPlot', {
 			text: 'Pause',
 			handler: 'onPause',
 			reference: 'pause'
-		}, '->', {
-			text: 'Settings',
-			menu: {
-				items: [{
-					xtype: 'checkbox',
-					fieldLabel: 'Line Graph',
-					checked: false,
-					listeners: {
-						change: 'onLineGraph'
-					}
-				}]
-			}
 		}]
 	},
 	initComponent: function () {
