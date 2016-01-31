@@ -32,24 +32,6 @@ Ext.define('NU.view.window.ScatterPlot', {
 			}
 		}, {
 			xtype: 'numberfield',
-			fieldLabel: 'Y Min',
-			labelStyle: 'white-space: nowrap',
-			labelWidth: 35,
-			width: 100,
-			listeners: {
-				change: 'onYMinChange'
-			}
-		}, {
-			xtype: 'numberfield',
-			fieldLabel: 'Y Max',
-			labelStyle: 'white-space: nowrap',
-			labelWidth: 35,
-			width: 100,
-			listeners: {
-				change: 'onYMaxChange'
-			}
-		}, {
-			xtype: 'numberfield',
 			fieldLabel: 'X Min',
 			labelStyle: 'white-space: nowrap',
 			labelWidth: 35,
@@ -68,10 +50,29 @@ Ext.define('NU.view.window.ScatterPlot', {
 			}
 		}, {
 			xtype: 'numberfield',
+			fieldLabel: 'Y Min',
+			labelStyle: 'white-space: nowrap',
+			labelWidth: 35,
+			width: 100,
+			listeners: {
+				change: 'onYMinChange'
+			}
+		}, {
+			xtype: 'numberfield',
+			fieldLabel: 'Y Max',
+			labelStyle: 'white-space: nowrap',
+			labelWidth: 35,
+			width: 100,
+			listeners: {
+				change: 'onYMaxChange'
+			}
+		},{
+			xtype: 'numberfield',
 			fieldLabel: 'Max Points',
 			labelStyle: 'white-space: nowrap',
 			labelWidth: 70,
 			width: 150,
+			value: 100,
 			listeners: {
 				change: 'onPointsChange'
 			}
