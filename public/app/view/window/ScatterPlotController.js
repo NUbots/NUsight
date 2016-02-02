@@ -238,9 +238,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
             }
             var label = dataPoint.label;
             var values = dataPoint.value;
-
             var id = null;
-
             var trace = this.getTraceID()[label];
 
             if(trace === undefined) {
@@ -253,10 +251,19 @@ Ext.define('NU.view.window.ScatterPlotController', {
                     display: false,
                     shouldAddTrace: false
                 };
+
+                //add the trace info as a key based array.
                 this.getTraceID()[label] = info;
+
                 //add config option to the toolbar to allow selection of X and Y
                 this.addConfigOption(label, id, values.length);
             }else {
+                //check to make sure the trace has not been added previously.
+                if(trace.id !== null) {
+                    trace.shouldAddTrace = false;
+                }
+
+                //if the trace was just selected to be displayed
                 if (trace.shouldAddTrace) {
                     trace.shouldAddTrace = false;
                     trace.displayed = true;
@@ -286,8 +293,9 @@ Ext.define('NU.view.window.ScatterPlotController', {
                             name: label
                         };
                     }
+
                     Plotly.addTraces(this.getDivID(), newTrace);
-                } else if(trace.display) {
+                } else if(trace.display) { //if the trace has already been added and still wants to update
                     var update = null;
                     if (values.length == 1) {
                         //cant support multiple axis to show a timestamp for traces that use a TimeStamp
@@ -381,7 +389,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                     ]
                 }, {
                     xtype: 'checkbox',
-                    fieldLabel: 'Display',
+                    fieldLabel: 'Display Trace',
                     checked: false,
                     listeners: {
                         change: 'displayTrace'
@@ -417,8 +425,6 @@ Ext.define('NU.view.window.ScatterPlotController', {
             trace.display = true;
         }else {
             trace.display = false;
-            //Plotly.deleteTraces(this.getDivID(), trace.id);
-            //this.setNextTraceID(this.getNextTraceID() - 1);
         }
     },
 
@@ -433,6 +439,8 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 mode: 'markers'
             };
         }
+
+        //restyle the specific trace with update
         Plotly.restyle(this.getDivID(), update, [this.getTraceID()[obj.traceLocation].id]);
     },
 });
