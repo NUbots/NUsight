@@ -4,3 +4,4 @@ logs/
 public/lib/
 *.sublime-workspace
 app/configuration.yaml
+npm-debug.log
