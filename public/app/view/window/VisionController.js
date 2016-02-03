@@ -371,15 +371,16 @@ Ext.define('NU.view.window.VisionController', {
 		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
-		visionObjects.objects.forEach(function (visionObject) {
+        var type = API.message.vision.proto.VisionObject.ObjectType;
+		visionObjects.object.forEach(function (visionObject) {
 			switch (visionObject.getType()) {
-				case 0: // Goal
+				case type.GOAL: // Goal
 					this.drawGoals(visionObject.getGoal());
 					break;
-				case 1: // Ball
+				case type.BALL: // Ball
 					this.drawBalls(visionObject.getBall());
 					break;
-				case 3: // Lines
+				case type.LINE: // Lines
 					this.drawLines(visionObject.getLine());
 					break;
 			}
