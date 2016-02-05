@@ -67,6 +67,14 @@ Ext.define('NU.util.Network', {
 		var socket = io.connect(document.location.origin);
 		socket.on('updateRobot', this.updateRobot.bind(this));
 		socket.on('message', this.onMessage.bind(this));
+
+		// When reconnecting, re request all of the network types we wanted
+		socket.on('connect', function () {
+			Object.keys(this.deserialisers).forEach(function (key) {
+				this.socket.emit('addType', key);
+			}, this);
+		}.bind(this));
+
 		this.socket = socket;
 	},
 
