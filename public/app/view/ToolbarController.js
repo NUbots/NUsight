@@ -16,6 +16,9 @@ Ext.define('NU.view.ToolbarController', {
 	onVisionDisplay: function () {
 		this.create('NU.view.window.Vision');
 	},
+	onVisionTrainer: function() {
+		this.create('NU.view.window.VisionTrainer');
+	},
 	onChartDisplay: function () {
 		this.create('NU.view.window.Chart');
 	},

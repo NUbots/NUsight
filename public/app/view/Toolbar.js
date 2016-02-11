@@ -22,6 +22,11 @@ Ext.define('NU.view.Toolbar', {
             click: 'onVisionDisplay'
         }
     }, {
+        text: 'Vision Trainer',
+        listeners: {
+            click: 'onVisionTrainer'
+        }
+    }, {
         text: 'Chart',
         listeners: {
             click: 'onChartDisplay'
