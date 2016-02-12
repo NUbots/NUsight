@@ -2,16 +2,14 @@ Ext.define('NU.view.window.VisionTrainer', {
     extend : 'NU.view.window.Display',
     alias: 'widget.nu_chart_window',
     requires: [
-        'NU.view.window.VisionTrainerController',
-        'Ext.ux.form.MultiSelect',
-        'Ext.layout.container.Anchor',
-        'NU.store.Streams',
+        'NU.view.window.VisionController',
+        'NU.view.LayeredCanvas',
         'NU.view.camera.Selector',
-        'NU.view.LayeredCanvas'
+        'Ext.layout.container.Anchor'
     ],
     controller: 'VisionTrainer',
     title: 'Vision Trainer',
-    width: 720,
+    width: 454,
     height: 295,
 //    resizable: {
 //        preserveRatio: true

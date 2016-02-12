@@ -2,6 +2,7 @@ Ext.define('NU.view.window.VisionTrainerController', {
     extend: 'NU.view.window.DisplayController',
     alias: 'controller.VisionTrainer',
     requires: [
+        'NU.view.webgl.Vision',
         'NU.util.TypeMap'
     ],
     config: {
@@ -36,6 +37,8 @@ Ext.define('NU.view.window.VisionTrainerController', {
             context: imageLayer.context,
             autoRender: false
         });
+
+        layeredCanvas.showAll();
 
         Promise.all([
             this.imageRenderer.onReady(),
