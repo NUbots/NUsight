@@ -1,8 +1,8 @@
 Ext.define('NU.view.window.VisionTrainer', {
     extend : 'NU.view.window.Display',
-    alias: 'widget.nu_chart_window',
+    alias: 'widget.nu_vision_trainer_window',
     requires: [
-        'NU.view.window.VisionController',
+        'NU.view.window.VisionTrainerController',
         'NU.view.LayeredCanvas',
         'NU.view.camera.Selector',
         'Ext.layout.container.Anchor'
