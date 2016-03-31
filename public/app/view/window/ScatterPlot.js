@@ -20,6 +20,17 @@ Ext.define('NU.view.window.ScatterPlot', {
 		afterrender: 'onAfterRender',
 		resize: 'onResize'
 	},
+	//right toolbar for configs for traces
+	rbar: {
+		id: 'rightbar',
+		xtype: 'toolbar',
+		width: 150,
+		layout: {
+			overflowHandler: 'scroller'
+		},
+		items: [
+		],
+	},
 	tbar: {
 		xtype: 'toolbar',
 		layout: {

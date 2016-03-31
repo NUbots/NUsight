@@ -37,14 +37,13 @@ Ext.define('NU.view.window.ScatterPlotController', {
         var divElement = this.lookupReference('scatter').getEl();
         var divName = divElement.id;
         this.setDivID(divName);
-        var div = document.getElementById(divName);
 
         var data = [];
 
         var layout = {
             autosize: false,
-            height: divElement.getWidth(),
-            width: divElement.getHeight(),
+            height: divElement.getHeight(),
+            width: divElement.getWidth(),
             margin: {
                 l: 50,
                 r: 50,
@@ -363,9 +362,22 @@ Ext.define('NU.view.window.ScatterPlotController', {
             });
         }
 
-        //get the toolbar for the window and add our radio buttons
-        scatterPlotWindow.down('toolbar').add({
-            text: 'Config - ' + name,
+        //get the toolbar for the window and add our menu
+        //scatterPlotWindow.down('toolbar').add({
+
+        //get the right side bar toolbar from the window and add our menu
+        scatterPlotWindow.down('#rightbar').add({
+            text: '' + name,
+            width: 140,
+            listeners: {
+                afterrender: function(menu) {
+                    Ext.tip.QuickTipManager.register({
+                        target: menu.getId(),
+                        title : name,  // QuickTip Header
+                        //text  : '' // Tip content
+                    });
+                }
+            },
             menu: [
                 {
                     text: 'X',
