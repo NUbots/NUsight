@@ -34,7 +34,7 @@ message Subsumption {
 
     message LimbSet {
         float priority = 1;
-        repeated Limb limbs = 2;
+        repeated Limb limbs = 2[packed=true];
     }
 
     message ActionRegister {
@@ -52,12 +52,12 @@ message Subsumption {
 
         State state = 1;
         string name = 2;
-        repeated Limb limbs = 3;
+        repeated Limb limbs = 3[packed=true];
     }
 
     message ActionPriorites {
         uint32 id = 1;
-        repeated float priorities = 2;
+        repeated float priorities = 2[packed=true];
     }
 
     repeated ActionRegister action_register = 1;
