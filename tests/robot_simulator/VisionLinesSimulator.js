@@ -22,7 +22,7 @@ VisionLinesSimulator.prototype.run = function () {
 	}
 
 	var message = new this.API.message.vision.proto.VisionObjects({
-		objects: [{
+		object: [{
 			cameraId: 0,
 			type: this.API.message.vision.proto.VisionObject.ObjectType.LINE,
 			line: lines
