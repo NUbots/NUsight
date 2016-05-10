@@ -440,8 +440,16 @@ Ext.define('NU.view.window.VisionController', {
 		var context = this.getContext('balls');
 		context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-		for (var i = 0; i < balls.length; i++) {
-			var ball = balls[i];
+		//ensure that the balls are in a list
+		var ballList;
+		if(balls.length == null) {
+			ballList = [balls];
+		}else {
+			ballList = balls;
+		}
+
+		for (var i = 0; i < ballList.length; i++) {
+			var ball = ballList[i];
 			context.beginPath();
 
 			context.shadowColor = 'black';
