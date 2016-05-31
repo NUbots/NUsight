@@ -49,15 +49,16 @@ Ext.define('NU.view.field.Robot', {
 			if (this.getShowOrientation()) {
 				var rotation = new THREE.Matrix4()
 				rotation.set(
-					api_sensor_data.orientation.x.x, api_sensor_data.orientation.x.y, api_sensor_data.orientation.x.z, 0,
-					api_sensor_data.orientation.y.x, api_sensor_data.orientation.y.y, api_sensor_data.orientation.y.z, 0,
-					api_sensor_data.orientation.z.x, api_sensor_data.orientation.z.y, api_sensor_data.orientation.z.z, 0,
+					api_sensor_data.world.x.x, api_sensor_data.world.x.y, api_sensor_data.world.x.z, 0,
+					api_sensor_data.world.y.x, api_sensor_data.world.y.y, api_sensor_data.world.y.z, 0,
+					api_sensor_data.world.z.x, api_sensor_data.world.z.y, api_sensor_data.world.z.z, 0,
 					0, 0, 0, 1
 				);
-				darwin.object.quaternion.setFromRotationMatrix(rotation);
+				model.quaternion.setFromRotationMatrix(rotation);
+				model.position.setX(api_sensor_data.world.t.x);
+				model.position.setY(api_sensor_data.world.t.y);
+				model.position.setZ(api_sensor_data.world.t.z);
 			}
-			// TODO: remove - walk engine orientation override for testing
-	//        darwin.object.rotation.y = -15 * Math.PI / 180;
 		}, this);
 	},
 	onLocalisation: function (api_localisation) {
@@ -317,9 +318,9 @@ Ext.define('NU.view.field.Robot', {
 		return arr;
 	},
 	calculateErrorElipse: function (xx, xy, yy) {
-		//based on 
+		//based on
 		// http://www.math.harvard.edu/archive/21b_fall_04/exhibits/2dmatrices/index.html
-		// and 
+		// and
 		// http://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
 		var result, scalefactor, Eig1, Eig2, maxEig, minEig;
 		result = {};
@@ -330,10 +331,10 @@ Ext.define('NU.view.field.Robot', {
 
 		Eig1 = trace / 2 + Math.sqrt(trace * trace / 4 - det)
 		Eig2 = trace / 2 - Math.sqrt(trace * trace / 4 - det)
-		
+
 		maxEig = Math.max(Eig1, Eig2);
 		minEig = Math.min(Eig1, Eig2);
-	
+
 		result.x = Math.sqrt(maxEig) * scalefactor;
 		result.y = Math.sqrt(minEig) * scalefactor;
 

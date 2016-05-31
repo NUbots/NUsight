@@ -150,20 +150,27 @@ Ext.define('NU.view.window.ChartController', {
             ]
         }, timestamp);
 
-        // Orientation
-        var orientation = sensorData.getOrientation();
+        // World
+        var world = sensorData.getWorld();
         this.onDataPoint(robotId, {
-            label: "Orientation",
+            label: "World",
             value: [
-                orientation.xx,
-                orientation.yx,
-                orientation.zx,
-                orientation.xy,
-                orientation.yy,
-                orientation.zy,
-                orientation.xz,
-                orientation.yz,
-                orientation.zz
+                world.x.x,
+                world.y.x,
+                world.z.x,
+                world.t.x,
+                world.x.y,
+                world.y.y,
+                world.z.y,
+                world.t.y,
+                world.x.z,
+                world.y.z,
+                world.z.z,
+                world.t.z,
+                world.x.t,
+                world.y.t,
+                world.z.t,
+                world.t.t
             ]
         }, timestamp);
 
