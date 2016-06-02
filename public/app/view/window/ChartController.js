@@ -174,37 +174,25 @@ Ext.define('NU.view.window.ChartController', {
             ]
         }, timestamp);
 
-        // Left FSR
-        //var lFSR = sensorData.getLeftFSR();
-        //this.onDataPoint(robotId, {
-        //    label: "Left FSR Position",
-        //    value: [
-        //        lFSR.x,
-        //        lFSR.y
-        //    ]
-        //}, timestamp);
-        //this.onDataPoint(robotId, {
-        //    label: "Left FSR Force",
-        //    value: [
-        //        lFSR.z
-        //    ]
-        //}, timestamp);
+        // FSRs
+        var fsrs = sensorData.fsrs;
+        Ext.each(sensorData.fsr, function(fsr, index) {
 
-        // Right FSR
-        //var rFSR = sensorData.getRightFSR();
-        //this.onDataPoint(robotId, {
-        //    label: "Right FSR Position",
-        //    value: [
-        //        rFSR.x,
-        //        rFSR.y
-        //    ]
-        //}, timestamp);
-        //this.onDataPoint(robotId, {
-        //    label: "Right FSR Force",
-        //    value: [
-        //        rFSR.z
-        //    ]
-        //}, timestamp);
+            // Our FSR values
+            this.onDataPoint(robotId, {
+                label: "FSR " + index,
+                value: fsr.value,
+            }, timestamp);
+
+            // Our FSR centre
+            this.onDataPoint(robotId, {
+                label: "FSR Centre "  + index,
+                value: [
+                    fsr.centre.x,
+                    fsr.centre.y
+                ]
+            }, timestamp);
+        }, this);
 
         // Servos
         Ext.each(sensorData.servo, function(servo) {
