@@ -49,20 +49,30 @@ Ext.define('NU.view.field.Robot', {
 				model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].presentPosition);
 			}
 
+			// Set our rotation from our rotation matrix
+			// This is transposing the matrix as it is constructed
+			var rotation = new THREE.Matrix4();
+			rotation.set(
+				api_sensor_data.world.x.x, api_sensor_data.world.x.y, api_sensor_data.world.x.z, 0,
+				api_sensor_data.world.y.x, api_sensor_data.world.y.y, api_sensor_data.world.y.z, 0,
+				api_sensor_data.world.z.x, api_sensor_data.world.z.y, api_sensor_data.world.z.z, 0,
+				0, 0, 0, 1
+			);
+
+			var translation = new THREE.Vector4();
+			translation.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 0);
+
+			// Put our translation in world
+			translation.applyMatrix4(rotation);
+			translation.negate();
+
 			// Apply rotation and z position
 			if (this.getShowOrientation()) {
-				// Set our rotation from our rotation matrix
-				var rotation = new THREE.Matrix4();
-				rotation.set(
-					api_sensor_data.world.x.x, api_sensor_data.world.x.y, api_sensor_data.world.x.z, 0,
-					api_sensor_data.world.y.x, api_sensor_data.world.y.y, api_sensor_data.world.y.z, 0,
-					api_sensor_data.world.z.x, api_sensor_data.world.z.y, api_sensor_data.world.z.z, 0,
-					0, 0, 0, 1
-				);
+
 				model.quaternion.setFromRotationMatrix(rotation);
 
 				// Set our z position from our sensors
-				model.position.setZ(api_sensor_data.world.t.z);
+				model.position.setZ(translation.z);
 			}
 			else {
 				model.quaternion.setFromEuler(new THREE.Euler(0,0,0));
@@ -70,8 +80,8 @@ Ext.define('NU.view.field.Robot', {
 
 			// Apply odometry x and y
 			if (this.getShowOdometry() && !this.getShowLocalisation()) {
-				darwin.position.setX(api_sensor_data.world.t.x);
-				darwin.position.setY(api_sensor_data.world.t.y);
+				darwin.position.setX(translation.x);
+				darwin.position.setY(translation.y);
 			}
 
 		}, this);
