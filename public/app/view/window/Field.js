@@ -51,26 +51,35 @@ Ext.define('NU.view.window.Field', {
 				items: [{
 					xtype: 'checkbox',
 					fieldLabel: 'Orientation',
-					checked: false,
+					checked: true,
 					listeners: {
-						change: 'onOrientation'
+						change: 'onDisplayOrientation'
 					}
 				}, {
-					itemId: 'resetOrientation',
-					text: 'Reset Orientation',
-					ui: 'default-toolbar',
+					xtype: 'checkbox',
+					fieldLabel: 'Odometry',
+					checked: false,
 					listeners: {
-						click: 'onResetOrientation'
+						change: 'onDisplayOdometry'
+					}
+				}, {
+					xtype: 'checkbox',
+					fieldLabel: 'Localisation',
+					checked: false,
+					listeners: {
+						change: 'onDisplayLocalisation'
 					}
 				}, {
 					xtype: 'checkbox',
 					fieldLabel: 'Anaglyph',
+					checked: false,
 					listeners: {
 						change: 'onAnaglyph'
 					}
 				}, {
 					xtype: 'checkbox',
 					fieldLabel: 'Gamepad',
+					checked: false,
 					listeners: {
 						change: 'onGamepad'
 					}

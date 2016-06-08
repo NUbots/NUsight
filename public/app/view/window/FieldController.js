@@ -100,7 +100,7 @@ Ext.define('NU.view.window.FieldController', {
 
 		if(newValue) {
 			newCamera = new THREE.OrthographicCamera(-aspectRatio / cameraSize, aspectRatio / cameraSize, 1 / cameraSize, -1 /cameraSize, -5, 50);
-		}else {
+		} else {
 			newCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50);
 		}
 
@@ -146,17 +146,21 @@ Ext.define('NU.view.window.FieldController', {
 		crosshair.setVisible(crosshair.isHidden() ? true : false);
 	},
 
-	onOrientation: function (obj, newValue, oldValue, eOpts) {
+	onDisplayOrientation: function (obj, newValue, oldValue, eOpts) {
 		this.robots.forEach(function (robot) {
 			robot.setShowOrientation(newValue);
 		});
 	},
 
-	onResetOrientation: function () {
+	onDisplayOdometry: function (obj, newValue, oldValue, eOpts) {
 		this.robots.forEach(function (robot) {
-			robot.darwinModels.forEach(function (model) {
-				model.object.rotation.set(0, 0, 0);
-			});
+			robot.setShowOdometry(newValue);
+		});
+	},
+
+	onDisplayLocalisation: function (obj, newValue, oldValue, eOpts) {
+		this.robots.forEach(function (robot) {
+			robot.setShowLocalisation(newValue);
 		});
 	},
 

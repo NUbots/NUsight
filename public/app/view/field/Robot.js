@@ -4,13 +4,16 @@ Ext.define('NU.view.field.Robot', {
 	requires: ['Ext.util.TaskManager'],
 	config: {
 		robotId: null,
-		showOrientation: false
+		showOrientation: true,
+		showOdometry: false,
+		showLocalisation: false
 	},
 	darwinModels: [],
 	ballModels: [],
 	constructor: function () {
 		this.callParent(arguments);
 		var darwin = this.createDarwinModel();
+		this.setShowOrientation(true);
 		this.darwinModels = [darwin];
 		return this;
 	},
@@ -46,8 +49,10 @@ Ext.define('NU.view.field.Robot', {
 				model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].presentPosition);
 			}
 
+			// Apply rotation and z position
 			if (this.getShowOrientation()) {
-				var rotation = new THREE.Matrix4()
+				// Set our rotation from our rotation matrix
+				var rotation = new THREE.Matrix4();
 				rotation.set(
 					api_sensor_data.world.x.x, api_sensor_data.world.x.y, api_sensor_data.world.x.z, 0,
 					api_sensor_data.world.y.x, api_sensor_data.world.y.y, api_sensor_data.world.y.z, 0,
@@ -55,23 +60,38 @@ Ext.define('NU.view.field.Robot', {
 					0, 0, 0, 1
 				);
 				model.quaternion.setFromRotationMatrix(rotation);
-				model.position.setX(api_sensor_data.world.t.x);
-				model.position.setY(api_sensor_data.world.t.y);
+
+				// Set our z position from our sensors
 				model.position.setZ(api_sensor_data.world.t.z);
 			}
+			else {
+				model.quaternion.setFromEuler(new THREE.Euler(0,0,0));
+			}
+
+			// Apply odometry x and y
+			if (this.getShowOdometry() && !this.getShowLocalisation()) {
+				darwin.position.setX(api_sensor_data.world.t.x);
+				darwin.position.setY(api_sensor_data.world.t.y);
+			}
+
 		}, this);
 	},
 	onLocalisation: function (api_localisation) {
+
+		if(!this.getShowLocalisation()) {
+			return;
+		}
+
 		function updateModel(model, field_object) {
-			model.position.x = field_object.wm_x;
-			model.position.y = field_object.wm_y;
+			model.position.x = field_object.wmX;
+			model.position.y = field_object.wmY;
 			model.rotation.z = field_object.heading;
-			var result = this.calculateErrorElipse(field_object.sr_xx, field_object.sr_xy, field_object.sr_yy);
+			var result = this.calculateErrorElipse(field_object.srXx, field_object.srXy, field_object.srYy);
 			model.visualiser.scale.x = result.x;
 			model.visualiser.scale.y = result.y;
 			model.visualiser.rotation.z = result.angle;
 		}
-		api_localisation.field_object.forEach(function (field_object) {
+		api_localisation.fieldObject.forEach(function (field_object) {
 			if(field_object.name == 'ball') {
 				// remove the old models
 				this.fireEvent('ball-model-list-resized', field_object.models.length);
@@ -190,7 +210,7 @@ Ext.define('NU.view.field.Robot', {
 			mesh.traverse(function (object) {
 				var material = object.material;
 				// Check if there is a material on the child.
-				if (material != undefined) {
+				if (material !== undefined) {
 					materials.push(material);
 					material.transparent = true;
 				}
