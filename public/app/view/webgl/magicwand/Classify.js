@@ -75,7 +75,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 			this.scene.remove(this.imagePointCloud);
 			geometry.addAttribute('position', new THREE.BufferAttribute(data, itemSize));
 		}
-		this.imagePointCloud = new THREE.PointCloud(geometry, material);
+		this.imagePointCloud = new THREE.Points(geometry, material);
 		this.imagePointCloud.frustumCulled = false;
 		this.imagePointCloud.depthTest = false;
 		this.imagePointCloud.depthWrite = false;
@@ -105,7 +105,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 	},
 	updateRawImage: function (imageFormat, data, width, height, textureFormat) {
 		var positionAttr = this.imagePointCloud.geometry.getAttribute('position');
-		if (!positionAttr || positionAttr.length !== width * height * 3) {
+		if (!positionAttr || positionAttr.count !== width * height * 3) {
 			this.createPointCloud(width, height);
 		}
 

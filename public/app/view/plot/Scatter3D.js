@@ -241,25 +241,25 @@ Ext.define('NU.view.plot.Scatter3D', {
 		var xAxisMat = new THREE.LineBasicMaterial({
 			color: 0xeeeeee
 		});
-		var xAxis = new THREE.Line(xAxisGeo, xAxisMat, THREE.LinePieces);
+		var xAxis = new THREE.Line(xAxisGeo, xAxisMat, THREE.LineSegments);
 		scatterPlot.add(xAxis);
 
 		var yAxisMat = new THREE.LineBasicMaterial({
 			color: 0xeeeeee
 		});
-		var yAxis = new THREE.Line(yAxisGeo, yAxisMat, THREE.LinePieces);
+		var yAxis = new THREE.Line(yAxisGeo, yAxisMat, THREE.LineSegments);
 		scatterPlot.add(yAxis);
 
 		var zAxisMat = new THREE.LineBasicMaterial({
 			color: 0xeeeeee
 		});
-		var zAxis = new THREE.Line(zAxisGeo, zAxisMat, THREE.LinePieces);
+		var zAxis = new THREE.Line(zAxisGeo, zAxisMat, THREE.LineSegments);
 		scatterPlot.add(zAxis);
 
 		var midLinesMat = new THREE.LineBasicMaterial({
 			color: 0xdddddd
 		});
-		var midLines = new THREE.Line(midLinesGeo, midLinesMat, THREE.LinePieces);
+		var midLines = new THREE.Line(midLinesGeo, midLinesMat, THREE.LineSegments);
 		scatterPlot.add(midLines);
 
 		var boundaryGeo = new THREE.BoxGeometry(bounds.maxx - bounds.minx, bounds.maxy - bounds.miny, bounds.maxz - bounds.minz);
@@ -370,7 +370,7 @@ Ext.define('NU.view.plot.Scatter3D', {
 			});
 			material.obj = this;
 
-			points = new THREE.PointCloud(geometry, material);
+			points = new THREE.Points(geometry, material);
 			points.frustumCulled = false;
 			scatterPlot.add(points);
 			this.setPoints(points);
