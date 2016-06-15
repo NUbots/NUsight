@@ -38,7 +38,13 @@ void main() {
 	}
 	// convert into RGBA colour
 //	gl_FragColor = vec4(vec3(1.0, 0.0, 0.0) * length(difference), 1.0);
-	gl_FragColor = vec4(difference, length(difference));
+
+//HACKED out image diff:
+	// gl_FragColor = vec4(difference, length(difference));
+	gl_FragColor = vec4(0,0,0,0);
+
+
+
 //	gl_FragColor = diff(self, -1.0 / float(imageWidth), -1.0 / float(imageHeight));
 }
 
