@@ -57,6 +57,9 @@ Ext.define('NU.view.window.VisionController', {
 		layeredCanvas.add('balls', {group: 'field_objects'});
 		layeredCanvas.add('lines');
 
+		//hide image diff by default
+		layeredCanvas.hide('image_diff');
+
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
 //        this.setContext(this.getCanvas().el.dom.getContext('2d'));
@@ -84,6 +87,10 @@ Ext.define('NU.view.window.VisionController', {
 		layeredCanvas.hideAll();
 		Ext.each(newValue, function (value) {
 			switch (value) {
+				case 'all_but_image_diff':
+					layeredCanvas.showAll();
+					layeredCanvas.hide('image_diff');
+					break;
 				case 'all':
 					layeredCanvas.showAll();
 					break;

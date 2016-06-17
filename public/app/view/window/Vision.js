@@ -57,7 +57,7 @@ Ext.define('NU.view.window.Vision', {
             xtype: 'multiselect',
             width: 148,
             store: [
-                ['all', 'All'],
+                ['all_but_image_diff', 'All but Image Diff'],
                 ['raw', 'Raw Image'],
                 ['image_diff', 'Image Diff'],
                 ['classified_search', 'Classified Search'],
@@ -65,7 +65,8 @@ Ext.define('NU.view.window.Vision', {
                 ['visual_horizon', 'Visual Horizon'],
                 ['horizon', 'Horizon'],
                 ['objects', 'Field Objects'],
-				['lines', 'Debug Lines']
+				['lines', 'Debug Lines'],
+                ['all', 'All']
             ],
             blankText: 'No items available',
             listeners: {
