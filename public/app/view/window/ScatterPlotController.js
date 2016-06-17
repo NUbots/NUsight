@@ -106,6 +106,20 @@ Ext.define('NU.view.window.ScatterPlotController', {
         this.setMaxPoints(newValue);
     },
 
+    onGraphTypeChange: function (obj, newValue, oldValue, eOpts) {
+        if (newValue) {
+            var update;
+
+            update = {
+                type: obj.type
+            };
+
+            //restyle the specific trace with update
+            Plotly.restyle(this.getDivID(), update);
+            Plotly.redraw(this.getDivID());
+        }
+    },
+
     onResize: function (obj, width, height) {
         var divElement = this.lookupReference('scatter').getEl();
 
@@ -246,6 +260,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                     xVal: 0,
                     xLocation: 0,
                     yLocation: 1,
+                    zLocation: -1,
                     id: null,
                     display: false,
                     shouldAddTrace: false
@@ -275,6 +290,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                         newTrace = {
                             x: [0],
                             y: [values[trace.yLocation]],
+                            z: [(trace.zLocation == -1) ? 0 : values[trace.yLocation]],
                             mode: 'markers',
                             type: 'scattergl',
                             hoverinfo: "x+y",
@@ -285,6 +301,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                         newTrace = {
                             x: [values[trace.xLocation]],
                             y: [values[trace.yLocation]],
+                            z: [(trace.zLocation == -1) ? 0 : values[trace.yLocation]],
                             mode: 'markers',
                             type: 'scattergl',
                             hoverinfo: "x+y",
@@ -303,7 +320,8 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
                         update = {
                             x: [[trace.xVal]],
-                            y: [[values[trace.yLocation]]]
+                            y: [[values[trace.yLocation]]],
+                            z: [[(trace.zLocation == -1) ? 0 : values[trace.yLocation]]]
                         };
                         Plotly.extendTraces(this.getDivID(), update, [trace.id], this.getMaxPoints());
                     } else {
@@ -312,7 +330,8 @@ Ext.define('NU.view.window.ScatterPlotController', {
                         if (x !== null && y !== null) {
                             update = {
                                 x: [[x]],
-                                y: [[y]]
+                                y: [[y]],
+                                z: [[(trace.zLocation == -1) ? 0 : values[trace.yLocation]]]
                             };
                             Plotly.extendTraces(this.getDivID(), update, [trace.id], this.getMaxPoints());
                         }
@@ -332,6 +351,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
         var radiobuttonX = [];
         var radiobuttonY = [];
+        var radiobuttonZ = [];
 
         //create the radio buttons
         for(var i = 0; i < componentLength; i++) {
@@ -341,7 +361,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 name: name + ' X',
                 inputValue: String(i),
                 listeners: {
-                    change: 'updateTraceXY'
+                    change: 'updateTraceXYZ'
                 },
                 axis: 'x',
                 traceLocation: name,
@@ -354,9 +374,22 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 name: name + ' Y',
                 inputValue: String(i),
                 listeners: {
-                    change: 'updateTraceXY'
+                    change: 'updateTraceXYZ'
                 },
                 axis: 'y',
+                traceLocation: name,
+                componentLocation: i
+            });
+
+            //menu for Z config
+            radiobuttonZ.push({
+                boxLabel: String(i),
+                name: name + ' Z',
+                inputValue: String(i),
+                listeners: {
+                    change: 'updateTraceXYZ'
+                },
+                axis: 'z',
                 traceLocation: name,
                 componentLocation: i
             });
@@ -399,6 +432,16 @@ Ext.define('NU.view.window.ScatterPlotController', {
                             items: radiobuttonY
                         }
                     ]
+                },{
+                    text: 'Z',
+                    menu: [
+                        {
+                            xtype: 'radiogroup',
+                            columns: 1,
+                            vertical: true,
+                            items: radiobuttonZ
+                        }
+                    ]
                 }, {
                     xtype: 'checkbox',
                     fieldLabel: 'Display Trace',
@@ -420,12 +463,14 @@ Ext.define('NU.view.window.ScatterPlotController', {
         });
     },
 
-    updateTraceXY: function(obj, newValue, oldValue, eOpts) {
+    updateTraceXYZ: function(obj, newValue, oldValue, eOpts) {
         if(newValue){
             if(obj.axis === 'x') {
                 this.getTraceID()[obj.traceLocation].xLocation = obj.componentLocation;
-            }else {
+            }else if(obj.axis === 'y') {
                 this.getTraceID()[obj.traceLocation].yLocation = obj.componentLocation;
+            }else {
+                this.getTraceID()[obj.traceLocation].zLocation = obj.componentLocation;
             }
         }
     },

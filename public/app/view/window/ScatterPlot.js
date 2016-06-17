@@ -102,6 +102,31 @@ Ext.define('NU.view.window.ScatterPlot', {
 			text: 'Pause',
 			handler: 'onPause',
 			reference: 'pause'
+		}, '->', {
+			text: 'Graph Type',
+			menu: [{
+				xtype: 'radiogroup',
+				columns: 1,
+				vertical: true,
+				items: [{
+					checked: true,
+					boxLabel: '2D Scatter Plot',
+					name: 'graphType',
+					inputValue: '2D Scatter Plot',
+					listeners: {
+						change: 'onGraphTypeChange'
+					},
+					type: 'scattergl' //Plotly's Graph Type
+				}, {
+					boxLabel: '3D Scatter Plot',
+					name: 'graphType',
+					inputValue: '3D Scatter Plot',
+					listeners: {
+						change: 'onGraphTypeChange'
+					},
+					type: 'scatter3d'
+				}]
+			}]
 		}]
 	},
 	initComponent: function () {
