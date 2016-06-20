@@ -15,7 +15,14 @@ Ext.define('NU.view.window.ScatterPlotController', {
         traceID: null,
         pause: null,
         context: null,
-        servoMap: null
+        servoMap: null,
+        symbolTypes: [
+            //[Text, symbolName] https://plot.ly/javascript/reference/#scatter-marker-symbol
+            ['Circle', 'circle'],
+            ['Square', 'square'],
+            ['Cross', 'cross'],
+            ['Diamond', 'diamond']
+        ]
     },
 
     init: function () {
@@ -352,6 +359,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
         var radiobuttonX = [];
         var radiobuttonY = [];
         var radiobuttonZ = [];
+        var radiobuttonSymbols = [];
 
         //create the radio buttons
         for(var i = 0; i < componentLength; i++) {
@@ -395,6 +403,20 @@ Ext.define('NU.view.window.ScatterPlotController', {
             });
         }
 
+        //add every symbol to the trace's config
+        this.getSymbolTypes().forEach(function(symbol) {
+            radiobuttonSymbols.push({
+                boxLabel: symbol[0],
+                name: name + ' Symbol',
+                inputValue: symbol[0],
+                listeners: {
+                    change: 'updateTraceSymbol'
+                },
+                traceLocation: name,
+                symbolType: symbol[1]
+            });
+        });
+        
         //get the toolbar for the window and add our menu
         //scatterPlotWindow.down('toolbar').add({
 
@@ -443,6 +465,16 @@ Ext.define('NU.view.window.ScatterPlotController', {
                         }
                     ]
                 }, {
+                    text: 'Symbol',
+                    menu: [
+                        {
+                            xtype: 'radiogroup',
+                            columns: 1,
+                            vertical: true,
+                            items: radiobuttonSymbols
+                        }
+                    ]
+                }, {
                     xtype: 'checkbox',
                     fieldLabel: 'Display Trace',
                     checked: false,
@@ -463,6 +495,18 @@ Ext.define('NU.view.window.ScatterPlotController', {
         });
     },
 
+    updateTraceSymbol: function(obj, newValue, oldValue, eOpts) {
+        if(newValue){
+            update = {
+                marker: {
+                    symbol: obj.symbolType,
+                    size: 12
+                }
+            };
+            Plotly.restyle(this.getDivID(), update, [this.getTraceID()[obj.traceLocation].id]);
+        }
+    },
+
     updateTraceXYZ: function(obj, newValue, oldValue, eOpts) {
         if(newValue){
             if(obj.axis === 'x') {
@@ -476,7 +520,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     displayTrace: function(obj, newValue, oldValue, eOpts) {
-        trace = this.getTraceID()[obj.traceLocation];
+        var trace = this.getTraceID()[obj.traceLocation];
         if(newValue) {
             trace.shouldAddTrace = true;
             trace.display = true;
