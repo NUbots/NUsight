@@ -17,6 +17,9 @@ function NUsight (io) {
 
 	// Robot joined
 	this.network.on('nuclear_join', function (name, address) {
+		if(name === 'nusight') {
+			return;
+		}
 		console.log('Robot', name, 'connected.');
 
 		var robot;
