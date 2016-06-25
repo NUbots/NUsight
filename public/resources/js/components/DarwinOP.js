@@ -57,7 +57,7 @@
 	DarwinOP = function (callback, scope) {
 		//Call super constructor
 		THREE.Object3D.call(this);
-		
+
 		this.dataModel = null;
 
         // This corrects the fact that the model is made for computer graphics axis
@@ -71,18 +71,12 @@
         var me = this;
         var addComponent = function (params) {
             return me.addComponent(params, callback, scope);
-        }
-
-        this.body = addComponent({
-            url: "resources/darwin/Body.json",
-            baseOffset: new THREE.Vector3(0, 0.3422, 0),
-            rotationAxis: "y"
-        });
+        };
 
 		//Setup Body Container
 		this.body = addComponent({
 			url: "resources/darwin/Body.json",
-			baseOffset: new THREE.Vector3(0, 0.3422, 0),
+			baseOffset: new THREE.Vector3(0, 0.096, 0),
 			rotationAxis: "y"
 		});
 		this.body.rotation.y = Math.PI/2;
@@ -251,65 +245,7 @@
             }
         }, this);
         return component;
-    }
-
-	/**
-     * This method binds the robot's position and movement to the data model so
-     * that updates to the data model update the robot's position and rotation
-     */
-	DarwinOP.prototype.bindToData = function (dataModel) {
-		var key, self, createCallbackForKey;
-
-		//Maintain context
-		self = this;
-
-		//Create a factory to make our callback functions
-		createCallbackForKey = function (key) {
-			dataModel.motors[key].angle.onUpdate(function (event) {
-				self[key].setAngle(event.detail.newValue);
-			});
-		};
-
-		//Bind to all the motor angles
-		for (key in this) {
-			if (this.hasOwnProperty(key) && dataModel.motors[key] !== undefined) {
-				createCallbackForKey(key);
-			}
-		}
-
-		//Bind to the localisation position
-		dataModel.localisation.position.onUpdate(function (event) {
-			//self.setPosition(new THREE.Vector3(event.detail.newValue[0], 0, event.detail.newValue[1]));
-			self.position.x = event.detail.newValue[0];
-			self.position.z = event.detail.newValue[1];
-		});
-
-		//Bind to the localisation angle
-		dataModel.localisation.angle.onUpdate(function (event) {
-			//self.setAngle(event.detail.newValue);
-			self.rotation.y = event.detail.newValue;
-		});
-
-		//Bind to the orientation angle
-		dataModel.sensors.orientation[0].onUpdate(function (event) {
-			//self.setRotation(new THREE.Vector3(event.detail.newValue[0], undefined, event.detail.newValue[1]));
-			self.rotation.x = event.detail.newValue;
-
-		//TODO calculate his vertical position and set the y position so that he is always touching the ground
-		//Should be some simple trig, he will rotate around body.baseOffset off the ground (until it goes upside down and he will be underground)
-		});
-		
-		//Bind to the orientation angle
-		dataModel.sensors.orientation[1].onUpdate(function (event) {
-			//self.setRotation(new THREE.Vector3(event.detail.newValue[0], undefined, event.detail.newValue[1]));
-			self.rotation.z = event.detail.newValue;
-
-		//TODO calculate his vertical position and set the y position so that he is always touching the ground
-		//Should be some simple trig, he will rotate around body.baseOffset off the ground (until it goes upside down and he will be underground)
-		});
-		
-		this.dataModel = dataModel;
-	};
+    };
 
 	/**
 	 * This constructs a new DarwinComponent which loads in the data for each
