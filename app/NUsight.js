@@ -41,6 +41,9 @@ function NUsight (io) {
 
 	// Robot left
 	this.network.on('nuclear_leave', function (name) {
+		if(name === 'nusight') {
+			return;
+		}
 		console.log('Robot', name, 'disconnected.');
 
 		var robot = this.robots[name];
