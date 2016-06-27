@@ -63,8 +63,8 @@ Ext.define('NU.view.field.Robot', {
 			translation.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 0);
 
 			// Put our translation in world
-			translation.applyMatrix4(rotation);
-			translation.negate();
+			//translation.applyMatrix4(rotation);
+			//translation.negate();
 
 			// Apply rotation and z position
 			if (this.getShowOrientation()) {
