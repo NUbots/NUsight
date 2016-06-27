@@ -61,27 +61,26 @@ Ext.define('NU.view.field.Robot', {
 
 			var translation = new THREE.Vector4();
 			translation.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 0);
+			// Set our z position from our sensors
+			model.position.setZ(translation.z);
 
-			// Put our translation in world
-			//translation.applyMatrix4(rotation);
-			//translation.negate();
-
+			if (!this.getShowLocalisation()) {
 			// Apply rotation and z position
-			if (this.getShowOrientation()) {
+				if (this.getShowOrientation()) {
 
-				model.quaternion.setFromRotationMatrix(rotation);
+					model.quaternion.setFromRotationMatrix(rotation);
 
-				// Set our z position from our sensors
-				model.position.setZ(translation.z);
-			}
-			else {
-				model.quaternion.setFromEuler(new THREE.Euler(0,0,0));
-			}
+					
+				}
+				else {
+					model.quaternion.setFromEuler(new THREE.Euler(0,0,0));
+				}
 
-			// Apply odometry x and y
-			if (this.getShowOdometry() && !this.getShowLocalisation()) {
-				darwin.position.setX(translation.x);
-				darwin.position.setY(translation.y);
+				// Apply odometry x and y
+				if (this.getShowOdometry()) {
+					darwin.position.setX(translation.x);
+					darwin.position.setY(translation.y);
+				}
 			}
 
 		}, this);
