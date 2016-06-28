@@ -61,6 +61,8 @@ Ext.define('NU.view.field.Robot', {
 
 			var translation = new THREE.Vector4();
 			translation.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 0);
+			translation.applyMatrix4(rotation);
+			translation.negate();
 			// Set our z position from our sensors
 			model.position.setZ(translation.z);
 
