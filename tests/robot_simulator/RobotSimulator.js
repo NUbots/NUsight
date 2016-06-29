@@ -2,9 +2,10 @@ var ProtoBuf = require('protobufjs');
 var NUClearNet = require('nuclearnet.js');
 var ref = require('ref');
 
-function RobotSimulator () {
-	this.net = new NUClearNet(this.constructor.name, '239.226.152.162', 7447);
-	this.protoBuilder = ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
+function RobotSimulator (opts) {
+	opts = opts || {};
+	this.net = opts.net || new NUClearNet(this.constructor.name, '239.226.152.162', 7447);
+	this.protoBuilder = opts.protoBuilder || ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
 }
 
 RobotSimulator.prototype.loadProto = function (protocolBuffer) {
