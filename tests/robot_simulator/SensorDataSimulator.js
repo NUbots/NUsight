@@ -46,39 +46,45 @@ SensorDataSimulator.prototype.createServo = function (id) {
 	}
 };
 
-SensorDataSimulator.prototype.run = function () {
-	var now = Date.now();
-	var elapsedTime = now - this.started;
+SensorDataSimulator.prototype.run = (function() {
+	var vector = new THREE.Vector3();
+	var euler = new THREE.Euler();
 
-	var radius = 2;
-	var period = 19000;
-	var x = radius * Math.cos(TAU * elapsedTime / period);
-	var y =	radius * Math.sin(TAU * elapsedTime / period);
-	var z = 0.2 * (Math.cos(TAU * elapsedTime / 3000) - 1);
-	var rotX = Math.PI * Math.cos(TAU * elapsedTime / period);
-	var rotY = Math.PI * Math.cos(TAU * elapsedTime / period);
-	var rotZ = Math.PI * Math.cos(TAU * elapsedTime / period);
-	var quat = new THREE.Quaternion().setFromEuler(new THREE.Euler(rotX, rotY, rotZ));
-	var pos = new THREE.Vector3(x, y, z).applyQuaternion(quat);
-	var scale = new THREE.Vector3(1, 1, 1);
-	this.matrix.compose(pos, quat, scale);
-	this.message.world = this.matrixToProto(this.matrix);
+	return function () {
+		var now = Date.now();
+		var elapsedTime = now - this.started;
 
-	this.message.getServo().forEach(function (servo) {
+		var radius = 2;
+		var period = 19000;
+		var x = radius * Math.cos(TAU * elapsedTime / period);
+		var y =	radius * Math.sin(TAU * elapsedTime / period);
+		var z = 0.2 * (Math.cos(TAU * elapsedTime / 3000) - 1);
+		var rotX = Math.PI * Math.cos(TAU * elapsedTime / (2 * period / 3));
+		var rotY = Math.PI * Math.cos(TAU * elapsedTime / (2 * period / 5));
+		var rotZ = Math.PI * Math.cos(TAU * elapsedTime / (2 * period / 7));
 
-		if (servo.__clockwise__ === undefined) {
-			servo.__clockwise__ = true;
-		}
+		euler.set(rotX, rotY, rotZ);
+		this.matrix.makeRotationFromEuler(euler);
+		this.matrix.setPosition(vector.set(x, y, z).applyMatrix4(this.matrix));
 
-		if (Math.random() < 0.05) {
-			servo.__clockwise__ = !servo.__clockwise__;
-		}
+		this.message.world = this.matrixToProto(this.matrix);
 
-		servo.setPresentPosition(servo.getPresentPosition() + (servo.__clockwise__ ? 1 : -1) * Math.PI / 180);
-	}, this);
+		this.message.getServo().forEach(function (servo) {
 
-	this.sendMessage(this.message);
-};
+			if (servo.__clockwise__ === undefined) {
+				servo.__clockwise__ = true;
+			}
+
+			if (Math.random() < 0.05) {
+				servo.__clockwise__ = !servo.__clockwise__;
+			}
+
+			servo.setPresentPosition(servo.getPresentPosition() + (servo.__clockwise__ ? 1 : -1) * Math.PI / 180);
+		}, this);
+
+		this.sendMessage(this.message);
+	}
+}());
 
 if (require.main === module) {
 	new SensorDataSimulator().runEvery(50);
