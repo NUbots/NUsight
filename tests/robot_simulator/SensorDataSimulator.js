@@ -1,19 +1,35 @@
 var util = require('util');
 var RobotSimulator = require('./RobotSimulator');
+var THREE = require('three');
 
-function SensorDataSimulator () {
-	RobotSimulator.call(this);
+function SensorDataSimulator (opts) {
+	RobotSimulator.call(this, opts);
 
 	this.loadProto('message.input.proto.Sensors');
+	this.loadProto('message.mat44');
+
+	var matrix = new THREE.Matrix4();
+	matrix.makeTranslation(-2, -1, 0);
 
 	this.message = new this.API.message.input.proto.Sensors({
 		timestamp: Date.now(),
 		voltage: 12,
 		battery: Math.random(),
-		servo: this.createServos()
+		servo: this.createServos(),
+		world: this.matrixToProto(matrix)
 	});
 }
 util.inherits(SensorDataSimulator, RobotSimulator);
+
+SensorDataSimulator.prototype.matrixToProto = function (matrix) {
+	var el = matrix.elements;
+	return new this.API.message.mat44({
+		x: {x: el[0],  y: el[1],  z: el[2],  t: el[3]},
+		y: {x: el[4],  y: el[5],  z: el[6],  t: el[7]},
+		z: {x: el[8],  y: el[9],  z: el[10], t: el[11]},
+		t: {x: el[12], y: el[13], z: el[14], t: el[15]},
+	});
+};
 
 SensorDataSimulator.prototype.createServos = function () {
 	var servos = [];
@@ -49,3 +65,5 @@ SensorDataSimulator.prototype.run = function () {
 if (require.main === module) {
 	new SensorDataSimulator().runEvery(50);
 }
+
+module.exports = SensorDataSimulator;

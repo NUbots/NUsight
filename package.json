@@ -22,6 +22,7 @@
   "devDependencies": {
     "gl-matrix": "^2.3.0",
     "protobufjs": "^5.0.0",
-    "ref": "*"
+    "ref": "*",
+    "three.js": "^0.77.1"
   }
 }
