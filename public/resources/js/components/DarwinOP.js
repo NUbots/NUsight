@@ -112,6 +112,8 @@
 			baseOffset: new THREE.Vector3(0, 0.0329074, 0.0359816),
 			rotationAxis: "none"
 		});
+		this.camera.rotation.y = Math.PI;
+		this.camera.add(new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.01, 50));
 		this.head.add(this.camera);
 
 		//Setup Left Leg containers
