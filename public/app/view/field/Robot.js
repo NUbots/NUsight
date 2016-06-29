@@ -79,9 +79,17 @@ Ext.define('NU.view.field.Robot', {
 			// Set our z position from our sensors
 			model.position.setZ(translation.z);
 
-			if (this.getShowOrientation() && !this.getShowLocalisation()) {
+			if (this.getShowOrientation()) {
 				// Apply orientation
-				model.quaternion.setFromRotationMatrix(rotation);
+				if (!this.getShowLocalisation()) {
+					// Localisation is not enabled, show full sensor data orientation
+					model.quaternion.setFromRotationMatrix(rotation);
+				} else {
+					// Localisation is enabled, combine localisation heading + orientation pitch/roll.
+					var euler = new THREE.Euler().setFromRotationMatrix(rotation);
+					model.rotation.x = euler.x;
+					model.rotation.y = euler.y;
+				}
 			}
 
 			if (this.getShowOdometry() && !this.getShowLocalisation()) {
