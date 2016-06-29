@@ -1,6 +1,7 @@
 var util = require('util');
 var RobotSimulator = require('./RobotSimulator');
 var THREE = require('three');
+var TAU = 2 * Math.PI;
 
 function SensorDataSimulator (opts) {
 	RobotSimulator.call(this, opts);
@@ -8,15 +9,14 @@ function SensorDataSimulator (opts) {
 	this.loadProto('message.input.proto.Sensors');
 	this.loadProto('message.mat44');
 
-	var matrix = new THREE.Matrix4();
-	matrix.makeTranslation(-2, -1, 0);
+	this.started = Date.now();
+	this.matrix = new THREE.Matrix4();
 
 	this.message = new this.API.message.input.proto.Sensors({
 		timestamp: Date.now(),
 		voltage: 12,
 		battery: Math.random(),
-		servo: this.createServos(),
-		world: this.matrixToProto(matrix)
+		servo: this.createServos()
 	});
 }
 util.inherits(SensorDataSimulator, RobotSimulator);
@@ -47,6 +47,23 @@ SensorDataSimulator.prototype.createServo = function (id) {
 };
 
 SensorDataSimulator.prototype.run = function () {
+	var now = Date.now();
+	var elapsedTime = now - this.started;
+
+	var radius = 2;
+	var period = 19000;
+	var x = radius * Math.cos(TAU * elapsedTime / period);
+	var y =	radius * Math.sin(TAU * elapsedTime / period);
+	var z = 0.2 * (Math.cos(TAU * elapsedTime / 3000) - 1);
+	var rotX = Math.PI * Math.cos(TAU * elapsedTime / period);
+	var rotY = Math.PI * Math.cos(TAU * elapsedTime / period);
+	var rotZ = Math.PI * Math.cos(TAU * elapsedTime / period);
+	var quat = new THREE.Quaternion().setFromEuler(new THREE.Euler(rotX, rotY, rotZ));
+	var pos = new THREE.Vector3(x, y, z).applyQuaternion(quat);
+	var scale = new THREE.Vector3(1, 1, 1);
+	this.matrix.compose(pos, quat, scale);
+	this.message.world = this.matrixToProto(this.matrix);
+
 	this.message.getServo().forEach(function (servo) {
 
 		if (servo.__clockwise__ === undefined) {
@@ -59,6 +76,7 @@ SensorDataSimulator.prototype.run = function () {
 
 		servo.setPresentPosition(servo.getPresentPosition() + (servo.__clockwise__ ? 1 : -1) * Math.PI / 180);
 	}, this);
+
 	this.sendMessage(this.message);
 };
 

@@ -8,6 +8,15 @@ Ext.define('NU.view.field.Robot', {
 		showOdometry: false,
 		showLocalisation: false
 	},
+	applyShowOrientation: function (value) {
+		if (!value) {
+			this.darwinModels.forEach(function (darwinModel) {
+				var model = darwinModel.object;
+				model.rotation.set(0, 0, 0);
+			});
+		}
+		return value;
+	},
 	darwinModels: [],
 	ballModels: [],
 	constructor: function () {
@@ -49,9 +58,11 @@ Ext.define('NU.view.field.Robot', {
 				model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].presentPosition);
 			}
 
-			// Set our rotation from our rotation matrix
-			// This is transposing the matrix as it is constructed
 			var rotation = new THREE.Matrix4();
+
+			// Set our rotation from the worldToLocal matrix
+			// Invert as we go to get world space translations/rotations
+			// This is transposing the matrix as it is constructed
 			rotation.set(
 				api_sensor_data.world.x.x, api_sensor_data.world.x.y, api_sensor_data.world.x.z, 0,
 				api_sensor_data.world.y.x, api_sensor_data.world.y.y, api_sensor_data.world.y.z, 0,
@@ -61,28 +72,21 @@ Ext.define('NU.view.field.Robot', {
 
 			var translation = new THREE.Vector4();
 			translation.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 0);
+			// Apply inverse rotation (as its transposed above)
 			translation.applyMatrix4(rotation);
+			// Invert translation
 			translation.negate();
 			// Set our z position from our sensors
 			model.position.setZ(translation.z);
 
-			if (!this.getShowLocalisation()) {
-			// Apply rotation and z position
-				if (this.getShowOrientation()) {
+			if (this.getShowOrientation() && !this.getShowLocalisation()) {
+				// Apply orientation
+				model.quaternion.setFromRotationMatrix(rotation);
+			}
 
-					model.quaternion.setFromRotationMatrix(rotation);
-
-					
-				}
-				else {
-					model.quaternion.setFromEuler(new THREE.Euler(0,0,0));
-				}
-
-				// Apply odometry x and y
-				if (this.getShowOdometry()) {
-					darwin.position.setX(translation.x);
-					darwin.position.setY(translation.y);
-				}
+			if (this.getShowOdometry() && !this.getShowLocalisation()) {
+				darwin.position.setX(translation.x);
+				darwin.position.setY(translation.y);
 			}
 
 		}, this);
