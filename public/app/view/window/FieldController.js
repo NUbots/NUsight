@@ -298,6 +298,8 @@ Ext.define('NU.view.window.FieldController', {
 		//this.onAddObject(robot);
 		//this.addObject(robot.darwinModels);
 		//todo this.addObject(robot.ballModels);
+
+		Ext.GlobalEvents.fireEvent('localisationOpened', this.mainScene.scene, this.robots);
 	},
 
 	onSensorData: function (rInfo, api_sensor_data) {

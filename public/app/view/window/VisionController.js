@@ -7,6 +7,7 @@ Ext.define('NU.view.window.VisionController', {
 	],
 	imageRenderer: null,
 	imageDiffRenderer: null,
+	localisationRenderer: null,
     config: {
 		cameraId: null,
         displayImage: false,
@@ -49,6 +50,20 @@ Ext.define('NU.view.window.VisionController', {
 			autoRender: false
 		});
 
+		var localisationLayer = layeredCanvas.add('localisation', {
+			webgl: true,
+			webglAttributes: {
+				antialias: false
+			}
+		});
+
+		this.localisationRenderer = Ext.create('NU.view.webgl.Vision', {
+			shader: 'VisionDiff',
+			canvas: localisationLayer.canvas,
+			context: localisationLayer.context,
+			autoRender: false
+		});
+
 		layeredCanvas.add('classified_image_search');
 		layeredCanvas.add('classified_image_refine');
 		layeredCanvas.add('visual_horizon');
@@ -56,9 +71,9 @@ Ext.define('NU.view.window.VisionController', {
 		layeredCanvas.add('goals', {group: 'field_objects'});
 		layeredCanvas.add('balls', {group: 'field_objects'});
 		layeredCanvas.add('lines');
-
 		//hide image diff by default
 		layeredCanvas.hide('image_diff');
+		layeredCanvas.hide('localisation');
 
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
@@ -67,7 +82,8 @@ Ext.define('NU.view.window.VisionController', {
 
 		Promise.all([
 			this.imageRenderer.onReady(),
-			this.imageDiffRenderer.onReady()
+			this.imageDiffRenderer.onReady(),
+			this.localisationRenderer.onReady()
 		]).then(function () {
 			this.addEvents();
 		}.bind(this));
@@ -78,8 +94,40 @@ Ext.define('NU.view.window.VisionController', {
 			'message.input.proto.Image': this.onImage,
 			'message.vision.proto.ClassifiedImage': this.onClassifiedImage,
 			'message.vision.proto.VisionObjects': this.onVisionObjects,
+			'message.localisation.proto.Localisation': this.renderLocalisation, //for localisation camera
 			scope: this
 		});
+
+		//listen to an event when the localisation window is opened and has robots.
+		Ext.on('localisationOpened', this.onLocalisationViewConnected, this);
+	},
+
+	onSelectRobot: function (robotId) {
+		if(this.localisationRobots != null) {
+			for (var i = 0; i < this.localisationRobots.length; i++) {
+				if (this.localisationRobots[i].robotId == robotId) {
+					this.localisationRenderer.camera = this.localisationRobots[i].darwinModels[0].object.camera.children[0];
+					break;
+				}
+			}
+		}
+		this.setRobotId(robotId);
+	},
+
+	onLocalisationViewConnected: function(scene, robots) {
+		this.localisationRobots = robots;
+		for(var i = 0; i < robots.length; i++) {
+			if(robots[i].robotId == this.getRobotId()) {
+				this.localisationRenderer.camera = robots[i].darwinModels[0].object.camera.children[0];
+				this.localisationRenderer.scene = scene;
+				break;
+			}
+		}
+		this.renderLocalisation();
+	},
+
+	renderLocalisation: function() {
+		this.localisationRenderer.render();
 	},
 
 	onLayerSelect: function (obj, newValue, oldValue, e) {
@@ -117,6 +165,9 @@ Ext.define('NU.view.window.VisionController', {
 					break;
 				case 'lines':
 					layeredCanvas.show('lines');
+					break;
+				case 'localisation':
+					layeredCanvas.show('localisation');
 					break;
 			}
 		}, this);

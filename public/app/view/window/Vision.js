@@ -66,6 +66,7 @@ Ext.define('NU.view.window.Vision', {
                 ['horizon', 'Horizon'],
                 ['objects', 'Field Objects'],
 				['lines', 'Debug Lines'],
+                ['localisation', 'Localisation'],
                 ['all', 'All']
             ],
             blankText: 'No items available',
