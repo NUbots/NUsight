@@ -246,14 +246,14 @@
         MARK_WIDTH: 0.05,
         FIELD_LENGTH: 9,
         FIELD_WIDTH: 6,
-        GOAL_DEPTH: 0.5,
+        GOAL_DEPTH: 0.6,
         GOAL_WIDTH: 1.8,
-        GOAL_AREA_LENGTH: 0.6,
-        GOAL_AREA_WIDTH: 3.45,
+        GOAL_AREA_LENGTH: 1,
+        GOAL_AREA_WIDTH: 5,
         GOAL_CROSSBAR_HEIGHT: 1.1,
         GOAL_POST_DIAMETER: 0.1,
         GOAL_NET_HEIGHT: 1,
-        PENALTY_MARK_DISTANCE: 1.80,
+        PENALTY_MARK_DISTANCE: 2.1,
         CENTER_CIRCLE_DIAMETER: 1.50,
         BORDER_STRIP_MIN_WIDTH: 0.7
     };
