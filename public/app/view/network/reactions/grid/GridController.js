@@ -17,7 +17,6 @@ Ext.define('NU.view.network.reactions.grid.GridController', {
 			scope: this
 		});
 
-		this.addData(this.store);
 		NU.Network.sendCommand('get_reaction_handles', robot.get('id'));
 		this.mon(NU.Network, 'message.support.nubugger.proto.ReactionHandles', this.onReactionHandles, this);
 	},
