@@ -22,6 +22,6 @@
     "bluebird": "~2.3.11",
     "svg.js": "*",
     "gl-matrix": "*",
-    "plotly.js": "*"
+    "plotly.js": "~1.18.x"
   }
 }
