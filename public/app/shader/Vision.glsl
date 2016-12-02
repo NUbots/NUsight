@@ -136,10 +136,10 @@ vec4 YCbCrToRGB(vec4 ycbcr) {
 vec4 YCrCbToRGB(vec4 ycrcb) {
 	// conversion numbers have been modified to account for the colour being in the 0-1 range instead of 0-255
 	return clamp(vec4(
-		ycbcr.r + 1.402 * (ycbcr.g - 128.0 / 255.0),
-		ycbcr.r - 0.34414 * (ycbcr.b - 128.0 / 255.0) - 0.71414 * (ycbcr.g - 128.0 / 255.0),
-		ycbcr.r + 1.772 * (ycbcr.b - 128.0 / 255.0),
-		ycbcr.a
+		ycrcb.r + 1.402 * (ycrcb.g - 128.0 / 255.0),
+		ycrcb.r - 0.34414 * (ycrcb.b - 128.0 / 255.0) - 0.71414 * (ycrcb.g - 128.0 / 255.0),
+		ycrcb.r + 1.772 * (ycrcb.b - 128.0 / 255.0),
+		ycrcb.a
 	), 0.0, 1.0);
 }
 
