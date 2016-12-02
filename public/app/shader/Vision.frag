@@ -20,14 +20,6 @@ uniform int imageHeight;
  */
 varying vec2 center;
 
-/**
- * Constant for the image format type. Look at
- */
-const int FORMAT_YCBCR422 = 1;
-const int FORMAT_YCBCR444 = 2;
-const int FORMAT_JPEG = 3;
-const int FORMAT_Y422 = 0x32323459;
-
 void main() {
 	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, center);
 
@@ -39,6 +31,6 @@ void main() {
 	} else if(imageFormat == FORMAT_JPEG) {
         gl_FragColor = YCbCrToRGB(rawColour);
 	} else if(imageFormat == FORMAT_Y422) {
-        gl_FragColor = YCrCbToRGB(rawColour);
+        gl_FragColor = YCbCrToRGB(rawColour);
 	}
 }

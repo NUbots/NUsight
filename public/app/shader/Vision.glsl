@@ -127,22 +127,6 @@ vec4 YCbCrToRGB(vec4 ycbcr) {
 	), 0.0, 1.0);
 }
 
-/**
- * A function for converting a Y422 (YCrCb) colour to RGBA
- *
- * @param {vec4} ycrcb A 4-component ycrcb array (includes alpha for convenience)
- * @returns {vec4} A converted RGBA colour (alpha untouched)
- */
-vec4 YCrCbToRGB(vec4 ycrcb) {
-	// conversion numbers have been modified to account for the colour being in the 0-1 range instead of 0-255
-	return clamp(vec4(
-		ycrcb.r + 1.402 * (ycrcb.g - 128.0 / 255.0),
-		ycrcb.r - 0.34414 * (ycrcb.b - 128.0 / 255.0) - 0.71414 * (ycrcb.g - 128.0 / 255.0),
-		ycrcb.r + 1.772 * (ycrcb.b - 128.0 / 255.0),
-		ycrcb.a
-	), 0.0, 1.0);
-}
-
 vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int imageFormat, vec2 center) {
 	vec4 rawColour;
 
@@ -153,22 +137,14 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 		float texelSize = 1.0 / rawImageWidth;
 		vec2 coord = center * vec2(float(imageWidth), float(imageHeight));
 
-		vec2 yCoord = vec2(
-			2.0 * texelSize * floor(coord.x) + startOffset,
-			center.y
-		);
+		float origin = 2.0 * texelSize * floor(coord.x) + startOffset;
+		float shift  = 2.0 * mod(floor(coord.x), 2.0);
 
-		vec2 cbCoord = vec2(
-			yCoord.x + texelSize * (1.0 - 2.0 * mod(floor(coord.x), 2.0)),
-			yCoord.y
-		);
+		vec2 yCoord  = vec2(origin, center.y);
+		vec2 cbCoord = vec2(origin + texelSize * (1.0 - shift), yCoord.y);
+		vec2 crCoord = vec2(origin + texelSize * (3.0 - shift), yCoord.y);
 
-		vec2 crCoord = vec2(
-			yCoord.x + texelSize * (3.0 - 2.0 * mod(floor(coord.x), 2.0)),
-			yCoord.y
-		);
-
-		float y = texture2D(rawImage, yCoord).r;
+		float y  = texture2D(rawImage, yCoord).r;
 		float cb = texture2D(rawImage, cbCoord).r;
 		float cr = texture2D(rawImage, crCoord).r;
 
@@ -180,24 +156,16 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
         float texelSize = 1.0 / rawImageWidth;
         vec2 coord = center * vec2(float(imageWidth), float(imageHeight));
 
-        vec2 yCoord = vec2(
-            2.0 * texelSize * floor(coord.x) + startOffset,
-            center.y
-        );
+		float origin = 2.0 * texelSize * floor(coord.x) + startOffset;
+		float shift  = 2.0 * mod(floor(coord.x), 2.0);
 
-        vec2 cbCoord = vec2(
-            yCoord.x + texelSize * (1.0 - 2.0 * mod(floor(coord.x), 2.0)),
-            yCoord.y
-        );
+		vec2 yCoord  = vec2(origin + texelSize, center.y);
+		vec2 cbCoord = vec2(origin - texelSize * shift, yCoord.y);
+		vec2 crCoord = vec2(origin + texelSize * (2.0 - shift), yCoord.y);
 
-        vec2 crCoord = vec2(
-            yCoord.x + texelSize * (3.0 - 2.0 * mod(floor(coord.x), 2.0)),
-            yCoord.y
-        );
-
-        float y = texture2D(rawImage, yCoord).r;
-        float cr = texture2D(rawImage, cbCoord).r;
-        float cb = texture2D(rawImage, crCoord).r;
+        float y  = texture2D(rawImage, yCoord).r;
+        float cb = texture2D(rawImage, cbCoord).r;
+        float cr = texture2D(rawImage, crCoord).r;
 
         rawColour = vec4(y, cr, cb, 1.0);
     } else {
