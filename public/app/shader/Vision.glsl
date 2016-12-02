@@ -6,10 +6,27 @@ const float T_ORANGE = 111.0; // ball
 const float T_CYAN = 99.0;
 const float T_MAGENTA = 109.0;
 
-const int FORMAT_YCBCR422 = 1;
-const int FORMAT_YCBCR444 = 2;
-const int FORMAT_JPEG = 3;
-const int FORMAT_Y422 = 0x32323459;
+const int FORMAT_GREY = 0x59455247;
+const int FORMAT_Y12  = 0x20323159;
+const int FORMAT_Y16  = 0x20363159;
+const int FORMAT_GRBG = 0x47425247;
+const int FORMAT_RGGB = 0x42474752;
+const int FORMAT_GBRG = 0x47524247;
+const int FORMAT_BGGR = 0x52474742;
+const int FORMAT_GR12 = 0x32315247;
+const int FORMAT_RG12 = 0x32314752;
+const int FORMAT_GB12 = 0x32314247;
+const int FORMAT_BG12 = 0x32314742;
+const int FORMAT_GR16 = 0x36315247;
+const int FORMAT_RG16 = 0x36314752;
+const int FORMAT_GB16 = 0x36314247;
+const int FORMAT_BG16 = 0x36314742;
+const int FORMAT_Y411 = 0x31313459;
+const int FORMAT_UYVY = 0x59565955;
+const int FORMAT_YUYV = 0x56595559;
+const int FORMAT_YM24 = 0x34324d59;
+const int FORMAT_RGB3 = 0x33424752;
+const int FORMAT_JPEG = 0x4745504a;
 
 const int COLOUR_SPACE_YCBCR = 1;
 const int COLOUR_SPACE_RGB = 2;
@@ -120,9 +137,9 @@ float classify(vec4 colour, sampler2D lut, float size, float bitsR, float bitsG,
 vec4 YCbCrToRGB(vec4 ycbcr) {
 	// conversion numbers have been modified to account for the colour being in the 0-1 range instead of 0-255
 	return clamp(vec4(
-		ycbcr.r + 1.402 * (ycbcr.b - 128.0 / 255.0),
-		ycbcr.r - 0.34414 * (ycbcr.g - 128.0 / 255.0) - 0.71414 * (ycbcr.b - 128.0 / 255.0),
 		ycbcr.r + 1.772 * (ycbcr.g - 128.0 / 255.0),
+		ycbcr.r - 0.34414 * (ycbcr.g - 128.0 / 255.0) - 0.71414 * (ycbcr.b - 128.0 / 255.0),
+		ycbcr.r + 1.402 * (ycbcr.b - 128.0 / 255.0),
 		ycbcr.a
 	), 0.0, 1.0);
 }
@@ -130,7 +147,7 @@ vec4 YCbCrToRGB(vec4 ycbcr) {
 vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int imageFormat, vec2 center) {
 	vec4 rawColour;
 
-	if (imageFormat == FORMAT_YCBCR422) {
+	if (imageFormat == FORMAT_YUYV) {
 		float bytesPerPixel = 2.0;
 		float rawImageWidth = bytesPerPixel * float(imageWidth);
 		float startOffset = 0.5 / rawImageWidth;
@@ -149,7 +166,7 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 		float cr = texture2D(rawImage, crCoord).r;
 
 		rawColour = vec4(y, cb, cr, 1.0);
-	} else if (imageFormat == FORMAT_Y422) {
+	} else if (imageFormat == FORMAT_UYVY) {
         float bytesPerPixel = 2.0;
         float rawImageWidth = bytesPerPixel * float(imageWidth);
         float startOffset = 0.5 / rawImageWidth;

@@ -200,7 +200,32 @@ Ext.define('NU.view.window.VisionController', {
 		var width = image.dimensions.x;
 		var height = image.dimensions.y;
 		this.autoSize(width, height);
-		var Format = API.message.input.proto.Image.Format;
+
+        // Copied from NUbots:shared/utility/vision/fourcc.h
+        var Format = {
+            GREY: 0x59455247,
+            Y12 : 0x20323159,
+            Y16 : 0x20363159,
+            GRBG: 0x47425247,
+            RGGB: 0x42474752,
+            GBRG: 0x47524247,
+            BGGR: 0x52474742,
+            GR12: 0x32315247,
+            RG12: 0x32314752,
+            GB12: 0x32314247,
+            BG12: 0x32314742,
+            GR16: 0x36315247,
+            RG16: 0x36314752,
+            GB16: 0x36314247,
+            BG16: 0x36314742,
+            Y411: 0x31313459,
+            UYVY: 0x59565955,
+            YUYV: 0x56595559,
+            YM24: 0x34324d59,
+            RGB3: 0x33424752,
+            JPEG: 0x4745504a,
+            UNKNOWN: 0,
+        };
 
 		switch (image.format) {
 			case Format.JPEG:
@@ -210,18 +235,19 @@ Ext.define('NU.view.window.VisionController', {
 				// 2nd implementation - potentially faster
 				this.drawImageB64(image);
 				break;
-			case Format.YCbCr422:
+			case Format.YUYV:
 				this.drawImageYbCr422(image);
 				//this.drawImageBayer(image);
 				break;
-			case Format.YCbCr444:
+			case Format.YM24:
 				this.drawImageYbCr444(image);
 				//this.drawImageBayer(image);
 				break;
-			case Format.Y422:
+			case Format.UYVY:
 				this.drawImageY422(image);
 				break;
 			default:
+                console.log('Format: ', image.format);
 				throw 'Unsupported Format';
 		}
     },
@@ -243,14 +269,14 @@ Ext.define('NU.view.window.VisionController', {
 		var bytesPerPixel = 2;
 		this.imageRenderer.resize(width, height);
 		this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.Y422);
+		this.imageRenderer.updateUniform('imageFormat', image.format);
 		this.imageRenderer.updateUniform('imageWidth', width);
 		this.imageRenderer.updateUniform('imageHeight', height);
 		this.imageRenderer.render();
 
 		this.imageDiffRenderer.resize(width, height);
 		this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageDiffRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.Y422);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
 		this.imageDiffRenderer.updateUniform('imageWidth', width);
 		this.imageDiffRenderer.updateUniform('imageHeight', height);
 		this.imageDiffRenderer.render();
@@ -262,14 +288,14 @@ Ext.define('NU.view.window.VisionController', {
 		var bytesPerPixel = 2;
 		this.imageRenderer.resize(width, height);
 		this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr422);
+		this.imageRenderer.updateUniform('imageFormat', image.format);
 		this.imageRenderer.updateUniform('imageWidth', width);
 		this.imageRenderer.updateUniform('imageHeight', height);
 		this.imageRenderer.render();
 
 		this.imageDiffRenderer.resize(width, height);
 		this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageDiffRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr422);
+		this.imageDiffRenderer.updateUniform('imageFormat', image.format);
 		this.imageDiffRenderer.updateUniform('imageWidth', width);
 		this.imageDiffRenderer.updateUniform('imageHeight', height);
 		this.imageDiffRenderer.render();
@@ -279,9 +305,9 @@ Ext.define('NU.view.window.VisionController', {
 		var height = this.getHeight();
 		var data = new Uint8Array(image.data.toArrayBuffer());
 		this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.imageRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr444);
+		this.imageRenderer.updateUniform('imageFormat', image.format);
 		this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.imageRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr444);
+		this.imageRenderer.updateUniform('imageFormat', image.format);
 	},
     drawImageB64: function (image) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));

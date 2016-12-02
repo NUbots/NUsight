@@ -24,13 +24,13 @@ void main() {
 	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, center);
 
     // convert into RGBA colour
-    if (imageFormat == FORMAT_YCBCR422) {
+    if (imageFormat == FORMAT_YUYV) {
 	    gl_FragColor = YCbCrToRGB(rawColour);
-	} else if (imageFormat == FORMAT_YCBCR444) {
+	} else if (imageFormat == FORMAT_YM24) {
         gl_FragColor = YCbCrToRGB(rawColour);
 	} else if(imageFormat == FORMAT_JPEG) {
         gl_FragColor = YCbCrToRGB(rawColour);
-	} else if(imageFormat == FORMAT_Y422) {
+	} else if(imageFormat == FORMAT_UYVY) {
         gl_FragColor = YCbCrToRGB(rawColour);
 	}
 }
