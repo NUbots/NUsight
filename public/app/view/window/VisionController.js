@@ -218,6 +218,9 @@ Ext.define('NU.view.window.VisionController', {
 				this.drawImageYbCr444(image);
 				//this.drawImageBayer(image);
 				break;
+			case Format.Y422:
+				this.drawImageY422(image);
+				break;
 			default:
 				throw 'Unsupported Format';
 		}
@@ -233,6 +236,25 @@ Ext.define('NU.view.window.VisionController', {
             URL.revokeObjectURL(url);
         };
     },
+	drawImageY422: function(image) {
+		var width = this.getWidth();
+		var height = this.getHeight();
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		var bytesPerPixel = 2;
+		this.imageRenderer.resize(width, height);
+		this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+		this.imageRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.Y422);
+		this.imageRenderer.updateUniform('imageWidth', width);
+		this.imageRenderer.updateUniform('imageHeight', height);
+		this.imageRenderer.render();
+
+		this.imageDiffRenderer.resize(width, height);
+		this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+		this.imageDiffRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.Y422);
+		this.imageDiffRenderer.updateUniform('imageWidth', width);
+		this.imageDiffRenderer.updateUniform('imageHeight', height);
+		this.imageDiffRenderer.render();
+	},
 	drawImageYbCr422: function (image) {
 		var width = this.getWidth();
 		var height = this.getHeight();
@@ -257,7 +279,9 @@ Ext.define('NU.view.window.VisionController', {
 		var height = this.getHeight();
 		var data = new Uint8Array(image.data.toArrayBuffer());
 		this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.imageRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr444);
 		this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.imageRenderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr444);
 	},
     drawImageB64: function (image) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));

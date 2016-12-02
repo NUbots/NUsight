@@ -9,6 +9,7 @@ const float T_MAGENTA = 109.0;
 const int FORMAT_YCBCR422 = 1;
 const int FORMAT_YCBCR444 = 2;
 const int FORMAT_JPEG = 3;
+const int FORMAT_Y422 = 0x32323459;
 
 const int COLOUR_SPACE_YCBCR = 1;
 const int COLOUR_SPACE_RGB = 2;
@@ -126,6 +127,22 @@ vec4 YCbCrToRGB(vec4 ycbcr) {
 	), 0.0, 1.0);
 }
 
+/**
+ * A function for converting a Y422 (YCrCb) colour to RGBA
+ *
+ * @param {vec4} ycrcb A 4-component ycrcb array (includes alpha for convenience)
+ * @returns {vec4} A converted RGBA colour (alpha untouched)
+ */
+vec4 YCrCbToRGB(vec4 ycrcb) {
+	// conversion numbers have been modified to account for the colour being in the 0-1 range instead of 0-255
+	return clamp(vec4(
+		ycbcr.r + 1.402 * (ycbcr.g - 128.0 / 255.0),
+		ycbcr.r - 0.34414 * (ycbcr.b - 128.0 / 255.0) - 0.71414 * (ycbcr.g - 128.0 / 255.0),
+		ycbcr.r + 1.772 * (ycbcr.b - 128.0 / 255.0),
+		ycbcr.a
+	), 0.0, 1.0);
+}
+
 vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int imageFormat, vec2 center) {
 	vec4 rawColour;
 
@@ -156,7 +173,34 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 		float cr = texture2D(rawImage, crCoord).r;
 
 		rawColour = vec4(y, cb, cr, 1.0);
-	} else {
+	} else if (imageFormat == FORMAT_Y422) {
+        float bytesPerPixel = 2.0;
+        float rawImageWidth = bytesPerPixel * float(imageWidth);
+        float startOffset = 0.5 / rawImageWidth;
+        float texelSize = 1.0 / rawImageWidth;
+        vec2 coord = center * vec2(float(imageWidth), float(imageHeight));
+
+        vec2 yCoord = vec2(
+            2.0 * texelSize * floor(coord.x) + startOffset,
+            center.y
+        );
+
+        vec2 cbCoord = vec2(
+            yCoord.x + texelSize * (1.0 - 2.0 * mod(floor(coord.x), 2.0)),
+            yCoord.y
+        );
+
+        vec2 crCoord = vec2(
+            yCoord.x + texelSize * (3.0 - 2.0 * mod(floor(coord.x), 2.0)),
+            yCoord.y
+        );
+
+        float y = texture2D(rawImage, yCoord).r;
+        float cr = texture2D(rawImage, cbCoord).r;
+        float cb = texture2D(rawImage, crCoord).r;
+
+        rawColour = vec4(y, cr, cb, 1.0);
+    } else {
 		// sample from the raw (e.g. YCbCr) image
 		rawColour = texture2D(rawImage, center);
 	}
