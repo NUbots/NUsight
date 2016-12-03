@@ -79,6 +79,34 @@ Ext.define('NU.view.window.ClassifierController', {
 		LutBitsPerColorCr: 6
 	},
 	/**
+	 * FourCC's Image Format codes
+	 * Copied from NUbots:shared/utility/vision/fourcc.h
+ 	 */
+	Format: {
+		GREY: 0x59455247,
+		Y12 : 0x20323159,
+		Y16 : 0x20363159,
+		GRBG: 0x47425247,
+		RGGB: 0x42474752,
+		GBRG: 0x47524247,
+		BGGR: 0x52474742,
+		GR12: 0x32315247,
+		RG12: 0x32314752,
+		GB12: 0x32314247,
+		BG12: 0x32314742,
+		GR16: 0x36315247,
+		RG16: 0x36314752,
+		GB16: 0x36314247,
+		BG16: 0x36314742,
+		Y411: 0x31313459,
+		UYVY: 0x59565955,
+		YUYV: 0x56595559,
+		YM24: 0x34324d59,
+		RGB3: 0x33424752,
+		JPEG: 0x4745504a,
+		UNKNOWN: 0,
+	},
+	/**
 	 * Callback when the undo button is clicked
 	 */
 	onUndo: function () {
@@ -346,6 +374,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setMagicWandColours([]);
 		this.lutDiffs = [];
 		this.onLookUpTableDiffBatch = this.onLookUpTableDiffBatch.bind(this);
+
+		console.log(this.Format);
 	},
 	onEsc: function () {
 		this.selectionRenderer.updateTolerance(-1);
@@ -1125,16 +1155,15 @@ Ext.define('NU.view.window.ClassifierController', {
 		//x = imageWidth - x - 1;
 		//y = imageHeight - y - 1;
 
-		var Format = API.message.input.proto.Image.Format;
 		switch (this.getImageFormat()) {
-			case Format.JPEG:
+			case this.Format.JPEG:
 				var offset = 3 * (y * imageWidth + x);
 				return [
 					components[offset    ],
 					components[offset + 1],
 					components[offset + 2]
 				];
-			case Format.YCbCr422:
+			case this.Format.YUYV:
 				var offset = 2 * (y * imageWidth + x);
 				var shift = (x % 2) * 2;
 				return [
@@ -1142,27 +1171,34 @@ Ext.define('NU.view.window.ClassifierController', {
 					components[offset + 1 - shift],
 					components[offset + 3 - shift]
 				];
-			case Format.YCbCr444:
+			case this.Format.YM24:
 				return [
 					components[3 * (y * imageWidth + x)    ],
 					components[3 * (y * imageWidth + x) + 1],
 					components[3 * (y * imageWidth + x) + 2]
+				];
+			case this.Format.UYVY:
+				var offset = 2 * (y * imageWidth + x);
+				var shift = (x % 2) * 2;
+				return [
+					components[offset + 1],
+					components[offset + 0 - shift],
+					components[offset + 2 - shift]
 				];
 			default:
 				throw new Error('Unsupported format');
 		}
 	},
 	drawImage: function (image, callback, thisArg) {
-		var Format = API.message.input.proto.Image.Format;
 		this.setImageFormat(image.format);
 		switch (image.format) {
-			case Format.JPEG:
+			case this.Format.JPEG:
 				this.drawImageJPEG(image, callback, thisArg);
 				break;
-			case Format.YCbCr422:
+			case this.Format.YUYV:
 				this.drawImageYbCr422(image, callback, thisArg);
 				break;
-			case Format.YCbCr444:
+			case this.Format.YM24:
 				this.drawImageYbCr444(image, callback, thisArg);
 				break;
 			default:
@@ -1180,13 +1216,13 @@ Ext.define('NU.view.window.ClassifierController', {
 			var renderer = renderers[i];
 			renderer.resize(width, height);
 			renderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-			renderer.updateUniform('imageFormat', API.message.input.proto.Image.Format.YCbCr422);
+			renderer.updateUniform('imageFormat', this.Format.YUYV);
 			renderer.updateUniform('imageWidth', width);
 			renderer.updateUniform('imageHeight', height);
 			renderer.render();
 		}
 		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(API.message.input.proto.Image.Format.YCbCr422, data, width, height, THREE.LuminanceFormat);
+		this.selectionClassifier.updateRawImage(this.Format.YUYV, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageYbCr444: function (image) {
@@ -1200,7 +1236,7 @@ Ext.define('NU.view.window.ClassifierController', {
 			renderer.render();
 		}
 		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(API.message.input.proto.Image.Format.YCbCr444, data, width, height, THREE.RGBFormat);
+		this.selectionClassifier.updateRawImage(this.Format.YM24, data, width, height, THREE.RGBFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageJPEG: function (image, callback, thisArg) {
@@ -1239,7 +1275,7 @@ Ext.define('NU.view.window.ClassifierController', {
 				x: imageObj.width,
 				y: imageObj.height
 			});
-			image.setFormat(API.message.input.proto.Image.Format.YCbCr444);
+			image.setFormat(this.Format.YM24);
 			var record = NU.Network.getRobotStore().findRecord('id', this.getRobotId());
 			this.onImage(record, image);
 			callback.call(this);
