@@ -137,9 +137,9 @@ float classify(vec4 colour, sampler2D lut, float size, float bitsR, float bitsG,
 vec4 YCbCrToRGB(vec4 ycbcr) {
 	// conversion numbers have been modified to account for the colour being in the 0-1 range instead of 0-255
 	return clamp(vec4(
-		ycbcr.r + 1.772 * (ycbcr.g - 128.0 / 255.0),
-		ycbcr.r - 0.34414 * (ycbcr.g - 128.0 / 255.0) - 0.71414 * (ycbcr.b - 128.0 / 255.0),
 		ycbcr.r + 1.402 * (ycbcr.b - 128.0 / 255.0),
+		ycbcr.r - 0.34414 * (ycbcr.g - 128.0 / 255.0) - 0.71414 * (ycbcr.b - 128.0 / 255.0),
+		ycbcr.r + 1.772 * (ycbcr.g - 128.0 / 255.0),
 		ycbcr.a
 	), 0.0, 1.0);
 }
@@ -184,7 +184,7 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
         float cb = texture2D(rawImage, cbCoord).r;
         float cr = texture2D(rawImage, crCoord).r;
 
-        rawColour = vec4(y, cr, cb, 1.0);
+        rawColour = vec4(y, cb, cr, 1.0);
     } else {
 		// sample from the raw (e.g. YCbCr) image
 		rawColour = texture2D(rawImage, center);
