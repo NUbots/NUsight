@@ -10,8 +10,8 @@ Ext.define('NU.view.field.Robot', {
 	},
 	applyShowOrientation: function (value) {
 		if (!value) {
-			this.robotModels.forEach(function (darwinModel) {
-				var model = darwinModel.object;
+			this.robotModels.forEach(function (robotModel) {
+				var model = robotModel.object;
 				model.rotation.set(0, 0, 0);
 			});
 		}
@@ -33,13 +33,13 @@ Ext.define('NU.view.field.Robot', {
 		return this;
 	},
 	onSensorData: function (api_sensor_data) {
-		this.robotModels.forEach(function (darwinModel) {
-			var darwin = darwinModel;
+		this.robotModels.forEach(function (robotModel) {
+			var robot = robotModel;
 			var api_motor_data = api_sensor_data.servo;
 
 			var PI2 = Math.PI/2;
 			var ServoID = API.message.input.proto.Sensors.ServoID;
-			var model = darwin.object;
+			var model = robot.object;
 
 			if (api_motor_data.length > 0) {
 				model.rightShoulder.setAngle(api_motor_data[ServoID.R_SHOULDER_PITCH].presentPosition - PI2);
@@ -91,8 +91,8 @@ Ext.define('NU.view.field.Robot', {
 			}
 
 			if (this.getShowOdometry() && !this.getShowLocalisation()) {
-				darwin.position.setX(translation.x);
-				darwin.position.setY(translation.y);
+				robot.position.setX(translation.x);
+				robot.position.setY(translation.y);
 			}
 
 		}, this);
@@ -129,17 +129,17 @@ Ext.define('NU.view.field.Robot', {
 				}
 			} else if(field_object.name == 'self') {
 				// remove the old models
-				this.fireEvent('darwin-model-list-resized', field_object.models.length);
+				this.fireEvent('robot-model-list-resized', field_object.models.length);
 				for (var i = 0; i < field_object.models.length; i++) {
-					var darwin;
+					var robot;
 					if (i >= this.robotModels.length) {
-						darwin = this.createDarwinModel();
-						this.robotModels.push(darwin);
+						robot = this.createDarwinModel();
+						this.robotModels.push(robot);
 					} else {
-						darwin = this.robotModels[i];
+						robot = this.robotModels[i];
 					}
 
-					updateModel.call(this, darwin, field_object.models[i]);
+					updateModel.call(this, robot, field_object.models[i]);
 				}
 			}
 		}, this);

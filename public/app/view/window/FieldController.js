@@ -245,7 +245,7 @@ Ext.define('NU.view.window.FieldController', {
 			}, this);
 		}, this);
 
-		robot.on('darwin-model-list-resized', function (numModels) {
+		robot.on('robot-model-list-resized', function (numModels) {
 			for (var i = 0; i < robot.robotModels.length; i++) {
 				if (i < numModels) {
 					robot.robotModels[i].traverse(function (object) {
