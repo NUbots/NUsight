@@ -186,7 +186,7 @@ Ext.define('NU.view.window.FieldController', {
 	onSelectRobot: function (robotId) {
 		this.robots.forEach(function (robot) {
 			if (robot.robotId !== robotId) {
-				robot.darwinModels.forEach(function (model) {
+				robot.robotModels.forEach(function (model) {
 					model.traverse(function (object) {
 						object.visible = false;
 					});
@@ -197,7 +197,7 @@ Ext.define('NU.view.window.FieldController', {
 					});
 				});
 			} else {
-				robot.darwinModels.forEach(function (model) {
+				robot.robotModels.forEach(function (model) {
 					model.traverse(function (object) {
 						object.visible = true;
 					});
@@ -226,7 +226,7 @@ Ext.define('NU.view.window.FieldController', {
 		robot.on('loaded', function () {
 			// Hide if we are not currently selected
 			if (newRobot.id !== this.getRobotId()) {
-				robot.darwinModels.forEach(function (model) {
+				robot.robotModels.forEach(function (model) {
 					model.traverse(function (object) {
 						object.visible = false;
 					});
@@ -237,7 +237,7 @@ Ext.define('NU.view.window.FieldController', {
 					});
 				});
 			}
-			robot.darwinModels.forEach(function (model) {
+			robot.robotModels.forEach(function (model) {
 				this.mainScene.scene.add(model);
 			}, this);
 			robot.ballModels.forEach(function (model) {
@@ -246,13 +246,13 @@ Ext.define('NU.view.window.FieldController', {
 		}, this);
 
 		robot.on('darwin-model-list-resized', function (numModels) {
-			for (var i = 0; i < robot.darwinModels.length; i++) {
+			for (var i = 0; i < robot.robotModels.length; i++) {
 				if (i < numModels) {
-					robot.darwinModels[i].traverse(function (object) {
+					robot.robotModels[i].traverse(function (object) {
 						object.visible = true;
 					});
 				} else {
-					robot.darwinModels[i].traverse(function (object) {
+					robot.robotModels[i].traverse(function (object) {
 						object.visible = false;
 					});
 				}
@@ -296,7 +296,7 @@ Ext.define('NU.view.window.FieldController', {
 		this.robots.push(robot);
 		//todo remove this:
 		//this.onAddObject(robot);
-		//this.addObject(robot.darwinModels);
+		//this.addObject(robot.robotModels);
 		//todo this.addObject(robot.ballModels);
 
 		Ext.GlobalEvents.fireEvent('localisationOpened', this.mainScene.scene, this.robots);

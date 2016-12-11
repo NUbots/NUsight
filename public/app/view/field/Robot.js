@@ -10,24 +10,30 @@ Ext.define('NU.view.field.Robot', {
 	},
 	applyShowOrientation: function (value) {
 		if (!value) {
-			this.darwinModels.forEach(function (darwinModel) {
+			this.robotModels.forEach(function (darwinModel) {
 				var model = darwinModel.object;
 				model.rotation.set(0, 0, 0);
 			});
 		}
 		return value;
 	},
-	darwinModels: [],
+	robotModels: [],
 	ballModels: [],
-	constructor: function () {
+	constructor: function (config) {
+        this.initConfig(config);
 		this.callParent(arguments);
-		var darwin = this.createDarwinModel();
+		var newRobot;
+		if(this.getRobotId().toLowerCase().includes('igus')) {
+            newRobot = this.createDarwinModel(); //createIgusModel();
+		}else {
+			newRobot = this.createDarwinModel();
+		}
 		this.setShowOrientation(true);
-		this.darwinModels = [darwin];
+		this.robotModels = [newRobot];
 		return this;
 	},
 	onSensorData: function (api_sensor_data) {
-		this.darwinModels.forEach(function (darwinModel) {
+		this.robotModels.forEach(function (darwinModel) {
 			var darwin = darwinModel;
 			var api_motor_data = api_sensor_data.servo;
 
@@ -126,11 +132,11 @@ Ext.define('NU.view.field.Robot', {
 				this.fireEvent('darwin-model-list-resized', field_object.models.length);
 				for (var i = 0; i < field_object.models.length; i++) {
 					var darwin;
-					if (i >= this.darwinModels.length) {
+					if (i >= this.robotModels.length) {
 						darwin = this.createDarwinModel();
-						this.darwinModels.push(darwin);
+						this.robotModels.push(darwin);
 					} else {
-						darwin = this.darwinModels[i];
+						darwin = this.robotModels[i];
 					}
 
 					updateModel.call(this, darwin, field_object.models[i]);
@@ -156,6 +162,14 @@ Ext.define('NU.view.field.Robot', {
 		darwin = LocalisationVisualiser.visualise(darwin);
 		darwin = BehaviourVisualiser.visualise(darwin);
 		return darwin;
+	},
+	createIgusModel: function () {
+		var igus = new IgusOP(function () {
+			this.fireEvent('loaded');
+		}, this);
+		igus = LocalisationVisualiser.visualise(igus);
+		igus = BehaviourVisualiser.visualise(igus);
+		return igus;
 	},
 	/**
 	 * This method fires the event in the field controller to add the model in the scene.
