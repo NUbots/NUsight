@@ -125,7 +125,15 @@ Ext.define('NU.view.window.ScatterPlot', {
 						change: 'onGraphTypeChange'
 					},
 					type: 'scatter3d'
-				}]
+				}, {
+                    boxLabel: 'Heatmap',
+                    name: 'graphType',
+                    inputValue: 'Heatmap',
+                    listeners: {
+                        change: 'onGraphTypeChange'
+                    },
+                    type: 'heatmapgl'
+                }]
 			}]
 		}]
 	},
