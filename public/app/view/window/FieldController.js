@@ -802,6 +802,9 @@ Ext.define('NU.view.window.FieldController', {
 
 		this.createSkybox(scene, renderer, camera);
 
+		var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6 );
+		scene.add(hemiLight);
+
 		return {
 			scene: scene,
 			camera: camera,
