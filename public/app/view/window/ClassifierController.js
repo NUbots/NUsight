@@ -1201,6 +1201,9 @@ Ext.define('NU.view.window.ClassifierController', {
 			case this.Format.YM24:
 				this.drawImageYbCr444(image, callback, thisArg);
 				break;
+            case Format.UYVY:
+                this.drawImageY422(image);
+                break;
 			default:
 				throw 'Unsupported Format';
 		}
@@ -1225,6 +1228,26 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.selectionClassifier.updateRawImage(this.Format.YUYV, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
+    drawImageY422: function (image) {
+        var width = this.getImageWidth();
+        var height = this.getImageHeight();
+        var data = new Uint8Array(image.data.toArrayBuffer());
+        var bytesPerPixel = 2;
+
+        var renderers = [this.rawImageRenderer, this.classifiedRenderer, this.selectionRenderer];
+        for (var i = 0, len = renderers.length; i < len; i++) {
+            var renderer = renderers[i];
+            renderer.resize(width, height);
+            renderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+            renderer.updateUniform('imageFormat', this.Format.UYVY);
+            renderer.updateUniform('imageWidth', width);
+            renderer.updateUniform('imageHeight', height);
+            renderer.render();
+        }
+        this.selectionClassifier.resize(width, height);
+        this.selectionClassifier.updateRawImage(this.Format.YUYV, data, width, height, THREE.LuminanceFormat);
+        this.setRawImageComponents(data);
+    },
 	drawImageYbCr444: function (image) {
 		var width = this.getImageWidth();
 		var height = this.getImageHeight();
