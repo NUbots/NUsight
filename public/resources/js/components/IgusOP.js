@@ -78,13 +78,14 @@
         // this.camera.add(new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.01, 50));
         // this.head.add(this.camera);
 
-        // //Setup Left Leg containers
-        // this.leftPelvisY = addComponent({
-        //     url: "resources/igus/LeftPelvisY.json",
-        //     baseOffset: new THREE.Vector3(0.037, -0.1222, -0.005),
-        //     rotationAxis: "y"
-        // });
-        // this.body.add(this.leftPelvisY);
+        //Setup Left Leg containers
+        this.leftPelvisY = addComponent({
+            url: "resources/igus/LeftHip.json",
+            baseOffset: new THREE.Vector3(0.027, -0.33, 0.03),
+            rotationAxis: "y",
+            scale: new THREE.Vector3(0.001, 0.001, 0.001)
+        });
+        this.body.add(this.leftPelvisY);
         // this.leftPelvis = addComponent({
         //     url: "resources/igus/LeftPelvis.json",
         //     baseOffset: new THREE.Vector3(),
@@ -115,14 +116,15 @@
         //     rotationAxis: "z"
         // });
         // this.leftAnkle.add(this.leftFoot);
-        //
-        // //Setup Right Leg containers
-        // this.rightPelvisY = addComponent({
-        //     url: "resources/igus/RightPelvisY.json",
-        //     baseOffset: new THREE.Vector3(-0.037, -0.1222, -0.005),
-        //     rotationAxis: "y"
-        // });
-        // this.body.add(this.rightPelvisY);
+
+        //Setup Right Leg containers
+        this.rightPelvisY = addComponent({
+            url: "resources/igus/RightHip.json",
+            baseOffset: new THREE.Vector3(0.029, -0.33, 0.03),
+            rotationAxis: "y",
+            scale: new THREE.Vector3(0.001, 0.001, 0.001)
+        });
+        this.body.add(this.rightPelvisY);
         // this.rightPelvis = addComponent({
         //     url: "resources/igus/RightPelvis.json",
         //     baseOffset: new THREE.Vector3(),
@@ -177,26 +179,30 @@
             scale: new THREE.Vector3(0.001, 0.001, 0.001)
         });
         this.leftUpperArm.add(this.leftLowerArm);
-        //
-        // //Setup Right Arm Containers
-        // this.rightShoulder = addComponent({
-        //     url: "resources/igus/RightShoulder.json",
-        //     baseOffset: new THREE.Vector3(-0.082, 0, 0),
-        //     rotationAxis: "x"
-        // });
-        // this.body.add(this.rightShoulder);
-        // this.rightUpperArm = addComponent({
-        //     url: "resources/igus/RightUpperArm.json",
-        //     baseOffset: new THREE.Vector3(0, -0.016, 0),
-        //     rotationAxis: "z"
-        // });
-        // this.rightShoulder.add(this.rightUpperArm);
-        // this.rightLowerArm = addComponent({
-        //     url: "resources/igus/RightLowerArm.json",
-        //     baseOffset: new THREE.Vector3(0, -0.06, 0.016),
-        //     rotationAxis: "x"
-        // });
-        // this.rightUpperArm.add(this.rightLowerArm);
+
+        //Setup Right Arm Containers
+        this.rightShoulder = addComponent({
+            url: "resources/igus/RightShoulder.json",
+            baseOffset: new THREE.Vector3(0.079, 0.186, 0.045),
+            rotationAxis: "x",
+            scale: new THREE.Vector3(0.001, 0.001, 0.001)
+        });
+        this.body.add(this.rightShoulder);
+        this.rightUpperArm = addComponent({
+            url: "resources/igus/RightUpperArm.json",
+            baseOffset: new THREE.Vector3(-0.2, -0.01, 0),
+            rotationAxis: "z",
+            scale: new THREE.Vector3(0.001, 0.001, 0.001)
+        });
+        this.rightUpperArm.rotation.x = Math.PI/2;
+        this.rightShoulder.add(this.rightUpperArm);
+        this.rightLowerArm = addComponent({
+            url: "resources/igus/RightLowerArm.json",
+            baseOffset: new THREE.Vector3(0, 0.0, 0.0),
+            rotationAxis: "x",
+            scale: new THREE.Vector3(0.001, 0.001, 0.001)
+        });
+        this.rightUpperArm.add(this.rightLowerArm);
 
     };
 
