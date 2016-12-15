@@ -1202,7 +1202,7 @@ Ext.define('NU.view.window.ClassifierController', {
 				this.drawImageYbCr444(image, callback, thisArg);
 				break;
             case Format.UYVY:
-                this.drawImageY422(image);
+                this.drawImageY422(image, callback, thisArg);
                 break;
 			default:
 				throw 'Unsupported Format';
