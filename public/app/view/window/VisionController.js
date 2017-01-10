@@ -249,6 +249,15 @@ Ext.define('NU.view.window.VisionController', {
 			case Format.GRBG:
 				this.drawImageBayer(image);
 				break;
+            case Format.RGGB:
+                this.drawImageBayer(image);
+                break;
+            case Format.GBRG:
+                this.drawImageBayer(image);
+                break;
+            case Format.BGGR:
+                this.drawImageBayer(image);
+                break;
 			default:
                 console.log('Format: ', image.format);
 				throw 'Unsupported Format';
