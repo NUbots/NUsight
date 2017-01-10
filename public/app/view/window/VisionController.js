@@ -346,7 +346,6 @@ Ext.define('NU.view.window.VisionController', {
         this.imageRenderer.updateUniform('imageFormat', image.format);
 
         this.imageRenderer.updateUniform('sourceSize', THREE.Vector4(width, height, 1 / width, 1 / height));
-
         var Format = {
             GRBG: 0x47425247,
             RGGB: 0x42474752,

@@ -197,6 +197,8 @@ Ext.define('NU.view.webgl.WebGL', {
 		if (material === undefined) {
 			material = this.plane.material;
 		}
+		//console.log(name);
+		//console.log(material.uniforms[name]);
 		material.uniforms[name].value = value;
 		material.needsUpdate = true;
 		if (this.getAutoRender()) {

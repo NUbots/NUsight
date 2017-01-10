@@ -1,6 +1,6 @@
 varying vec4 center;
 
-# Bayer related
+// Bayer related
 uniform vec4 sourceSize = vec4(1, 1, 1, 1);
 uniform vec2 firstRed = vec2(0, 0);
 varying vec4 center;
