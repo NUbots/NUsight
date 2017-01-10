@@ -246,6 +246,9 @@ Ext.define('NU.view.window.VisionController', {
 			case Format.UYVY:
 				this.drawImageY422(image);
 				break;
+			case Format.GRBG:
+				this.drawImageBayer(image);
+				break;
 			default:
                 console.log('Format: ', image.format);
 				throw 'Unsupported Format';
@@ -324,6 +327,41 @@ Ext.define('NU.view.window.VisionController', {
 //			ctx.restore();
         };
     },
+    drawImageBayer: function(image) {
+        var width = this.getWidth();
+        var height = this.getHeight();
+        var data = new Uint8Array(image.data.toArrayBuffer());
+        this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+        this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+
+        this.imageRenderer.updateUniform('sourceSize', [width, height, 1 / width, 1 / height]);
+
+        var Format = {
+            GRBG: 0x47425247,
+            RGGB: 0x42474752,
+            GBRG: 0x47524247,
+            BGGR: 0x52474742,
+            GR12: 0x32315247,
+            RG12: 0x32314752,
+            GB12: 0x32314247,
+            BG12: 0x32314742,
+            GR16: 0x36315247,
+            RG16: 0x36314752,
+            GB16: 0x36314247,
+            BG16: 0x36314742
+        };
+		if(image.format == Format.GRBG) {
+            this.imageRenderer.updateUniform('firstRed', [(1 / width), 0]);
+		}else if(image.format == Format.RGGB) {
+            this.imageRenderer.updateUniform('firstRed', [0, 0]);
+        }else if(image.format == Format.GBRG) {
+            this.imageRenderer.updateUniform('firstRed', [0 , (1 / height)]);
+        }else if(image.format == Format.BGGR) {
+            this.imageRenderer.updateUniform('firstRed', [(1 / width), (1 / height)]);
+        }
+	},
 	arrayBufferToBase64: function (buffer) {
 		// from http://stackoverflow.com/a/9458996/868679
 		var binary = '';
