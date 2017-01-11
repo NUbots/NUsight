@@ -55,6 +55,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 me.setGraphUpdateZ({});
             }
         }, 1000 / 60));
+
     },
 
     addEvents: function () {
@@ -92,7 +93,6 @@ Ext.define('NU.view.window.ScatterPlotController', {
     onClose: function() {
         if(this.getIntervalId() != null) {
             clearInterval(this.getIntervalId());
-            this.setIntervalid(null);
         }
     },
 
