@@ -71,6 +71,7 @@ Ext.define('NU.view.window.VisionController', {
 		layeredCanvas.add('goals', {group: 'field_objects'});
 		layeredCanvas.add('balls', {group: 'field_objects'});
 		layeredCanvas.add('lines');
+		layeredCanvas.add('imageText');
 		//hide image diff by default
 		layeredCanvas.hide('image_diff');
 		layeredCanvas.hide('localisation');
@@ -144,6 +145,7 @@ Ext.define('NU.view.window.VisionController', {
 					break;
 				case 'raw':
 					layeredCanvas.show('image');
+                    layeredCanvas.show('imageText');
 					break;
 				case 'image_diff':
 					layeredCanvas.show('image_diff');
@@ -229,6 +231,7 @@ Ext.define('NU.view.window.VisionController', {
 
 		switch (image.format) {
 			case Format.JPEG:
+				this.drawImageFormatName('JPEG');
 				// 1st implementation - potentially slower
 				//	        this.drawImageURL(image);
 
@@ -236,26 +239,33 @@ Ext.define('NU.view.window.VisionController', {
 				this.drawImageB64(image);
 				break;
 			case Format.YUYV:
+                this.drawImageFormatName('YUYV');
 				this.drawImageYbCr422(image);
 				//this.drawImageBayer(image);
 				break;
 			case Format.YM24:
+                this.drawImageFormatName('YM24');
 				this.drawImageYbCr444(image);
 				//this.drawImageBayer(image);
 				break;
 			case Format.UYVY:
+                this.drawImageFormatName('UYVY');
 				this.drawImageY422(image);
 				break;
 			case Format.GRBG:
+                this.drawImageFormatName('Bayer - GRBG');
 				this.drawImageBayer(image);
 				break;
             case Format.RGGB:
+                this.drawImageFormatName('Bayer - RGGB');
                 this.drawImageBayer(image);
                 break;
             case Format.GBRG:
+                this.drawImageFormatName('Bayer - GBRG');
                 this.drawImageBayer(image);
                 break;
             case Format.BGGR:
+                this.drawImageFormatName('Bayer - BGGR');
                 this.drawImageBayer(image);
                 break;
 			default:
@@ -263,6 +273,17 @@ Ext.define('NU.view.window.VisionController', {
 				throw 'Unsupported Format';
 		}
     },
+
+	drawImageFormatName: function(name) {
+        var imageContext = this.getContext('image');
+		var height = imageContext.canvas.height;
+
+    	var context = this.getContext('imageText');
+        context.fillStyle = 'white';
+        context.font = "20px Arial";
+		context.fillText(name, 5, height - 5);
+	},
+
     drawImageURL: function (image) {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
         var url = URL.createObjectURL(blob);
@@ -590,7 +611,6 @@ Ext.define('NU.view.window.VisionController', {
 		}
 	},
 	drawBalls: function (balls) {
-
 		var context = this.getContext('balls');
 		context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
