@@ -9,18 +9,6 @@ const float T_MAGENTA = 109.0;
 const int FORMAT_GREY = 0x59455247;
 const int FORMAT_Y12  = 0x20323159;
 const int FORMAT_Y16  = 0x20363159;
-const int FORMAT_GRBG = 0x47425247;
-const int FORMAT_RGGB = 0x42474752;
-const int FORMAT_GBRG = 0x47524247;
-const int FORMAT_BGGR = 0x52474742;
-const int FORMAT_GR12 = 0x32315247;
-const int FORMAT_RG12 = 0x32314752;
-const int FORMAT_GB12 = 0x32314247;
-const int FORMAT_BG12 = 0x32314742;
-const int FORMAT_GR16 = 0x36315247;
-const int FORMAT_RG16 = 0x36314752;
-const int FORMAT_GB16 = 0x36314247;
-const int FORMAT_BG16 = 0x36314742;
 const int FORMAT_Y411 = 0x31313459;
 const int FORMAT_UYVY = 0x59565955;
 const int FORMAT_YUYV = 0x56595559;
@@ -207,8 +195,8 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 	return rawColour;
 }
 
-vec4 bayerToRGB(vec4 colour) {
-	#define fetch(x, y) texture2D(image, vec2(x, y)).r
+vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec4 center, vec4 xCoord, vec4 yCoord) {
+	#define fetch(x, y) texture2D(rawImage, vec2(x, y)).r
 
 	float C = colour.r; // ( 0, 0)
 	const vec4 kC = vec4(4.0, 6.0, 5.0, 5.0) / 8.0;
@@ -282,7 +270,7 @@ vec4 bayerToRGB(vec4 colour) {
 	PATTERN.xz += kF.xz * F;
 
     vec4 result = vec4(0, 0, 0, 1);
-	result = (alternate.y == 0.0)
+	result.rgb = (alternate.y == 0.0)
 		? ((alternate.x == 0.0)
 			? vec3(C, PATTERN.xy)
 			: vec3(PATTERN.z, C, PATTERN.w))

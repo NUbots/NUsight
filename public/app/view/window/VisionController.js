@@ -361,12 +361,13 @@ Ext.define('NU.view.window.VisionController', {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
-        this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
-        this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
-
+        this.imageRenderer.resize(width, height);
+		this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.RGBFormat);
+		this.imageRenderer.updateUniform('imageFormat', image.format);
+		this.imageRenderer.updateUniform('imageWidth', width);
+		this.imageRenderer.updateUniform('imageHeight', height);
         this.imageRenderer.updateUniform('sourceSize', THREE.Vector4(width, height, 1 / width, 1 / height));
+
         var Format = {
             GRBG: 0x47425247,
             RGGB: 0x42474752,
@@ -390,6 +391,7 @@ Ext.define('NU.view.window.VisionController', {
         }else if(image.format == Format.BGGR) {
             this.imageRenderer.updateUniform('firstRed', [(1 / width), (1 / height)]);
         }
+		this.imageRenderer.render();
 	},
 	arrayBufferToBase64: function (buffer) {
 		// from http://stackoverflow.com/a/9458996/868679

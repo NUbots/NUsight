@@ -19,6 +19,8 @@ uniform int imageHeight;
  * The coordinate of the current pixel, usually just maps to the current UV coordinate
  */
 varying vec4 center;
+varying vec4 xCoord;
+varying vec4 yCoord;
 
 void main() {
 	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, center.xy);
@@ -32,7 +34,9 @@ void main() {
         gl_FragColor = YCbCrToRGB(rawColour);
 	} else if(imageFormat == FORMAT_UYVY) {
         gl_FragColor = YCbCrToRGB(rawColour);
-	}else if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
-        gl_FragColor = bayerToRGB(rawColour);
+	} else if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
+        gl_FragColor = bayerToRGB(rawImage, rawColour, center, xCoord, yCoord);
+	} else {
+		gl_FragColor = rawColour;
 	}
 }
