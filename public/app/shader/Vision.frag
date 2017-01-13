@@ -36,6 +36,8 @@ void main() {
         gl_FragColor = YCbCrToRGB(rawColour);
 	} else if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
         gl_FragColor = bayerToRGB(rawImage, rawColour, center, xCoord, yCoord);
+	} else if(imageFormat == FORMAT_RGB3) {
+		gl_FragColor = rawColour;
 	} else {
 		gl_FragColor = rawColour;
 	}

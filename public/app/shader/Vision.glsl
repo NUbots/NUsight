@@ -198,7 +198,8 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec4 center, vec4 xCoord, vec4 yCoord) {
 	#define fetch(x, y) texture2D(rawImage, vec2(x, y)).r
 
-	float C = colour.r; // ( 0, 0)
+	//float C = colour.r; // ( 0, 0)
+	float C = texture2D(rawImage, center.xy).r; // ( 0, 0)
 	const vec4 kC = vec4(4.0, 6.0, 5.0, 5.0) / 8.0;
 
 	// Determine which of four types of pixels we are on.
@@ -223,15 +224,15 @@ vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec4 center, vec4 xCoord, vec4 
 		fetch(center.x, yCoord[0]), // ( 0,-2)
 		fetch(center.x, yCoord[1]), // ( 0,-1)
 		fetch(xCoord[0], center.y), // ( 1, 0)
-		fetch(xCoord[1], center.y)
-	); // ( 2, 0)
+		fetch(xCoord[1], center.y)  // ( 2, 0)
+	);
 
 	vec4 temp = vec4(
 		fetch(center.x, yCoord[3]), // ( 0, 2)
 		fetch(center.x, yCoord[2]), // ( 0, 1)
 		fetch(xCoord[3], center.y), // ( 2, 0)
-		fetch(xCoord[2], center.y)
-	); // ( 1, 0)
+		fetch(xCoord[2], center.y)  // ( 1, 0)
+	);
 
 	// Even the simplest compilers should be able to constant-fold these to avoid the division.
 	// Note that on scalar processors these constants force computation of some identical products twice.

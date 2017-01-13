@@ -1,3 +1,4 @@
+/*
 Ext.define('NU.view.webgl.Bayer', {
 	extend: 'NU.view.webgl.WebGL',
 	constructor: function (config) {
@@ -17,3 +18,5 @@ Ext.define('NU.view.webgl.Bayer', {
 		this.updateUniform('sourceSize', [width, height, 1 / width, 1 / height]);
 	}
 });
+
+*/

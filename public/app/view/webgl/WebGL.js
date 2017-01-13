@@ -81,6 +81,7 @@ Ext.define('NU.view.webgl.WebGL', {
 	createPlane: function (width, height) {
 		var geometry = new THREE.PlaneBufferGeometry(width, height);
 		geometry.applyMatrix(new THREE.Matrix4().makeTranslation(width / 2, height / 2, 0));
+		debugger;
 		var material = new THREE.ShaderMaterial({
 			uniforms: this.getUniforms(),
 			vertexShader: this.vertexShaderText,

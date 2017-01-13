@@ -268,6 +268,10 @@ Ext.define('NU.view.window.VisionController', {
                 this.drawImageFormatName('Bayer - BGGR');
                 this.drawImageBayer(image);
                 break;
+            case Format.RGB3:
+                this.drawImageFormatName('RGB3');
+                this.drawImageRGB3(image);
+            	break;
 			default:
                 console.log('Format: ', image.format);
 				throw 'Unsupported Format';
@@ -342,6 +346,15 @@ Ext.define('NU.view.window.VisionController', {
 		this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
 		this.imageRenderer.updateUniform('imageFormat', image.format);
 	},
+	drawImageRGB3: function (image) {
+		var width = this.getWidth();
+		var height = this.getHeight();
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.imageRenderer.updateUniform('imageFormat', image.format);
+		this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+		this.imageRenderer.updateUniform('imageFormat', image.format);
+	},
     drawImageB64: function (image) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
         var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
@@ -362,11 +375,16 @@ Ext.define('NU.view.window.VisionController', {
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
         this.imageRenderer.resize(width, height);
-		this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.RGBFormat);
+		this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
 		this.imageRenderer.updateUniform('imageFormat', image.format);
 		this.imageRenderer.updateUniform('imageWidth', width);
 		this.imageRenderer.updateUniform('imageHeight', height);
-        this.imageRenderer.updateUniform('sourceSize', THREE.Vector4(width, height, 1 / width, 1 / height));
+        this.imageRenderer.updateUniform('sourceSize', new THREE.Vector4(width, height, 1 / width, 1 / height));
+		this.imageDiffRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
+		this.imageDiffRenderer.updateUniform('imageFormat', image.format);
+		this.imageDiffRenderer.updateUniform('imageWidth', width);
+		this.imageDiffRenderer.updateUniform('imageHeight', height);
+        //this.imageDiffRenderer.updateUniform('sourceSize', new THREE.Vector4(width, height, 1 / width, 1 / height));
 
         var Format = {
             GRBG: 0x47425247,
@@ -383,15 +401,23 @@ Ext.define('NU.view.window.VisionController', {
             BG16: 0x36314742
         };
 		if(image.format == Format.GRBG) {
-            this.imageRenderer.updateUniform('firstRed', [(1 / width), 0]);
+            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2((1 / width), 0));
+            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2((1 / width), 0));
 		}else if(image.format == Format.RGGB) {
-            this.imageRenderer.updateUniform('firstRed', [0, 0]);
+            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
         }else if(image.format == Format.GBRG) {
-            this.imageRenderer.updateUniform('firstRed', [0 , (1 / height)]);
+            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , (1 / height)));
+            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0 , (1 / height)));
         }else if(image.format == Format.BGGR) {
-            this.imageRenderer.updateUniform('firstRed', [(1 / width), (1 / height)]);
+            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2((1 / width), (1 / height)));
+            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2((1 / width), (1 / height)));
+        } else {
+            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
         }
 		this.imageRenderer.render();
+		this.imageDiffRenderer.render();
 	},
 	arrayBufferToBase64: function (buffer) {
 		// from http://stackoverflow.com/a/9458996/868679
