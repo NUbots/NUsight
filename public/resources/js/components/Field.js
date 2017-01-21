@@ -240,17 +240,17 @@
  //        BORDER_STRIP_MIN_WIDTH: 0.7
  //    };
 
-    // field constants 2014 onward
+    // field constants 2017 onward
     Field.constants = {
         LINE_WIDTH: 0.05,
         MARK_WIDTH: 0.05,
         FIELD_LENGTH: 9,
         FIELD_WIDTH: 6,
         GOAL_DEPTH: 0.6,
-        GOAL_WIDTH: 1.8,
+        GOAL_WIDTH: 2.6,
         GOAL_AREA_LENGTH: 1,
         GOAL_AREA_WIDTH: 5,
-        GOAL_CROSSBAR_HEIGHT: 1.1,
+        GOAL_CROSSBAR_HEIGHT: 1.8,
         GOAL_POST_DIAMETER: 0.1,
         GOAL_NET_HEIGHT: 1,
         PENALTY_MARK_DISTANCE: 2.1,
