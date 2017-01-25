@@ -109,7 +109,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 			this.createPointCloud(width, height);
 		}
 
-		var Format = API.message.input.proto.Image.Format;
+		var Format = API.message.input.Image.Format;
 		if (imageFormat === Format.YCbCr422) {
 			var bytesPerPixel = 2;
 			this.updateTexture('rawImage', data, width * bytesPerPixel, height, textureFormat, this.imagePointCloud.material);

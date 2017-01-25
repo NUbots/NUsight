@@ -38,7 +38,28 @@ Ext.define('NU.view.field.Robot', {
 			var api_motor_data = api_sensor_data.servo;
 
 			var PI2 = Math.PI/2;
-			var ServoID = API.message.input.proto.Sensors.ServoID;
+			var ServoID = {
+                R_SHOULDER_PITCH    : 0,
+                L_SHOULDER_PITCH    : 1,
+                R_SHOULDER_ROLL     : 2,
+                L_SHOULDER_ROLL     : 3,
+                R_ELBOW             : 4,
+                L_ELBOW             : 5,
+                R_HIP_YAW           : 6,
+                L_HIP_YAW           : 7,
+                R_HIP_ROLL          : 8,
+                L_HIP_ROLL          : 9,
+                R_HIP_PITCH         : 10,
+                L_HIP_PITCH         : 11,
+                R_KNEE              : 12,
+                L_KNEE              : 13,
+                R_ANKLE_PITCH       : 14,
+                L_ANKLE_PITCH       : 15,
+                R_ANKLE_ROLL        : 16,
+                L_ANKLE_ROLL        : 17,
+                HEAD_PAN            : 18,
+                HEAD_TILT           : 19,
+            };
 			var model = robot.object;
 
 			if (api_motor_data.length > 0) {

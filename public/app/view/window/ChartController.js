@@ -33,11 +33,11 @@ Ext.define('NU.view.window.ChartController', {
 
     addEvents: function () {
         this.mon(NU.Network, {
-            'message.support.nubugger.proto.DataPoint': this.onDataPoint,
-            'message.input.proto.Sensors': this.onSensorData,
+            'message.support.nubugger.DataPoint': this.onDataPoint,
+            'message.input.Sensors': this.onSensorData,
             scope: this
         });
-        this.servoMap = NU.TypeMap.get(API.message.input.proto.Sensors.ServoID);
+        this.servoMap = NU.TypeMap.get(API.message.input.Sensors.ServoID);
     },
 
     onAfterRender: function () {

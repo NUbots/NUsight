@@ -5,3 +5,4 @@ public/lib/
 *.sublime-workspace
 app/configuration.yaml
 npm-debug.log
+public/resources/js/proto/google

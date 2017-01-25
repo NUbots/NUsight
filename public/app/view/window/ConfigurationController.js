@@ -16,10 +16,10 @@ Ext.define('NU.view.window.ConfigurationController', {
     mode: null,                         // The current updating mode.
     init: function () {
         this.store = this.getViewModel().getStore('tree');
-        NU.Network.loadProto('message.support.nubugger.proto.ConfigurationState');
-        this.type = API.message.support.nubugger.proto.ConfigurationState.Node.Type;
+        NU.Network.loadProto('message.support.nubugger.ConfigurationState');
+        this.type = API.message.support.nubugger.ConfigurationState.Node.Type;
         this.mode = this.Modes.STANDARD;
-        this.mon(NU.Network, 'message.support.nubugger.proto.ConfigurationState', this.onConfigurationState, this);
+        this.mon(NU.Network, 'message.support.nubugger.ConfigurationState', this.onConfigurationState, this);
     },
     /**
      * A function that is called when the user selects a robot. It then sends the command to get the configuration state with this IP address.
@@ -433,7 +433,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @param [path] The path to the file or directory.
      */
     createKeyPair: function (name, value, path) {
-        var keyPair = new API.message.support.nubugger.proto.ConfigurationState.KeyPair;
+        var keyPair = new API.message.support.nubugger.ConfigurationState.KeyPair;
         keyPair.setName(name);
         if (value) {
             keyPair.setValue(value);
@@ -450,7 +450,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {spec.Node} A ConfigurationState Node.
      */
     createNode: function (type) {
-        var node = new API.message.support.nubugger.proto.ConfigurationState.Node;
+        var node = new API.message.support.nubugger.ConfigurationState.Node;
         node.setType(type);
         return node;
     },
@@ -462,7 +462,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      */
     createFileNode: function (record) {
         var node = this.createNode(this.type.FILE);
-        var map = new API.message.support.nubugger.proto.ConfigurationState.KeyPair;
+        var map = new API.message.support.nubugger.ConfigurationState.KeyPair;
         map.setName(record.get('name'));
         map.setPath(record.get('path'));
         node.getMapValue().push(map);
@@ -618,7 +618,7 @@ Ext.define('NU.view.window.ConfigurationController', {
      * @returns {Window.API.Configuration} The ConfigurationState message.
      */
     getConfigurationState: function (tree) {
-        var configuration = new API.message.support.nubugger.proto.ConfigurationState();
+        var configuration = new API.message.support.nubugger.ConfigurationState();
         configuration.setRoot(tree.root);
         return configuration;
     }

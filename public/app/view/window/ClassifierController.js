@@ -361,8 +361,8 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	init: function () {
 		// Load the protocol buffers we use
-		NU.Network.loadProto('message.input.proto.Image');
-		NU.Network.loadProto('message.vision.proto.LookUpTable');
+		NU.Network.loadProto('message.input.Image');
+		NU.Network.loadProto('message.vision.LookUpTable');
 
 		// these must initialized here so there is an object per-controller
 		this.resetLUT();
@@ -503,9 +503,9 @@ Ext.define('NU.view.window.ClassifierController', {
 
 	addEvents: function () {
 		this.mon(NU.Network, {
-			'message.input.proto.Image': this.onImage,
-			'message.vision.proto.LookUpTable': this.onLookUpTable,
-			'message.vision.proto.LookUpTableDiff': this.onLookUpTableDiff,
+			'message.input.Image': this.onImage,
+			'message.vision.LookUpTable': this.onLookUpTable,
+			'message.vision.LookUpTableDiff': this.onLookUpTableDiff,
 			scope: this
 		});
 	},
@@ -590,7 +590,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	},
 	upload: function (save) {
 		save = !!save; // convert to bool
-		var lookupTable = new API.message.vision.proto.LookUpTable();
+		var lookupTable = new API.message.vision.LookUpTable();
 		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
@@ -1291,7 +1291,7 @@ Ext.define('NU.view.window.ClassifierController', {
 				imageObj.adobe.transformCode = false;
 			}
 			var rawData = imageObj.getData(imageObj.width, imageObj.height);
-			var image = new API.message.input.proto.Image();
+			var image = new API.message.input.Image();
 			image.setData(rawData);
 			image.setCameraId(0);
 			image.setDimensions({

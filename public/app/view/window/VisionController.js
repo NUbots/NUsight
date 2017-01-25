@@ -92,10 +92,10 @@ Ext.define('NU.view.window.VisionController', {
 
 	addEvents: function () {
 		this.mon(NU.Network, {
-			'message.input.proto.Image': this.onImage,
-			'message.vision.proto.ClassifiedImage': this.onClassifiedImage,
-			'message.vision.proto.VisionObjects': this.onVisionObjects,
-			'message.localisation.proto.Localisation': this.renderLocalisation, //for localisation camera
+			'message.input.Image': this.onImage,
+			'message.vision.ClassifiedImage': this.onClassifiedImage,
+			'message.vision.VisionObjects': this.onVisionObjects,
+			'message.localisation.Localisation': this.renderLocalisation, //for localisation camera
 			scope: this
 		});
 
@@ -574,7 +574,7 @@ Ext.define('NU.view.window.VisionController', {
 		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
-        var type = API.message.vision.proto.VisionObject.ObjectType;
+        var type = API.message.vision.VisionObject.ObjectType;
 		visionObjects.object.forEach(function (visionObject) {
 			switch (visionObject.getType()) {
 				case type.GOAL: // Goal

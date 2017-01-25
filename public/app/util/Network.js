@@ -26,7 +26,7 @@ Ext.define('NU.util.Network', {
 		this.on('removeListener', this.removeHandler.bind(this));
 
 		// We use the command protocol buffer
-		this.loadProto('message.support.nubugger.proto.Command');
+		this.loadProto('message.support.nubugger.Command');
 
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
 	},
@@ -206,7 +206,7 @@ Ext.define('NU.util.Network', {
 	 */
 	sendCommand: function (command, target) {
 
-		var msg = new API.message.support.nubugger.proto.Command();
+		var msg = new API.message.support.nubugger.Command();
 		msg.setCommand(command);
 
 		this.send(msg, target, true);

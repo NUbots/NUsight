@@ -31,7 +31,7 @@ Ext.define('NU.view.window.ConfigurationViewModel', {
      */
     processMessage: function (node, message) {
         // Get the type of nodes.
-        var nodeType = API.message.support.nubugger.proto.ConfigurationState.Node.Type;
+        var nodeType = API.message.support.nubugger.ConfigurationState.Node.Type;
         // Retrieve the type and tag of the message.
         var type = message.type;
         var tag = this.parseTag(message.tag);
