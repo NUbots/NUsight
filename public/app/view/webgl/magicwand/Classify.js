@@ -4,6 +4,34 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 	imagePointCloud: null,
 	imageVertexShaderText: null,
 	imageFragmentShaderText: null,
+	/**
+	 * FourCC's Image Format codes
+	 * Copied from NUbots:shared/utility/vision/fourcc.h
+	 */
+	Format: {
+		GREY: 0x59455247,
+		Y12 : 0x20323159,
+		Y16 : 0x20363159,
+		GRBG: 0x47425247,
+		RGGB: 0x42474752,
+		GBRG: 0x47524247,
+		BGGR: 0x52474742,
+		GR12: 0x32315247,
+		RG12: 0x32314752,
+		GB12: 0x32314247,
+		BG12: 0x32314742,
+		GR16: 0x36315247,
+		RG16: 0x36314752,
+		GB16: 0x36314247,
+		BG16: 0x36314742,
+		Y411: 0x31313459,
+		UYVY: 0x59565955,
+		YUYV: 0x56595559,
+		YM24: 0x34324d59,
+		RGB3: 0x33424752,
+		JPEG: 0x4745504a,
+		UNKNOWN: 0,
+	},
 	constructor: function (config) {
 		var canvas = new Ext.Element(document.createElement('canvas'));
 		var webglAttributes = {antialias: false, preserveDrawingBuffer: true};
@@ -109,8 +137,7 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 			this.createPointCloud(width, height);
 		}
 
-		var Format = API.message.input.Image.Format;
-		if (imageFormat === Format.YCbCr422) {
+		if (imageFormat === this.Format.YUYV) {
 			var bytesPerPixel = 2;
 			this.updateTexture('rawImage', data, width * bytesPerPixel, height, textureFormat, this.imagePointCloud.material);
 		} else {
