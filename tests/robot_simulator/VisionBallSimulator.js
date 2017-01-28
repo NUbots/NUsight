@@ -4,7 +4,7 @@ var RobotSimulator = require('./RobotSimulator');
 function VisionBallSimulator () {
     RobotSimulator.call(this);
 
-    this.loadProto('message.vision.proto.VisionObjects');
+    this.loadProto('message.vision.VisionObjects');
 }
 util.inherits(VisionBallSimulator, RobotSimulator);
 
@@ -16,12 +16,8 @@ VisionBallSimulator.prototype.run = function () {
     ball.circle.centre.y = 50;
     ball.circle.radius = 50;
 
-    var message = new this.API.message.vision.proto.VisionObjects({
-        object: [{
-            cameraId: 0,
-            type: this.API.message.vision.proto.VisionObject.ObjectType.BALL,
-            ball: ball
-        }]
+    var message = new this.API.message.vision.NUsightBalls({
+        balls: [ball]
     });
 
     this.sendMessage(message);

@@ -7,7 +7,7 @@ function LocalisationSimulator (opts) {
 	RobotSimulator.call(this, opts);
 	this.started = Date.now();
 
-	this.loadProto('message.localisation.proto.Localisation');
+	this.loadProto('message.localisation.Localisation');
 }
 util.inherits(LocalisationSimulator, RobotSimulator);
 
@@ -15,7 +15,7 @@ LocalisationSimulator.prototype.run = function () {
 	var now = Date.now();
 	var elapsedTime = now - this.started;
 	var radius = 1;
-	var message = new this.API.message.localisation.proto.Localisation({
+	var message = new this.API.message.localisation.Localisation({
 		fieldObject: [{
 			name: 'self',
 			models: [{

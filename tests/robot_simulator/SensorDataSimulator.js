@@ -6,14 +6,14 @@ var TAU = 2 * Math.PI;
 function SensorDataSimulator (opts) {
 	RobotSimulator.call(this, opts);
 
-	this.loadProto('message.input.proto.Sensors');
+	this.loadProto('message.input.Sensors');
 	this.loadProto('message.mat44');
 
 	this.started = Date.now();
 	this.matrix = new THREE.Matrix4();
 
-	this.message = new this.API.message.input.proto.Sensors({
-		timestamp: Date.now(),
+	this.message = new this.API.message.input.Sensors({
+		timestamp: {seconds: (Date.now() / 1000).toFixed(0)},
 		voltage: 12,
 		battery: Math.random(),
 		servo: this.createServos()
@@ -23,7 +23,7 @@ util.inherits(SensorDataSimulator, RobotSimulator);
 
 SensorDataSimulator.prototype.matrixToProto = function (matrix) {
 	var el = matrix.elements;
-	return new this.API.message.mat44({
+	return new this.API.mat44({
 		x: {x: el[0],  y: el[1],  z: el[2],  t: el[3]},
 		y: {x: el[4],  y: el[5],  z: el[6],  t: el[7]},
 		z: {x: el[8],  y: el[9],  z: el[10], t: el[11]},

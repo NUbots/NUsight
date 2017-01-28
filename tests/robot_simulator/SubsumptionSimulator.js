@@ -4,7 +4,7 @@ var RobotSimulator = require('./RobotSimulator');
 function SubsumptionSimulator () {
 	RobotSimulator.call(this);
 
-	this.loadProto('message.behaviour.proto.Subsumption');
+	this.loadProto('message.behaviour.Subsumption');
 }
 util.inherits(SubsumptionSimulator, RobotSimulator);
 
@@ -40,7 +40,7 @@ SubsumptionSimulator.prototype.run = function () {
 	var action = actions[index];
 	data[action.name] = action.data;
 
-	var message = new this.API.message.behaviour.proto.Subsumption(data);
+	var message = new this.API.message.behaviour.Subsumption(data);
 
 	this.sendMessage(message);
 
