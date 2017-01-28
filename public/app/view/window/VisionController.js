@@ -94,7 +94,10 @@ Ext.define('NU.view.window.VisionController', {
 		this.mon(NU.Network, {
 			'message.input.Image': this.onImage,
 			'message.vision.ClassifiedImage': this.onClassifiedImage,
-			'message.vision.VisionObjects': this.onVisionObjects,
+			'message.vision.NUsightBalls': this.onNUsightBalls,
+			'message.vision.NUsightGoals': this.onNUsightGoals,
+			'message.vision.NUsightObstacles': this.onNUsightObstacles,
+			'message.vision.NUsightLines': this.onNUsightLines,
 			'message.localisation.Localisation': this.renderLocalisation, //for localisation camera
 			scope: this
 		});
@@ -102,7 +105,6 @@ Ext.define('NU.view.window.VisionController', {
 		//listen to an event when the localisation window is opened and has robots.
 		Ext.on('localisationOpened', this.onLocalisationViewConnected, this);
 	},
-
 	onSelectRobot: function (robotId) {
 		if(this.localisationRobots != null) {
 			for (var i = 0; i < this.localisationRobots.length; i++) {
@@ -569,25 +571,33 @@ Ext.define('NU.view.window.VisionController', {
             context.stroke();
         }
     },
-	onVisionObjects: function (robot, visionObjects) {
-
+	onNUsightBalls: function(robot, balls) {
 		if (robot.get('id') !== this.getRobotId()) {
 			return;
 		}
-        var type = API.message.vision.VisionObject.ObjectType;
-		visionObjects.object.forEach(function (visionObject) {
-			switch (visionObject.getType()) {
-				case type.GOAL: // Goal
-					this.drawGoals(visionObject.getGoal());
-					break;
-				case type.BALL: // Ball
-					this.drawBalls(visionObject.getBall());
-					break;
-				case type.LINE: // Lines
-					this.drawLines(visionObject.getLine());
-					break;
-			}
-		}, this);
+
+		this.drawBalls(balls.getBalls());
+	},
+	onNUsightGoals: function(robot, goals) {
+		if (robot.get('id') !== this.getRobotId()) {
+			return;
+		}
+
+		this.drawGoals(goals.getGoals());
+	},
+	//TODO: implement this
+	onNUsightObstacles: function(robot, obstacles) {
+		if (robot.get('id') !== this.getRobotId()) {
+			return;
+		}
+
+		console.log("NUsightObstacles CURRENTLY NOT SUPPORTED");
+	},
+	onNUsightLines: function(robot, lines) {
+		if (robot.get('id') !== this.getRobotId()) {
+			return;
+		}
+		this.drawLines(lines.getLines());
 	},
 	drawGoals: function (goals) {
 
@@ -619,22 +629,22 @@ Ext.define('NU.view.window.VisionController', {
 
 			context.stroke();
 
-			var measurements = goal.getMeasurement();
-
-			// Calculate our error!
-			context.fillStyle = "rgba(255, 255, 255, 1)";
-			var mX = (quad.tl.x + quad.tr.x + quad.br.x + quad.bl.x) / 4.0;
-			var mY = (quad.tl.y + quad.tr.y + quad.br.y + quad.bl.y) / 4.0;
-
-			for(var j = 0; j < measurements.length; ++j) {
-
-				var m = measurements[j];
-
-				var d = Math.sqrt(m.position.x);
-				var dE = Math.sqrt(m.covariance.x.x);
-
-				context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", mX, mY+j*15);
-			}
+			// var measurements = goal.getMeasurement();
+            //
+			// // Calculate our error!
+			// context.fillStyle = "rgba(255, 255, 255, 1)";
+			// var mX = (quad.tl.x + quad.tr.x + quad.br.x + quad.bl.x) / 4.0;
+			// var mY = (quad.tl.y + quad.tr.y + quad.br.y + quad.bl.y) / 4.0;
+            //
+			// for(var j = 0; j < measurements.length; ++j) {
+            //
+			// 	var m = measurements[j];
+            //
+			// 	var d = Math.sqrt(m.position.x);
+			// 	var dE = Math.sqrt(m.covariance.x.x);
+            //
+			// 	context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", mX, mY+j*15);
+			// }
 
 		}
 	},
@@ -658,20 +668,20 @@ Ext.define('NU.view.window.VisionController', {
 			context.lineWidth = 2;
 			context.stroke();
 
-			var measurements = ball.getMeasurement();
-
-			// Calculate our error!
-			context.fillStyle = "rgba(255, 255, 255, 1)";
-
-			for(var j = 0; j < measurements.length; ++j) {
-
-				var m = measurements[j];
-
-				var d = Math.sqrt(m.position.x);
-				var dE = Math.sqrt(m.covariance.x.x);
-
-				context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", ball.circle.centre.x, ball.circle.centre.y+j*15);
-			}
+			// var measurements = ball.getMeasurement();
+            //
+			// // Calculate our error!
+			// context.fillStyle = "rgba(255, 255, 255, 1)";
+            //
+			// for(var j = 0; j < measurements.length; ++j) {
+            //
+			// 	var m = measurements[j];
+            //
+			// 	var d = Math.sqrt(m.position.x);
+			// 	var dE = Math.sqrt(m.covariance.x.x);
+            //
+			// 	context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", ball.circle.centre.x, ball.circle.centre.y+j*15);
+			// }
 		}
 	},
 	drawLines: function (lines) {

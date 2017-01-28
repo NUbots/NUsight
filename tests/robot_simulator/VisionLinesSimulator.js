@@ -4,7 +4,7 @@ var RobotSimulator = require('./RobotSimulator');
 function VisionLinesSimulator () {
 	RobotSimulator.call(this);
 
-	this.loadProto('message.vision.VisionObjects');
+	this.loadProto('message.vision.NUsightLines');
 }
 util.inherits(VisionLinesSimulator, RobotSimulator);
 

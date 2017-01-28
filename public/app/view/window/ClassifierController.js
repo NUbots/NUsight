@@ -374,8 +374,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setMagicWandColours([]);
 		this.lutDiffs = [];
 		this.onLookUpTableDiffBatch = this.onLookUpTableDiffBatch.bind(this);
-
-		console.log(this.Format);
 	},
 	onEsc: function () {
 		this.selectionRenderer.updateTolerance(-1);
