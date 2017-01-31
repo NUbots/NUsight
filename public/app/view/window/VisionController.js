@@ -457,50 +457,49 @@ Ext.define('NU.view.window.VisionController', {
         var refinedPixels = refinedData.data;
         var pixels;
 
-        var segments = image.getSegment();
+        var segments = image.getVerticalSegments();
 
         for (var i = 0; i < segments.length; i++) {
             var segment = segments[i];
             var colour = this.segmentColourToRGB(segment.colour);
 
-            if (segment.start.x === segment.end.x) {
+            var x = segment.start.x;
 
-                var x = segment.start.x;
+            // vertical lines
+            for (var y = segment.start.y; y <= segment.end.y; y++)
+            {
+                var subsample = (y - segment.start.y) % segment.subsample === 0 ? 1 : 0.7;
 
-                // vertical lines
-                for (var y = segment.start.y; y <= segment.end.y; y++)
-                {
-                    var subsample = (y - segment.start.y) % segment.subsample === 0 ? 1 : 0.7;
+                // Pick which layer to draw to
+                pixels = segment.subsample === 1 ? refinedPixels : searchPixels;
 
-                    // Pick which layer to draw to
-                    pixels = segment.subsample === 1 ? refinedPixels : searchPixels;
-
-                    pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
-                    pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
-                    pixels[4 * (width * y + x) + 2] = colour[2] * subsample;
-                    pixels[4 * (width * y + x) + 3] = colour[3];
-                }
-
-            } else if (segment.start.y === segment.end.y) {
-
-                var y = segment.start.y;
-
-                // horizontal lines
-                for (var x = segment.start.x; x <= segment.end.x; x++)
-                {
-                    var subsample = (x - segment.start.x) % segment.subsample === 0 ? 1 : 0.7;
-
-                    // Pick which layer to draw to
-                    pixels = segment.subsample === 1 ? refinedPixels : searchPixels;
-
-                    pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
-                    pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
-                    pixels[4 * (width * y + x) + 2] = colour[2] * subsample;
-                    pixels[4 * (width * y + x) + 3] = colour[3];
-                }
+                pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
+                pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
+                pixels[4 * (width * y + x) + 2] = colour[2] * subsample;
+                pixels[4 * (width * y + x) + 3] = colour[3];
             }
-            else {
-                console.log('unsupported diagonal classified image segment');
+        }
+
+        var segments = image.getHorizontalSegments();
+
+        for (var i = 0; i < segments.length; i++) {
+            var segment = segments[i];
+            var colour = this.segmentColourToRGB(segment.colour);
+
+            var y = segment.start.y;
+
+            // horizontal lines
+            for (var x = segment.start.x; x <= segment.end.x; x++)
+            {
+                var subsample = (x - segment.start.x) % segment.subsample === 0 ? 1 : 0.7;
+
+                // Pick which layer to draw to
+                pixels = segment.subsample === 1 ? refinedPixels : searchPixels;
+
+                pixels[4 * (width * y + x) + 0] = colour[0] * subsample;
+                pixels[4 * (width * y + x) + 1] = colour[1] * subsample;
+                pixels[4 * (width * y + x) + 2] = colour[2] * subsample;
+                pixels[4 * (width * y + x) + 3] = colour[3];
             }
         }
 
