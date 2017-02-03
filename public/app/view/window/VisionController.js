@@ -375,7 +375,7 @@ Ext.define('NU.view.window.VisionController', {
     drawImageBayer: function(image) {
         var width = this.getWidth();
         var height = this.getHeight();
-        var data = new Uint8Array(image.data);
+        var data = new Uint8Array(image.data.toArrayBuffer());
         this.imageRenderer.resize(width, height);
 		this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
 		this.imageRenderer.updateUniform('imageFormat', image.format);
