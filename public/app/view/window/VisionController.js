@@ -375,18 +375,19 @@ Ext.define('NU.view.window.VisionController', {
     drawImageBayer: function(image) {
         var width = this.getWidth();
         var height = this.getHeight();
-        var data = new Uint8Array(image.data.toArrayBuffer());
+        var data = new Uint8Array(image.data);
         this.imageRenderer.resize(width, height);
 		this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
 		this.imageRenderer.updateUniform('imageFormat', image.format);
 		this.imageRenderer.updateUniform('imageWidth', width);
 		this.imageRenderer.updateUniform('imageHeight', height);
-        this.imageRenderer.updateUniform('sourceSize', new THREE.Vector4(width, height, 1 / width, 1 / height));
+        this.imageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
+
 		this.imageDiffRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
 		this.imageDiffRenderer.updateUniform('imageFormat', image.format);
 		this.imageDiffRenderer.updateUniform('imageWidth', width);
 		this.imageDiffRenderer.updateUniform('imageHeight', height);
-        //this.imageDiffRenderer.updateUniform('sourceSize', new THREE.Vector4(width, height, 1 / width, 1 / height));
+		this.imageDiffRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 
         var Format = {
             GRBG: 0x47425247,
@@ -402,22 +403,24 @@ Ext.define('NU.view.window.VisionController', {
             GB16: 0x36314247,
             BG16: 0x36314742
         };
+
 		if(image.format == Format.GRBG) {
-            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2((1 / width), 0));
-            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2((1 / width), 0));
+            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+			this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
 		}else if(image.format == Format.RGGB) {
             this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
         }else if(image.format == Format.GBRG) {
-            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , (1 / height)));
-            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0 , (1 / height)));
+            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
+            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
         }else if(image.format == Format.BGGR) {
-            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2((1 / width), (1 / height)));
-            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2((1 / width), (1 / height)));
+            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
+            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
         } else {
             this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-            //this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+			this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
         }
+
 		this.imageRenderer.render();
 		this.imageDiffRenderer.render();
 	},

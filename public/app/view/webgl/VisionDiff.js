@@ -6,7 +6,9 @@ Ext.define('NU.view.webgl.VisionDiff', {
 				rawImage: {type: 't'},
 				imageWidth: {type: 'i'},
 				imageHeight: {type: 'i'},
-				imageFormat: {type: 'i'}
+				imageFormat: {type: 'i'},
+				resolution: {type: 'v2'},
+				firstRed: {type: 'v2'}
 			}
 		});
 
