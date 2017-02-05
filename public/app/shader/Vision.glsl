@@ -196,34 +196,35 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 }
 
 vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec2 center, vec2 resolution, vec2 firstRed) {
+    #define fetch(x, y) texture2D(rawImage, vec2(x, y)).r
+
     float value = colour.r;
     float pixelX = 1.0 / resolution.x;
     float pixelY = 1.0 / resolution.y;
 
-    int x = int(center.x / pixelX) - 1;
-    int y = int(center.y / pixelY);
+    int x = int(floor(center.x / pixelX));
+    int y = int(floor(center.y / pixelY));
     vec4 result = vec4(0, 0, 0, 1);
 
-
     if(mod(float(x), 2.0) == (firstRed.x)) {
-        if(mod(float(y), 2.0) == firstRed.y) { //r
-            result.r = value;
-            //get g average
-            //get b average
-        }else { //g
+        if(mod(float(y), 2.0) == firstRed.y) {
             result.g = value;
-            //get r average
-            //get b average
+            result.r = (fetch(center.x, center.y - pixelY) + fetch(center.x, center.y + pixelY)) / 2.0;
+            result.b = (fetch(center.x - pixelX, center.y) + fetch(center.x + pixelX, center.y)) / 2.0;
+        }else {
+            result.r = value;
+            result.b = (fetch(center.x - pixelX, center.y - pixelY) + fetch(center.x + pixelX, center.y - pixelY) + fetch(center.x - pixelX, center.y + pixelY) + fetch(center.x + pixelX, center.y + pixelY)) / 4.0;
+            result.g = (fetch(center.x - pixelX, center.y) + fetch(center.x + pixelX, center.y) + fetch(center.x, center.y - pixelY) + fetch(center.x, center.y + pixelY)) / 4.0;
         }
     }else {
-        if(mod(float(y), 2.0) == firstRed.y) { //g
-            result.g = value;
-            //get r average
-            //get b average
-        }else { //b
+        if(mod(float(y), 2.0) == firstRed.y) {
             result.b = value;
-            //get r average
-            //get g average
+            result.r = (fetch(center.x - pixelX, center.y - pixelY) + fetch(center.x + pixelX, center.y - pixelY) + fetch(center.x - pixelX, center.y + pixelY) + fetch(center.x + pixelX, center.y + pixelY)) / 4.0;
+            result.g = (fetch(center.x - pixelX, center.y) + fetch(center.x + pixelX, center.y) + fetch(center.x, center.y - pixelY) + fetch(center.x, center.y + pixelY)) / 4.0;
+        }else {
+            result.g = value;
+            result.r = (fetch(center.x, center.y - pixelY) + fetch(center.x, center.y + pixelY)) / 2.0;
+            result.b = (fetch(center.x - pixelX, center.y) + fetch(center.x + pixelX, center.y)) / 2.0;
         }
     }
 
