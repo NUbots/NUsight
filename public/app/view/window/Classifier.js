@@ -59,11 +59,6 @@ Ext.define('NU.view.window.Classifier', {
 				click: 'onUpload'
 			}
 		}, {
-			text: 'Upload & Save',
-			listeners: {
-				click: 'onUploadSave'
-			}
-		}, {
 			text: 'Refresh',
 			listeners: {
 				click: 'onRefresh'

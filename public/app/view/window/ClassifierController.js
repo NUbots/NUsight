@@ -259,12 +259,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.upload();
 	},
 	/**
-	 * Callback when the save button is clicked
-	 */
-	onUploadSave: function () {
-		this.upload(true);
-	},
-	/**
 	 * Callback when the refresh button is clicked
 	 */
 	onRefresh: function () {
@@ -586,14 +580,12 @@ Ext.define('NU.view.window.ClassifierController', {
 	download: function () {
 		NU.Network.sendCommand("download_lut", this.getRobotId());
 	},
-	upload: function (save) {
-		save = !!save; // convert to bool
+	upload: function () {
 		var lookupTable = new API.message.vision.LookUpTable();
 		lookupTable.setTable(this.getLookup().buffer);
 		lookupTable.setBitsY(this.self.LutBitsPerColorY);
 		lookupTable.setBitsCb(this.self.LutBitsPerColorCb);
 		lookupTable.setBitsCr(this.self.LutBitsPerColorCr);
-		lookupTable.setSave(save);
 		NU.Network.send(lookupTable, this.getRobotId(), true);
 	},
 	getLUTIndex: function (ycbcr) {
