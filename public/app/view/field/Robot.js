@@ -24,7 +24,7 @@ Ext.define('NU.view.field.Robot', {
 		this.callParent(arguments);
 		var newRobot;
 		if(this.getRobotId().toLowerCase().includes('igus')) {
-            newRobot = this.createIgusModel();
+            newRobot = this.createDarwinModel(); // this.createIgusModel();
 		}else {
 			newRobot = this.createDarwinModel();
 		}
