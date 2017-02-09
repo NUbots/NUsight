@@ -12,7 +12,9 @@ Ext.define('NU.view.webgl.Classifier', {
 				rawUnderlayOpacity: {type: 'f', value: 0.5},
 				bitsR: {type: 'f', value: 6},
 				bitsG: {type: 'f', value: 6},
-				bitsB: {type: 'f', value: 6}
+				bitsB: {type: 'f', value: 6},
+				resolution: {type: 'v2', value: new THREE.Vector2(1280, 1024)},
+				firstRed: {type: 'v2', value: new THREE.Vector2(0, 0)}
 			}
 		});
 

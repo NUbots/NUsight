@@ -228,7 +228,5 @@ vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec2 center, vec2 resolution, v
         }
     }
 
-
-
     return result;
 }

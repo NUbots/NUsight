@@ -1191,12 +1191,67 @@ Ext.define('NU.view.window.ClassifierController', {
 			case this.Format.YM24:
 				this.drawImageYbCr444(image, callback, thisArg);
 				break;
-            case Format.UYVY:
+            case this.Format.UYVY:
                 this.drawImageY422(image, callback, thisArg);
                 break;
+			case this.Format.GRBG:
+				this.drawImageBayer(image, callback, thisArg);
+				break;
+			case this.Format.RGGB:
+				this.drawImageBayer(image, callback, thisArg);
+				break;
+			case this.Format.GBRG:
+				this.drawImageBayer(image, callback, thisArg);
+				break;
+			case this.Format.BGGR:
+				this.drawImageBayer(image, callback, thisArg);
+				break;
 			default:
+				console.log('Format: ', image.format);
 				throw 'Unsupported Format';
 		}
+	},
+	drawImageBayer: function (image) {
+		var width = this.getImageWidth();
+		var height = this.getImageHeight();
+		var data = new Uint8Array(image.data.toArrayBuffer());
+		var bytesPerPixel = 2;
+
+		var renderers = [this.rawImageRenderer, this.classifiedRenderer, this.selectionRenderer];
+		for (var i = 0, len = renderers.length; i < len; i++) {
+			var renderer = renderers[i];
+			renderer.resize(width, height);
+			renderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
+			renderer.updateUniform('imageFormat', image.format);
+			renderer.updateUniform('imageWidth', width);
+			renderer.updateUniform('imageHeight', height);
+			renderer.render();
+		}
+
+		this.rawImageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
+		this.classifiedRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
+
+		if(image.format == Format.GRBG) {
+			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+		}else if(image.format == Format.RGGB) {
+			console.log('test');
+			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+		}else if(image.format == Format.GBRG) {
+			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
+			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
+		}else if(image.format == Format.BGGR) {
+			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
+			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
+		} else {
+			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+		}
+
+		this.selectionClassifier.resize(width, height);
+		this.selectionClassifier.updateRawImage(this.Format.YUYV, data, width, height, THREE.LuminanceFormat);
+		this.setRawImageComponents(data);
 	},
 	drawImageYbCr422: function (image) {
 		var width = this.getImageWidth();

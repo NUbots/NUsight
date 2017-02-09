@@ -7,8 +7,8 @@ Ext.define('NU.view.webgl.Vision', {
 				imageWidth: {type: 'i'},
 				imageHeight: {type: 'i'},
 				imageFormat: {type: 'i'},
-				resolution: {type: 'v2'},
-				firstRed: {type: 'v2'}
+				resolution: {type: 'v2', value: new THREE.Vector2(1280, 1024)},
+				firstRed: {type: 'v2', value: new THREE.Vector2(0, 0)}
 			}
 		});
 

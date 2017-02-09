@@ -28,6 +28,9 @@ uniform sampler2D rawImage;
 uniform int imageFormat;
 uniform int imageWidth;
 uniform int imageHeight;
+uniform vec2 resolution;
+uniform vec2 firstRed;
+
 /**
  * The raw underlay opacity percentage ranging between 0-1
  */
@@ -56,8 +59,22 @@ void main() {
 	float classification = classify(rawColour, lut, lutSize, bitsR, bitsG, bitsB);
 
 	if (classification == T_UNCLASSIFIED) {
-		// if fragment is not classified, display image (in RGB)
-		gl_FragColor = YCbCrToRGB(rawColour) * rawUnderlayOpacity;
+        // convert into RGBA colour
+        if (imageFormat == FORMAT_YUYV) {
+            gl_FragColor = YCbCrToRGB(rawColour) * rawUnderlayOpacity;
+        } else if (imageFormat == FORMAT_YM24) {
+            gl_FragColor = YCbCrToRGB(rawColour) * rawUnderlayOpacity;
+        } else if(imageFormat == FORMAT_JPEG) {
+            gl_FragColor = YCbCrToRGB(rawColour) * rawUnderlayOpacity;
+        } else if(imageFormat == FORMAT_UYVY) {
+            gl_FragColor = YCbCrToRGB(rawColour) * rawUnderlayOpacity;
+        } else if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
+            gl_FragColor = bayerToRGB(rawImage, rawColour, center, resolution, firstRed) * rawUnderlayOpacity;
+        } else if(imageFormat == FORMAT_RGB3) {
+            gl_FragColor = rawColour * rawUnderlayOpacity;
+        } else {
+            gl_FragColor = rawColour * rawUnderlayOpacity;
+        }
 	} else {
 		// convert classification into RGBA colour
 		gl_FragColor = getColour(classification);
