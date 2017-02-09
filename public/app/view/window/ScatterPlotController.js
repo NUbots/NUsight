@@ -8,6 +8,10 @@ Ext.define('NU.view.window.ScatterPlotController', {
         divID: null,
         nextTraceID: 0,
         maxPoints: 100,
+        intervalId: null,
+        graphUpdateX: {},
+        graphUpdateY: {},
+        graphUpdateZ: {},
         yMin: null,
         yMax: null,
         xMin: null,
@@ -29,6 +33,29 @@ Ext.define('NU.view.window.ScatterPlotController', {
         this.setTraceID([]);
         this.setPause(false);
         this.addEvents();
+        var me = this;
+
+        //redraw the graph at 60 fps
+        this.setIntervalId(setInterval(function() {
+            if(!me.getPause() && Object.keys(me.getGraphUpdateX()).length > 0) {
+
+                //x = [ [trace 1 x values], [trace 2 x values], ... ]
+                var update = {
+                    x: Object.values(me.getGraphUpdateX()),
+                    y: Object.values(me.getGraphUpdateY()),
+                    z: Object.values(me.getGraphUpdateZ())
+                }
+
+                //extend the graph
+                Plotly.extendTraces(me.getDivID(), update, Object.keys(me.getGraphUpdateX()).map(Number), me.getMaxPoints());
+
+                //reset the values to update the graph
+                me.setGraphUpdateX({});
+                me.setGraphUpdateY({});
+                me.setGraphUpdateZ({});
+            }
+        }, 1000 / 60));
+
     },
 
     addEvents: function () {
@@ -61,6 +88,12 @@ Ext.define('NU.view.window.ScatterPlotController', {
         };
 
         Plotly.newPlot(divName, data, layout);
+    },
+
+    onClose: function() {
+        if(this.getIntervalId() != null) {
+            clearInterval(this.getIntervalId());
+        }
     },
 
     onYMinChange: function (field, newValue, oldValue, eOpts) {
@@ -332,22 +365,52 @@ Ext.define('NU.view.window.ScatterPlotController', {
                         //for now just increase by 1
                         trace.xVal += 1;
 
-                        update = {
-                            x: [[trace.xVal]],
-                            y: [[values[trace.yLocation]]],
-                            z: [[(trace.zLocation == -1) ? 0 : values[trace.yLocation]]]
-                        };
-                        Plotly.extendTraces(this.getDivID(), update, [trace.id], this.getMaxPoints());
+                        // update = {
+                        //     x: [[trace.xVal]],
+                        //     y: [[values[trace.yLocation]]],
+                        //     z: [[(trace.zLocation == -1) ? 0 : values[trace.yLocation]]]
+                        // };
+                        if(this.getGraphUpdateX()[trace.id] == null) {
+                            this.getGraphUpdateX()[trace.id] = [trace.xVal];
+                        } else {
+                            this.getGraphUpdateX()[trace.id].push(trace.xVal);
+                        }
+                        if(this.getGraphUpdateY()[trace.id] == null) {
+                            this.getGraphUpdateY()[trace.id] = [values[trace.yLocation]];
+                        } else {
+                            this.getGraphUpdateY()[trace.id].push(values[trace.yLocation]);
+                        }
+                        if(this.getGraphUpdateZ()[trace.id] == null) {
+                            this.getGraphUpdateZ()[trace.id] = [(trace.zLocation == -1) ? 0 : values[trace.yLocation]];
+                        } else {
+                            this.getGraphUpdateZ()[trace.id].push((trace.zLocation == -1) ? 0 : values[trace.yLocation]);
+                        }
+                        //Plotly.extendTraces(this.getDivID(), update, [trace.id], this.getMaxPoints());
                     } else {
                         var x = values[trace.xLocation];
                         var y = values[trace.yLocation];
                         if (x !== null && y !== null) {
-                            update = {
-                                x: [[x]],
-                                y: [[y]],
-                                z: [[(trace.zLocation == -1) ? 0 : values[trace.yLocation]]]
-                            };
-                            Plotly.extendTraces(this.getDivID(), update, [trace.id], this.getMaxPoints());
+                            // update = {
+                            //     x: [[x]],
+                            //     y: [[y]],
+                            //     z: [[(trace.zLocation == -1) ? 0 : values[trace.yLocation]]]
+                            // };
+                            if(this.getGraphUpdateX()[trace.id] == null) {
+                                this.getGraphUpdateX()[trace.id] = [x];
+                            } else {
+                                this.getGraphUpdateX()[trace.id].push(x);
+                            }
+                            if(this.getGraphUpdateY()[trace.id] == null) {
+                                this.getGraphUpdateY()[trace.id] = [y];
+                            } else {
+                                this.getGraphUpdateY()[trace.id].push(y);
+                            }
+                            if(this.getGraphUpdateZ()[trace.id] == null) {
+                                this.getGraphUpdateZ()[trace.id] = [(trace.zLocation == -1) ? 0 : values[trace.yLocation]];
+                            } else {
+                                this.getGraphUpdateZ()[trace.id].push((trace.zLocation == -1) ? 0 : values[trace.yLocation]);
+                            }
+                            //Plotly.extendTraces(this.getDivID(), update, [trace.id], this.getMaxPoints());
                         }
                     }
                 }
@@ -423,7 +486,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 symbolType: symbol[1]
             });
         });
-        
+
         //get the toolbar for the window and add our menu
         //scatterPlotWindow.down('toolbar').add({
 
