@@ -121,7 +121,11 @@ Ext.define('NU.view.window.VisionController', {
 		this.localisationRobots = robots;
 		for(var i = 0; i < robots.length; i++) {
 			if(robots[i].robotId == this.getRobotId()) {
-				this.localisationRenderer.camera = robots[i].darwinModels[0].object.camera.children[0];
+				if(robots[i].robotModels[0].object.camera == null) {
+					return;
+				}
+
+				this.localisationRenderer.camera = robots[i].robotModels[0].object.camera.children[0];
 				this.localisationRenderer.scene = scene;
 				break;
 			}
