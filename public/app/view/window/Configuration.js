@@ -5,10 +5,9 @@ Ext.define('NU.view.window.Configuration', {
     extend : 'NU.view.window.Display',
     alias: 'widget.nu_configuration_window',
     requires: [
-        'NU.view.column.Widget',
-        'NU.view.factory.Widget',
         'NU.view.window.ConfigurationViewModel',
-        'NU.view.window.ConfigurationController'
+        'NU.view.window.ConfigurationController',
+        'Ext.layout.container.Column'
     ],
     viewModel: {
         type: 'Configuration'
@@ -17,78 +16,44 @@ Ext.define('NU.view.window.Configuration', {
     title: 'Configuration',
     width: 1000,
     height: 550,
-    listeners: {
-        close: 'onClose'
-    },
-    tbar: [{
-        xtype: 'robot_selector',
-        listeners: {
-            selectRobot: 'onSelectRobot'
-        }
-    }, {
-        xtype: 'component',
-        reference: 'currentMode',
-        tpl: '<strong>Current mode: </strong> {name}',
-        flex: 2,
-        listeners: {
-            afterRender: 'onCurrentModeAfterRender'
-        }
-    }, {
-        xtype: 'button',
-        reference: 'save',
-        text: 'Save',
-        handler: 'onSave',
-        flex: 0.5,
-        listeners: {
-            afterRender: 'onSaveAfterRender'
-        }
-    }, {
-        xtype: 'button',
-        reference: 'live',
-        text: 'Live',
-        enableToggle: true,
-        flex: 1,
-        toggleHandler: 'onToggleMode',
-        listeners: {
-            afterRender: 'onLiveAfterRender'
-        }
-    }],
-    items: [{
-        xtype: 'treepanel',
-        reference: 'configurations',
-        referenceHolder: true,
-        bind: {
-            store: '{tree}'
-        },
-        title: 'Robot Configurations',
-        autoLoad: true,
-        rootVisible: false,
-        rowLines: true,
-        columnLines: true,
-        viewConfig: {
-            stripeRows: true
-        },
-        tools: [{
-            type: 'refresh',
-            handler: 'onRefresh'
-        }],
-        columns: [{
-            xtype: 'treecolumn',
-            text: 'Path',
-            dataIndex: 'name',
-            sortable: false,
-            flex: 1
-        }, {
-            xtype: 'widgetColumn',
-            text: 'Configurations',
-            widget: {
-                xtype: 'factoryWidget'
-            },
-            sortable: false,
+    tbar: [
+        {
+            xtype: 'robot_selector',
             listeners: {
-                updateWidget: 'onUpdateWidget'
+                selectRobot: 'onSelectRobot'
+            }
+        }
+    ],
+    items: [
+        {
+            xtype: 'panel',
+            layout: {
+                type: 'hbox',
+                pack: 'start',
+                align: 'stretch'
             },
-            flex: 1
-        }]
-    }]
+            height: '100%',
+            width: '100%',
+            bodyStyle: {
+                'border-top': '1px solid #999!important'
+            },
+            items: [
+                {
+                    xtype: 'panel',
+                    height: '100%',
+                    width: '30%',
+                    reference: 'filesPanel',
+                    bodyStyle: {
+                        'border-right': '1px solid #999!important'
+                    }
+                },
+                {
+                    xtype: 'panel',
+                    height: '100%',
+                    width: '70%',
+                    reference: 'editPanel'
+                }
+            ]
+        }
+    ]
 });
