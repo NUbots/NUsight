@@ -183,7 +183,8 @@ Ext.define('NU.util.Network', {
 		}
 	},
 
-	send: function (message, target, reliable) {
+	send: function (message, target, reliable, messageType) {
+		messageType = messageType || message.$type.toString().substr(1);
 
 		// Shunt up our types
 		if(typeof target === 'boolean') {
@@ -191,7 +192,7 @@ Ext.define('NU.util.Network', {
 			target = undefined;
 		}
 
-		this.socket.emit('message', message.$type.toString().substr(1), message.toArrayBuffer(), target, reliable);
+		this.socket.emit('message', messageType, message.toArrayBuffer(), target, reliable);
 	},
 
 	getRobotStore: function () {
@@ -210,5 +211,20 @@ Ext.define('NU.util.Network', {
 		msg.setCommand(command);
 
 		this.send(msg, target, true);
+	},
+
+	/**
+	 * Creates a command message with the NUSight<> wrapper to send over the network.
+	 *
+	 * @param command The name of the command.
+	 * @param target The id of the robot associated with the command.
+	 */
+	sendNusightCommand: function (command, target) {
+		var message = new API.message.support.nubugger.Command();
+		message.setCommand(command);
+
+		var messageType = 'NUsight<' + message.$type.toString().substr(1) + '>';
+
+		this.send(message, target, true, messageType);
 	}
 });
