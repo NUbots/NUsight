@@ -1,17 +1,31 @@
 var ProtoBuf = require('protobufjs');
 var NUClearNet = require('nuclearnet.js');
 var ref = require('ref');
+var path = require('path');
 
 function RobotSimulator (opts) {
 	opts = opts || {};
 	this.net = opts.net || new NUClearNet(this.constructor.name, '239.226.152.162', 7447);
 	this.protoBuilder = opts.protoBuilder || ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
+
+	// A map of message types to callback functions which will be called
+	// when a message of the type is received
+	this.listenerCallbacks = {};
+
+	// Holds the proto messages that have been loaded, to be used
+	// for decoding messages
+	this.protos = {};
 }
 
 RobotSimulator.prototype.loadProto = function (protocolBuffer) {
+	// Return the proto message if it has already been loaded
+	if (this.protos[protocolBuffer]) {
+		return this.protos[protocolBuffer];
+	}
+
 	// Load the protocol buffer file and build it
 	ProtoBuf.loadProtoFile({
-		root: '../../public/resources/js/proto',
+		root: path.join(__dirname, '../../public/resources/js/proto'),
 		file: protocolBuffer.replace(/\./g, '/') + '.proto'
 	}, this.protoBuilder);
 
@@ -20,8 +34,22 @@ RobotSimulator.prototype.loadProto = function (protocolBuffer) {
 	// Update our API
 	this.API = this.protoBuilder.build();
 
+	// Store the loaded proto message, which will be used for decoding
+	this.protos[protocolBuffer] = proto;
+
 	return proto;
-}
+};
+
+RobotSimulator.prototype.decodeProto = function (messageType, data) {
+	try {
+		return this.protos[messageType].decode(data);
+	} catch (error) {
+		console.error('Error decoding the proto message', messageType, '\n', error);
+
+		// Quit the process, as this is considered a fatal error
+		process.exit();
+	}
+};
 
 RobotSimulator.prototype.randFloat =  function (min, max) {
 	return Math.random() * (max - min) + min;
@@ -83,7 +111,6 @@ RobotSimulator.prototype.getLUTIndex = function (ycbcr, bitsY, bitsCb, bitsCr) {
 };
 
 RobotSimulator.prototype.sendMessage = function (message, reliable) {
-
 	// Our message type
 	var messageType = 'NUsight<' + message.$type.toString().substr(1) + '>';
 
@@ -93,6 +120,24 @@ RobotSimulator.prototype.sendMessage = function (message, reliable) {
 	header.writeUInt64LE(Date.now(), 1)
 
 	this.net.send(messageType, Buffer.concat([header, message.toBuffer()]), 'nusight', reliable);
+};
+
+RobotSimulator.prototype.onMessage = function (messageType, callback) {
+	var callbacks = Array.isArray(this.listenerCallbacks[messageType]) ? this.listenerCallbacks[messageType] : [];
+	var isFirstListener = callbacks.length === 0;
+
+	callbacks.push(callback);
+	this.listenerCallbacks[messageType] = callbacks;
+
+	if (isFirstListener) {
+		this.net.on('NUsight<' + messageType + '>', function (source, data) {
+			var decodedMessage = this.decodeProto(messageType, data);
+
+			this.listenerCallbacks[messageType].forEach(function (callback) {
+				callback(decodedMessage);
+			});
+		}.bind(this));
+	}
 };
 
 RobotSimulator.prototype.run = function () {};
