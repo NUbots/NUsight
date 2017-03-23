@@ -201,7 +201,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		cameraImage: function (get) {
 			var lastCameraImage = get('lastCameraImage');
-			return lastCameraImage ? ((Date.now() - lastCameraImage.toNumber()) / 1000).toFixed(2) : 'Not seen';
+			return lastCameraImage ? ((Date.now() - (lastCameraImage.getNanos() / 1000000)) / 1000).toFixed(2) : 'Not seen';
 		},
 		lastCameraBackground: function (get) {
 			if (get('lastCameraImage') === null) {
@@ -215,7 +215,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		lastBall: function (get) {
 			var lastSeenBall = get('lastSeenBall');
-			return lastSeenBall ? ((Date.now() - lastSeenBall.toNumber()) / 1000).toFixed(2) : 'Not seen';
+			return lastSeenBall ? ((Date.now() - (lastSeenBall.getNanos() / 1000000)) / 1000).toFixed(2) : 'Not seen';
 		},
 		lastBallBackground: function (get) {
 			if (get('lastSeenBall') === null) {
@@ -229,7 +229,7 @@ Ext.define('NU.view.dashboard.panel.DashboardPanelViewModel', {
 		},
 		lastGoal: function (get) {
 			var lastSeenGoal = get('lastSeenGoal');
-			return lastSeenGoal ? ((Date.now() - lastSeenGoal.toNumber()) / 1000).toFixed(2) : 'Not seen';
+			return lastSeenGoal ? ((Date.now() - (lastSeenGoal.getNanos() / 1000000)) / 1000).toFixed(2) : 'Not seen';
 		},
 		lastGoalBackground: function (get) {
 			if (get('lastSeenGoal') === null) {
