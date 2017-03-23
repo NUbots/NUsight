@@ -1,16 +1,21 @@
 var util = require('util');
 var RobotSimulator = require('./RobotSimulator');
+var ConfigurationUtil = require('../../public/app/util/Configuration');
 
 var sampleFileWalkEngine = {
 	value: {
 		name: {
-			value: 'x',
-			tag: '<Slider(0,1,0.1)>'
+			value: 'ConfigurationRobot'
 		},
-		age: {
-			value: 23
+		positionX: {
+			value: 0,
+			tag: '<Slider(-10,10,1)>'
 		},
-		color: {
+		positionY: {
+			value: 0,
+			tag: '<Slider(-10,10,1)>'
+		},
+		areaColor: {
 			value: {
 				r: {
 					value: '255'
@@ -25,8 +30,8 @@ var sampleFileWalkEngine = {
 		},
 		locations: {
 			value: [
-				{ value: 'Home'},
-				{ value: 'Work'}
+				{ value: 'Home' },
+				{ value: 'Work' }
 			]
 		}
 	}
@@ -95,6 +100,8 @@ function ConfigurationSimulator () {
 util.inherits(ConfigurationSimulator, RobotSimulator);
 
 ConfigurationSimulator.prototype.sendConfiguration = function () {
+	console.log(sampleConfig);
+
 	var message = new this.API.message.support.nubugger.Configuration(sampleConfig);
 	this.sendMessage(message);
 
@@ -116,96 +123,9 @@ function encodeConfig(files) {
 	return files.map(function (file) {
 		return {
 			path: file.path,
-			content: encodeField(file.content)
+			content: ConfigurationUtil.encodeField(file.content)
 		};
 	});
-}
-
-/**
- * Convert the field to be compatible with the Configuration protobuf message
- *
- * @param  {Object} field 	The field to convert
- * @param  {String} name    The name (key) of the field
- * @return {Object}
- */
-function encodeField(field, name) {
-    var value = field.value;
-    var tag = field.tag;
-
-	if (typeof value === undefined || value === null) {
-		return wrapField({ tag: tag, nullValue: 0 }, name);
-	}
-
-    if (typeof value === 'string') {
-        return wrapField({ tag: tag, stringValue: value }, name);
-    }
-
-    if (typeof value === 'number') {
-        return wrapField({ tag: tag, numberValue: value}, name);
-    }
-
-    if (typeof value === 'boolean') {
-        return wrapField({ tag: tag, boolValue: value }, name);
-    }
-
-	if (Array.isArray(value)) {
-		var encoded = {
-            tag: tag,
-            listValue: {
-            	values: value.map(function(value) {
-	            	return encodeField(value)
-	            })
-            }
-        };
-
-		return wrapField(encoded, name);
-	}
-
-    if (isObject(value)) {
-        var encoded = {
-            mapValue: {
-                fields: {}
-            }
-        };
-
-        for (var subfield in value) {
-            encoded.mapValue.fields[subfield] = encodeField(value[subfield], subfield)[subfield];
-        }
-
-        return wrapField(encoded, name);
-    }
-
-    return 'LOL';
-};
-
-/**
- * Check if the given JS value is an object
- *
- * @param  {Any}  value 	The value to check
- * @return {Boolean}
- */
-function isObject(value) {
-	return typeof value === 'object' &&
-		value &&
-		Object.prototype.toString.call(value) !== '[object Array]'
-}
-
-/**
- * Create an object with the given field nested in the given name
- *
- * @param  {Object} field   The field to wrap
- * @param  {[type]} name    The name (key) to nest the field in
- * @return {Object}
- */
-function wrapField(field, name) {
-	if (!name) {
-		return field;
-	}
-
-	var wrapper = {};
-	wrapper[name] = field;
-
-	return wrapper;
 }
 
 if (require.main === module) {

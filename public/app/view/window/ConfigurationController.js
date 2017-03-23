@@ -5,7 +5,10 @@ Ext.define('NU.view.window.ConfigurationController', {
     extend: 'NU.view.window.DisplayController',
     alias: 'controller.Configuration',
     requires: [
-        'NU.util.DeepMerge'
+        'NU.util.Helper',
+        'NU.util.Configuration',
+        'Ext.form.Panel',
+        'Ext.tree.Panel'
     ],
 
     init: function () {
@@ -46,8 +49,8 @@ Ext.define('NU.view.window.ConfigurationController', {
     },
 
     /**
-     * Process and render the list of configuration files when
-     * a configuration message is received from a robot.
+     * Process and render the list of configuration files when a configuration
+     * message is received from a robot.
      */
     onConfiguration(source, message) {
         this.fileTree = this.createFileTree(message.files);
@@ -70,7 +73,13 @@ Ext.define('NU.view.window.ConfigurationController', {
             return this.createFileNode(file.path.split('/'), file.content, file.path);
         }.bind(this));
 
-        return NU.util.DeepMerge.merge({}, files);
+        var tree = {};
+
+        files.forEach(function (file) {
+            NU.util.Helper.deepMerge(tree, file);
+        });
+
+        return tree;
     },
 
     /**
@@ -115,7 +124,7 @@ Ext.define('NU.view.window.ConfigurationController', {
                 text: firstSegment,
                 leaf: true,
                 data: {
-                    content: decodeField(data),
+                    content: NU.util.Configuration.decodeField(data),
                     path: path
                 }
             };
@@ -142,79 +151,131 @@ Ext.define('NU.view.window.ConfigurationController', {
                     text: 'config/',
                     expanded: true,
                     children: fileTree
+                },
+                listeners:{
+                    itemclick: function(node, record, el, index) {
+                        this.renderFile(record);
+                    }.bind(this)
                 }
             })
         );
-    }
-});
+    },
 
-/**
- * Recursively convert a field in the Configuration protobuf message to a simpler
- * JSON format with less nesting and no unnecessary fields
- *
- * @param  {Object} field   The field to convert
- * @param  {String} name    The name (key) of the field to convert. When given, the decoded field
- *                          object is wrapped inside this key
- * @return {Object}
- */
-function decodeField(field, name) {
-    if (field.kind === 'nullValue') {
-        return wrapField({ value: null, tag: field.tag }, name);
-    }
-
-    if (field.kind === 'stringValue') {
-        return wrapField({ value: field.stringValue, tag: field.tag }, name);
-    }
-
-    if (field.kind === 'numberValue') {
-        return wrapField({ value: field.numberValue, tag: field.tag }, name);
-    }
-
-    if (field.kind === 'boolValue') {
-        return wrapField({ value: field.boolValue, tag: field.tag }, name);
-    }
-
-    if (field.kind === 'listValue') {
-        var decoded = {
-            tag: field.tag,
-            value: field.listValue.values.map(function(value) {
-                return decodeField(value);
-            })
-        };
-
-        return wrapField(decoded, name);
-    }
-
-    if (field.kind === 'mapValue') {
-        var fields = field.mapValue.fields.map;
-        var decoded = {
-            value: {}
-        };
-
-        for (var subfield in fields) {
-            decoded.value[subfield] = decodeField(fields[subfield].value);
+    /**
+     * Render the contents of the given file node as editable input fields
+     *
+     * @param  {Object} node    The file node from the files tree
+     */
+    renderFile(node) {
+        if (node.data.text.endsWith('/')) {
+            return;
         }
 
-        return wrapField(decoded, name);
+        var file = node.data.data;
+        var fields = file.content.value;
+        var inputs = [];
+
+        for (field in fields) {
+            inputs = inputs.concat(this.fieldToInput(fields[field], file.path + '@' + field))
+        }
+
+        this.refs.editPanel.removeAll();
+        this.refs.editPanel.add(
+            Ext.create('Ext.form.Panel', {
+                title: file.path,
+                width: '100%',
+                height: '100%',
+                bodyPadding: '16px',
+                items: inputs
+            })
+        );
+    },
+
+    /**
+     * Convert a field from the configuration message to an input field
+     *
+     * @param  {Object} field   The field object
+     * @param  {String} path    The full path to the field in the file.
+     *                          Example: config/darwin3/Network.yaml@port
+     * @return {Array}
+     */
+    fieldToInput(field, path) {
+        if (typeof field.value === 'boolean') {
+            return this.createExtInput('checkbox', field, path);
+        } else if (typeof field.value === 'number') {
+            return this.createExtInput('numberfield', field, path);
+        } else if (typeof field.value === 'string') {
+            return this.createExtInput('textfield', field, path);
+        } else if (NU.util.Helper.isObject(field.value)) {
+            return Object.keys(field.value).map(function (subfield) {
+                return this.fieldToInput(field.value[subfield], path + '.' + subfield);
+            }.bind(this));
+        }
+
+        return []; // 'LOL';
+    },
+
+    /**
+     * Create an Ext input field of the given type and data
+     *
+     * @param  {String} type    The xtype of the input field
+     * @param  {Object} data    Data to associate with the field, later used for submitting changes
+     * @param  {String} path    The full path to the field in the file.
+     *                          Example: config/darwin3/Network.yaml@port
+     * @return {Object}
+     */
+    createExtInput(type, data, path) {
+        return {
+            meta: {
+                data: data,
+                path: path
+            },
+            xtype: type,
+            value: data.value,
+            fieldLabel: path.split('@')[1],
+            listeners: {
+                scope: this,
+                change: this.onInputChange
+            }
+        };
+    },
+
+   /**
+    * Handle the change of an input field
+    *
+    * @param  {Object} field            The ExtJS input field instance
+    * @param  {Number|String} newValue  The field's new value
+    * @param  {Number|String} oldValue  The field's old value
+    */
+    onInputChange(field, newValue, oldValue) {
+        if (newValue == oldValue) {
+            return;
+        }
+
+        var path = this.parsePath(field.meta.path);
+
+        var config = {
+            file: path.toFile,
+            path: path.toValue,
+            value: NU.util.Helper.deepMerge(field.meta.data, { value: newValue })
+        };
+
+        // TODO: Encode config and send ConfigurationDelta message
+    },
+
+    /**
+     * Parse the full path of a configuration value into an object containing
+     * the file path and the path to the value in the file
+     *
+     * @param  {String} path The path to parse
+     * @return {Object}
+     */
+    parsePath(path) {
+        var segments = path.split('@');
+
+        return {
+            toFile: segments[0],
+            toValue: segments[1].split('.')
+        };
     }
-
-    return 'LOL';
-}
-
-/**
- * Create an object with the given field nested in the given name
- *
- * @param  {Object} field   The field to wrap
- * @param  {[type]} name    The name (key) to nest the field in
- * @return {Object}
- */
-function wrapField(field, name) {
-    if (!name) {
-        return field;
-    }
-
-    var wrapper = {};
-    wrapper[name] = field;
-
-    return wrapper;
-}
+});
