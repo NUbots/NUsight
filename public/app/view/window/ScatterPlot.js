@@ -90,14 +90,17 @@ Ext.define('NU.view.window.ScatterPlot', {
             }
         }, {
             xtype: 'numberfield',
-            reference: 'offset',
-            fieldLabel: 'Offset (ms)',
+            reference: 'fps',
+            fieldLabel: 'FPS:',
             labelStyle: 'white-space: nowrap',
-            labelWidth: 70,
-            width: 150,
-            value: 0,
-            readOnly: true,
-            disabled: true
+            labelWidth: 25,
+            width: 100,
+            value: 30,
+            minValue: 1,
+            maxValue: 60,
+            listeners: {
+                change: 'onFPSChange'
+            }
         }, {
             xtype: 'button',
             text: 'Pause',

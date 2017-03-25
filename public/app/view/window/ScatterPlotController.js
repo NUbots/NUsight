@@ -167,6 +167,38 @@ Ext.define('NU.view.window.ScatterPlotController', {
         this.setMaxPoints(newValue);
     },
 
+    onFPSChange: function (field, newValue, oldValue, eOpts) {
+        //limit the fps to 1-60
+        if(newValue == null || newValue < 0 || newValue > 60) {
+            return;
+        }
+
+        var me = this;
+
+        if(this.getIntervalId() != null) {
+            clearInterval(this.getIntervalId());
+        }
+
+        this.setIntervalId(setInterval(function() {
+            if(!me.getPause() && Object.keys(me.getGraphUpdateX()).length > 0) {
+
+                var update = {
+                    x: Object.values(me.getGraphUpdateX()),
+                    y: Object.values(me.getGraphUpdateY()),
+                    z: Object.values(me.getGraphUpdateZ())
+                }
+
+                //extend the graph
+                Plotly.extendTraces(me.getDivID(), update, Object.keys(me.getGraphUpdateX()).map(Number), me.getMaxPoints());
+
+                //reset the values to update the graph
+                me.setGraphUpdateX({});
+                me.setGraphUpdateY({});
+                me.setGraphUpdateZ({});
+            }
+        }, 1000 / newValue));
+    },
+
     onGraphTypeChange: function (obj, newValue, oldValue, eOpts) {
         if (newValue) {
             var update;
