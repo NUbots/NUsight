@@ -6,6 +6,8 @@ Ext.define('NU.view.window.ScatterPlotController', {
     ],
     config: {
         divID: null,
+        defaultFPS: 30,
+        lastRobot: '',
         nextTraceID: 0,
         maxPoints: 100,
         intervalId: null,
@@ -33,13 +35,20 @@ Ext.define('NU.view.window.ScatterPlotController', {
         this.setTraceID([]);
         this.setPause(false);
         this.addEvents();
-        var me = this;
 
         //redraw the graph at 60 fps
+        this.createUpdateInterval(1000/this.getDefaultFPS());
+    },
+
+    createUpdateInterval: function(targetedFps) {
+        var me = this;
+
+        if(this.getIntervalId() !== null) {
+            clearInterval(this.getIntervalId());
+        }
+
         this.setIntervalId(setInterval(function() {
             if(!me.getPause() && Object.keys(me.getGraphUpdateX()).length > 0) {
-
-                //x = [ [trace 1 x values], [trace 2 x values], ... ]
                 var update = {
                     x: Object.values(me.getGraphUpdateX()),
                     y: Object.values(me.getGraphUpdateY()),
@@ -54,8 +63,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                 me.setGraphUpdateY({});
                 me.setGraphUpdateZ({});
             }
-        }, 1000 / 60));
-
+        }, targetedFps));
     },
 
     addEvents: function () {
@@ -173,30 +181,9 @@ Ext.define('NU.view.window.ScatterPlotController', {
             return;
         }
 
-        var me = this;
+        this.setDefaultFPS(newValue);
 
-        if(this.getIntervalId() != null) {
-            clearInterval(this.getIntervalId());
-        }
-
-        this.setIntervalId(setInterval(function() {
-            if(!me.getPause() && Object.keys(me.getGraphUpdateX()).length > 0) {
-
-                var update = {
-                    x: Object.values(me.getGraphUpdateX()),
-                    y: Object.values(me.getGraphUpdateY()),
-                    z: Object.values(me.getGraphUpdateZ())
-                }
-
-                //extend the graph
-                Plotly.extendTraces(me.getDivID(), update, Object.keys(me.getGraphUpdateX()).map(Number), me.getMaxPoints());
-
-                //reset the values to update the graph
-                me.setGraphUpdateX({});
-                me.setGraphUpdateY({});
-                me.setGraphUpdateZ({});
-            }
-        }, 1000 / newValue));
+        this.createUpdateInterval(1000/newValue);
     },
 
     onGraphTypeChange: function (obj, newValue, oldValue, eOpts) {
@@ -345,6 +332,47 @@ Ext.define('NU.view.window.ScatterPlotController', {
     },
 
     onDataPoint: function (robot, dataPoint, timestamp) {
+        //clean up after changing robot selection
+        if(this.getRobotId() !== this.getLastRobot() && this.getLastRobot() !== '') {
+            this.setLastRobot(this.getRobotId());
+
+            //clear the right toolbar
+            var scatterPlotWindow = Ext.ComponentQuery.query('window[id=scatterPlotWindow]')[0];
+            scatterPlotWindow.down('#rightbar').removeAll();
+
+            //clean up the graph
+            var divElement = this.lookupReference('scatter').getEl();
+            var layout = {
+                autosize: false,
+                height: divElement.getHeight(),
+                width: divElement.getWidth(),
+                margin: {
+                    l: 50,
+                    r: 50,
+                    b: 30,
+                    t: 40,
+                    pad: 4
+                },
+                yaxis: {
+                    range: [this.getYMin(), this.getYMax()]
+                },
+                xaxis: {
+                    range: [this.getXMin(), this.getXMax()]
+                }
+            };
+            Plotly.newPlot(this.getDivID(), [], layout);
+
+            //reset variables
+            this.setGraphUpdateX([]);
+            this.setGraphUpdateY([]);
+            this.setGraphUpdateZ([]);
+            this.setTraceID({});
+            this.setNextTraceID(0);
+
+        }else if(this.getLastRobot() === '') {
+            this.setLastRobot(this.getRobotId());
+        }
+
         if(!this.getPause()) {
             if (robot.get('id') !== this.getRobotId()) {
                 return;
