@@ -30,6 +30,17 @@ Ext.define('NU.view.window.ScatterPlot', {
             overflowHandler: 'scroller'
         },
         items: [
+            {
+                xtype: 'textfield',
+                reference: 'search',
+                fieldLabel: '',
+                labelStyle: 'white-space: nowrap',
+                labelWidth: 42,
+                width: 135,
+                listeners: {
+                    change: 'onSearch'
+                }
+            }
         ],
     },
     tbar: {

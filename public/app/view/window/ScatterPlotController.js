@@ -186,6 +186,21 @@ Ext.define('NU.view.window.ScatterPlotController', {
         this.createUpdateInterval(1000/newValue);
     },
 
+    onSearch: function (field, newValue, oldValue, eOpts) {
+        var search = newValue.trim().toLowerCase();
+
+        var scatterPlotWindow = Ext.ComponentQuery.query('window[id=scatterPlotWindow]')[0];
+        var items = scatterPlotWindow.down('#rightbar').items;
+
+        for(var i = 1; i < items.length; i++) {
+            if(items.items[i].config.text.toLowerCase().includes(search) || search == '' || search == null){
+                items.items[i].show();
+            }else {
+                items.items[i].hide();
+            }
+        }
+    },
+
     onGraphTypeChange: function (obj, newValue, oldValue, eOpts) {
         if (newValue) {
             var update;
@@ -338,7 +353,11 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
             //clear the right toolbar
             var scatterPlotWindow = Ext.ComponentQuery.query('window[id=scatterPlotWindow]')[0];
-            scatterPlotWindow.down('#rightbar').removeAll();
+            var rightBar = scatterPlotWindow.down('#rightbar');
+
+            for(var i = rightBar.items.length - 1; i > 0; i--) {
+                rightBar.remove(i);
+            }
 
             //clean up the graph
             var divElement = this.lookupReference('scatter').getEl();
