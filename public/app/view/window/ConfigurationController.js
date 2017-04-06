@@ -176,7 +176,7 @@ Ext.define('NU.view.window.ConfigurationController', {
         var inputs = [];
 
         for (field in fields) {
-            inputs = inputs.concat(this.fieldToInput(fields[field], file.path + '@' + field))
+            inputs = inputs.concat(this.fieldToInput(fields[field], file.path, [field]));
         }
 
         this.refs.editPanel.removeAll();
@@ -194,21 +194,21 @@ Ext.define('NU.view.window.ConfigurationController', {
     /**
      * Convert a field from the configuration message to an input field
      *
-     * @param  {Object} field   The field object
-     * @param  {String} path    The full path to the field in the file.
-     *                          Example: config/darwin3/Network.yaml@port
+     * @param  {Object} field      The field object
+     * @param  {String} filePath   The path to the file containing the field
+     * @param  {Array}  fieldPath  The path to the field in the file
      * @return {Array}
      */
-    fieldToInput(field, path) {
+    fieldToInput(field, filePath, fieldPath) {
         if (typeof field.value === 'boolean') {
-            return this.createExtInput('checkbox', field, path);
+            return this.createExtInput('checkbox', field, filePath, fieldPath);
         } else if (typeof field.value === 'number') {
-            return this.createExtInput('numberfield', field, path);
+            return this.createExtInput('numberfield', field, filePath, fieldPath);
         } else if (typeof field.value === 'string') {
-            return this.createExtInput('textfield', field, path);
+            return this.createExtInput('textfield', field, filePath, fieldPath);
         } else if (NU.util.Helper.isObject(field.value)) {
             return Object.keys(field.value).map(function (subfield) {
-                return this.fieldToInput(field.value[subfield], path + '.' + subfield);
+                return this.fieldToInput(field.value[subfield], filePath, fieldPath.concat(subfield));
             }.bind(this));
         }
 
@@ -218,21 +218,24 @@ Ext.define('NU.view.window.ConfigurationController', {
     /**
      * Create an Ext input field of the given type and data
      *
-     * @param  {String} type    The xtype of the input field
-     * @param  {Object} data    Data to associate with the field, later used for submitting changes
-     * @param  {String} path    The full path to the field in the file.
-     *                          Example: config/darwin3/Network.yaml@port
+     * @param  {String} type       The xtype of the input field
+     * @param  {Object} data       Data to associate with the field, later used for submitting changes
+     * @param  {String} filePath   The path to the file containing the field
+     * @param  {Array}  fieldPath  The path to the field in the file
      * @return {Object}
      */
-    createExtInput(type, data, path) {
+    createExtInput(type, data, filePath, fieldPath) {
+        console.log(filePath, fieldPath);
+
         return {
             meta: {
                 data: data,
-                path: path
+                filePath: filePath,
+                fieldPath: fieldPath
             },
             xtype: type,
             value: data.value,
-            fieldLabel: path.split('@')[1],
+            fieldLabel: fieldPath.join('.'),
             listeners: {
                 scope: this,
                 change: this.onInputChange
@@ -252,30 +255,14 @@ Ext.define('NU.view.window.ConfigurationController', {
             return;
         }
 
-        var path = this.parsePath(field.meta.path);
-
         var config = {
-            file: path.toFile,
-            path: path.toValue,
+            file: field.meta.filePath,
+            path: field.meta.fieldPath,
             value: NU.util.Helper.deepMerge(field.meta.data, { value: newValue })
         };
 
+        console.log('Send config', config);
+
         // TODO: Encode config and send ConfigurationDelta message
-    },
-
-    /**
-     * Parse the full path of a configuration value into an object containing
-     * the file path and the path to the value in the file
-     *
-     * @param  {String} path The path to parse
-     * @return {Object}
-     */
-    parsePath(path) {
-        var segments = path.split('@');
-
-        return {
-            toFile: segments[0],
-            toValue: segments[1].split('.')
-        };
     }
 });
