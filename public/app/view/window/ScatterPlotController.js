@@ -54,7 +54,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                     y: Object.values(me.getGraphUpdateY()),
                     z: Object.values(me.getGraphUpdateZ())
                 }
-
+                
                 //extend the graph
                 Plotly.extendTraces(me.getDivID(), update, Object.keys(me.getGraphUpdateX()).map(Number), me.getMaxPoints());
 
@@ -476,9 +476,9 @@ Ext.define('NU.view.window.ScatterPlotController', {
                             this.getGraphUpdateX()[trace.id].push(trace.xVal);
                         }
                         if(this.getGraphUpdateY()[trace.id] == null) {
-                            this.getGraphUpdateY()[trace.id] = [values[trace.yLocation]];
+                            this.getGraphUpdateY()[trace.id] = [values[0]];
                         } else {
-                            this.getGraphUpdateY()[trace.id].push(values[trace.yLocation]);
+                            this.getGraphUpdateY()[trace.id].push(values[0]);
                         }
                         if(this.getGraphUpdateZ()[trace.id] == null) {
                             this.getGraphUpdateZ()[trace.id] = [(trace.zLocation == -1) ? 0 : values[trace.yLocation]];

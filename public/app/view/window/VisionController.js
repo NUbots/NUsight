@@ -468,7 +468,7 @@ Ext.define('NU.view.window.VisionController', {
 
         for (var i = 0; i < segments.length; i++) {
             var segment = segments[i];
-            var colour = this.segmentColourToRGB(segment.colour);
+            var colour = this.segmentColourToRGB(segment.getSegmentClass());
 
             var x = segment.start.x;
 
@@ -491,7 +491,7 @@ Ext.define('NU.view.window.VisionController', {
 
         for (var i = 0; i < segments.length; i++) {
             var segment = segments[i];
-            var colour = this.segmentColourToRGB(segment.colour);
+            var colour = this.segmentColourToRGB(segment.getSegmentClass());
 
             var y = segment.start.y;
 
