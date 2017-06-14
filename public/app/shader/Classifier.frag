@@ -55,6 +55,10 @@ varying vec2 center;
 void main() {
 	// sample from the raw (e.g. YCbCr) image
 	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, center);
+
+	if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
+        rawColour = bayerToRGB(rawImage, rawColour, center, resolution, firstRed);
+    }
 	// classify using the raw image
 	float classification = classify(rawColour, lut, lutSize, bitsR, bitsG, bitsB);
 
@@ -69,7 +73,8 @@ void main() {
         } else if(imageFormat == FORMAT_UYVY) {
             gl_FragColor = YCbCrToRGB(rawColour) * rawUnderlayOpacity;
         } else if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
-            gl_FragColor = bayerToRGB(rawImage, rawColour, center, resolution, firstRed) * rawUnderlayOpacity;
+            // bayer image was already converted to RGB.
+            gl_FragColor = rawColour * rawUnderlayOpacity;
         } else if(imageFormat == FORMAT_RGB3) {
             gl_FragColor = rawColour * rawUnderlayOpacity;
         } else {

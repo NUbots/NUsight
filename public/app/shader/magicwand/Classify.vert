@@ -51,10 +51,11 @@ void main() {
 	// Render a single pixel
 	gl_PointSize = 1.0;
 	// The geometry is assumed to be the raw (e.g. YCbCr) colours of the image
-	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, (position.xy + 0.5) / vec2(float(imageWidth), float(imageHeight)));
+	vec2 center = vec2((position.xy + 0.5) / vec2(float(imageWidth), float(imageHeight)));
+	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, center);
 
 	if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
-	   // rawColour = (bayerToRGB(rawImage, rawColour, uv, resolution, firstRed));
+	   rawColour = bayerToRGB(rawImage, rawColour, center, vec2(1280, 1024), vec2(1, 1));
 	}
 
     rawColour.xyz *= 255.0;

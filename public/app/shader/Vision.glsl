@@ -195,12 +195,9 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 	return rawColour;
 }
 
-vec4 rgbToYCbCr(vec4 rgb) {
-    float y = rgb.r *  .299000 + rgb.g *  .587000 + rgb.b *  .114000;
-    float cb = rgb.r * -.168736 + rgb.g * -.331264 + rgb.b *  .500000 + 128.0;
-    float cr = rgb.r *  .500000 + rgb.g * -.418688 + rgb.b * -.081312 + 128.0;
-
-    return vec4(y, cb, cr, 1.0);
+vec4 rgbToYCbCr(vec4 rgba) {
+    mat3 mat = mat3(vec3(0.257, -0.148, 0.439), vec3(0.504, -0.291, -0.368), vec3(0.098, 0.439, -0.071));
+    return vec4(vec3(16, 128, 128) * mat * rgba.rgb, 1.0);
 }
 
 vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec2 center, vec2 resolution, vec2 firstRed) {
