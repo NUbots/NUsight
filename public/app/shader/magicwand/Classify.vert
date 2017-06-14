@@ -43,13 +43,22 @@ uniform float tolerance;
  */
 uniform bool overwrite;
 
+uniform vec2 resolution;
+uniform vec2 firstRed;
+
 // Assumes the LUT has been rendered to the scene first
 void main() {
 	// Render a single pixel
 	gl_PointSize = 1.0;
 	// The geometry is assumed to be the raw (e.g. YCbCr) colours of the image
 	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, (position.xy + 0.5) / vec2(float(imageWidth), float(imageHeight)));
-	rawColour.xyz *= 255.0;
+
+	if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
+	   // rawColour = (bayerToRGB(rawImage, rawColour, uv, resolution, firstRed));
+	}
+
+    rawColour.xyz *= 255.0;
+
 	// Get the lut index of the colour
 	float index = getLutIndex(rawColour.xyz, bitsR, bitsG, bitsB);
 	// Convert the lut index into a 2D texture coordinate

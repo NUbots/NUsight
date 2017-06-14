@@ -23,8 +23,16 @@ uniform float tolerance;
  */
 varying vec2 center;
 
+uniform vec2 resolution;
+uniform vec2 firstRed;
+
 void main() {
 	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, center);
+
+	if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
+        rawColour = bayerToRGB(rawImage, rawColour, center, resolution, firstRed);
+    }
+
 	// check euclidean distance between rawColour and colour
 	if (distance(rawColour.rgb * 255.0, colour) <= tolerance) {
 		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);

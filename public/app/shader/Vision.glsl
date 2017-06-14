@@ -195,6 +195,14 @@ vec4 sampleRawImage(sampler2D rawImage, int imageWidth, int imageHeight, int ima
 	return rawColour;
 }
 
+vec4 rgbToYCbCr(vec4 rgb) {
+    float y = rgb.r *  .299000 + rgb.g *  .587000 + rgb.b *  .114000;
+    float cb = rgb.r * -.168736 + rgb.g * -.331264 + rgb.b *  .500000 + 128.0;
+    float cr = rgb.r *  .500000 + rgb.g * -.418688 + rgb.b * -.081312 + 128.0;
+
+    return vec4(y, cb, cr, 1.0);
+}
+
 vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec2 center, vec2 resolution, vec2 firstRed) {
     #define fetch(x, y) texture2D(rawImage, vec2(x, y)).r
 
@@ -206,10 +214,12 @@ vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec2 center, vec2 resolution, v
     int y = int(floor(center.y / pixelY));
     vec4 result = vec4(0, 0, 0, 1);
 
+    firstRed = vec2(1, 1);
+
     if(mod(float(x), 2.0) == (firstRed.x)) {
         if(mod(float(y), 2.0) == firstRed.y) {
             result.g = value;
-            result.r = (fetch(center.x, center.y - pixelY) + fetch(center.x, center.y + pixelY)) / 2.0;
+            result.r = ( fetch(center.x, center.y - pixelY) + fetch(center.x, center.y + pixelY)) / 2.0;
             result.b = (fetch(center.x - pixelX, center.y) + fetch(center.x + pixelX, center.y)) / 2.0;
         }else {
             result.r = value;
