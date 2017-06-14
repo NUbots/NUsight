@@ -214,8 +214,6 @@ vec4 bayerToRGB(sampler2D rawImage, vec4 colour, vec2 center, vec2 resolution, v
     int y = int(floor(center.y / pixelY));
     vec4 result = vec4(0, 0, 0, 1);
 
-    firstRed = vec2(1, 1);
-
     if(mod(float(x), 2.0) == (firstRed.x)) {
         if(mod(float(y), 2.0) == firstRed.y) {
             result.g = value;

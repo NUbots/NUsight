@@ -1185,16 +1185,16 @@ Ext.define('NU.view.window.ClassifierController', {
 		}
 	},
 	bayerToRGB: function(components, x, y, imageWidth, imageHeight, firstRed) {
-		var value = x + imageWidth * y;
+		var value = y * imageWidth + x;
 		var colour = [];
-		var n = x + imageWidth * (y - 1);
-		var s = x + imageWidth * (y + 1);
-		var e = (x + 1) + imageWidth * y;
-		var w = (x - 1) + imageWidth * y;
-		var ne = (x + 1) + imageWidth * (y - 1);
-		var se = (x + 1) + imageWidth * (y + 1);
-		var nw = (x - 1) + imageWidth * (y - 1);
-		var sw = (x - 1) + imageWidth * (y + 1);
+		var n = (y - 1) * imageWidth + x;
+		var s = (y + 1) * imageWidth + x;
+		var e = y * imageWidth + (x + 1);
+		var w = y * imageWidth + (x - 1);
+		var ne = (y - 1) * imageWidth + (x + 1);
+		var se = (y + 1) * imageWidth + (x + 1);
+		var nw = (y - 1) * imageWidth + (x - 1);
+		var sw = (y + 1) * imageWidth + (x - 1);
 
 		if(x % 2 == firstRed[0]) {
 			if(y % 2 == firstRed[1]) {
@@ -1264,6 +1264,26 @@ Ext.define('NU.view.window.ClassifierController', {
 		var data = new Uint8Array(image.data);
 		var bytesPerPixel = 2;
 
+        if(image.format == this.Format.GRBG) {
+            this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+            this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+            this.selectionClassifier.updateRawImage(this.Format.GRBG, data, width, height, THREE.LuminanceFormat);
+        }else if(image.format == this.Format.RGGB) {
+            this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            this.selectionClassifier.updateRawImage(this.Format.RGGB, data, width, height, THREE.LuminanceFormat);
+        }else if(image.format == this.Format.GBRG) {
+            this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
+            this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
+            this.selectionClassifier.updateRawImage(this.Format.GBRG, data, width, height, THREE.LuminanceFormat);
+        }else if(image.format == this.Format.BGGR) {
+            this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
+            this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
+            this.selectionClassifier.updateRawImage(this.Format.BGGR, data, width, height, THREE.LuminanceFormat);
+        } else {
+            this.selectionClassifier.updateRawImage(this.Format.YUYV, data, width, height, THREE.LuminanceFormat);
+        }
+
 		var renderers = [this.rawImageRenderer, this.classifiedRenderer, this.selectionRenderer];
 		for (var i = 0, len = renderers.length; i < len; i++) {
 			var renderer = renderers[i];
@@ -1278,25 +1298,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.rawImageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 		this.classifiedRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 
-		if(image.format == this.Format.GRBG) {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
-		}else if(image.format == this.Format.RGGB) {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-		}else if(image.format == this.Format.GBRG) {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
-		}else if(image.format == this.Format.BGGR) {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
-		} else {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-		}
+        this.selectionClassifier.resize(width, height);
 
-		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(this.Format.BGGR, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageYbCr422: function (image) {
