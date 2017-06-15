@@ -1,7 +1,7 @@
 //var Robot = require('./Robot');
 //var RobotList = require('./RobotList');
 var Client = require('./Client');
-var NUClearNet = require('nuclearnet.js');
+var NUClearNet = require('nuclearnet.js').NUClearNet;
 var fs = require('fs');
 var util = require('util');
 var int53 = require('int53');
@@ -13,13 +13,21 @@ function NUsight (io) {
 	this.files = [];
 	this.robots = {};
 	this.recordings = {};
-	this.network = new NUClearNet('nusight', '239.226.152.162', 7447);
+	console.log(NUClearNet);
+	this.network = new NUClearNet();
+	this.network.connect({
+		name: 'nusight',
+	});
 
 	// Robot joined
-	this.network.on('nuclear_join', function (name, address) {
+	this.network.on('nuclear_join', function (peer) {
+		var name = peer.name;
+		var address = peer.address;
+		console.log(address);
 		if(name === 'nusight') {
 			return;
 		}
+
 		console.log('Robot', name, 'connected.');
 
 		var robot;
@@ -40,7 +48,9 @@ function NUsight (io) {
 	}.bind(this));
 
 	// Robot left
-	this.network.on('nuclear_leave', function (name) {
+	this.network.on('nuclear_leave', function (peer) {
+		var name = peer.name;
+
 		if(name === 'nusight') {
 			return;
 		}
