@@ -1,11 +1,14 @@
 var ProtoBuf = require('protobufjs');
-var NUClearNet = require('nuclearnet.js');
+var NUClearNet = require('nuclearnet.js').NUClearNet;
 var ref = require('ref');
 var path = require('path');
 
 function RobotSimulator (opts) {
 	opts = opts || {};
-	this.net = opts.net || new NUClearNet(this.constructor.name, '239.226.152.162', 7447);
+	this.net = opts.net || new NUClearNet();
+	this.net.connect({
+		name: this.constructor.name,
+	});
 	this.protoBuilder = opts.protoBuilder || ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
 
 	// A map of message types to callback functions which will be called
@@ -118,8 +121,12 @@ RobotSimulator.prototype.sendMessage = function (message, reliable) {
 	var header = new Buffer(9);
 	header.writeUInt8(0, 0);
 	header.writeUInt64LE(Date.now(), 1)
-
-	this.net.send(messageType, Buffer.concat([header, message.toBuffer()]), 'nusight', reliable);
+	this.net.send({
+		type: messageType,
+		payload: Buffer.concat([header, message.toBuffer()]),
+		target: 'nusight',
+		'reliable': reliable,
+	});
 };
 
 RobotSimulator.prototype.onMessage = function (messageType, callback) {
@@ -130,7 +137,10 @@ RobotSimulator.prototype.onMessage = function (messageType, callback) {
 	this.listenerCallbacks[messageType] = callbacks;
 
 	if (isFirstListener) {
-		this.net.on('NUsight<' + messageType + '>', function (source, data) {
+		this.net.on('NUsight<' + messageType + '>', function (packet) {
+			var source = packet.peer.name;
+			var data = packet.payload;
+
 			var decodedMessage = this.decodeProto(messageType, data);
 
 			this.listenerCallbacks[messageType].forEach(function (callback) {
