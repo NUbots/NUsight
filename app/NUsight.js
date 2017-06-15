@@ -15,9 +15,6 @@ function NUsight (io) {
 	this.recordings = {};
 	console.log(NUClearNet);
 	this.network = new NUClearNet();
-	this.network.connect({
-		name: 'nusight',
-	});
 
 	// Robot joined
 	this.network.on('nuclear_join', function (peer) {
@@ -75,6 +72,10 @@ function NUsight (io) {
 	// We stopped listening to a type
 	this.network.on('unlisten', function (event) {
 		console.log('Stopped listening to', event);
+	});
+
+	this.network.connect({
+		name: 'nusight',
 	});
 
 	this.io.on('connection', function (socket) {
