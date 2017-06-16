@@ -1,7 +1,7 @@
 //var Robot = require('./Robot');
 //var RobotList = require('./RobotList');
 var Client = require('./Client');
-var NUClearNet = require('nuclearnet.js');
+var NUClearNet = require('nuclearnet.js').NUClearNet;
 var fs = require('fs');
 var util = require('util');
 var int53 = require('int53');
@@ -13,13 +13,18 @@ function NUsight (io) {
 	this.files = [];
 	this.robots = {};
 	this.recordings = {};
-	this.network = new NUClearNet('nusight', '239.226.152.162', 7447);
+	console.log(NUClearNet);
+	this.network = new NUClearNet();
 
 	// Robot joined
-	this.network.on('nuclear_join', function (name, address) {
+	this.network.on('nuclear_join', function (peer) {
+		var name = peer.name;
+		var address = peer.address;
+		console.log(address);
 		if(name === 'nusight') {
 			return;
 		}
+
 		console.log('Robot', name, 'connected.');
 
 		var robot;
@@ -40,7 +45,9 @@ function NUsight (io) {
 	}.bind(this));
 
 	// Robot left
-	this.network.on('nuclear_leave', function (name) {
+	this.network.on('nuclear_leave', function (peer) {
+		var name = peer.name;
+
 		if(name === 'nusight') {
 			return;
 		}
@@ -58,13 +65,17 @@ function NUsight (io) {
 	}.bind(this));
 
 	// We started listening to a type
-	this.network.on('nuclear_listen', function (event) {
+	this.network.on('listen', function (event) {
 		console.log('Started listening to', event);
 	});
 
 	// We stopped listening to a type
-	this.network.on('nuclear_unlisten', function (event) {
+	this.network.on('unlisten', function (event) {
 		console.log('Stopped listening to', event);
+	});
+
+	this.network.connect({
+		name: 'nusight',
 	});
 
 	this.io.on('connection', function (socket) {
@@ -81,7 +92,11 @@ function NUsight (io) {
 		}, this);
 
 		socket.on('message', function (typeName, data, target, reliable) {
-			this.network.send(typeName, data, target, reliable);
+			this.network.send({
+				type: typeName, 
+				payload: data, 
+				target: target, 
+				reliable: reliable});
 		}.bind(this));
 
 		socket.on('disconnect', function () {
@@ -97,8 +112,13 @@ function NUsight (io) {
 		}.bind(this));
 
 		socket.on('addType', function (socket, messageType) {
+			console.log('Started listening to', messageType);
+
 			// Add a callback function for this
-			client.listeners[messageType] = function (source, data) {
+			client.listeners[messageType] = function (packet) {
+				var source = packet.peer;
+				var data = packet.payload;
+
 				var filterId = data.readUInt8(0);
 				var timestamp = int53.readUInt64LE(data, 1);
 				var protobuf = data.slice(9);
@@ -111,7 +131,7 @@ function NUsight (io) {
 		}.bind(this, client));
 
 		socket.on('dropType', function (client, messageType) {
-
+			console.log('Stopped listening to', messageType);
 			// Remove listeners and stop sending stuff
 			var func = client.listeners[messageType];
 			if(func) {
