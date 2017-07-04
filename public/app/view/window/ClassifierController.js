@@ -1261,7 +1261,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	drawImageBayer: function (image) {
 		var width = this.getImageWidth();
 		var height = this.getImageHeight();
-		var data = new Uint8Array(image.data);
+		var data = new Uint8Array(image.data.toArrayBuffer());
 		var bytesPerPixel = 2;
 
         if(image.format == this.Format.GRBG) {
