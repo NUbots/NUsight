@@ -29,16 +29,36 @@ import "message/input/Sensors.proto";
 import "message/vision/ClassifiedImage.proto";
 import "message/vision/VisionObjects.proto";
 
+
 message Ball {
-    VisionObject  visObject          = 1;
+    enum MeasurementType {
+        REPROJECTION = 0;
+        WIDTH_BASED  = 1;
+    }
 
-    // The position of the ball in world coordinates
-    vec3          position           = 2;
-    vec3          torsoSpacePosition = 3;
+    message Measurement {
+        MeasurementType type        = 1;
+        //Vector from camera to ball in camera coordinates
+        vec3            rBCc        = 2;
+        mat33           covariance  = 3;
+    }
 
-    repeated vec3 edgePoints         = 4;
-    Circle        circle             = 5;
+    VisionObject  visObject             = 1;
+    repeated Measurement measurements   = 2;
+    repeated vec3 edgePoints            = 3;
+    Circle        circle                = 4;
 }
+
+// message Ball {
+//     VisionObject  visObject          = 1;
+
+//     // The position of the ball in world coordinates
+//     vec3          position           = 2;
+//     vec3          torsoSpacePosition = 3;
+
+//     repeated vec3 edgePoints         = 4;
+//     Circle        circle             = 5;
+// }
 
 message NUsightBalls {
     repeated Ball balls = 1;
