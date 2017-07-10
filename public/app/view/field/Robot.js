@@ -119,51 +119,53 @@ Ext.define('NU.view.field.Robot', {
 		}, this);
 	},
 	onLocalisation: function (api_localisation) {
-
+		//Field object
 		if(!this.getShowLocalisation()) {
 			return;
 		}
 
-		function updateModel(model, field_object) {
-			model.position.x = field_object.wmX;
-			model.position.y = field_object.wmY;
-			model.rotation.z = field_object.heading;
-			var result = this.calculateErrorElipse(field_object.srXx, field_object.srXy, field_object.srYy);
-			model.visualiser.scale.x = result.x;
-			model.visualiser.scale.y = result.y;
-			model.visualiser.rotation.z = result.angle;
-		}
-		api_localisation.fieldObject.forEach(function (field_object) {
-			if(field_object.name == 'ball') {
-				// remove the old models
-				this.fireEvent('ball-model-list-resized', field_object.models.length);
-				for (var i = 0; i < field_object.models.length; i++) {
-					var ball;
-					if (i >= this.ballModels.length) {
-						ball = this.createBallModel();
-						this.ballModels.push(ball);
-					} else {
-						ball = this.ballModels[i];
-					}
 
-					updateModel.call(this, ball, field_object.models[i]);
-				}
-			} else if(field_object.name == 'self') {
-				// remove the old models
-				this.fireEvent('robot-model-list-resized', field_object.models.length);
-				for (var i = 0; i < field_object.models.length; i++) {
-					var robot;
-					if (i >= this.robotModels.length) {
-						robot = this.createDarwinModel();
-						this.robotModels.push(robot);
-					} else {
-						robot = this.robotModels[i];
-					}
 
-					updateModel.call(this, robot, field_object.models[i]);
-				}
-			}
-		}, this);
+		// function updateModel(model, field_object) {
+		// 	model.position.x = field_object.wmX;
+		// 	model.position.y = field_object.wmY;
+		// 	model.rotation.z = field_object.heading;
+		// 	var result = this.calculateErrorElipse(field_object.srXx, field_object.srXy, field_object.srYy);
+		// 	model.visualiser.scale.x = result.x;
+		// 	model.visualiser.scale.y = result.y;
+		// 	model.visualiser.rotation.z = result.angle;
+		// }
+		// api_localisation.fieldObject.forEach(function (field_object) {
+		// 	if(field_object.name == 'ball') {
+		// 		// remove the old models
+		// 		this.fireEvent('ball-model-list-resized', field_object.models.length);
+		// 		for (var i = 0; i < field_object.models.length; i++) {
+		// 			var ball;
+		// 			if (i >= this.ballModels.length) {
+		// 				ball = this.createBallModel();
+		// 				this.ballModels.push(ball);
+		// 			} else {
+		// 				ball = this.ballModels[i];
+		// 			}
+
+		// 			updateModel.call(this, ball, field_object.models[i]);
+		// 		}
+		// 	} else if(field_object.name == 'self') {
+		// 		// remove the old models
+		// 		this.fireEvent('robot-model-list-resized', field_object.models.length);
+		// 		for (var i = 0; i < field_object.models.length; i++) {
+		// 			var robot;
+		// 			if (i >= this.robotModels.length) {
+		// 				robot = this.createDarwinModel();
+		// 				this.robotModels.push(robot);
+		// 			} else {
+		// 				robot = this.robotModels[i];
+		// 			}
+
+		// 			updateModel.call(this, robot, field_object.models[i]);
+		// 		}
+		// 	}
+		// }, this);
 	},
 	createBallModel: function () {
 		var ball = new Sphere();
