@@ -38,7 +38,7 @@ Ext.define('NU.view.window.FieldController', {
 	addEvents: function () {
 		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
-			'message.localisation.FieldObject': this.onLocalisation,
+			'message.localisation.Self': this.onLocalisation,
 			'message.support.nubugger.DrawObjects': this.onDrawObjects,
 			'message.input.Sensors': this.onSensorData,
 			scope: this

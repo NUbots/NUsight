@@ -7,7 +7,7 @@ function LocalisationSimulator (opts) {
 	RobotSimulator.call(this, opts);
 	this.started = Date.now();
 
-	this.loadProto('message.localisation.Localisation');
+	this.loadProto('message.localisation.Self');
 }
 util.inherits(LocalisationSimulator, RobotSimulator);
 
@@ -15,23 +15,14 @@ LocalisationSimulator.prototype.run = function () {
 	var now = Date.now();
 	var elapsedTime = now - this.started;
 	var radius = 1;
-	var message = new this.API.message.localisation.Localisation({
-		fieldObject: [{
-			name: 'self',
-			models: [{
-				modelId: 0,
-				wmX: radius * Math.cos(TAU * elapsedTime / 5000),
-				wmY: radius * Math.sin(TAU * elapsedTime / 5000),
-				sdX: 1E-1,
-				sdY: 2E-1,
-				srXx: 3E-1,
-				srXy: 4E-1,
-				srYy: 5E-1,
-				heading: Math.PI * Math.cos(TAU * elapsedTime / 3000),
-				sdHeading: 1E-1,
-				lost: false
-			}]
-		}]
+	var message = new this.API.message.localisation.Self({
+		locObject: {
+			position: {x:-2,y:1}
+			// last_measurement_time : now
+		},
+		heading : {x:-1,y:-1},
+		velocity : {x:0,y:0},
+		covariance : {x:{x:1,y:0,z:0},y:{x:0,y:1,z:0},z:{x:0,y:0,z:1}}
 	});
 
 	this.sendMessage(message);

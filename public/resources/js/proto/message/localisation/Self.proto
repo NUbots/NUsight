@@ -23,30 +23,11 @@ package message.localisation;
 import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "Vector.proto";
-import "message/localisation/Localisation.proto";
-
-// Sent to NUbugger
-message FieldObject {
-    string name           = 1;
-    repeated Model models = 2;
-}
-
-message LocalisationObject {
-    vec2                      position              = 1;
-    mat22                     position_cov          = 2;
-    google.protobuf.Timestamp last_measurement_time = 3;
-}
-
-message Ball {
-    LocalisationObject locObject   = 1;
-    vec2               velocity    = 2;
-    bool               world_space = 3; // Ball will always be in robot space except
-                                        // when sent from MockRobot.
-}
+import "message/localisation/LocalisationObject.proto";
 
 message Self {
     LocalisationObject locObject               = 1;
     vec2               heading                 = 2; //robot face direction (vector 2)
     vec2               velocity                = 3; //robot velocity (vector 2)
-    mat22              robot_to_world_rotation = 4; //??might not be useful
+    mat33              covariance              = 4;
 }

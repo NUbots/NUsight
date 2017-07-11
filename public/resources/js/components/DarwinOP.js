@@ -60,6 +60,7 @@
 
 		this.dataModel = null;
 
+
         // This corrects the fact that the model is made for computer graphics axis
         this.orientationCorrection = new THREE.Object3D();
         this.orientationCorrection.rotation.x = Math.PI/2;
@@ -73,6 +74,10 @@
             return me.addComponent(params, callback, scope);
         };
 
+        //Setup localisation container
+        this.localisation = new THREE.Object3D();
+        this.orientationCorrection.add(this.localisation);
+        
 		//Setup Body Container
 		this.body = addComponent({
 			url: "resources/darwin/Body.json",
@@ -80,7 +85,7 @@
 			rotationAxis: "y"
 		});
 		this.body.rotation.y = Math.PI/2;
-		this.orientationCorrection.add(this.body);
+		this.localisation.add(this.body);
 
 		//Setup Head Containers
 		this.neck = addComponent({

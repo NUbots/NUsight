@@ -119,53 +119,42 @@ Ext.define('NU.view.field.Robot', {
 		}, this);
 	},
 	onLocalisation: function (api_localisation) {
-		//Field object
+		//Self object
 		if(!this.getShowLocalisation()) {
 			return;
 		}
+		this.robotModels.forEach(function (robot) {
 
+			var model = robot.object;
 
+			var x = api_localisation.locObject.position.x;
+			var y = api_localisation.locObject.position.y;
 
-		// function updateModel(model, field_object) {
-		// 	model.position.x = field_object.wmX;
-		// 	model.position.y = field_object.wmY;
-		// 	model.rotation.z = field_object.heading;
-		// 	var result = this.calculateErrorElipse(field_object.srXx, field_object.srXy, field_object.srYy);
-		// 	model.visualiser.scale.x = result.x;
-		// 	model.visualiser.scale.y = result.y;
-		// 	model.visualiser.rotation.z = result.angle;
-		// }
-		// api_localisation.fieldObject.forEach(function (field_object) {
-		// 	if(field_object.name == 'ball') {
-		// 		// remove the old models
-		// 		this.fireEvent('ball-model-list-resized', field_object.models.length);
-		// 		for (var i = 0; i < field_object.models.length; i++) {
-		// 			var ball;
-		// 			if (i >= this.ballModels.length) {
-		// 				ball = this.createBallModel();
-		// 				this.ballModels.push(ball);
-		// 			} else {
-		// 				ball = this.ballModels[i];
-		// 			}
+			var rotation = new THREE.Matrix4();
 
-		// 			updateModel.call(this, ball, field_object.models[i]);
-		// 		}
-		// 	} else if(field_object.name == 'self') {
-		// 		// remove the old models
-		// 		this.fireEvent('robot-model-list-resized', field_object.models.length);
-		// 		for (var i = 0; i < field_object.models.length; i++) {
-		// 			var robot;
-		// 			if (i >= this.robotModels.length) {
-		// 				robot = this.createDarwinModel();
-		// 				this.robotModels.push(robot);
-		// 			} else {
-		// 				robot = this.robotModels[i];
-		// 			}
+			// Set our rotation from the worldToLocal matrix
+			// Invert as we go to get world space translations/rotations
+			// This is transposing the matrix as it is constructed
+			rotation.set(
+				api_localisation.heading.x, 0, api_localisation.heading.y, 	0,
+				0, 							1,								 0, 0,
+				-api_localisation.heading.y, 0, api_localisation.heading.x, 		0,
+				0, 0, 														 0, 1
+			);
 
-		// 			updateModel.call(this, robot, field_object.models[i]);
-		// 		}
-		// 	}
-		// }, this);
+			// Set the robot-world to field matrix (=Hfw)
+			model.localisation.quaternion.setFromRotationMatrix(rotation);
+			model.localisation.position.setX(x);
+			model.localisation.position.setZ(-y);
+
+			//TODO: covariance ellipse
+
+			// var result = this.calculateErrorElipse(api_localisation.covariance.x.x, api_localisation.covariance.x.y, api_localisation.covariance.y.y);
+			// model.visualiser.scale.x = result.x;
+			// model.visualiser.scale.y = result.y;
+			// model.visualiser.rotation.z = result.angle;
+
+		},this);
 	},
 	createBallModel: function () {
 		var ball = new Sphere();
