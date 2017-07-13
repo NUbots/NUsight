@@ -13,6 +13,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	],
 	rawImageRenderer: null,
 	config: {
+		cameraId: null,
 		rawContext: null,
 		classifiedContext: null,
 		frozen: false,
@@ -105,6 +106,9 @@ Ext.define('NU.view.window.ClassifierController', {
 		RGB3: 0x33424752,
 		JPEG: 0x4745504a,
 		UNKNOWN: 0,
+	},
+	onSelectCamera: function(cameraId) {
+		this.setCameraId(cameraId);
 	},
 	/**
 	 * Callback when the undo button is clicked
@@ -694,6 +698,10 @@ Ext.define('NU.view.window.ClassifierController', {
 
 		// TODO: remove
 		if (robot.get('id') !== this.getRobotId()) {
+			return;
+		}
+
+		if (image.getCameraId() !== this.getCameraId()) {
 			return;
 		}
 
