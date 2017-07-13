@@ -13,7 +13,6 @@ function NUsight (io) {
 	this.files = [];
 	this.robots = {};
 	this.recordings = {};
-	console.log(NUClearNet);
 	this.network = new NUClearNet();
 
 	// Robot joined
