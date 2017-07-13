@@ -69,13 +69,24 @@
         //Add ball
         this.ball_model = new THREE.Object3D();
         this.localisation.add(this.ball_model);
+		this.ball_model.position.setX(1);
+		
+		//Add mesh
         var radius = 0.075;
         var geometry = new THREE.SphereGeometry( radius, 32, 32 );
 		var material = new THREE.MeshPhongMaterial( {color: 0xffffff} );
 		var sphere = new THREE.Mesh( geometry, material );
 		sphere.position.setZ(radius);
 		this.ball_model.add( sphere );
-		this.ball_model.position.setX(1);
+
+		//Add error ellipse
+		var disk = new THREE.CircleGeometry(1,32);
+		var disk_material =  new THREE.MeshBasicMaterial( {color: 0x0000ff, transparent: true, opacity : 0.5} );
+		var disk_mesh = new THREE.Mesh( disk, disk_material );
+		this.ball_model.add( disk_mesh );
+		this.ball_ellipse = disk_mesh;
+		disk_mesh.position.setZ(0.001123);
+
 
         // This corrects the fact that the model is made for computer graphics axis
         //Hwt

@@ -158,10 +158,10 @@ Ext.define('NU.view.field.Robot', {
 
 			//TODO: covariance ellipse
 
-			var result = this.calculateErrorElipse(api_localisation.covariance.x.x, api_localisation.covariance.x.y, api_localisation.covariance.y.y);
-			model.visualiser.scale.x = result.x;
-			model.visualiser.scale.y = result.y;
-			model.visualiser.rotation.z = result.angle;
+			// var result = this.calculateErrorElipse(api_localisation.covariance.x.x, api_localisation.covariance.x.y, api_localisation.covariance.y.y);
+			// model.visualiser.scale.x = result.x;
+			// model.visualiser.scale.y = result.y;
+			// model.visualiser.rotation.z = result.angle;
 
 		},this);
 	},
@@ -184,6 +184,11 @@ Ext.define('NU.view.field.Robot', {
 				model.ball_model.position.setY(vec.y);
 
 			}
+			var result = this.calculateErrorElipse(api_ball.locObject.positionCov.x.x, api_ball.locObject.positionCov.x.y, api_ball.locObject.positionCov.y.y);
+
+			model.ball_ellipse.scale.setX(result.x);
+			model.ball_ellipse.scale.setY(result.y);
+			model.ball_ellipse.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),result.angle);
 
 
 		},this);

@@ -63,8 +63,9 @@ LocalisationSimulator.prototype.run = function () {
 
 	var ball_message = new this.API.message.localisation.Ball({
 		locObject: {
-			position: {x:1,y:1}
+			position: {x:1,y:1},
 			// last_measurement_time : now
+			positionCov: {x:{x:0.02,y:-0.009},y:{x:-0.009,y:0.01}}
 		},
 		velocity : {x:0,y:0},
 	});
