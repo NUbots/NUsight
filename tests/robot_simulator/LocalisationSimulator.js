@@ -58,7 +58,7 @@ LocalisationSimulator.prototype.run = function () {
 		},
 		heading : {x:1,y:1},
 		velocity : {x:0,y:0},
-		covariance : {x:{x:1,y:0,z:0},y:{x:0,y:1,z:0},z:{x:0,y:0,z:1}}
+		covariance : {x:{x:0.02,y:0.009,z:0},y:{x:0.009,y:0.01,z:0},z:{x:0,y:0,z:0.001}}
 	});
 
 	var ball_message = new this.API.message.localisation.Ball({

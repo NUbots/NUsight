@@ -157,11 +157,12 @@ Ext.define('NU.view.field.Robot', {
 			model.localisation.position.setY(vec.y);
 
 			//TODO: covariance ellipse
+			var result = this.calculateErrorElipse(api_localisation.covariance.x.x, api_localisation.covariance.x.y, api_localisation.covariance.y.y);
 
-			// var result = this.calculateErrorElipse(api_localisation.covariance.x.x, api_localisation.covariance.x.y, api_localisation.covariance.y.y);
-			// model.visualiser.scale.x = result.x;
-			// model.visualiser.scale.y = result.y;
-			// model.visualiser.rotation.z = result.angle;
+			model.robot_ellipse.scale.setX(result.x);
+			model.robot_ellipse.scale.setY(result.y);
+			model.robot_ellipse.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),result.angle);
+
 
 		},this);
 	},

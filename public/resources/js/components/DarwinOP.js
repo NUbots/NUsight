@@ -92,11 +92,20 @@
         //Hwt
         this.worldTransform = new THREE.Object3D();
         this.localisation.add(this.worldTransform);
+        
+        //Add robot error ellipse
+		var robot_disk = new THREE.CircleGeometry(1,32);
+		var robot_disk_material =  new THREE.MeshBasicMaterial( {color: 0xff00ff, transparent: true, opacity : 0.5} );
+		var robot_disk_mesh = new THREE.Mesh( robot_disk, robot_disk_material );
+		this.worldTransform.add( robot_disk_mesh );
+		this.robot_ellipse = robot_disk_mesh;
+		robot_disk_mesh.position.setZ(0.0011236867);
 
         // This corrects the fact that the model is made for computer graphics axis
         this.orientationCorrection = new THREE.Object3D();
         this.orientationCorrection.rotation.x = Math.PI/2;
         this.worldTransform.add(this.orientationCorrection);
+
 
         this.loading = 0;
 
