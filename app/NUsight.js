@@ -20,7 +20,7 @@ function NUsight (io) {
 	this.network.on('nuclear_join', function (peer) {
 		var name = peer.name;
 		var address = peer.address;
-		console.log(address);
+
 		if(name === 'nusight') {
 			return;
 		}
@@ -64,16 +64,6 @@ function NUsight (io) {
 		});
 	}.bind(this));
 
-	// We started listening to a type
-	this.network.on('listen', function (event) {
-		console.log('Started listening to', event);
-	});
-
-	// We stopped listening to a type
-	this.network.on('unlisten', function (event) {
-		console.log('Stopped listening to', event);
-	});
-
 	this.network.connect({
 		name: 'nusight',
 	});
@@ -93,9 +83,9 @@ function NUsight (io) {
 
 		socket.on('message', function (typeName, data, target, reliable) {
 			this.network.send({
-				type: typeName, 
-				payload: data, 
-				target: target, 
+				type: typeName,
+				payload: data,
+				target: target,
 				reliable: reliable});
 		}.bind(this));
 
