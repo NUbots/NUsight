@@ -11,6 +11,7 @@ function LocalisationSimulator (opts) {
 	this.loadProto('message.input.Sensors');
 	this.loadProto('message.mat44');
 	this.loadProto('message.localisation.Self');
+	this.loadProto('message.localisation.Ball');
 
 
 	this.sensors_message = new this.API.message.input.Sensors({
@@ -59,6 +60,16 @@ LocalisationSimulator.prototype.run = function () {
 		velocity : {x:0,y:0},
 		covariance : {x:{x:1,y:0,z:0},y:{x:0,y:1,z:0},z:{x:0,y:0,z:1}}
 	});
+
+	var ball_message = new this.API.message.localisation.Ball({
+		locObject: {
+			position: {x:1,y:1}
+			// last_measurement_time : now
+		},
+		velocity : {x:0,y:0},
+	});
+
+	//SENSORS
 	var world_rot = new THREE.Matrix4()
 	var world_trans = new THREE.Matrix4()
 	//Htw = world
@@ -68,6 +79,7 @@ LocalisationSimulator.prototype.run = function () {
 
 	this.sendMessage(message);
 	this.sendMessage(this.sensors_message);
+	this.sendMessage(ball_message);
 };
 
 if (require.main === module) {

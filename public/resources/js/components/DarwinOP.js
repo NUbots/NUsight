@@ -65,7 +65,18 @@
         //Hfw
         this.localisation = new THREE.Object3D();
         this.add(this.localisation);
-        
+
+        //Add ball
+        this.ball_model = new THREE.Object3D();
+        this.localisation.add(this.ball_model);
+        var radius = 0.075;
+        var geometry = new THREE.SphereGeometry( radius, 32, 32 );
+		var material = new THREE.MeshPhongMaterial( {color: 0xffffff} );
+		var sphere = new THREE.Mesh( geometry, material );
+		sphere.position.setZ(radius);
+		this.ball_model.add( sphere );
+		this.ball_model.position.setX(1);
+
         // This corrects the fact that the model is made for computer graphics axis
         //Hwt
         this.worldTransform = new THREE.Object3D();

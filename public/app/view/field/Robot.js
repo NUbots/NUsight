@@ -60,7 +60,7 @@ Ext.define('NU.view.field.Robot', {
                 HEAD_PAN            : 18,
                 HEAD_TILT           : 19,
             };
-			var model = robot.object;
+			var model = robot;
 
 			if (api_motor_data.length > 0) {
 				model.rightShoulder.setAngle(api_motor_data[ServoID.R_SHOULDER_PITCH].presentPosition - PI2);
@@ -98,6 +98,10 @@ Ext.define('NU.view.field.Robot', {
 			);
 			Hwt.getInverse(Htw);
 
+			// Hackery! just attach this to the model for ball localisation
+			model.Htw = Htw;
+			model.Hwt = Hwt;
+
 			// var rWTt = new THREE.Vector4();
 			// rWTt.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 1);
 			
@@ -123,7 +127,7 @@ Ext.define('NU.view.field.Robot', {
 		}
 		this.robotModels.forEach(function (robot) {
 
-			var model = robot.object;
+			var model = robot;
 
 
 			var x = api_localisation.locObject.position.x;
@@ -154,10 +158,33 @@ Ext.define('NU.view.field.Robot', {
 
 			//TODO: covariance ellipse
 
-			// var result = this.calculateErrorElipse(api_localisation.covariance.x.x, api_localisation.covariance.x.y, api_localisation.covariance.y.y);
-			// model.visualiser.scale.x = result.x;
-			// model.visualiser.scale.y = result.y;
-			// model.visualiser.rotation.z = result.angle;
+			var result = this.calculateErrorElipse(api_localisation.covariance.x.x, api_localisation.covariance.x.y, api_localisation.covariance.y.y);
+			model.visualiser.scale.x = result.x;
+			model.visualiser.scale.y = result.y;
+			model.visualiser.rotation.z = result.angle;
+
+		},this);
+	},
+	onBallLocalisation: function (api_ball){
+		this.robotModels.forEach(function (robot) {
+			var model = robot;
+			// model.ball_model.children[0].material.color = 0xffffff;
+
+			// If we show odometry we are fine
+			if (this.getShowOrientation()) {
+				model.ball_model.position.setX(api_ball.locObject.position.x);
+				model.ball_model.position.setY(api_ball.locObject.position.y);
+			}
+			// Otherwise we need to transform this through the odometry transform
+			else if (model.Htw) {
+				var vec = new THREE.Vector4(api_ball.locObject.position.x, api_ball.locObject.position.y, 0, 1);
+				vec.applyMatrix4(model.Htw);
+
+				model.ball_model.position.setX(vec.x);
+				model.ball_model.position.setY(vec.y);
+
+			}
+
 
 		},this);
 	},
@@ -176,8 +203,8 @@ Ext.define('NU.view.field.Robot', {
 		//        darwin.bindToData(DarwinModel);
 		//        var model = Ext.create('NU.model.DarwinOP');
 		//        darwin.setModel(model);
-		darwin = LocalisationVisualiser.visualise(darwin);
-		darwin = BehaviourVisualiser.visualise(darwin);
+		// darwin = LocalisationVisualiser.visualise(darwin);
+		// darwin = BehaviourVisualiser.visualise(darwin);
 		return darwin;
 	},
 	createIgusModel: function () {
