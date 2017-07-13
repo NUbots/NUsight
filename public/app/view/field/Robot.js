@@ -85,35 +85,33 @@ Ext.define('NU.view.field.Robot', {
 				model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].presentPosition);
 			}
 
-			var rotation = new THREE.Matrix4();
+			//World to torso
+			var Htw = new THREE.Matrix4();
+			var Hwt = new THREE.Matrix4();
 
-			// Set our rotation from the worldToLocal matrix
-			// Invert as we go to get world space translations/rotations
-			// This is transposing the matrix as it is constructed
-			rotation.set(
-				api_sensor_data.world.x.x, api_sensor_data.world.x.y, api_sensor_data.world.x.z, 0,
-				api_sensor_data.world.y.x, api_sensor_data.world.y.y, api_sensor_data.world.y.z, 0,
-				api_sensor_data.world.z.x, api_sensor_data.world.z.y, api_sensor_data.world.z.z, 0,
+			//set
+			Htw.set(
+				api_sensor_data.world.x.x, api_sensor_data.world.y.x, api_sensor_data.world.z.x, api_sensor_data.world.t.x,
+				api_sensor_data.world.x.y, api_sensor_data.world.y.y, api_sensor_data.world.z.y, api_sensor_data.world.t.y,
+				api_sensor_data.world.x.z, api_sensor_data.world.y.z, api_sensor_data.world.z.z, api_sensor_data.world.t.z,
 				0, 0, 0, 1
 			);
+			Hwt.getInverse(Htw);
 
-			var translation = new THREE.Vector4();
-			translation.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 0);
-			// Apply inverse rotation (as its transposed above)
-			translation.applyMatrix4(rotation);
-			// Invert translation
-			translation.negate();
-			// Set our z position from our sensors
-			model.position.setZ(translation.z);
-
-			if (this.getShowOrientation() && !this.getShowLocalisation()) {
+			// var rWTt = new THREE.Vector4();
+			// rWTt.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 1);
+			
+			var vec = new THREE.Vector3();
+			vec.setFromMatrixPosition(Hwt);
+			model.worldTransform.position.setZ(vec.z);
+			
+			if (this.getShowOrientation()) {
 				// Apply orientation
-				model.quaternion.setFromRotationMatrix(rotation);
+				model.worldTransform.quaternion.setFromRotationMatrix(Hwt);
 			}
-
-			if (this.getShowOdometry() && !this.getShowLocalisation()) {
-				robot.position.setX(translation.x);
-				robot.position.setY(translation.y);
+			if (this.getShowOdometry()) {
+				model.worldTransform.position.setX(vec.x);
+				model.worldTransform.position.setY(vec.y);
 			}
 
 		}, this);
@@ -136,16 +134,16 @@ Ext.define('NU.view.field.Robot', {
 			// Invert as we go to get world space translations/rotations
 			// This is transposing the matrix as it is constructed
 			rotation.set(
-				api_localisation.heading.x, 0, api_localisation.heading.y, 	0,
-				0, 							1,								 0, 0,
-				-api_localisation.heading.y, 0, api_localisation.heading.x, 		0,
-				0, 0, 														 0, 1
+				api_localisation.heading.x, -api_localisation.heading.y, 0,		0,
+				api_localisation.heading.y, api_localisation.heading.x, 0,	0,
+				0, 0, 1, 0,
+				0, 0, 0, 1
 			);
 
 			// Set the robot-world to field matrix (=Hfw)
 			model.localisation.quaternion.setFromRotationMatrix(rotation);
 			model.localisation.position.setX(x);
-			model.localisation.position.setZ(-y);
+			model.localisation.position.setY(y);
 
 			//TODO: covariance ellipse
 
