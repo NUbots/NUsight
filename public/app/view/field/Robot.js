@@ -125,25 +125,32 @@ Ext.define('NU.view.field.Robot', {
 
 			var model = robot.object;
 
+
 			var x = api_localisation.locObject.position.x;
 			var y = api_localisation.locObject.position.y;
 
-			var rotation = new THREE.Matrix4();
+			var x_axis = new THREE.Vector3( api_localisation.heading.x, api_localisation.heading.y);
+			var y_axis = new THREE.Vector3(-api_localisation.heading.y, api_localisation.heading.x);
+			x_axis.normalize();
+			y_axis.normalize();
 
-			// Set our rotation from the worldToLocal matrix
-			// Invert as we go to get world space translations/rotations
-			// This is transposing the matrix as it is constructed
-			rotation.set(
-				api_localisation.heading.x, -api_localisation.heading.y, 0,		0,
-				api_localisation.heading.y, api_localisation.heading.x, 0,	0,
+			//Transform from world to field
+			Hwf = new THREE.Matrix4();
+			Hwf.set(
+				x_axis.x, y_axis.x, 0,	x,
+				x_axis.y, y_axis.y, 0,	y,
 				0, 0, 1, 0,
 				0, 0, 0, 1
 			);
+			Hfw = new THREE.Matrix4();
+			Hfw.getInverse(Hwf);
 
 			// Set the robot-world to field matrix (=Hfw)
-			model.localisation.quaternion.setFromRotationMatrix(rotation);
-			model.localisation.position.setX(x);
-			model.localisation.position.setY(y);
+			model.localisation.quaternion.setFromRotationMatrix(Hfw);
+			var vec = new THREE.Vector3();
+			vec.setFromMatrixPosition(Hfw);
+			model.localisation.position.setX(vec.x);
+			model.localisation.position.setY(vec.y);
 
 			//TODO: covariance ellipse
 

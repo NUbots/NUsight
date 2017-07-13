@@ -52,16 +52,17 @@ LocalisationSimulator.prototype.run = function () {
 	var radius = 1;
 	var message = new this.API.message.localisation.Self({
 		locObject: {
-			position: {x:0,y:0}
+			position: {x:1,y:1}
 			// last_measurement_time : now
 		},
-		heading : {x:1,y:0},
+		heading : {x:1,y:1},
 		velocity : {x:0,y:0},
 		covariance : {x:{x:1,y:0,z:0},y:{x:0,y:1,z:0},z:{x:0,y:0,z:1}}
 	});
 	var world_rot = new THREE.Matrix4()
 	var world_trans = new THREE.Matrix4()
-	world_rot.makeRotationZ(1.7);
+	//Htw = world
+	world_rot.makeRotationZ(now / 1000);
 	world_trans.makeTranslation(1,1,-0.2);
 	this.sensors_message.world = this.matrixToProto(world_trans.multiply(world_rot));
 

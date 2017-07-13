@@ -62,10 +62,12 @@
 
 
         //Setup localisation container
+        //Hfw
         this.localisation = new THREE.Object3D();
         this.add(this.localisation);
         
         // This corrects the fact that the model is made for computer graphics axis
+        //Hwt
         this.worldTransform = new THREE.Object3D();
         this.localisation.add(this.worldTransform);
 
