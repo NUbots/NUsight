@@ -159,7 +159,7 @@ Ext.define('NU.view.field.Robot', {
 				0, 0, 0, 1
 			);
 			Hfw = new THREE.Matrix4();
-			Hfw.getInverse(Hwf);
+			Hfw.copy(Hwf);
 
 			// Set the robot-world to field matrix (=Hfw)
 			model.localisation.quaternion.setFromRotationMatrix(Hfw);
