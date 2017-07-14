@@ -112,22 +112,34 @@ Ext.define('NU.view.field.Robot', {
 			if (this.getShowOrientation()) {
 				// Apply orientation
 				model.worldTransform.quaternion.setFromRotationMatrix(Hwt);
+			} else {
+				//Set to identity
+				model.worldTransform.quaternion.set(new THREE.Quaternion());
 			}
 			if (this.getShowOdometry()) {
 				model.worldTransform.position.setX(vec.x);
 				model.worldTransform.position.setY(vec.y);
+			} else {
+				model.worldTransform.position.setX(0);
+				model.worldTransform.position.setY(0);
 			}
 
 		}, this);
 	},
 	onLocalisation: function (api_localisation) {
 		//Self object
-		if(!this.getShowLocalisation()) {
-			return;
-		}
+		
 		this.robotModels.forEach(function (robot) {
-
 			var model = robot;
+			if(!this.getShowLocalisation()) {
+				model.localisation.quaternion.setFromRotationMatrix(new THREE.Matrix4());
+				model.localisation.position.setX(0);
+				model.localisation.position.setY(0);
+				model.robot_ellipse.scale.setX(0.0000001);
+				model.robot_ellipse.scale.setY(0.0000001);
+				model.robot_ellipse.quaternion.setFromAxisAngle(new THREE.Quaternion());
+				return;
+			}
 
 
 			var x = api_localisation.locObject.position.x;
