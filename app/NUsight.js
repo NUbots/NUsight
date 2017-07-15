@@ -186,7 +186,6 @@ function NUsight (io) {
 					try { fs.mkdirSync('logs/' + robotId); } catch(e) {}
 
 					// Create a recording file
-					console.log(robotId);
 					this.recordings[robotId] = fs.createWriteStream('logs/' + robotId + '/' + Date.now() + '.nbs', {encoding: 'binary'});
 
 					// TODO make a callback that gets all network data from this robot
