@@ -177,7 +177,8 @@ Ext.define('NU.view.field.Robot', {
 			model.robot_ellipse.scale.setY(result.y);
 			model.robot_ellipse.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),result.angle);
 
-	        var theta = Math.max(0.1,api_localisation.covariance.z.z);
+			//Times 3 for 99% confidence interval
+	        var theta = 2 * Math.max(0.1,api_localisation.covariance.z.z) * 3;
 			var new_robot_wedge = new THREE.CircleGeometry(0.2,32,0,theta);
 			model.robot_direction_wedge.geometry = new_robot_wedge;
 			model.robot_direction_wedge.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),-theta/2);
