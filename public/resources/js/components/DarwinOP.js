@@ -100,6 +100,16 @@
 		this.worldTransform.add( robot_disk_mesh );
 		this.robot_ellipse = robot_disk_mesh;
 		robot_disk_mesh.position.setZ(0.0011236867);
+        
+        //Add robot error ellipse
+        var theta = 0.5;
+		var robot_wedge = new THREE.CircleGeometry(0.2,32,0,theta);
+		var robot_wedge_material =  new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: false, opacity : 0.5} );
+		var robot_direction_wedge = new THREE.Mesh( robot_wedge, robot_wedge_material );
+		this.worldTransform.add( robot_direction_wedge );
+		this.robot_direction_wedge = robot_direction_wedge;
+		robot_direction_wedge.position.setZ(0.01812867);
+		robot_direction_wedge.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),-theta/2);
 
         // This corrects the fact that the model is made for computer graphics axis
         this.orientationCorrection = new THREE.Object3D();
