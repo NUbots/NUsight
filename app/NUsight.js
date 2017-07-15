@@ -102,15 +102,59 @@ function NUsight (io) {
 
 		socket.on('addType', function (socket, messageType) {
 			console.log('Started listening to', messageType);
-
+			var robots = this.robots;
+			var recordings = this.recordings;
 			// Add a callback function for this
 			client.listeners[messageType] = function (packet) {
+
+				function getByteLen(normal_val) {
+					// Force string type
+					normal_val = String(normal_val);
+
+					var byteLen = 0;
+					for (var i = 0; i < normal_val.length; i++) {
+						var c = normal_val.charCodeAt(i);
+						byteLen += c < (1 <<  7) ? 1 :
+								c < (1 << 11) ? 2 :
+								c < (1 << 16) ? 3 :
+								c < (1 << 21) ? 4 :
+								c < (1 << 26) ? 5 :
+								c < (1 << 31) ? 6 : Number.NaN;
+					}
+					return byteLen;
+				}
 				var source = packet.peer;
 				var data = packet.payload;
 
 				var filterId = data.readUInt8(0);
 				var timestamp = int53.readUInt64LE(data, 1);
 				var protobuf = data.slice(9);
+
+				if(robots[packet.peer.name].recording) {
+					const MAX_UINT32 = 0xFFFFFFFF;
+					var file = recordings[packet.peer.name];
+					
+					var radiationSymbol = Buffer.from([0xE2, 0x98, 0xA2]);
+					file.write(radiationSymbol); //radiation symbol
+					
+					var size = 8 + 8 + packet.payload.length;
+					var len = new Buffer(4);
+					len.writeUInt32LE(size, 0)
+					file.write(len);
+					
+					// timestamp
+					var time = Date.now() * 1000;
+					var buf = new Buffer(8);
+					const big = ~~(time / MAX_UINT32);
+					const low = (time % MAX_UINT32) - big;
+					buf.writeUInt32BE(big, 0);
+					buf.writeUInt32BE(low, 4);
+					file.write(buf);					
+
+					file.write(packet.hash);
+					
+					file.write(packet.payload);
+				}
 
 				this.sendMessage({ id: source.name, host: source.address }, messageType, protobuf, filterId, timestamp);
 			}.bind(client);
@@ -142,7 +186,8 @@ function NUsight (io) {
 					try { fs.mkdirSync('logs/' + robotId); } catch(e) {}
 
 					// Create a recording file
-					this.recordings[robotId] = fs.createWriteStream('logs/' + robotId + '/' + Date.now() + '.nbs');
+					console.log(robotId);
+					this.recordings[robotId] = fs.createWriteStream('logs/' + robotId + '/' + Date.now() + '.nbs', {encoding: 'binary'});
 
 					// TODO make a callback that gets all network data from this robot
 				}
