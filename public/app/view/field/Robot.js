@@ -138,6 +138,8 @@ Ext.define('NU.view.field.Robot', {
 				model.robot_ellipse.scale.setX(0.0000001);
 				model.robot_ellipse.scale.setY(0.0000001);
 				model.robot_ellipse.quaternion.setFromAxisAngle(new THREE.Quaternion());
+				model.robot_direction_wedge.geometry = new THREE.CircleGeometry(0,32,0,0);
+
 				return;
 			}
 
