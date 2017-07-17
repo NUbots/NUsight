@@ -20,7 +20,7 @@ Ext.define('NU.view.window.VisionController', {
 		// camera parameters
 		isPinholeCamera: false,
         pixelToTanThetaFactor: [], //pinhole
-        focalLengthPixels: null, //pinhole
+        focalLengthPixels: (320 * 0.5) / Math.tan(1.0472 * 0.5), //pinhole
         distortionFactor: null, //pinhole
         FOV: [2.0, 2.0],
         centreOffset: [0, 0]
@@ -562,7 +562,6 @@ Ext.define('NU.view.window.VisionController', {
         }
     },
     drawHorizon: function(horizon) {
-		horizon = [-0.1, 0.1, 1.0];
         var context = this.getContext('horizon');
         context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
@@ -579,14 +578,10 @@ Ext.define('NU.view.window.VisionController', {
 		var maxFOV = Math.max(fov[0], fov[1]);
 		var theta = maxFOV / N;
 		for(var i = -N; i < N + 1; i++) {
-			
-			//var R = new THREE.Matrix4().makeRotationAxis(n, theta * i);
-
-			//var fi = f0.clone().applyMatrix4(R);
 			var fi = f0.clone().applyAxisAngle(n, theta * i);
-
 			points.push(this.getImageFromCam(fi.toArray()));
 		}
+		
 		context.beginPath();
 		points.forEach(function(point, i) {
 			if(i == 0) {
