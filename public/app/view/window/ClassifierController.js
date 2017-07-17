@@ -13,6 +13,7 @@ Ext.define('NU.view.window.ClassifierController', {
 	],
 	rawImageRenderer: null,
 	config: {
+		cameraId: null,
 		rawContext: null,
 		classifiedContext: null,
 		frozen: false,
@@ -105,6 +106,9 @@ Ext.define('NU.view.window.ClassifierController', {
 		RGB3: 0x33424752,
 		JPEG: 0x4745504a,
 		UNKNOWN: 0,
+	},
+	onSelectCamera: function(cameraId) {
+		this.setCameraId(cameraId);
 	},
 	/**
 	 * Callback when the undo button is clicked
@@ -641,7 +645,6 @@ Ext.define('NU.view.window.ClassifierController', {
 		}
 	},
 	onLookUpTable: function (robot, lookuptable) {
-
 		// TODO: remove
 		if (robot.get('id') !== this.getRobotId()) {
 			return;
@@ -695,6 +698,10 @@ Ext.define('NU.view.window.ClassifierController', {
 
 		// TODO: remove
 		if (robot.get('id') !== this.getRobotId()) {
+			return;
+		}
+
+		if (image.getCameraId() !== this.getCameraId()) {
 			return;
 		}
 
@@ -1141,10 +1148,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		var components = this.getRawImageComponents();
 		var imageWidth = this.getImageWidth();
 		var imageHeight = this.getImageHeight();
-
 		//x = imageWidth - x - 1;
 		//y = imageHeight - y - 1;
-
 		switch (this.getImageFormat()) {
 			case this.Format.JPEG:
 				var offset = 3 * (y * imageWidth + x);
@@ -1163,10 +1168,10 @@ Ext.define('NU.view.window.ClassifierController', {
 				];
 			case this.Format.YM24:
 				return [
-					components[3 * (y * imageWidth + x)    ],
-					components[3 * (y * imageWidth + x) + 1],
-					components[3 * (y * imageWidth + x) + 2]
-				];
+                    components[3 * (y * imageWidth + x)    ],
+                    components[3 * (y * imageWidth + x) + 1],
+                    components[3 * (y * imageWidth + x) + 2]
+                ];;
 			case this.Format.UYVY:
 				var offset = 2 * (y * imageWidth + x);
 				var shift = (x % 2) * 2;
@@ -1175,9 +1180,59 @@ Ext.define('NU.view.window.ClassifierController', {
 					components[offset + 0 - shift],
 					components[offset + 2 - shift]
 				];
+			case this.Format.GRBG:
+				return this.bayerToRGB(components, x, y, imageWidth, imageHeight, [1, 0]);
+			case this.Format.RGGB:
+				return this.bayerToRGB(components, x, y, imageWidth, imageHeight, [0, 0]);
+			case this.Format.GBRG:
+				return this.bayerToRGB(components, x, y, imageWidth, imageHeight, [1, 0]);
+			case this.Format.BGGR:
+				return this.bayerToRGB(components, x, y, imageWidth, imageHeight, [1, 1]);;
 			default:
 				throw new Error('Unsupported format');
 		}
+	},
+	bayerToRGB: function(components, x, y, imageWidth, imageHeight, firstRed) {
+		var value = y * imageWidth + x;
+		var colour = [];
+		var n = (y - 1) * imageWidth + x;
+		var s = (y + 1) * imageWidth + x;
+		var e = y * imageWidth + (x + 1);
+		var w = y * imageWidth + (x - 1);
+		var ne = (y - 1) * imageWidth + (x + 1);
+		var se = (y + 1) * imageWidth + (x + 1);
+		var nw = (y - 1) * imageWidth + (x - 1);
+		var sw = (y + 1) * imageWidth + (x - 1);
+
+		if(x % 2 == firstRed[0]) {
+			if(y % 2 == firstRed[1]) {
+				colour[0] = components[value];
+				colour[1] = (components[n] + components[e] + components[s] + components[w]) / 4;
+				colour[2] = (components[nw] + components[ne] + components[sw] + components[se]) / 4;
+			}else {
+				colour[0] = (components[n] + components[s]) / 2;
+				colour[1] = components[value];
+				colour[2] = (components[w] + components[e]) / 2;
+			}
+		}else {
+			if(y % 2 == firstRed[1]) {
+				colour[0] = (components[n] + components[s]) / 2;
+				colour[1] = components[value];
+				colour[2] = (components[w] + components[e]) / 2;
+			}else {
+				colour[0] = (components[nw] + components[ne] + components[sw] + components[se]) / 4;
+				colour[1] = (components[n] + components[e] + components[s] + components[w]) / 4;
+				colour[2] = components[value];
+			}
+		}
+
+		return colour;
+	},
+	rgbToYCbCr: function(rgb) {
+		var y = rgb[0] *  .299000 + rgb[1] *  .587000 + rgb[2] *  .114000;
+		var u = rgb[0] * -.168736 + rgb[1] * -.331264 + rgb[2] *  .500000 + 128;
+		var v = rgb[0] *  .500000 + rgb[1] * -.418688 + rgb[2] * -.081312 + 128;
+		return [y, u, v];
 	},
 	drawImage: function (image, callback, thisArg) {
 		this.setImageFormat(image.format);
@@ -1217,6 +1272,26 @@ Ext.define('NU.view.window.ClassifierController', {
 		var data = new Uint8Array(image.data.toArrayBuffer());
 		var bytesPerPixel = 2;
 
+        if(image.format == this.Format.GRBG) {
+            this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+            this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+            this.selectionClassifier.updateRawImage(this.Format.GRBG, data, width, height, THREE.LuminanceFormat);
+        }else if(image.format == this.Format.RGGB) {
+            this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            this.selectionClassifier.updateRawImage(this.Format.RGGB, data, width, height, THREE.LuminanceFormat);
+        }else if(image.format == this.Format.GBRG) {
+            this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
+            this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
+            this.selectionClassifier.updateRawImage(this.Format.GBRG, data, width, height, THREE.LuminanceFormat);
+        }else if(image.format == this.Format.BGGR) {
+            this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
+            this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
+            this.selectionClassifier.updateRawImage(this.Format.BGGR, data, width, height, THREE.LuminanceFormat);
+        } else {
+            this.selectionClassifier.updateRawImage(this.Format.YUYV, data, width, height, THREE.LuminanceFormat);
+        }
+
 		var renderers = [this.rawImageRenderer, this.classifiedRenderer, this.selectionRenderer];
 		for (var i = 0, len = renderers.length; i < len; i++) {
 			var renderer = renderers[i];
@@ -1231,26 +1306,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.rawImageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 		this.classifiedRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 
-		if(image.format == Format.GRBG) {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
-		}else if(image.format == Format.RGGB) {
-			console.log('test');
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-		}else if(image.format == Format.GBRG) {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
-		}else if(image.format == Format.BGGR) {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
-		} else {
-			this.rawImageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-			this.classifiedRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-		}
+        this.selectionClassifier.resize(width, height);
 
-		this.selectionClassifier.resize(width, height);
-		this.selectionClassifier.updateRawImage(this.Format.YUYV, data, width, height, THREE.LuminanceFormat);
 		this.setRawImageComponents(data);
 	},
 	drawImageYbCr422: function (image) {
@@ -1328,6 +1385,31 @@ Ext.define('NU.view.window.ClassifierController', {
 		callback.call(thisArg, ctx);
 	},
 	testDrawImage: function (callback) {
+		// function _base64ToArrayBuffer(base64) {
+		// 	var binary_string =  window.atob(base64);
+		// 	var len = binary_string.length;
+		// 	var bytes = new Uint8Array( len );
+		// 	for (var i = 0; i < len; i++)        {
+		// 		bytes[i] = binary_string.charCodeAt(i);
+		// 	}
+		// 	return bytes.buffer;
+		// }
+        //
+		// var image = {
+		// 	data: _base64ToArrayBuffer(imageData),
+		// 	dimensions: {
+		// 		x: 1280,
+		// 		y: 1024
+		// 	},
+		// 	format: this.Format.BGGR
+		// };
+		// var width = image.dimensions.x;
+		// var height = image.dimensions.y;
+		// var record = NU.Network.getRobotStore().findRecord('id', this.getRobotId());
+		// this.onImage(record, image);
+		// callback.call(this);
+		// this.autoSize(width, height);
+
 		var uri = 'resources/images/test_image2.jpg';
 		var imageObj = new JpegImage();
 		imageObj.onload = function () {

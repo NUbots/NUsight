@@ -93,7 +93,9 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 					colour: {type: '3fv', value: [0, 0, 0]},
 					tolerance: {type: 'f', value: -1},
 					classification: {type: 'f', value: -1},
-					overwrite: {type: 'i', value: 0}
+					overwrite: {type: 'i', value: 0},
+                    resolution: {type: 'v2', value: new THREE.Vector2(1280, 1024)},
+                    firstRed: {type: 'v2', value: new THREE.Vector2(1, 1)}
 				},
 				vertexShader: this.imageVertexShaderText,
 				fragmentShader: this.imageFragmentShaderText
@@ -146,6 +148,17 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 		this.updateUniform('imageFormat', imageFormat, this.imagePointCloud.material);
 		this.updateUniform('imageWidth', width, this.imagePointCloud.material);
 		this.updateUniform('imageHeight', height, this.imagePointCloud.material);
+        this.updateUniform('resolution', new THREE.Vector2(width, height), this.imagePointCloud.material);
+
+        if(imageFormat == this.Format.GRBG) {
+            this.updateUniform('firstRed', new THREE.Vector2(1, 0), this.imagePointCloud.material);
+        }else if(imageFormat == this.Format.RGGB) {
+            this.updateUniform('firstRed', new THREE.Vector2(0, 0), this.imagePointCloud.material);
+        }else if(imageFormat == this.Format.GBRG) {
+            this.updateUniform('firstRed', new THREE.Vector2(0 , 1), this.imagePointCloud.material);
+        }else if(imageFormat == this.Format.BGGR) {
+            this.updateUniform('firstRed', new THREE.Vector2(1, 1), this.imagePointCloud.material);
+        }
 	},
 	updateColour: function (value) {
 		this.updateUniform('colour', value, this.imagePointCloud.material);
@@ -165,9 +178,15 @@ Ext.define('NU.view.webgl.magicwand.Classify', {
 	updateBitsB: function (value) {
 		this.updateUniform('bitsB', value, this.imagePointCloud.material);
 	},
-	updateOverwrite: function (value) {
-		this.updateUniform('overwrite', value, this.imagePointCloud.material);
-	},
+    updateOverwrite: function (value) {
+        this.updateUniform('overwrite', value, this.imagePointCloud.material);
+    },
+    updateFirstRed: function (value) {
+        this.updateUniform('firstRed', value, this.imagePointCloud.material);
+    },
+    updateResolution: function (value) {
+        this.updateUniform('resolution', value, this.imagePointCloud.material);
+    },
 	/**
 	 * @param {ArrayBuffer} [lut]
 	 * @param {int} [size]

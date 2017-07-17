@@ -8,7 +8,9 @@ Ext.define('NU.view.webgl.magicwand.Selection', {
 				imageHeight: {type: 'i'},
 				imageFormat: {type: 'i'},
 				colour: {type: '3fv', value: [0, 0, 0]},
-				tolerance: {type: 'f', value: -1}
+				tolerance: {type: 'f', value: -1},
+                resolution: {type: 'v2', value: new THREE.Vector2(1280, 1024)},
+                firstRed: {type: 'v2', value: new THREE.Vector2(1, 1)}
 			}
 		});
 
@@ -23,6 +25,12 @@ Ext.define('NU.view.webgl.magicwand.Selection', {
 	},
 	updateTolerance: function (value) {
 		this.updateUniform('tolerance', value);
-	}
+	},
+    updateResolution: function (value) {
+        this.updateUniform('resolution', value);
+    },
+    updateFirstRed: function (value) {
+        this.updateUniform('firstRed', value);
+    }
 });
 
