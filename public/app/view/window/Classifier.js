@@ -227,9 +227,35 @@ Ext.define('NU.view.window.Classifier', {
 						style: {
 							backgroundColor: '#000',
 							cursor: 'crosshair'
-//								backgroundImage: "url('resources/images/camera.png')",
-//								backgroundRepeat: 'no-repeat',
-//								backgroundPosition: 'center',
+							// backgroundImage: "url('resources/images/camera.png')",
+							// backgroundRepeat: 'no-repeat',
+							// backgroundPosition: 'center',
+						},
+						listeners: {
+							afterrender: function(a, b, c) {
+								console.log('Rendered', a, b, c);
+
+								this.getEl().on({
+									mouseenter: function(a, b, c) {
+										console.log('[Raw image]: Mouse entered', a, b, c);
+									},
+									mouseleave: function(a, b, c) {
+										console.log('[Raw image]: Mouse left', a, b, c);
+									},
+									mousemove: function(a, b, c) {
+										console.log('[Raw image]: Mouse move', a, b, c);
+									}
+								});
+							},
+							mouseenter: function(a, b, c) {
+								console.log('[Raw image]: Mouse entered', a, b, c);
+							},
+							mouseleave: function(a, b, c) {
+								console.log('[Raw image]: Mouse left', a, b, c);
+							},
+							mousemove: function(a, b, c) {
+								console.log('[Raw image]: Mouse move', a, b, c);
+							}
 						}
 					}
 				}, {
@@ -239,7 +265,8 @@ Ext.define('NU.view.window.Classifier', {
 					style: {
 						display: 'block',
 						border: '2px solid #000',
-						borderRadius: '2px'
+						borderRadius: '2px',
+						position: 'relative'
 					},
 					items: {
 						xtype: 'nu_layered_canvas',
@@ -253,10 +280,30 @@ Ext.define('NU.view.window.Classifier', {
 					}
 				}]
 			}, {
-				// 3d scatter
-				xtype: 'scatter3d',
-				reference: 'scatter3d',
-				flex: 1
+				layout: {
+					type: 'card',
+					align: 'stretch'
+				},
+				flex: 1,
+				items: [
+					{
+						// 3d scatter
+						xtype: 'scatter3d',
+						reference: 'scatter3d',
+						flex: 1
+					},
+					{
+						// Zoom overlay window
+						xtype: 'nu_layered_canvas',
+						reference: 'zoomWindow',
+						flex: 1,
+						id: 'zoomWindow',
+						style: {
+							backgroundColor: 'rgba(0,0,255, 0.5)',
+							height: '100%'
+						}
+					}
+				]
 			}]
 		}, {
 			// controls
