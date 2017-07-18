@@ -81,5 +81,8 @@ message ClassifiedImage {
     //map<uint32, Segment>      verticalSegments   = 9;
 
     //Old horizon TODO: phase out
+
+
+    //Old horizon TODO: phase out
     Line                      horizon            = 10;
 }

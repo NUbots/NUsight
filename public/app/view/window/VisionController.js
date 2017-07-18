@@ -474,7 +474,7 @@ Ext.define('NU.view.window.VisionController', {
 
         this.drawClassifiedImage(image);
         this.drawVisualHorizon(image.getVisualHorizon());
-        this.drawHorizon(image.getHorizon_normal());
+        this.drawHorizon(image.horizonNormal);
 
     },
     drawClassifiedImage: function(image) {
@@ -747,53 +747,55 @@ Ext.define('NU.view.window.VisionController', {
 		}
 	},
 	drawBalls: function (balls) {
-		var ballCentre = [2.0, 0.0, 2.0];
-		var p = new THREE.Vector3().fromArray(ballCentre);
-		var q = new THREE.Vector3(p.y, p.x, 0).normalize();
-		var r = new THREE.Vector3().crossVectors(q, p).normalize();
- 
-		var theta = 0;
-		var theta_count = 100.0;
-		var theta_step = 2.0 * Math.PI / theta_count; // not fully correct
+		balls.forEach(function(ball){
+			var ballCentre = ball.cone.axis;
+			var p = new THREE.Vector3().fromArray(ballCentre);
+			var q = new THREE.Vector3(p.y, p.x, 0).normalize();
+			var r = new THREE.Vector3().crossVectors(q, p).normalize();
+	 
+			var theta = 0;
+			var theta_count = 100.0;
+			var theta_step = 2.0 * Math.PI / theta_count; // not fully correct
 
-		var points = [];
+			var points = [];
 
-		var radius = 0.1; // probably not hard coded
+			var radius = ball.cone.gradient; // probably not hard coded
 
-		while(theta < 2 * Math.PI) {
-			var a = q.clone().multiplyScalar(Math.cos(theta));
-			var b = r.clone().multiplyScalar(Math.sin(theta)); 
-			a.add(b).multiplyScalar(radius); 
+			while(theta < 2 * Math.PI) {
+				var a = q.clone().multiplyScalar(Math.cos(theta));
+				var b = r.clone().multiplyScalar(Math.sin(theta)); 
+				a.add(b).multiplyScalar(radius); 
 
-			// P = p + radius * (q * cos(theta) + r * sin(theta));
-			var P = new THREE.Vector3().copy(p.clone().add(a));
+				// P = p + radius * (q * cos(theta) + r * sin(theta));
+				var P = new THREE.Vector3().copy(p.clone().add(a));
 
-			var pixel = this.projectCamSpaceToScreen(P.toArray());
-			points.push(this.screenToImage(pixel));
-			
-			theta += theta_step;
-		}
-
-		var context = this.getContext('balls');
-		context.clearRect(0, 0, this.getWidth(), this.getHeight());
-
-		context.beginPath();
-		points.forEach(function(point, i) {
-			if(i == 0) {
-				context.moveTo(point[0], point[1]);
-				return;
+				var pixel = this.projectCamSpaceToScreen(P.toArray());
+				points.push(this.screenToImage(pixel));
+				
+				theta += theta_step;
 			}
-			
-			context.lineTo(point[0], point[1]);
-		}.bind(this));
-		context.shadowColor = 'black';
-        context.shadowBlur = 5;
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
 
-        context.strokeStyle = "rgba(255, 255, 255, 1)";
-        context.lineWidth = 2;
-        context.stroke();
+			var context = this.getContext('balls');
+			context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+			context.beginPath();
+			points.forEach(function(point, i) {
+				if(i == 0) {
+					context.moveTo(point[0], point[1]);
+					return;
+				}
+				
+				context.lineTo(point[0], point[1]);
+			}.bind(this));
+			context.shadowColor = 'black';
+	        context.shadowBlur = 5;
+	        context.shadowOffsetX = 0;
+	        context.shadowOffsetY = 0;
+
+	        context.strokeStyle = "rgba(255, 255, 255, 1)";
+	        context.lineWidth = 2;
+	        context.stroke();
+		}.bind(this));
 	},
 	drawLines: function (lines) {
 
