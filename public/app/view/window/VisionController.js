@@ -474,7 +474,7 @@ Ext.define('NU.view.window.VisionController', {
 
         this.drawClassifiedImage(image);
         this.drawVisualHorizon(image.getVisualHorizon());
-        this.drawHorizon(image.horizonNormal);
+        this.drawHorizon(image.getHorizonNormal());
 
     },
     drawClassifiedImage: function(image) {
@@ -571,7 +571,7 @@ Ext.define('NU.view.window.VisionController', {
         var N = 100; // total number of points
 
 		var y = new THREE.Vector3(0.0, 1.0, 0.0);
-		var n = new THREE.Vector3().fromArray(horizon).normalize();
+		var n = new THREE.Vector3(horizon.x, horizon.y, horizon.z).normalize();
 		
 		var f0 = new THREE.Vector3().crossVectors(y,  n);
 
@@ -749,7 +749,7 @@ Ext.define('NU.view.window.VisionController', {
 	drawBalls: function (balls) {
 		balls.forEach(function(ball){
 			var ballCentre = ball.cone.axis;
-			var p = new THREE.Vector3().fromArray(ballCentre);
+			var p = new THREE.Vector3(ballCentre.x, ballCentre.y, ballCentre.z);
 			var q = new THREE.Vector3(p.y, p.x, 0).normalize();
 			var r = new THREE.Vector3().crossVectors(q, p).normalize();
 	 
