@@ -20,9 +20,9 @@ Ext.define('NU.view.window.VisionController', {
 		// camera parameters
 		isPinholeCamera: false,
         pixelToTanThetaFactor: [], //pinhole
-        focalLengthPixels: (320 * 0.5) / Math.tan(2.0 * 0.5), //pinhole
-        distortionFactor: null, //pinhole
         FOV: [3.351, 3.351],
+        focalLengthPixels: (320 * 0.5) / Math.tan(3.351 * 0.5), //pinhole
+        distortionFactor: null, //pinhole
         centreOffset: [0, 0]
     },
     onAfterRender: function () {
