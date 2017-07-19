@@ -271,10 +271,10 @@ Ext.define('NU.view.window.Classifier', {
 						// Zoom overlay canvas
 						xtype: 'nu_layered_canvas',
 						reference: 'zoomCanvas',
-						// flex: 1,
+						flex: 1,
 						style: {
 							backgroundColor: 'black',
-							height: '100%'
+							// height: '100%'
 						}
 					}
 				]
