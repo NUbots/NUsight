@@ -60,7 +60,7 @@ Ext.define('NU.view.field.Robot', {
                 HEAD_PAN            : 18,
                 HEAD_TILT           : 19,
             };
-			var model = robot.object;
+			var model = robot;
 
 			if (api_motor_data.length > 0) {
 				model.rightShoulder.setAngle(api_motor_data[ServoID.R_SHOULDER_PITCH].presentPosition - PI2);
@@ -85,85 +85,133 @@ Ext.define('NU.view.field.Robot', {
 				model.head.setAngle(api_motor_data[ServoID.HEAD_TILT].presentPosition);
 			}
 
-			var rotation = new THREE.Matrix4();
+			//World to torso
+			var Htw = new THREE.Matrix4();
+			var Hwt = new THREE.Matrix4();
 
-			// Set our rotation from the worldToLocal matrix
-			// Invert as we go to get world space translations/rotations
-			// This is transposing the matrix as it is constructed
-			rotation.set(
-				api_sensor_data.world.x.x, api_sensor_data.world.x.y, api_sensor_data.world.x.z, 0,
-				api_sensor_data.world.y.x, api_sensor_data.world.y.y, api_sensor_data.world.y.z, 0,
-				api_sensor_data.world.z.x, api_sensor_data.world.z.y, api_sensor_data.world.z.z, 0,
+			//set
+			Htw.set(
+				api_sensor_data.world.x.x, api_sensor_data.world.y.x, api_sensor_data.world.z.x, api_sensor_data.world.t.x,
+				api_sensor_data.world.x.y, api_sensor_data.world.y.y, api_sensor_data.world.z.y, api_sensor_data.world.t.y,
+				api_sensor_data.world.x.z, api_sensor_data.world.y.z, api_sensor_data.world.z.z, api_sensor_data.world.t.z,
 				0, 0, 0, 1
 			);
+			Hwt.getInverse(Htw);
 
-			var translation = new THREE.Vector4();
-			translation.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 0);
-			// Apply inverse rotation (as its transposed above)
-			translation.applyMatrix4(rotation);
-			// Invert translation
-			translation.negate();
-			// Set our z position from our sensors
-			model.position.setZ(translation.z);
+			// Hackery! just attach this to the model for ball localisation
+			model.Htw = Htw;
+			model.Hwt = Hwt;
 
-			if (this.getShowOrientation() && !this.getShowLocalisation()) {
+			// var rWTt = new THREE.Vector4();
+			// rWTt.set(api_sensor_data.world.t.x, api_sensor_data.world.t.y, api_sensor_data.world.t.z, 1);
+			
+			var vec = new THREE.Vector3();
+			vec.setFromMatrixPosition(Hwt);
+			model.worldTransform.position.setZ(vec.z);
+			
+			if (this.getShowOrientation()) {
 				// Apply orientation
-				model.quaternion.setFromRotationMatrix(rotation);
+				model.worldTransform.quaternion.setFromRotationMatrix(Hwt);
+			} else {
+				//Set to identity
+				model.worldTransform.quaternion.set(new THREE.Quaternion());
 			}
-
-			if (this.getShowOdometry() && !this.getShowLocalisation()) {
-				robot.position.setX(translation.x);
-				robot.position.setY(translation.y);
+			if (this.getShowOdometry()) {
+				model.worldTransform.position.setX(vec.x);
+				model.worldTransform.position.setY(vec.y);
+			} else {
+				model.worldTransform.position.setX(0);
+				model.worldTransform.position.setY(0);
 			}
 
 		}, this);
 	},
 	onLocalisation: function (api_localisation) {
+		//Self object
+		
+		this.robotModels.forEach(function (robot) {
+			var model = robot;
+			if(!this.getShowLocalisation()) {
+				model.localisation.quaternion.setFromRotationMatrix(new THREE.Matrix4());
+				model.localisation.position.setX(0);
+				model.localisation.position.setY(0);
+				model.robot_ellipse.scale.setX(0.0000001);
+				model.robot_ellipse.scale.setY(0.0000001);
+				model.robot_ellipse.quaternion.setFromAxisAngle(new THREE.Quaternion());
+				model.robot_direction_wedge.geometry = new THREE.CircleGeometry(0,32,0,0);
 
-		if(!this.getShowLocalisation()) {
-			return;
-		}
-
-		function updateModel(model, field_object) {
-			model.position.x = field_object.wmX;
-			model.position.y = field_object.wmY;
-			model.rotation.z = field_object.heading;
-			var result = this.calculateErrorElipse(field_object.srXx, field_object.srXy, field_object.srYy);
-			model.visualiser.scale.x = result.x;
-			model.visualiser.scale.y = result.y;
-			model.visualiser.rotation.z = result.angle;
-		}
-		api_localisation.fieldObject.forEach(function (field_object) {
-			if(field_object.name == 'ball') {
-				// remove the old models
-				this.fireEvent('ball-model-list-resized', field_object.models.length);
-				for (var i = 0; i < field_object.models.length; i++) {
-					var ball;
-					if (i >= this.ballModels.length) {
-						ball = this.createBallModel();
-						this.ballModels.push(ball);
-					} else {
-						ball = this.ballModels[i];
-					}
-
-					updateModel.call(this, ball, field_object.models[i]);
-				}
-			} else if(field_object.name == 'self') {
-				// remove the old models
-				this.fireEvent('robot-model-list-resized', field_object.models.length);
-				for (var i = 0; i < field_object.models.length; i++) {
-					var robot;
-					if (i >= this.robotModels.length) {
-						robot = this.createDarwinModel();
-						this.robotModels.push(robot);
-					} else {
-						robot = this.robotModels[i];
-					}
-
-					updateModel.call(this, robot, field_object.models[i]);
-				}
+				return;
 			}
-		}, this);
+
+
+			var x = api_localisation.locObject.position.x;
+			var y = api_localisation.locObject.position.y;
+
+			var x_axis = new THREE.Vector3( api_localisation.heading.x, api_localisation.heading.y);
+			var y_axis = new THREE.Vector3(-api_localisation.heading.y, api_localisation.heading.x);
+			x_axis.normalize();
+			y_axis.normalize();
+
+			//Transform from world to field
+			Hwf = new THREE.Matrix4();
+			Hwf.set(
+				x_axis.x, y_axis.x, 0,	x,
+				x_axis.y, y_axis.y, 0,	y,
+				0, 0, 1, 0,
+				0, 0, 0, 1
+			);
+			Hfw = new THREE.Matrix4();
+			Hfw.copy(Hwf);
+
+			// Set the robot-world to field matrix (=Hfw)
+			model.localisation.quaternion.setFromRotationMatrix(Hfw);
+			var vec = new THREE.Vector3();
+			vec.setFromMatrixPosition(Hfw);
+			model.localisation.position.setX(vec.x);
+			model.localisation.position.setY(vec.y);
+
+			//TODO: covariance ellipse
+			var result = this.calculateErrorElipse(api_localisation.covariance.x.x, api_localisation.covariance.x.y, api_localisation.covariance.y.y);
+
+			model.robot_ellipse.scale.setX(result.x);
+			model.robot_ellipse.scale.setY(result.y);
+			model.robot_ellipse.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),result.angle);
+
+			//Times 3 for 99% confidence interval
+	        var theta = 2 * Math.max(0.1,api_localisation.covariance.z.z) * 3;
+			var new_robot_wedge = new THREE.CircleGeometry(0.2,32,0,theta);
+			model.robot_direction_wedge.geometry = new_robot_wedge;
+			model.robot_direction_wedge.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),-theta/2);
+
+		},this);
+	},
+	onBallLocalisation: function (api_ball){
+		this.robotModels.forEach(function (robot) {
+			var model = robot;
+			// model.ball_model.children[0].material.color = 0xffffff;
+
+			// If we show odometry we are fine
+			if (this.getShowOrientation()) {
+				model.ball_model.position.setX(api_ball.locObject.position.x);
+				model.ball_model.position.setY(api_ball.locObject.position.y);
+			}
+			// Otherwise we need to transform this through the odometry transform
+			else if (model.Htw) {
+				var vec = new THREE.Vector4(api_ball.locObject.position.x, api_ball.locObject.position.y, 0, 1);
+				vec.applyMatrix4(model.Htw);
+
+				model.ball_model.position.setX(vec.x);
+				model.ball_model.position.setY(vec.y);
+
+			}
+			var result = this.calculateErrorElipse(api_ball.locObject.positionCov.x.x, api_ball.locObject.positionCov.x.y, api_ball.locObject.positionCov.y.y);
+
+			model.ball_ellipse.scale.setX(result.x);
+			model.ball_ellipse.scale.setY(result.y);
+			model.ball_ellipse.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),result.angle);
+
+
+		},this);
 	},
 	createBallModel: function () {
 		var ball = new Sphere();
@@ -180,8 +228,8 @@ Ext.define('NU.view.field.Robot', {
 		//        darwin.bindToData(DarwinModel);
 		//        var model = Ext.create('NU.model.DarwinOP');
 		//        darwin.setModel(model);
-		darwin = LocalisationVisualiser.visualise(darwin);
-		darwin = BehaviourVisualiser.visualise(darwin);
+		// darwin = LocalisationVisualiser.visualise(darwin);
+		// darwin = BehaviourVisualiser.visualise(darwin);
 		return darwin;
 	},
 	createIgusModel: function () {

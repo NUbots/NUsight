@@ -47,6 +47,18 @@ message Ball {
     repeated vec3 edgePoints            = 3;
     Cone        cone                    = 4;
 }
+
+// message Ball {
+//     VisionObject  visObject          = 1;
+
+//     // The position of the ball in world coordinates
+//     vec3          position           = 2;
+//     vec3          torsoSpacePosition = 3;
+
+//     repeated vec3 edgePoints         = 4;
+//     Circle        circle             = 5;
+// }
+
 message NUsightBalls {
     repeated Ball balls = 1;
 }

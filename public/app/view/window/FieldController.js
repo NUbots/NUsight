@@ -38,7 +38,8 @@ Ext.define('NU.view.window.FieldController', {
 	addEvents: function () {
 		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
-			'message.localisation.Localisation': this.onLocalisation,
+			'message.localisation.Self': this.onLocalisation,
+			'message.localisation.Ball': this.onBallLocalisation,
 			'message.support.nubugger.DrawObjects': this.onDrawObjects,
 			'message.input.Sensors': this.onSensorData,
 			scope: this
@@ -318,6 +319,14 @@ Ext.define('NU.view.window.FieldController', {
 			return;
 		}
 		robot.onLocalisation(api_localisation);
+	},
+	onBallLocalisation: function (rInfo, api_ball) {
+		var robot = this.getRobot(rInfo.get('id'));
+		if (robot == null) {
+			console.log('error', rInfo);
+			return;
+		}
+		robot.onBallLocalisation(api_ball);
 	},
 
 	onDrawObjects: function (rInfo, event, timestamp) {

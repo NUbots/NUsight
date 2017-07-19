@@ -60,10 +60,70 @@
 
 		this.dataModel = null;
 
+
+        //Setup localisation container
+        //Hfw
+        this.localisation = new THREE.Object3D();
+        this.add(this.localisation);
+
+        //Add ball
+        this.ball_model = new THREE.Object3D();
+        this.localisation.add(this.ball_model);
+		this.ball_model.position.setX(1);
+		
+		//Add mesh
+        var radius = 0.075;
+        var geometry = new THREE.SphereGeometry( radius, 32, 32 );
+		var material = new THREE.MeshPhongMaterial( {color: 0xffffff} );
+		var sphere = new THREE.Mesh( geometry, material );
+		sphere.position.setZ(radius);
+		this.ball_model.add( sphere );
+
+		//Add error ellipse
+		var disk = new THREE.CircleGeometry(1,32);
+		var disk_material =  new THREE.MeshBasicMaterial( {color: 0x0000ff, transparent: true, opacity : 0.5} );
+		var disk_mesh = new THREE.Mesh( disk, disk_material );
+		this.ball_model.add( disk_mesh );
+		this.ball_ellipse = disk_mesh;
+		disk_mesh.position.setZ(0.001123);
+
+
+        // This corrects the fact that the model is made for computer graphics axis
+        //Hwt
+        this.worldTransform = new THREE.Object3D();
+        this.localisation.add(this.worldTransform);
+        
+        //Add robot error ellipse
+		var robot_disk = new THREE.CircleGeometry(1,32);
+		var robot_disk_material =  new THREE.MeshBasicMaterial( {color: 0xff00ff, transparent: true, opacity : 0.5} );
+		var robot_disk_mesh = new THREE.Mesh( robot_disk, robot_disk_material );
+		this.worldTransform.add( robot_disk_mesh );
+		this.robot_ellipse = robot_disk_mesh;
+		robot_disk_mesh.position.setZ(0.0011236867);
+        
+        //Add robot error ellipse
+        var theta = 0.5;
+		var robot_wedge = new THREE.CircleGeometry(0.2,32,0,theta);
+		var robot_wedge_material =  new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: false, opacity : 0.5} );
+		var robot_direction_wedge = new THREE.Mesh( robot_wedge, robot_wedge_material );
+		this.worldTransform.add( robot_direction_wedge );
+		this.robot_direction_wedge = robot_direction_wedge;
+		robot_direction_wedge.position.setZ(0.01812867);
+		robot_direction_wedge.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),-theta/2);
+
+		//RESET TO INVISIBLE
+		this.localisation.quaternion.setFromRotationMatrix(new THREE.Matrix4());
+		this.localisation.position.setX(0);
+		this.localisation.position.setY(0);
+		this.robot_ellipse.scale.setX(0.0000001);
+		this.robot_ellipse.scale.setY(0.0000001);
+		this.robot_ellipse.quaternion.setFromAxisAngle(new THREE.Quaternion());
+		this.robot_direction_wedge.geometry = new THREE.CircleGeometry(0,32,0,0);
+
         // This corrects the fact that the model is made for computer graphics axis
         this.orientationCorrection = new THREE.Object3D();
         this.orientationCorrection.rotation.x = Math.PI/2;
-        this.add(this.orientationCorrection);
+        this.worldTransform.add(this.orientationCorrection);
 
         this.loading = 0;
 
@@ -72,7 +132,6 @@
         var addComponent = function (params) {
             return me.addComponent(params, callback, scope);
         };
-
 		//Setup Body Container
 		this.body = addComponent({
 			url: "resources/darwin/Body.json",
