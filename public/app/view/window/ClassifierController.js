@@ -54,6 +54,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		contextBeingZoomed: null,
 		zoomCanvasContext: null,
 		zoomFactor: 5,
+		zoomActive: false,
+		lastZoomMousePosition: { x: 0, y: 0 }
 	},
 	statics: {
 		/**
@@ -214,6 +216,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.setContextBeingZoomed(
 			contextName === 'rawImage' ? this.getRawContext() : this.getClassifiedContext()
 		);
+
+		this.setZoomActive(true);
 	},
 	/**
 	 * Handle zoom for mouse leaving the raw or classified image
@@ -221,11 +225,15 @@ Ext.define('NU.view.window.ClassifierController', {
 	onZoomMouseLeave(contextName, event) {
 		// Hide the zoom canvas
 		this.getRightPanelLayout().setActiveItem(0);
+
+		this.setZoomActive(false);
 	},
 	/**
 	 * Handle zoom for mouse moving on the raw or classified image
 	 */
 	onZoomMouseMove(mouse, event) {
+		this.setLastZoomMousePosition(mouse);
+
 		var gl = this.getContextBeingZoomed();
 		var ctx = this.getZoomCanvasContext();
 
@@ -802,7 +810,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.renderClassifiedImage();
 	},
 	onImage: function (robot, image) {
-
+		
 		// TODO: remove
 		if (robot.get('id') !== this.getRobotId()) {
 			return;
@@ -814,6 +822,7 @@ Ext.define('NU.view.window.ClassifierController', {
 
 		if (image) { // TODO: is this needed?
 			if (!this.getFrozen()) {
+				
 				this.autoSize(image.dimensions.x, image.dimensions.y);
 				this.drawImage(image, function (ctx) {
 					this.updateClassifiedData();
@@ -1371,6 +1380,11 @@ Ext.define('NU.view.window.ClassifierController', {
 			default:
 				console.log('Format: ', image.format);
 				throw 'Unsupported Format';
+		}
+
+		// Refresh the zoom display if zoom is active
+		if (this.getZoomActive()) {
+			this.onZoomMouseMove(this.getLastZoomMousePosition());
 		}
 	},
 	drawImageBayer: function (image) {
