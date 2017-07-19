@@ -230,32 +230,6 @@ Ext.define('NU.view.window.Classifier', {
 							// backgroundImage: "url('resources/images/camera.png')",
 							// backgroundRepeat: 'no-repeat',
 							// backgroundPosition: 'center',
-						},
-						listeners: {
-							afterrender: function(a, b, c) {
-								console.log('Rendered', a, b, c);
-
-								this.getEl().on({
-									mouseenter: function(a, b, c) {
-										console.log('[Raw image]: Mouse entered', a, b, c);
-									},
-									mouseleave: function(a, b, c) {
-										console.log('[Raw image]: Mouse left', a, b, c);
-									},
-									mousemove: function(a, b, c) {
-										console.log('[Raw image]: Mouse move', a, b, c);
-									}
-								});
-							},
-							mouseenter: function(a, b, c) {
-								console.log('[Raw image]: Mouse entered', a, b, c);
-							},
-							mouseleave: function(a, b, c) {
-								console.log('[Raw image]: Mouse left', a, b, c);
-							},
-							mousemove: function(a, b, c) {
-								console.log('[Raw image]: Mouse move', a, b, c);
-							}
 						}
 					}
 				}, {
@@ -282,9 +256,10 @@ Ext.define('NU.view.window.Classifier', {
 			}, {
 				layout: {
 					type: 'card',
-					align: 'stretch'
+					// align: 'stretch'
 				},
 				flex: 1,
+				reference: 'rightPanel',
 				items: [
 					{
 						// 3d scatter
@@ -293,13 +268,12 @@ Ext.define('NU.view.window.Classifier', {
 						flex: 1
 					},
 					{
-						// Zoom overlay window
+						// Zoom overlay canvas
 						xtype: 'nu_layered_canvas',
-						reference: 'zoomWindow',
-						flex: 1,
-						id: 'zoomWindow',
+						reference: 'zoomCanvas',
+						// flex: 1,
 						style: {
-							backgroundColor: 'rgba(0,0,255, 0.5)',
+							backgroundColor: 'black',
 							height: '100%'
 						}
 					}
