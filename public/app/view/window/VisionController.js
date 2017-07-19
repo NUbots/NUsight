@@ -18,7 +18,7 @@ Ext.define('NU.view.window.VisionController', {
 		height: 240,
 		bitsPerPixel: 4,
 		// camera parameters
-		isPinholeCamera: true,
+		isPinholeCamera: false,
         pixelToTanThetaFactor: [], //pinhole
         focalLengthPixels: (320 * 0.5) / Math.tan(2.0 * 0.5), //pinhole
         distortionFactor: null, //pinhole
@@ -750,7 +750,7 @@ Ext.define('NU.view.window.VisionController', {
 		balls.forEach(function(ball){
 			var ballCentre = ball.cone.axis;
 			var p = new THREE.Vector3(ballCentre.x, ballCentre.y, ballCentre.z);
-			var q = new THREE.Vector3(p.y, p.x, 0).normalize();
+			var q = new THREE.Vector3(p.y, -p.x, 0).normalize();
 			var r = new THREE.Vector3().crossVectors(q, p).normalize();
 	 
 			var theta = 0;
