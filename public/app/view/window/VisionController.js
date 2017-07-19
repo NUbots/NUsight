@@ -129,16 +129,18 @@ Ext.define('NU.view.window.VisionController', {
             return;
         }
 
-        if (cameraParameters.lens == cameraParameters.LensType.PINHOLE) {
+        if (cameraParameters.lens == 0) {
 			this.setIsPinholeCamera(true);
-            this.setPixelsToTanThetaFactor(cameraParameters.pinhole.pixelsToTanThetaFactor);
-            this.setFocalLengthPixels(cameraParameters.pinhole.focalLengthPixels);
+            this.setPixelsToTanThetaFactor([cameraParameters.pinhole.pixelsToTanThetaFactor.x, cameraParameters.pinhole.pixelsToTanThetaFactor.y]);
+
+            this.setFocalLengthPixels((this.getWidth() * 0.5) / Math.tan(cameraParameters.FOV.x * 0.5)); //(WITH * 0.5) / Math.tan(FOV.x * 0.5)
+
             this.setDistortionFactor(cameraParameters.pinhole.distortionFactor);                       
-        } else if (cameraParameters.lens == cameraParameters.LensType.RADIAL) {
+        } else if (cameraParameters.lens == 1) {
             this.setIsPinholeCamera(false);
         }
-        this.setFOV(cameraParameters.FOV);
-        this.setCentreOffset(cameraParameters.centreOffset);
+        this.setFOV([cameraParameters.FOV.x, cameraParameters.FOV.y]);
+        this.setCentreOffset([cameraParameters.centreOffset.x, cameraParameters.centreOffset.y]);
     },
 
 	onLocalisationViewConnected: function(scene, robots) {
