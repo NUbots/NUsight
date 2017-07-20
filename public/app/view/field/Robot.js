@@ -144,19 +144,18 @@ Ext.define('NU.view.field.Robot', {
 			}
 
 
-			var x = api_localisation.locObject.position.x;
-			var y = api_localisation.locObject.position.y;
-
-			var x_axis = new THREE.Vector3( api_localisation.heading.x, api_localisation.heading.y);
-			var y_axis = new THREE.Vector3(-api_localisation.heading.y, api_localisation.heading.x);
-			x_axis.normalize();
-			y_axis.normalize();
-
+			var x = api_localisation.position.x;
+			var y = api_localisation.position.y;
+			
+			var cos_theta = Math.cos(api_localisation.position.z);
+			var sin_theta = Math.sin(api_localisation.position.z);
+			
 			//Transform from world to field
 			Hwf = new THREE.Matrix4();
+
 			Hwf.set(
-				x_axis.x, y_axis.x, 0,	x,
-				x_axis.y, y_axis.y, 0,	y,
+				cos_theta, -sin_theta, 0,	x,
+				sin_theta, cos_theta, 0,	y,
 				0, 0, 1, 0,
 				0, 0, 0, 1
 			);
@@ -192,19 +191,19 @@ Ext.define('NU.view.field.Robot', {
 
 			// If we show odometry we are fine
 			if (this.getShowOrientation()) {
-				model.ball_model.position.setX(api_ball.locObject.position.x);
-				model.ball_model.position.setY(api_ball.locObject.position.y);
+				model.ball_model.position.setX(api_ball.position.x);
+				model.ball_model.position.setY(api_ball.position.y);
 			}
 			// Otherwise we need to transform this through the odometry transform
 			else if (model.Htw) {
-				var vec = new THREE.Vector4(api_ball.locObject.position.x, api_ball.locObject.position.y, 0, 1);
+				var vec = new THREE.Vector4(api_ball.position.x, api_ball.position.y, 0, 1);
 				vec.applyMatrix4(model.Htw);
 
 				model.ball_model.position.setX(vec.x);
 				model.ball_model.position.setY(vec.y);
 
 			}
-			var result = this.calculateErrorElipse(api_ball.locObject.positionCov.x.x, api_ball.locObject.positionCov.x.y, api_ball.locObject.positionCov.y.y);
+			var result = this.calculateErrorElipse(api_ball.covariance.x.x, api_ball.covariance.x.y, api_ball.covariance.y.y);
 
 			model.ball_ellipse.scale.setX(result.x);
 			model.ball_ellipse.scale.setY(result.y);

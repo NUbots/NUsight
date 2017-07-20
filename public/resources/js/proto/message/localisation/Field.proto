@@ -23,9 +23,10 @@ package message.localisation;
 import "Vector.proto";
 import "Matrix.proto";
 
-message Ball {
-    // The ball measured in world space (rBWw)
-    vec2  position = 1;
-    // Covariance in the balls measurement
-    mat22 covariance = 2;
+message Field {
+    // Measures the position of the field centre in world space position[0,1] = (rFWw)
+    // and measures the orientation of the field from the world position[2] = (thetafw)
+    vec3  position = 1;
+    // Covariance of the measurement
+    mat33 covariance = 2;
 }
