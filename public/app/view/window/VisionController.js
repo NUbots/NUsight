@@ -98,7 +98,7 @@ Ext.define('NU.view.window.VisionController', {
 			'message.vision.NUsightGoals': this.onNUsightGoals,
 			'message.vision.NUsightObstacles': this.onNUsightObstacles,
 			'message.vision.NUsightLines': this.onNUsightLines,
-			'message.localisation.Localisation': this.renderLocalisation, //for localisation camera
+			'message.localisation.Field': this.renderLocalisation, //for localisation camera
 			scope: this
 		});
 
@@ -121,11 +121,11 @@ Ext.define('NU.view.window.VisionController', {
 		this.localisationRobots = robots;
 		for(var i = 0; i < robots.length; i++) {
 			if(robots[i].robotId == this.getRobotId()) {
-				if(robots[i].robotModels[0].object.camera == null) {
+				if(robots[i].robotModels[0].camera == null) {
 					return;
 				}
 
-				this.localisationRenderer.camera = robots[i].robotModels[0].object.camera.children[0];
+				this.localisationRenderer.camera = robots[i].robotModels[0].camera.children[0];
 				this.localisationRenderer.scene = scene;
 				break;
 			}
