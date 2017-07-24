@@ -669,6 +669,7 @@ Ext.define('NU.view.window.VisionController', {
         var sin_theta = Math.sin(theta);
         var px = r * p[1] / sin_theta;
         var py = r * p[2] / sin_theta;
+
         return [px + this.getCentreOffset()[0], py + this.getCentreOffset()[1]];
     },
 	onNUsightBalls: function(robot, balls) {
@@ -700,22 +701,48 @@ Ext.define('NU.view.window.VisionController', {
 		this.drawLines(lines.getLines());
 	},
 	drawGoals: function (goals) {
-
 		var context = this.getContext('goals');
 		context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-		for (var i = 0; i < goals.length; i++) {
-			var goal = goals[i];
+		var interpolateCount = 20.0;
+		var interpolateFraction = 1.0 / interpolateCount;
+		goals.forEach(function(goal){
+			var points = [];
+
+			var frustum = goal.getFrustum();
+
+			for(var i = 0; i < interpolateCount; i++) {
+				var pixel = this.interpolate(frustum.bl, frustum.tl, interpolateFraction * i);
+				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+			}
+
+			for(var i = 0; i < interpolateCount; i++) {
+				var pixel = this.interpolate(frustum.tl, frustum.tr, interpolateFraction * i);
+				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+			}
+
+			for(var i = 0; i < interpolateCount; i++) {
+				var pixel = this.interpolate(frustum.tr, frustum.br, interpolateFraction * i);
+				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+			}
+
+			for(var i = 0; i < interpolateCount; i++) {
+				var pixel = this.interpolate(frustum.br, frustum.bl, interpolateFraction * i);
+				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+			}
+
 			context.beginPath();
 
-			var quad = goal.quad;
-			context.moveTo(quad.tl.x, quad.tl.y);
-			context.lineTo(quad.tr.x, quad.tr.y);
-			context.lineTo(quad.br.x, quad.br.y);
-			context.lineTo(quad.bl.x, quad.bl.y);
-			context.lineTo(quad.tl.x, quad.tl.y);
-			context.closePath();
+			points.forEach(function(point, i) {
+				if(i == 0) {
+					context.moveTo(point[0], point[1]);
+					return;
+				}
 
+				context.lineTo(point[0], point[1]);
+			}.bind(this));
+
+			context.closePath();
 			context.shadowColor = 'black';
 			context.shadowBlur = 5;
 			context.shadowOffsetX = 0;
@@ -728,27 +755,12 @@ Ext.define('NU.view.window.VisionController', {
 			context.lineWidth = 2;
 
 			context.stroke();
-
-			// var measurements = goal.getMeasurement();
-            //
-			// // Calculate our error!
-			// context.fillStyle = "rgba(255, 255, 255, 1)";
-			// var mX = (quad.tl.x + quad.tr.x + quad.br.x + quad.bl.x) / 4.0;
-			// var mY = (quad.tl.y + quad.tr.y + quad.br.y + quad.bl.y) / 4.0;
-            //
-			// for(var j = 0; j < measurements.length; ++j) {
-            //
-			// 	var m = measurements[j];
-            //
-			// 	var d = Math.sqrt(m.position.x);
-			// 	var dE = Math.sqrt(m.covariance.x.x);
-            //
-			// 	context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", mX, mY+j*15);
-			// }
-
-		}
+		}.bind(this));
 	},
 	drawBalls: function (balls) {
+		var context = this.getContext('balls');
+		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
 		balls.forEach(function(ball){
 			var ballCentre = ball.cone.axis;
 			var p = new THREE.Vector3(ballCentre.x, ballCentre.y, ballCentre.z);
@@ -777,16 +789,12 @@ Ext.define('NU.view.window.VisionController', {
 				theta += theta_step;
 			}
 
-			var context = this.getContext('balls');
-			context.clearRect(0, 0, this.getWidth(), this.getHeight());
-
 			context.beginPath();
 			points.forEach(function(point, i) {
 				if(i == 0) {
 					context.moveTo(point[0], point[1]);
 					return;
 				}
-				
 				context.lineTo(point[0], point[1]);
 			}.bind(this));
 			context.shadowColor = 'black';
@@ -857,5 +865,12 @@ Ext.define('NU.view.window.VisionController', {
                 colour = [0,0,0,255];
         }
         return colour;
-    }
+    },
+	interpolate: function(a, b, fracttion) {
+		var nx = a.x+(b.x-a.x)*fracttion;
+		var ny = a.y+(b.y-a.y)*fracttion;
+		var nz = a.z+(b.z-a.z)*fracttion;
+
+		return [nx, ny, nz];
+	}
 });
