@@ -8,6 +8,7 @@ function RobotSimulator (opts) {
 	this.net = opts.net || new NUClearNet();
 	this.net.connect({
 		name: this.constructor.name,
+		address: '10.1.255.255' // TODO: (Josephus/Trent) Remove hardcoded address after RoboCup 2017
 	});
 	this.protoBuilder = opts.protoBuilder || ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
 
