@@ -13,7 +13,7 @@
 
         <!-- Plot.ly JS needs to be loaded early to avoid break Promise's .spread method -->
         <script type="text/javascript" src="/lib/plotly.js/dist/plotly.js"></script>
-        
+
         <script type="text/javascript" src="/lib/extjs/ext-all-debug.js"></script>
         <script type="text/javascript" src="/lib/extjs/packages/ext-theme-neptune/build/ext-theme-neptune-debug.js"></script>
         <script type="text/javascript" src="/lib/threejs/build/three.js"></script>
@@ -50,5 +50,16 @@
         <!--<script type="text/javascript" src="/resources/js/lib/webgl-2d.js"></script>-->
         <script type="text/javascript" src="/app.js"></script>
     </head>
-    <body></body>
+    <body>
+
+       <!--  <div id="mouseZoomBox" style="position: absolute;
+                            top: 50px;
+                            left: 50px;
+                            width: 100px;
+                            height: 100px;
+                            background-color: rgba(0,0,255,0.5);
+                            cursor: crosshair;
+                            z-index: 99999;
+                            pointer-events: none;"></div> -->
+    </body>
 </html>

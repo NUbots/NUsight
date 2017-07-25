@@ -227,9 +227,9 @@ Ext.define('NU.view.window.Classifier', {
 						style: {
 							backgroundColor: '#000',
 							cursor: 'crosshair'
-//								backgroundImage: "url('resources/images/camera.png')",
-//								backgroundRepeat: 'no-repeat',
-//								backgroundPosition: 'center',
+							// backgroundImage: "url('resources/images/camera.png')",
+							// backgroundRepeat: 'no-repeat',
+							// backgroundPosition: 'center',
 						}
 					}
 				}, {
@@ -239,7 +239,8 @@ Ext.define('NU.view.window.Classifier', {
 					style: {
 						display: 'block',
 						border: '2px solid #000',
-						borderRadius: '2px'
+						borderRadius: '2px',
+						position: 'relative'
 					},
 					items: {
 						xtype: 'nu_layered_canvas',
@@ -253,10 +254,30 @@ Ext.define('NU.view.window.Classifier', {
 					}
 				}]
 			}, {
-				// 3d scatter
-				xtype: 'scatter3d',
-				reference: 'scatter3d',
-				flex: 1
+				layout: {
+					type: 'card',
+					// align: 'stretch'
+				},
+				flex: 1,
+				reference: 'rightPanel',
+				items: [
+					{
+						// 3d scatter
+						xtype: 'scatter3d',
+						reference: 'scatter3d',
+						flex: 1
+					},
+					{
+						// Zoom overlay canvas
+						xtype: 'nu_layered_canvas',
+						reference: 'zoomCanvas',
+						flex: 1,
+						style: {
+							backgroundColor: 'black',
+							// height: '100%'
+						}
+					}
+				]
 			}]
 		}, {
 			// controls

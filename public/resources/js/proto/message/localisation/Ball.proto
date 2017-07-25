@@ -14,22 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2017 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
 package message.localisation;
 
-import "google/protobuf/timestamp.proto";
-import "Matrix.proto";
 import "Vector.proto";
-import "message/localisation/LocalisationObject.proto";
-
+import "Matrix.proto";
 
 message Ball {
-    LocalisationObject locObject   = 1;
-    vec2               velocity    = 2;
-    bool               world_space = 3; // Ball will always be in robot space except
-                                        // when sent from MockRobot.
+    // The ball measured in world space (rBWw)
+    vec2  position = 1;
+    // Covariance in the balls measurement
+    mat22 covariance = 2;
 }
-

@@ -65,6 +65,7 @@ function NUsight (io) {
 
 	this.network.connect({
 		name: 'nusight',
+		address: '10.1.255.255' // TODO: (Josephus/Trent) Remove hardcoded address after RoboCup 2017
 	});
 
 	this.io.on('connection', function (socket) {
@@ -116,15 +117,15 @@ function NUsight (io) {
 				if(robots[packet.peer.name].recording) {
 					const MAX_UINT32 = 0xFFFFFFFF;
 					var file = recordings[packet.peer.name];
-					
+
 					var radiationSymbol = Buffer.from([0xE2, 0x98, 0xA2]);
 					file.write(radiationSymbol); //radiation symbol
-					
+
 					var size = 8 + 8 + packet.payload.length;
 					var len = new Buffer(4);
 					len.writeUInt32LE(size, 0)
 					file.write(len);
-					
+
 					// timestamp
 					var time = Date.now() * 1000;
 					var buf = new Buffer(8);
@@ -132,10 +133,10 @@ function NUsight (io) {
 					const low = (time % MAX_UINT32) - big;
 					buf.writeUInt32BE(big, 0);
 					buf.writeUInt32BE(low, 4);
-					file.write(buf);					
+					file.write(buf);
 
 					file.write(packet.hash);
-					
+
 					file.write(packet.payload);
 				}
 

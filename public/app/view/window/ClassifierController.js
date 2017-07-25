@@ -49,7 +49,13 @@ Ext.define('NU.view.window.ClassifierController', {
 		rawLayeredCanvas: null,
 		classifiedLayeredCanvas: null,
 		imageFormat: null,
-		lutNeedsUpdate: false
+		lutNeedsUpdate: false,
+		rightPanelLayout: null,
+		contextBeingZoomed: null,
+		zoomCanvasContext: null,
+		zoomFactor: 5,
+		zoomActive: false,
+		lastZoomMousePosition: { x: 0, y: 0 }
 	},
 	statics: {
 		/**
@@ -198,6 +204,75 @@ Ext.define('NU.view.window.ClassifierController', {
 			this.getClassifiedLayeredCanvas().clear('zoom');
 		}
 		this.renderImages();
+	},
+	/**
+	 * Handle zoom for mouse entering the raw or classified image
+	 */
+	onZoomMouseEnter(contextName, event) {
+		// Show the zoom canvas
+		this.getRightPanelLayout().setActiveItem(1);
+
+		// Set the context being zoomed
+		this.setContextBeingZoomed(
+			contextName === 'rawImage' ? this.getRawContext() : this.getClassifiedContext()
+		);
+
+		this.setZoomActive(true);
+	},
+	/**
+	 * Handle zoom for mouse leaving the raw or classified image
+	 */
+	onZoomMouseLeave(contextName, event) {
+		// Hide the zoom canvas
+		this.getRightPanelLayout().setActiveItem(0);
+
+		this.setZoomActive(false);
+	},
+	/**
+	 * Handle zoom for mouse moving on the raw or classified image
+	 */
+	onZoomMouseMove(mouse, event) {
+		this.setLastZoomMousePosition(mouse);
+
+		var gl = this.getContextBeingZoomed();
+		var ctx = this.getZoomCanvasContext();
+
+		var mouseX = mouse.x;
+		var mouseY = mouse.y;
+
+		var canvasWidth = ctx.canvas.width;
+		var canvasHeight = ctx.canvas.height;
+		var sourceWidth = canvasWidth / this.getZoomFactor();
+		var sourceHeight = canvasHeight / this.getZoomFactor();
+
+		// Clear the canvas
+		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+		var sx = mouseX - (sourceWidth / 2);
+		var sy = mouseY - (sourceHeight / 2);
+		var dx = 0;
+		var dy = 0;
+
+		ctx.drawImage(
+			gl.canvas,
+			sx, sy,
+			sourceWidth, sourceHeight,
+			dx, dy,
+			canvasWidth, canvasHeight
+		);
+	},
+	/**
+	 * Get the mouse coordinates of the event relative to the given element
+	 */
+	getZoomMouseCoordinates: function(e, element) {
+		var el = Ext.get(element);
+		var rawX = e.getX() - el.getLeft();
+		var rawY = e.getY() - el.getTop();
+
+		var x = Math.round(rawX * (this.getImageWidth() / this.getRawLayeredCanvas().getImageWidth()));
+		var y = Math.round(rawY * (this.getImageHeight() / this.getRawLayeredCanvas().getImageHeight()));
+
+		return { x: x, y: y };
 	},
 	/**
 	 * Callback when the green target is clicked
@@ -382,7 +457,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		var rawImageLayer = rawLayeredCanvas.add('raw', {
 			webgl: true,
 			webglAttributes: {
-				antialias: false
+				antialias: false,
+				preserveDrawingBuffer: true
 			}
 		});
 		this.rawImageRenderer = Ext.create('NU.view.webgl.Vision', {
@@ -400,7 +476,8 @@ Ext.define('NU.view.window.ClassifierController', {
 		var classifiedLayer = classifiedLayeredCanvas.add('classified', {
 			webgl: true,
 			webglAttributes: {
-				antialias: false
+				antialias: false,
+				preserveDrawingBuffer: true
 			}
 		});
 		classifiedLayeredCanvas.add('selection');
@@ -415,10 +492,11 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.classifiedRenderer = Ext.create('NU.view.webgl.Classifier', {
 			shader: 'Classifier',
 			canvas: classifiedLayer.canvas,
-			context: classifiedLayer.contex,
+			context: classifiedLayer.context,
 			autoRender: false
-
 		});
+
+		this.setClassifiedContext(classifiedLayer.context);
 
 		this.selectionRenderer = Ext.create('NU.view.webgl.magicwand.Selection', {
 			shader: 'magicwand/Selection',
@@ -494,6 +572,43 @@ Ext.define('NU.view.window.ClassifierController', {
 			});
 
 			//this.testClassifier();
+		}.bind(this));
+
+		var zoomCanvas = this.lookupReference('zoomCanvas').getController();
+		var zoomCanvasImage = zoomCanvas.add('image');
+		var zoomCanvasCrosshairs = zoomCanvas.add('crosshairs');
+
+		var crossHairsCtx = zoomCanvasCrosshairs.context;
+		var crossHairsCanvas = crossHairsCtx.canvas;
+
+		crossHairsCtx.beginPath();
+		crossHairsCtx.strokeStyle = 'rgb(0,0,255)';
+		crossHairsCtx.moveTo(crossHairsCanvas.width / 2, 0);
+		crossHairsCtx.lineTo(crossHairsCanvas.width / 2, crossHairsCanvas.height);
+		crossHairsCtx.stroke();
+		crossHairsCtx.strokeStyle = 'rgb(0,0,255)';
+		crossHairsCtx.moveTo(0, crossHairsCanvas.height / 2);
+		crossHairsCtx.lineTo(crossHairsCanvas.width, crossHairsCanvas.height / 2);
+		crossHairsCtx.stroke();
+
+		this.setRightPanelLayout(this.lookupReference('rightPanel').getLayout());
+		this.setZoomCanvasContext(zoomCanvasImage.context);
+
+		// Setup zoom event listeners
+		['rawImage', 'classifiedImage'].forEach(function(reference) {
+			this.mon(this.lookupReference(reference).getEl(), {
+				mouseenter: function(event, element) {
+					this.onZoomMouseEnter(reference, event, element);
+				},
+				mouseleave: function(event, element, data) {
+					this.onZoomMouseLeave(reference, event, element, data);
+				},
+				mousemove: function(event, element,) {
+					var position = this.getZoomMouseCoordinates(event, element);
+					this.onZoomMouseMove(position, event, element);
+				},
+				scope: this
+			});
 		}.bind(this));
 	},
 
@@ -695,7 +810,7 @@ Ext.define('NU.view.window.ClassifierController', {
 		this.renderClassifiedImage();
 	},
 	onImage: function (robot, image) {
-
+		
 		// TODO: remove
 		if (robot.get('id') !== this.getRobotId()) {
 			return;
@@ -707,6 +822,7 @@ Ext.define('NU.view.window.ClassifierController', {
 
 		if (image) { // TODO: is this needed?
 			if (!this.getFrozen()) {
+				
 				this.autoSize(image.dimensions.x, image.dimensions.y);
 				this.drawImage(image, function (ctx) {
 					this.updateClassifiedData();
@@ -1264,6 +1380,11 @@ Ext.define('NU.view.window.ClassifierController', {
 			default:
 				console.log('Format: ', image.format);
 				throw 'Unsupported Format';
+		}
+
+		// Refresh the zoom display if zoom is active
+		if (this.getZoomActive()) {
+			this.onZoomMouseMove(this.getLastZoomMousePosition());
 		}
 	},
 	drawImageBayer: function (image) {

@@ -30,7 +30,8 @@ Ext.define('NU.view.webgl.WebGL', {
 		 */
 		canvas: null,
 		/**
-		 * The context to draw with
+		 * The context
+		  to draw with
 		 */
 		context: null,
 		/**
