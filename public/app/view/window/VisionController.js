@@ -131,7 +131,7 @@ Ext.define('NU.view.window.VisionController', {
 
         if (cameraParameters.lens == 0) {
 			this.setIsPinholeCamera(true);
-            this.setPixelsToTanThetaFactor([cameraParameters.pinhole.pixelsToTanThetaFactor.x, cameraParameters.pinhole.pixelsToTanThetaFactor.y]);
+            this.setPixelToTanThetaFactor([cameraParameters.pinhole.pixelsToTanThetaFactor.x, cameraParameters.pinhole.pixelsToTanThetaFactor.y]);
 
             this.setFocalLengthPixels((this.getWidth() * 0.5) / Math.tan(cameraParameters.FOV.x * 0.5)); //(WITH * 0.5) / Math.tan(FOV.x * 0.5)
 
