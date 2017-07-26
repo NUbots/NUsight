@@ -50,3 +50,4 @@ message CameraParameters {
     //Lens type
     LensType lens                 = 6;
 }
+

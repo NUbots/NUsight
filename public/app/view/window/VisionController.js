@@ -16,7 +16,14 @@ Ext.define('NU.view.window.VisionController', {
 		layeredCanvas: null,
 		width: 320,
 		height: 240,
-		bitsPerPixel: 4
+		bitsPerPixel: 4,
+		// camera parameters
+		isPinholeCamera: false,
+        pixelToTanThetaFactor: [], //pinhole
+        FOV: [3.351, 3.351],
+        focalLengthPixels: (320 * 0.5) / Math.tan(3.351 * 0.5), //pinhole
+        distortionFactor: null, //pinhole
+        centreOffset: [0, 0]
     },
     onAfterRender: function () {
 		var layeredCanvas = this.lookupReference('canvas').getController();
@@ -99,9 +106,9 @@ Ext.define('NU.view.window.VisionController', {
 			'message.vision.NUsightObstacles': this.onNUsightObstacles,
 			'message.vision.NUsightLines': this.onNUsightLines,
 			'message.localisation.Field': this.renderLocalisation, //for localisation camera
+			'message.input.CameraParameters': this.cameraParameters,
 			scope: this
 		});
-
 		//listen to an event when the localisation window is opened and has robots.
 		Ext.on('localisationOpened', this.onLocalisationViewConnected, this);
 	},
@@ -116,6 +123,25 @@ Ext.define('NU.view.window.VisionController', {
 		}
 		this.setRobotId(robotId);
 	},
+
+	cameraParameters: function(robot, cameraParameters) {
+        if (robot.get('id') != this.getRobotId()) {
+            return;
+        }
+
+        if (cameraParameters.lens == 0) {
+			this.setIsPinholeCamera(true);
+            this.setPixelToTanThetaFactor([cameraParameters.pinhole.pixelsToTanThetaFactor.x, cameraParameters.pinhole.pixelsToTanThetaFactor.y]);
+
+            this.setFocalLengthPixels((this.getWidth() * 0.5) / Math.tan(cameraParameters.FOV.x * 0.5)); //(WITH * 0.5) / Math.tan(FOV.x * 0.5)
+
+            this.setDistortionFactor(cameraParameters.pinhole.distortionFactor);                       
+        } else if (cameraParameters.lens == 1) {
+            this.setIsPinholeCamera(false);
+        }
+        this.setFOV([cameraParameters.FOV.x, cameraParameters.FOV.y]);
+        this.setCentreOffset([cameraParameters.centreOffset.x, cameraParameters.centreOffset.y]);
+    },
 
 	onLocalisationViewConnected: function(scene, robots) {
 		this.localisationRobots = robots;
@@ -450,7 +476,7 @@ Ext.define('NU.view.window.VisionController', {
 
         this.drawClassifiedImage(image);
         this.drawVisualHorizon(image.getVisualHorizon());
-        this.drawHorizon(image.getHorizon());
+        this.drawHorizon(image.getHorizonNormal());
 
     },
     drawClassifiedImage: function(image) {
@@ -538,44 +564,113 @@ Ext.define('NU.view.window.VisionController', {
         }
     },
     drawHorizon: function(horizon) {
-
         var context = this.getContext('horizon');
         context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
         var points = [];
 
-        var x1 = horizon.distance / horizon.normal.x;
-        var x2 = (horizon.distance - this.getHeight() * horizon.normal.y) / horizon.normal.x;
-        var y1 = horizon.distance / horizon.normal.y;
-        var y2 = (horizon.distance - this.getWidth() * horizon.normal.x) / horizon.normal.y;
+		var fov = this.getFOV();
+        var N = 100; // total number of points
 
-        if (x1 > 0 && x1 < this.getWidth()) {
-            points.push([x1, 0]);
-        }
-        if (x2 > 0 && x2 < this.getWidth()) {
-            points.push([x2, this.getHeight()]);
-        }
-        if (y1 > 0 && y1 < this.getHeight()) {
-            points.push([0, y1]);
-        }
-        if (y2 > 0 && y2 < this.getHeight()) {
-            points.push([this.getWidth(), y2]);
-        }
+		var y = new THREE.Vector3(0.0, 1.0, 0.0);
+		var n = new THREE.Vector3(horizon.x, horizon.y, horizon.z).normalize();
+		
+		var f0 = new THREE.Vector3().crossVectors(y,  n);
 
-        if(points.length === 2) {
-            context.beginPath();
-            context.moveTo(points[0][0], points[0][1]);
-            context.lineTo(points[1][0], points[1][1]);
+		var maxFOV = Math.max(fov[0], fov[1]);
+		var theta = maxFOV / N;
+		for(var i = -N; i < N + 1; i++) {
+			var fi = f0.clone().applyAxisAngle(n, theta * i);
+			points.push(this.getImageFromCam(fi.toArray()));
+		}
+		
+		context.beginPath();
+		points.forEach(function(point, i) {
+			if(i == 0) {
+				context.moveTo(point[0], point[1]);
+				return;
+			}
+			
+			context.lineTo(point[0], point[1]);
+		}.bind(this));
+		context.shadowColor = 'black';
+        context.shadowBlur = 5;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
 
-            context.shadowColor = 'black';
-            context.shadowBlur = 5;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
+        context.strokeStyle = "rgba(0, 0, 255, 1)";
+        context.lineWidth = 2;
+        context.stroke();
+    },
+	projectCamSpaceToScreen: function(point) {
+		if(this.getIsPinholeCamera()) {
+			return this.projectPinholeCamSpaceToScreen(point);
+		}else {
+			return this.projectRadialCamSpaceToScreen(point);
+		}
+	},
+	getPinholeCamFromScreen: function(screen) {
+		return [this.getCamFocalLengthPixels(), screen[0], screen[1]];
+	},
+    projectPinholeCamSpaceToScreen: function(point) {
+		var camFocalLengthPixels = this.getFocalLengthPixels();
+        return [camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]];
+    },
+	getCamFromImage: function(image) {
+		if(this.getIsPinholeCamera()) {
+			return this.getCamFromScreen(this.getPinholeCamFromScreen(image));
+		} 
 
-            context.strokeStyle = "rgba(0, 0, 255, 1)";
-            context.lineWidth = 2;
-            context.stroke();
+		return this.getCamFromScreen(this.getRadialCamFromScreen(image));		
+	},
+	getImageFromCam: function(image) {
+		if(this.getIsPinholeCamera()) {
+			return this.screenToImage(this.projectPinholeCamSpaceToScreen(image));
+		} 
+
+		return this.screenToImage(this.projectRadialCamSpaceToScreen(image));		
+	},
+	screenToImage: function(screen) {
+		var imageSize = [this.getWidth(), this.getHeight()];
+		var x = ((imageSize[0] - 1) * 0.5) - screen[0];
+		var y = ((imageSize[1] - 1) * 0.5) - screen[1];
+		return [x, y];
+	},
+	imageToScreen: function(point) {
+		var imageSize = [this.getWidth(), this.getHeight()];
+		var x = ((imageSize[0] - 1) * 0.5) - point[0];
+		var y = ((imageSize[1] - 1) * 0.5) - point[1];
+		return [x, y];
+	},
+	getRadialCamFromScreen: function(point) {
+		var p = new THREE.Vector3().fromArray(point);
+		var px = p.sub(new THREE.Vector3(this.getCentreOffset()[0], this.getCentreOffset()[1]));
+		
+		var r = Math.sqrt( Math.pow(px.x, 2), Math.pow(px.y, 2));
+
+		if(r == 0) {
+			return [1, 0, 0];
+		}
+		var radiansPerPixel = Math.PI / this.getWidth();
+		var sx = Math.cos(radiansPerPixel * r);
+		var sy = Math.sin(radiansPerPixel * r) * (px.x / r);
+		var sz = Math.sin(radiansPerPixel * r) * (px.y / r);
+
+		return [sx, sy, sz];
+	},
+    projectRadialCamSpaceToScreen: function(point) {
+        var p = new THREE.Vector3().fromArray(point).normalize().toArray();
+        var theta = Math.acos(p[0]);
+        if (theta == 0) {
+            return [0, 0];
         }
+		var radiansPerPixel = Math.PI / this.getWidth();
+        var r = theta / radiansPerPixel;
+        var sin_theta = Math.sin(theta);
+        var px = r * p[1] / sin_theta;
+        var py = r * p[2] / sin_theta;
+
+        return [px + this.getCentreOffset()[0], py + this.getCentreOffset()[1]];
     },
 	onNUsightBalls: function(robot, balls) {
 		if (robot.get('id') !== this.getRobotId()) {
@@ -606,22 +701,48 @@ Ext.define('NU.view.window.VisionController', {
 		this.drawLines(lines.getLines());
 	},
 	drawGoals: function (goals) {
-
 		var context = this.getContext('goals');
 		context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-		for (var i = 0; i < goals.length; i++) {
-			var goal = goals[i];
+		var interpolateCount = 20.0;
+		var interpolateFraction = 1.0 / interpolateCount;
+		goals.forEach(function(goal){
+			var points = [];
+
+			var frustum = goal.getFrustum();
+
+			for(var i = 0; i < interpolateCount; i++) {
+				var pixel = this.interpolate(frustum.bl, frustum.tl, interpolateFraction * i);
+				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+			}
+
+			for(var i = 0; i < interpolateCount; i++) {
+				var pixel = this.interpolate(frustum.tl, frustum.tr, interpolateFraction * i);
+				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+			}
+
+			for(var i = 0; i < interpolateCount; i++) {
+				var pixel = this.interpolate(frustum.tr, frustum.br, interpolateFraction * i);
+				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+			}
+
+			for(var i = 0; i < interpolateCount; i++) {
+				var pixel = this.interpolate(frustum.br, frustum.bl, interpolateFraction * i);
+				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+			}
+
 			context.beginPath();
 
-			var quad = goal.quad;
-			context.moveTo(quad.tl.x, quad.tl.y);
-			context.lineTo(quad.tr.x, quad.tr.y);
-			context.lineTo(quad.br.x, quad.br.y);
-			context.lineTo(quad.bl.x, quad.bl.y);
-			context.lineTo(quad.tl.x, quad.tl.y);
-			context.closePath();
+			points.forEach(function(point, i) {
+				if(i == 0) {
+					context.moveTo(point[0], point[1]);
+					return;
+				}
 
+				context.lineTo(point[0], point[1]);
+			}.bind(this));
+
+			context.closePath();
 			context.shadowColor = 'black';
 			context.shadowBlur = 5;
 			context.shadowOffsetX = 0;
@@ -634,61 +755,57 @@ Ext.define('NU.view.window.VisionController', {
 			context.lineWidth = 2;
 
 			context.stroke();
-
-			// var measurements = goal.getMeasurement();
-            //
-			// // Calculate our error!
-			// context.fillStyle = "rgba(255, 255, 255, 1)";
-			// var mX = (quad.tl.x + quad.tr.x + quad.br.x + quad.bl.x) / 4.0;
-			// var mY = (quad.tl.y + quad.tr.y + quad.br.y + quad.bl.y) / 4.0;
-            //
-			// for(var j = 0; j < measurements.length; ++j) {
-            //
-			// 	var m = measurements[j];
-            //
-			// 	var d = Math.sqrt(m.position.x);
-			// 	var dE = Math.sqrt(m.covariance.x.x);
-            //
-			// 	context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", mX, mY+j*15);
-			// }
-
-		}
+		}.bind(this));
 	},
 	drawBalls: function (balls) {
 		var context = this.getContext('balls');
 		context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-		for (var i = 0; i < balls.length; i++) {
-			var ball = balls[i];
+		balls.forEach(function(ball){
+			var ballCentre = ball.cone.axis;
+			var p = new THREE.Vector3(ballCentre.x, ballCentre.y, ballCentre.z);
+			var q = new THREE.Vector3(p.y, -p.x, 0).normalize();
+			var r = new THREE.Vector3().crossVectors(q, p).normalize();
+	 
+			var theta = 0;
+			var theta_count = 100.0;
+			var theta_step = 2.0 * Math.PI / theta_count; // not fully correct
+
+			var points = [];
+
+			var radius = ball.cone.gradient; // probably not hard coded
+
+			while(theta < 2 * Math.PI) {
+				var a = q.clone().multiplyScalar(Math.cos(theta));
+				var b = r.clone().multiplyScalar(Math.sin(theta)); 
+				a.add(b).multiplyScalar(radius); 
+
+				// P = p + radius * (q * cos(theta) + r * sin(theta));
+				var P = new THREE.Vector3().copy(p.clone().add(a));
+
+				var pixel = this.projectCamSpaceToScreen(P.toArray());
+				points.push(this.screenToImage(pixel));
+				
+				theta += theta_step;
+			}
+
 			context.beginPath();
-
+			points.forEach(function(point, i) {
+				if(i == 0) {
+					context.moveTo(point[0], point[1]);
+					return;
+				}
+				context.lineTo(point[0], point[1]);
+			}.bind(this));
 			context.shadowColor = 'black';
-			context.shadowBlur = 5;
-			context.shadowOffsetX = 0;
-			context.shadowOffsetY = 0;
+	        context.shadowBlur = 5;
+	        context.shadowOffsetX = 0;
+	        context.shadowOffsetY = 0;
 
-			context.arc(ball.circle.centre.x, ball.circle.centre.y, ball.circle.radius, 0, Math.PI * 2, true);
-			context.closePath();
-
-			context.strokeStyle = "rgba(255, 255, 255, 1)";
-			context.lineWidth = 2;
-			context.stroke();
-
-			// var measurements = ball.getMeasurement();
-            //
-			// // Calculate our error!
-			// context.fillStyle = "rgba(255, 255, 255, 1)";
-            //
-			// for(var j = 0; j < measurements.length; ++j) {
-            //
-			// 	var m = measurements[j];
-            //
-			// 	var d = Math.sqrt(m.position.x);
-			// 	var dE = Math.sqrt(m.covariance.x.x);
-            //
-			// 	context.fillText("d " + d.toFixed(2) + "±" + dE.toFixed(2) + "\n", ball.circle.centre.x, ball.circle.centre.y+j*15);
-			// }
-		}
+	        context.strokeStyle = "rgba(255, 255, 255, 1)";
+	        context.lineWidth = 2;
+	        context.stroke();
+		}.bind(this));
 	},
 	drawLines: function (lines) {
 
@@ -748,5 +865,12 @@ Ext.define('NU.view.window.VisionController', {
                 colour = [0,0,0,255];
         }
         return colour;
-    }
+    },
+	interpolate: function(a, b, fracttion) {
+		var nx = a.x+(b.x-a.x)*fracttion;
+		var ny = a.y+(b.y-a.y)*fracttion;
+		var nz = a.z+(b.z-a.z)*fracttion;
+
+		return [nx, ny, nz];
+	}
 });
