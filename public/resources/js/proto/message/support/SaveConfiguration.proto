@@ -14,15 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
 package message.support;
 
 message SaveConfiguration {
-    string path = 1;
-
-    // TODO: How to represent a YAML file?
-    //YAML::Node config;
+    string path   = 1;
+    string config = 2;
 }
