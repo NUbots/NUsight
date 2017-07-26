@@ -18,27 +18,37 @@
  */
 syntax = "proto3";
 
-package message.behaviour;
+package message.motion;
 
-import "google/protobuf/duration.proto";
+import "Matrix.proto";
 import "Vector.proto";
 
-message FixedWalkFinished { }
-message WalkConfigSaved { }
-message CancelFixedWalk { }
+message FootMotionStopped {}
 
-message WalkOptimiserCommand {
-    string walkConfig = 1;
+message FootMotionUpdate {
+    double phase             = 1;
+    uint32 activeForwardLimb = 2;
+    vec3   leftFoot2D        = 3;
+    vec3   rightFoot2D       = 4;
+    mat44  leftFoot3D        = 5;
+    mat44  rightFoot3D       = 6;
 }
 
-message FixedWalkCommand {
-    message WalkSegment {
-        vec2 direction = 1;
-        double curvePeriod = 2;
-        double normalisedVelocity = 3;
-        double normalisedAngularVelocity = 4;
-        google.protobuf.Duration duration = 5;
-    };
-
-    repeated WalkSegment segments = 1;
+message NextFootTargetInfo {
+    vec3 leftFootSource       = 1;
+    vec3 rightFootSource      = 2;
+    vec3 supportMass          = 3;
+    vec3 leftFootDestination  = 4;
+    vec3 rightFootDestination = 5;
 }
+
+message FootStepRequested {
+    bool status = 1;
+}
+
+message FootStepCompleted {
+    bool status = 1;
+}
+
+message EnableFootMotion  {}
+message DisableFootMotion {}

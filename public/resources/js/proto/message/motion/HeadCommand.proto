@@ -18,27 +18,20 @@
  */
 syntax = "proto3";
 
-package message.behaviour;
+package message.motion;
 
-import "google/protobuf/duration.proto";
-import "Vector.proto";
-
-message FixedWalkFinished { }
-message WalkConfigSaved { }
-message CancelFixedWalk { }
-
-message WalkOptimiserCommand {
-    string walkConfig = 1;
+/**
+ * Tell the head where to look in world space.
+ * This command is interpreted such that the robot will use IMU data to fixate at these angles in the world even when rotating.
+ *
+ * @author Jake Fountain
+ */
+message HeadCommand {
+    float yaw        = 1;
+    float pitch      = 2;
+    bool  robotSpace = 3; // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
 }
 
-message FixedWalkCommand {
-    message WalkSegment {
-        vec2 direction = 1;
-        double curvePeriod = 2;
-        double normalisedVelocity = 3;
-        double normalisedAngularVelocity = 4;
-        google.protobuf.Duration duration = 5;
-    };
-
-    repeated WalkSegment segments = 1;
+message HeadMotionUpdate {
+    //TODO...
 }

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 syntax = "proto3";
@@ -48,4 +48,16 @@ message Quad {
 
 message Polygon {
     vec2 point = 1;
+}
+
+message Frustum {
+    vec3 tl = 1;
+    vec3 tr = 2;
+    vec3 bl = 3;
+    vec3 br = 4;
+}
+
+message Cone {
+    vec3 axis = 1;
+    float gradient = 2;
 }
