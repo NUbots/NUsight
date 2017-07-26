@@ -18,27 +18,19 @@
  */
 syntax = "proto3";
 
-package message.behaviour;
+package message.motion;
 
-import "google/protobuf/duration.proto";
-import "Vector.proto";
+import "google/protobuf/timestamp.proto";
 
-message FixedWalkFinished { }
-message WalkConfigSaved { }
-message CancelFixedWalk { }
-
-message WalkOptimiserCommand {
-    string walkConfig = 1;
-}
-
-message FixedWalkCommand {
-    message WalkSegment {
-        vec2 direction = 1;
-        double curvePeriod = 2;
-        double normalisedVelocity = 3;
-        double normalisedAngularVelocity = 4;
-        google.protobuf.Duration duration = 5;
-    };
-
-    repeated WalkSegment segments = 1;
+/**
+ * TODO document
+ *
+ * @author Trent Houliston
+ */
+message ServoTarget {
+    google.protobuf.Timestamp time     = 1;
+    uint32                    id       = 2;
+    float                     position = 3;
+    float                     gain     = 4;
+    float                     torque   = 5;
 }

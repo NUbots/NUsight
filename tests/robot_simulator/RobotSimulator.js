@@ -5,11 +5,17 @@ var path = require('path');
 
 function RobotSimulator (opts) {
 	opts = opts || {};
-	this.net = opts.net || new NUClearNet();
-	this.net.connect({
-		name: this.constructor.name,
-		address: '10.1.255.255' // TODO: (Josephus/Trent) Remove hardcoded address after RoboCup 2017
-	});
+
+	if (opts.net) {
+		this.net = opts.net
+	}else {
+		this.net = 	new NUClearNet();
+		this.net.connect({
+			name: this.constructor.name,
+			address: '10.1.255.255' // TODO: (Josephus/Trent) Remove hardcoded address after RoboCup 2017
+		});
+	}
+
 	this.protoBuilder = opts.protoBuilder || ProtoBuf.newBuilder({ convertFieldsToCamelCase: true });
 
 	// A map of message types to callback functions which will be called
