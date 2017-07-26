@@ -45,7 +45,7 @@ message Ball {
     VisionObject  visObject             = 1;
     repeated Measurement measurements   = 2;
     repeated vec3 edgePoints            = 3;
-    Cone        cone                    = 4;
+    Circle        circle                = 4;
 }
 
 message NUsightBalls {
