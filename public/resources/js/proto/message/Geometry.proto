@@ -63,5 +63,5 @@ message LineSegment {
 
 message Cone {
     vec3 axis = 1;
-    float gradient = 2;
+    double gradient = 2;
 }
