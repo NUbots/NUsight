@@ -55,7 +55,7 @@ void main() {
 	vec4 rawColour = sampleRawImage(rawImage, imageWidth, imageHeight, imageFormat, center);
 
 	if(imageFormat == FORMAT_GRBG || imageFormat == FORMAT_RGGB || imageFormat == FORMAT_GBRG || imageFormat == FORMAT_BGGR) {
-	   rawColour = bayerToRGB(rawImage, rawColour, center, vec2(1280, 1024), vec2(1, 1));
+	   rawColour = bayerToRGB(rawImage, rawColour, center, resolution, firstRed);
 	}
 
     rawColour.xyz *= 255.0;
