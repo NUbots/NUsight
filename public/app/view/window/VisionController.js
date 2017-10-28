@@ -1,24 +1,24 @@
 Ext.define('NU.view.window.VisionController', {
     extend: 'NU.view.window.DisplayController',
-	alias: 'controller.Vision',
-	requires: [
-		'NU.view.webgl.Vision',
-		'NU.view.webgl.VisionDiff'
-	],
-	imageRenderer: null,
-	imageDiffRenderer: null,
-	localisationRenderer: null,
+    alias: 'controller.Vision',
+    requires: [
+        'NU.view.webgl.Vision',
+        'NU.view.webgl.VisionDiff'
+    ],
+    imageRenderer: null,
+    imageDiffRenderer: null,
+    localisationRenderer: null,
     config: {
-		cameraId: null,
+        cameraId: null,
         displayImage: false,
         displayClassifiedImage: false,
         displayFieldObjects: false,
-		layeredCanvas: null,
-		width: 320,
-		height: 240,
-		bitsPerPixel: 4,
-		// camera parameters
-		isPinholeCamera: false,
+        layeredCanvas: null,
+        width: 320,
+        height: 240,
+        bitsPerPixel: 4,
+        // camera parameters
+        isPinholeCamera: false,
         pixelToTanThetaFactor: [], //pinhole
         FOV: [3.351, 3.351],
         focalLengthPixels: (320 * 0.5) / Math.tan(3.351 * 0.5), //pinhole
@@ -26,116 +26,118 @@ Ext.define('NU.view.window.VisionController', {
         centreOffset: [0, 0]
     },
     onAfterRender: function () {
-		var layeredCanvas = this.lookupReference('canvas').getController();
-		this.setLayeredCanvas(layeredCanvas);
+        var layeredCanvas = this.lookupReference('canvas').getController();
+        this.setLayeredCanvas(layeredCanvas);
 
-		var imageLayer = layeredCanvas.add('image', {
-			webgl: true,
-			webglAttributes: {
-				antialias: false
-			}
-		});
+        var imageLayer = layeredCanvas.add('image', {
+            webgl: true,
+            webglAttributes: {
+                antialias: false
+            }
+        });
 
-		this.imageRenderer = Ext.create('NU.view.webgl.Vision', {
-			shader: 'Vision',
-			canvas: imageLayer.canvas,
-			context: imageLayer.context,
-			autoRender: false
-		});
+        this.imageRenderer = Ext.create('NU.view.webgl.Vision', {
+            shader: 'Vision',
+            canvas: imageLayer.canvas,
+            context: imageLayer.context,
+            autoRender: false
+        });
 
-		var imageDiffLayer = layeredCanvas.add('image_diff', {
-			webgl: true,
-			webglAttributes: {
-				antialias: false
-			}
-		});
+        var imageDiffLayer = layeredCanvas.add('image_diff', {
+            webgl: true,
+            webglAttributes: {
+                antialias: false
+            }
+        });
 
-		this.imageDiffRenderer = Ext.create('NU.view.webgl.VisionDiff', {
-			shader: 'VisionDiff',
-			canvas: imageDiffLayer.canvas,
-			context: imageDiffLayer.context,
-			autoRender: false
-		});
+        this.imageDiffRenderer = Ext.create('NU.view.webgl.VisionDiff', {
+            shader: 'VisionDiff',
+            canvas: imageDiffLayer.canvas,
+            context: imageDiffLayer.context,
+            autoRender: false
+        });
 
-		var localisationLayer = layeredCanvas.add('localisation', {
-			webgl: true,
-			webglAttributes: {
-				antialias: false
-			}
-		});
+        var localisationLayer = layeredCanvas.add('localisation', {
+            webgl: true,
+            webglAttributes: {
+                antialias: false
+            }
+        });
 
-		this.localisationRenderer = Ext.create('NU.view.webgl.Vision', {
-			shader: 'VisionDiff',
-			canvas: localisationLayer.canvas,
-			context: localisationLayer.context,
-			autoRender: false
-		});
+        this.localisationRenderer = Ext.create('NU.view.webgl.Vision', {
+            shader: 'VisionDiff',
+            canvas: localisationLayer.canvas,
+            context: localisationLayer.context,
+            autoRender: false
+        });
 
-		layeredCanvas.add('classified_image_search');
-		layeredCanvas.add('classified_image_refine');
-		layeredCanvas.add('visual_horizon');
-		layeredCanvas.add('horizon');
-		layeredCanvas.add('goals', {group: 'field_objects'});
-		layeredCanvas.add('balls', {group: 'field_objects'});
-		layeredCanvas.add('lines');
-		layeredCanvas.add('imageText');
-		//hide image diff by default
-		layeredCanvas.hide('image_diff');
-		layeredCanvas.hide('localisation');
+        layeredCanvas.add('classified_image_search');
+        layeredCanvas.add('classified_image_refine');
+        layeredCanvas.add('visual_horizon');
+        layeredCanvas.add('horizon');
+        layeredCanvas.add('goals', {group: 'field_objects'});
+        layeredCanvas.add('balls', {group: 'field_objects'});
+        layeredCanvas.add('obstacles', {group: 'field_objects'});
+        layeredCanvas.add('lines');
+        layeredCanvas.add('imageText');
+        //hide image diff by default
+        layeredCanvas.hide('image_diff');
+        layeredCanvas.hide('localisation');
 
         //WebGL2D.enable(this.canvas.el.dom);
         //this.context = this.canvas.el.dom.getContext('webgl-2d');
 //        this.setContext(this.getCanvas().el.dom.getContext('2d'));
         //this.context.translate(0.5, 0.5); // HACK: stops antialiasing on pixel width lines
+        layeredCanvas.hide("imageText");
 
-		Promise.all([
-			this.imageRenderer.onReady(),
-			this.imageDiffRenderer.onReady(),
-			this.localisationRenderer.onReady()
-		]).then(function () {
-			this.addEvents();
-		}.bind(this));
+        Promise.all([
+            this.imageRenderer.onReady(),
+            this.imageDiffRenderer.onReady(),
+            this.localisationRenderer.onReady()
+        ]).then(function () {
+            this.addEvents();
+        }.bind(this));
     },
 
-	addEvents: function () {
-		this.mon(NU.Network, {
-			'message.input.Image': this.onImage,
-			'message.vision.ClassifiedImage': this.onClassifiedImage,
-			'message.vision.NUsightBalls': this.onNUsightBalls,
-			'message.vision.NUsightGoals': this.onNUsightGoals,
-			'message.vision.NUsightObstacles': this.onNUsightObstacles,
-			'message.vision.NUsightLines': this.onNUsightLines,
-			'message.localisation.Field': this.renderLocalisation, //for localisation camera
-			'message.input.CameraParameters': this.cameraParameters,
-			scope: this
-		});
-		//listen to an event when the localisation window is opened and has robots.
-		Ext.on('localisationOpened', this.onLocalisationViewConnected, this);
-	},
-	onSelectRobot: function (robotId) {
-		if(this.localisationRobots != null) {
-			for (var i = 0; i < this.localisationRobots.length; i++) {
-				if (this.localisationRobots[i].robotId == robotId) {
-					this.localisationRenderer.camera = this.localisationRobots[i].darwinModels[0].object.camera.children[0];
-					break;
-				}
-			}
-		}
-		this.setRobotId(robotId);
-	},
+    addEvents: function () {
+        this.mon(NU.Network, {
+            'message.input.Image': this.onImage,
+            'message.vision.ClassifiedImage': this.onClassifiedImage,
+            'message.vision.NUsightBalls': this.onNUsightBalls,
+            'message.vision.NUsightGoals': this.onNUsightGoals,
+            'message.vision.NUsightObstacles': this.onNUsightObstacles,
+            'message.vision.NUsightLines': this.onNUsightLines,
+            'message.localisation.Field': this.renderLocalisation, //for localisation camera
+            'message.input.CameraParameters': this.cameraParameters,
+            scope: this
+        });
+        //listen to an event when the localisation window is opened and has robots.
+        Ext.on('localisationOpened', this.onLocalisationViewConnected, this);
+    },
+    onSelectRobot: function (robotId) {
+        if(this.localisationRobots != null) {
+            for (var i = 0; i < this.localisationRobots.length; i++) {
+                if (this.localisationRobots[i].robotId == robotId) {
+                    this.localisationRenderer.camera = this.localisationRobots[i].darwinModels[0].object.camera.children[0];
+                    break;
+                }
+            }
+        }
+        this.setRobotId(robotId);
+    },
 
-	cameraParameters: function(robot, cameraParameters) {
+    cameraParameters: function(robot, cameraParameters) {
         if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
         if (cameraParameters.lens == 0) {
-			this.setIsPinholeCamera(true);
+            this.setIsPinholeCamera(true);
             this.setPixelToTanThetaFactor([cameraParameters.pinhole.pixelsToTanThetaFactor.x, cameraParameters.pinhole.pixelsToTanThetaFactor.y]);
 
             this.setFocalLengthPixels((this.getWidth() * 0.5) / Math.tan(cameraParameters.FOV.x * 0.5)); //(WITH * 0.5) / Math.tan(FOV.x * 0.5)
 
-            this.setDistortionFactor(cameraParameters.pinhole.distortionFactor);                       
+            this.setDistortionFactor(cameraParameters.pinhole.distortionFactor);
         } else if (cameraParameters.lens == 1) {
             this.setIsPinholeCamera(false);
         }
@@ -143,97 +145,97 @@ Ext.define('NU.view.window.VisionController', {
         this.setCentreOffset([cameraParameters.centreOffset.x, cameraParameters.centreOffset.y]);
     },
 
-	onLocalisationViewConnected: function(scene, robots) {
-		this.localisationRobots = robots;
-		for(var i = 0; i < robots.length; i++) {
-			if(robots[i].robotId == this.getRobotId()) {
-				if(robots[i].robotModels[0].camera == null) {
-					return;
-				}
+    onLocalisationViewConnected: function(scene, robots) {
+        this.localisationRobots = robots;
+        for(var i = 0; i < robots.length; i++) {
+            if(robots[i].robotId == this.getRobotId()) {
+                if(robots[i].robotModels[0].camera == null) {
+                    return;
+                }
 
-				this.localisationRenderer.camera = robots[i].robotModels[0].camera.children[0];
-				this.localisationRenderer.scene = scene;
-				break;
-			}
-		}
-		this.renderLocalisation();
-	},
+                this.localisationRenderer.camera = robots[i].robotModels[0].camera.children[0];
+                this.localisationRenderer.scene = scene;
+                break;
+            }
+        }
+        this.renderLocalisation();
+    },
 
-	renderLocalisation: function() {
-		this.localisationRenderer.render();
-	},
+    renderLocalisation: function() {
+        this.localisationRenderer.render();
+    },
 
-	onLayerSelect: function (obj, newValue, oldValue, e) {
-		var layeredCanvas = this.getLayeredCanvas();
-		layeredCanvas.hideAll();
-		Ext.each(newValue, function (value) {
-			switch (value) {
-				case 'all_but_image_diff':
-					layeredCanvas.showAll();
-					layeredCanvas.hide('image_diff');
-					break;
-				case 'all':
-					layeredCanvas.showAll();
-					break;
-				case 'raw':
-					layeredCanvas.show('image');
+    onLayerSelect: function (obj, newValue, oldValue, e) {
+        var layeredCanvas = this.getLayeredCanvas();
+        layeredCanvas.hideAll();
+        Ext.each(newValue, function (value) {
+            switch (value) {
+                case 'all_but_image_diff':
+                    layeredCanvas.showAll();
+                    layeredCanvas.hide('image_diff');
+                    break;
+                case 'all':
+                    layeredCanvas.showAll();
+                    break;
+                case 'raw':
+                    layeredCanvas.show('image');
                     layeredCanvas.show('imageText');
-					break;
-				case 'image_diff':
-					layeredCanvas.show('image_diff');
-					break;
-				case 'classified_search':
-					layeredCanvas.show('classified_image_search');
-					break;
-				case 'classified_refine':
-					layeredCanvas.show('classified_image_refine');
-					break;
-				case 'visual_horizon':
-					layeredCanvas.show('visual_horizon');
-					break;
-				case 'horizon':
-					layeredCanvas.show('horizon');
-					break;
-				case 'objects':
-					layeredCanvas.showGroup('field_objects');
-					break;
-				case 'lines':
-					layeredCanvas.show('lines');
-					break;
-				case 'localisation':
-					layeredCanvas.show('localisation');
-					break;
-			}
-		}, this);
-	},
-	onSelectCamera: function (cameraId) {
-		this.setCameraId(cameraId);
-	},
-	getContext: function (name) {
-		return this.getLayeredCanvas().getContext(name);
-	},
-	autoSize: function (width, height) {
-		if (width === this.getWidth() && height === this.getHeight()) {
-			return; // didn't change
-		}
+                    break;
+                case 'image_diff':
+                    layeredCanvas.show('image_diff');
+                    break;
+                case 'classified_search':
+                    layeredCanvas.show('classified_image_search');
+                    break;
+                case 'classified_refine':
+                    layeredCanvas.show('classified_image_refine');
+                    break;
+                case 'visual_horizon':
+                    layeredCanvas.show('visual_horizon');
+                    break;
+                case 'horizon':
+                    layeredCanvas.show('horizon');
+                    break;
+                case 'objects':
+                    layeredCanvas.showGroup('field_objects');
+                    break;
+                case 'lines':
+                    layeredCanvas.show('lines');
+                    break;
+                case 'localisation':
+                    layeredCanvas.show('localisation');
+                    break;
+            }
+        }, this);
+    },
+    onSelectCamera: function (cameraId) {
+        this.setCameraId(cameraId);
+    },
+    getContext: function (name) {
+        return this.getLayeredCanvas().getContext(name);
+    },
+    autoSize: function (width, height) {
+        if (width === this.getWidth() && height === this.getHeight()) {
+            return; // didn't change
+        }
 
-		this.setWidth(width);
-		this.setHeight(height);
-		this.getLayeredCanvas().setCanvasSize(width, height);
-	},
+        this.setWidth(width);
+        this.setHeight(height);
+        this.getLayeredCanvas().setCanvasSize(width, height);
+    },
     onImage: function (robot, image) {
 
         if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
-		if (image.getCameraId() !== this.getCameraId()) {
-			return;
-		}
+        if (image.getCameraId() !== this.getCameraId()) {
+            return;
+        }
 
-		var width = image.dimensions.x;
-		var height = image.dimensions.y;
-		this.autoSize(width, height);
+        var width = image.dimensions.x;
+        var height = image.dimensions.y;
+        this.autoSize(width, height);
 
         // Copied from NUbots:shared/utility/vision/fourcc.h
         var Format = {
@@ -261,33 +263,33 @@ Ext.define('NU.view.window.VisionController', {
             UNKNOWN: 0,
         };
 
-		switch (image.format) {
-			case Format.JPEG:
-				this.drawImageFormatName('JPEG');
-				// 1st implementation - potentially slower
-				//	        this.drawImageURL(image);
+        switch (image.format) {
+            case Format.JPEG:
+                this.drawImageFormatName('JPEG');
+                // 1st implementation - potentially slower
+                //          this.drawImageURL(image);
 
-				// 2nd implementation - potentially faster
-				this.drawImageB64(image);
-				break;
-			case Format.YUYV:
+                // 2nd implementation - potentially faster
+                this.drawImageB64(image);
+                break;
+            case Format.YUYV:
                 this.drawImageFormatName('YUYV');
-				this.drawImageYbCr422(image);
-				//this.drawImageBayer(image);
-				break;
-			case Format.YM24:
+                this.drawImageYbCr422(image);
+                //this.drawImageBayer(image);
+                break;
+            case Format.YM24:
                 this.drawImageFormatName('YM24');
-				this.drawImageYbCr444(image);
-				//this.drawImageBayer(image);
-				break;
-			case Format.UYVY:
+                this.drawImageYbCr444(image);
+                //this.drawImageBayer(image);
+                break;
+            case Format.UYVY:
                 this.drawImageFormatName('UYVY');
-				this.drawImageY422(image);
-				break;
-			case Format.GRBG:
+                this.drawImageY422(image);
+                break;
+            case Format.GRBG:
                 this.drawImageFormatName('Bayer - GRBG');
-				this.drawImageBayer(image);
-				break;
+                this.drawImageBayer(image);
+                break;
             case Format.RGGB:
                 this.drawImageFormatName('Bayer - RGGB');
                 this.drawImageBayer(image);
@@ -303,22 +305,22 @@ Ext.define('NU.view.window.VisionController', {
             case Format.RGB3:
                 this.drawImageFormatName('RGB3');
                 this.drawImageRGB3(image);
-            	break;
-			default:
+                break;
+            default:
                 console.log('Format: ', image.format);
-				throw 'Unsupported Format';
-		}
+                throw 'Unsupported Format';
+        }
     },
 
-	drawImageFormatName: function(name) {
+    drawImageFormatName: function(name) {
         var imageContext = this.getContext('image');
-		var height = imageContext.canvas.height;
+        var height = imageContext.canvas.height;
 
-    	var context = this.getContext('imageText');
+        var context = this.getContext('imageText');
         context.fillStyle = 'white';
         context.font = "20px Arial";
-		context.fillText(name, 5, height - 5);
-	},
+        context.fillText(name, 5, height - 5);
+    },
 
     drawImageURL: function (image) {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
@@ -331,62 +333,62 @@ Ext.define('NU.view.window.VisionController', {
             URL.revokeObjectURL(url);
         };
     },
-	drawImageY422: function(image) {
-		var width = this.getWidth();
-		var height = this.getHeight();
-		var data = new Uint8Array(image.data.toArrayBuffer());
-		var bytesPerPixel = 2;
-		this.imageRenderer.resize(width, height);
-		this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageRenderer.updateUniform('imageFormat', image.format);
-		this.imageRenderer.updateUniform('imageWidth', width);
-		this.imageRenderer.updateUniform('imageHeight', height);
-		this.imageRenderer.render();
-
-		this.imageDiffRenderer.resize(width, height);
-		this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+    drawImageY422: function(image) {
+        var width = this.getWidth();
+        var height = this.getHeight();
+        var data = new Uint8Array(image.data.toArrayBuffer());
+        var bytesPerPixel = 2;
+        this.imageRenderer.resize(width, height);
+        this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
         this.imageRenderer.updateUniform('imageFormat', image.format);
-		this.imageDiffRenderer.updateUniform('imageWidth', width);
-		this.imageDiffRenderer.updateUniform('imageHeight', height);
-		this.imageDiffRenderer.render();
-	},
-	drawImageYbCr422: function (image) {
-		var width = this.getWidth();
-		var height = this.getHeight();
-		var data = new Uint8Array(image.data.toArrayBuffer());
-		var bytesPerPixel = 2;
-		this.imageRenderer.resize(width, height);
-		this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageRenderer.updateUniform('imageFormat', image.format);
-		this.imageRenderer.updateUniform('imageWidth', width);
-		this.imageRenderer.updateUniform('imageHeight', height);
-		this.imageRenderer.render();
+        this.imageRenderer.updateUniform('imageWidth', width);
+        this.imageRenderer.updateUniform('imageHeight', height);
+        this.imageRenderer.render();
 
-		this.imageDiffRenderer.resize(width, height);
-		this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-		this.imageDiffRenderer.updateUniform('imageFormat', image.format);
-		this.imageDiffRenderer.updateUniform('imageWidth', width);
-		this.imageDiffRenderer.updateUniform('imageHeight', height);
-		this.imageDiffRenderer.render();
-	},
-	drawImageYbCr444: function (image) {
-		var width = this.getWidth();
-		var height = this.getHeight();
-		var data = new Uint8Array(image.data.toArrayBuffer());
-		this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.imageRenderer.updateUniform('imageFormat', image.format);
-		this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.imageRenderer.updateUniform('imageFormat', image.format);
-	},
-	drawImageRGB3: function (image) {
-		var width = this.getWidth();
-		var height = this.getHeight();
-		var data = new Uint8Array(image.data.toArrayBuffer());
-		this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.imageRenderer.updateUniform('imageFormat', image.format);
-		this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-		this.imageRenderer.updateUniform('imageFormat', image.format);
-	},
+        this.imageDiffRenderer.resize(width, height);
+        this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+        this.imageDiffRenderer.updateUniform('imageWidth', width);
+        this.imageDiffRenderer.updateUniform('imageHeight', height);
+        this.imageDiffRenderer.render();
+    },
+    drawImageYbCr422: function (image) {
+        var width = this.getWidth();
+        var height = this.getHeight();
+        var data = new Uint8Array(image.data.toArrayBuffer());
+        var bytesPerPixel = 2;
+        this.imageRenderer.resize(width, height);
+        this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+        this.imageRenderer.updateUniform('imageWidth', width);
+        this.imageRenderer.updateUniform('imageHeight', height);
+        this.imageRenderer.render();
+
+        this.imageDiffRenderer.resize(width, height);
+        this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+        this.imageDiffRenderer.updateUniform('imageFormat', image.format);
+        this.imageDiffRenderer.updateUniform('imageWidth', width);
+        this.imageDiffRenderer.updateUniform('imageHeight', height);
+        this.imageDiffRenderer.render();
+    },
+    drawImageYbCr444: function (image) {
+        var width = this.getWidth();
+        var height = this.getHeight();
+        var data = new Uint8Array(image.data.toArrayBuffer());
+        this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+        this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+    },
+    drawImageRGB3: function (image) {
+        var width = this.getWidth();
+        var height = this.getHeight();
+        var data = new Uint8Array(image.data.toArrayBuffer());
+        this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+        this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+    },
     drawImageB64: function (image) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
         var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
@@ -394,12 +396,12 @@ Ext.define('NU.view.window.VisionController', {
         var ctx = this.getContext('image');
         imageObj.src = uri;
         imageObj.onload = function () {
-			// flip image vertically
-//			ctx.save();
-//			ctx.scale(-1, -1);
-//			ctx.drawImage(imageObj, -image.dimensions.x, -image.dimensions.y, image.dimensions.x, image.dimensions.y);
-			ctx.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
-//			ctx.restore();
+            // flip image vertically
+//          ctx.save();
+//          ctx.scale(-1, -1);
+//          ctx.drawImage(imageObj, -image.dimensions.x, -image.dimensions.y, image.dimensions.x, image.dimensions.y);
+            ctx.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
+//          ctx.restore();
         };
     },
     drawImageBayer: function(image) {
@@ -407,17 +409,17 @@ Ext.define('NU.view.window.VisionController', {
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
         this.imageRenderer.resize(width, height);
-		this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
-		this.imageRenderer.updateUniform('imageFormat', image.format);
-		this.imageRenderer.updateUniform('imageWidth', width);
-		this.imageRenderer.updateUniform('imageHeight', height);
+        this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
+        this.imageRenderer.updateUniform('imageFormat', image.format);
+        this.imageRenderer.updateUniform('imageWidth', width);
+        this.imageRenderer.updateUniform('imageHeight', height);
         this.imageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 
-		this.imageDiffRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
-		this.imageDiffRenderer.updateUniform('imageFormat', image.format);
-		this.imageDiffRenderer.updateUniform('imageWidth', width);
-		this.imageDiffRenderer.updateUniform('imageHeight', height);
-		this.imageDiffRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
+        this.imageDiffRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
+        this.imageDiffRenderer.updateUniform('imageFormat', image.format);
+        this.imageDiffRenderer.updateUniform('imageWidth', width);
+        this.imageDiffRenderer.updateUniform('imageHeight', height);
+        this.imageDiffRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 
         var Format = {
             GRBG: 0x47425247,
@@ -434,10 +436,10 @@ Ext.define('NU.view.window.VisionController', {
             BG16: 0x36314742
         };
 
-		if(image.format == Format.GRBG) {
+        if(image.format == Format.GRBG) {
             this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
-			this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
-		}else if(image.format == Format.RGGB) {
+            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+        }else if(image.format == Format.RGGB) {
             this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
             this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
         }else if(image.format == Format.GBRG) {
@@ -448,31 +450,31 @@ Ext.define('NU.view.window.VisionController', {
             this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
         } else {
             this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-			this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
         }
 
-		this.imageRenderer.render();
-		this.imageDiffRenderer.render();
-	},
-	arrayBufferToBase64: function (buffer) {
-		// from http://stackoverflow.com/a/9458996/868679
-		var binary = '';
-		var bytes = new Uint8Array(buffer);
-		var len = bytes.byteLength;
-		for (var i = 0; i < len; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return window.btoa(binary);
-	},
+        this.imageRenderer.render();
+        this.imageDiffRenderer.render();
+    },
+    arrayBufferToBase64: function (buffer) {
+        // from http://stackoverflow.com/a/9458996/868679
+        var binary = '';
+        var bytes = new Uint8Array(buffer);
+        var len = bytes.byteLength;
+        for (var i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    },
     onClassifiedImage: function (robot, image) {
 
         if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
-		var width = image.dimensions.x;
-		var height = image.dimensions.y;
-		this.autoSize(width, height);
+        var width = image.dimensions.x;
+        var height = image.dimensions.y;
+        this.autoSize(width, height);
 
         this.drawClassifiedImage(image);
         this.drawVisualHorizon(image.getVisualHorizon());
@@ -569,31 +571,31 @@ Ext.define('NU.view.window.VisionController', {
 
         var points = [];
 
-		var fov = this.getFOV();
+        var fov = this.getFOV();
         var N = 100; // total number of points
 
-		var y = new THREE.Vector3(0.0, 1.0, 0.0);
-		var n = new THREE.Vector3(horizon.x, horizon.y, horizon.z).normalize();
-		
-		var f0 = new THREE.Vector3().crossVectors(y,  n);
+        var y = new THREE.Vector3(0.0, 1.0, 0.0);
+        var n = new THREE.Vector3(horizon.x, horizon.y, horizon.z).normalize();
 
-		var maxFOV = Math.max(fov[0], fov[1]);
-		var theta = maxFOV / N;
-		for(var i = -N; i < N + 1; i++) {
-			var fi = f0.clone().applyAxisAngle(n, theta * i);
-			points.push(this.getImageFromCam(fi.toArray()));
-		}
-		
-		context.beginPath();
-		points.forEach(function(point, i) {
-			if(i == 0) {
-				context.moveTo(point[0], point[1]);
-				return;
-			}
-			
-			context.lineTo(point[0], point[1]);
-		}.bind(this));
-		context.shadowColor = 'black';
+        var f0 = new THREE.Vector3().crossVectors(y,  n);
+
+        var maxFOV = Math.max(fov[0], fov[1]);
+        var theta = maxFOV / N;
+        for(var i = -N; i < N + 1; i++) {
+            var fi = f0.clone().applyAxisAngle(n, theta * i);
+            points.push(this.getImageFromCam(fi.toArray()));
+        }
+
+        context.beginPath();
+        points.forEach(function(point, i) {
+            if(i == 0) {
+                context.moveTo(point[0], point[1]);
+                return;
+            }
+
+            context.lineTo(point[0], point[1]);
+        }.bind(this));
+        context.shadowColor = 'black';
         context.shadowBlur = 5;
         context.shadowOffsetX = 0;
         context.shadowOffsetY = 0;
@@ -602,69 +604,69 @@ Ext.define('NU.view.window.VisionController', {
         context.lineWidth = 2;
         context.stroke();
     },
-	projectCamSpaceToScreen: function(point) {
-		if(this.getIsPinholeCamera()) {
-			return this.projectPinholeCamSpaceToScreen(point);
-		}else {
-			return this.projectRadialCamSpaceToScreen(point);
-		}
-	},
-	getPinholeCamFromScreen: function(screen) {
-		return [this.getCamFocalLengthPixels(), screen[0], screen[1]];
-	},
+    projectCamSpaceToScreen: function(point) {
+        if(this.getIsPinholeCamera()) {
+            return this.projectPinholeCamSpaceToScreen(point);
+        }else {
+            return this.projectRadialCamSpaceToScreen(point);
+        }
+    },
+    getPinholeCamFromScreen: function(screen) {
+        return [this.getCamFocalLengthPixels(), screen[0], screen[1]];
+    },
     projectPinholeCamSpaceToScreen: function(point) {
-		var camFocalLengthPixels = this.getFocalLengthPixels();
+        var camFocalLengthPixels = this.getFocalLengthPixels();
         return [camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]];
     },
-	getCamFromImage: function(image) {
-		if(this.getIsPinholeCamera()) {
-			return this.getCamFromScreen(this.getPinholeCamFromScreen(image));
-		} 
+    getCamFromImage: function(image) {
+        if(this.getIsPinholeCamera()) {
+            return this.getCamFromScreen(this.getPinholeCamFromScreen(image));
+        }
 
-		return this.getCamFromScreen(this.getRadialCamFromScreen(image));		
-	},
-	getImageFromCam: function(image) {
-		if(this.getIsPinholeCamera()) {
-			return this.screenToImage(this.projectPinholeCamSpaceToScreen(image));
-		} 
+        return this.getCamFromScreen(this.getRadialCamFromScreen(image));
+    },
+    getImageFromCam: function(image) {
+        if(this.getIsPinholeCamera()) {
+            return this.screenToImage(this.projectPinholeCamSpaceToScreen(image));
+        }
 
-		return this.screenToImage(this.projectRadialCamSpaceToScreen(image));		
-	},
-	screenToImage: function(screen) {
-		var imageSize = [this.getWidth(), this.getHeight()];
-		var x = ((imageSize[0] - 1) * 0.5) - screen[0];
-		var y = ((imageSize[1] - 1) * 0.5) - screen[1];
-		return [x, y];
-	},
-	imageToScreen: function(point) {
-		var imageSize = [this.getWidth(), this.getHeight()];
-		var x = ((imageSize[0] - 1) * 0.5) - point[0];
-		var y = ((imageSize[1] - 1) * 0.5) - point[1];
-		return [x, y];
-	},
-	getRadialCamFromScreen: function(point) {
-		var p = new THREE.Vector3().fromArray(point);
-		var px = p.sub(new THREE.Vector3(this.getCentreOffset()[0], this.getCentreOffset()[1]));
-		
-		var r = Math.sqrt( Math.pow(px.x, 2), Math.pow(px.y, 2));
+        return this.screenToImage(this.projectRadialCamSpaceToScreen(image));
+    },
+    screenToImage: function(screen) {
+        var imageSize = [this.getWidth(), this.getHeight()];
+        var x = ((imageSize[0] - 1) * 0.5) - screen[0];
+        var y = ((imageSize[1] - 1) * 0.5) - screen[1];
+        return [x, y];
+    },
+    imageToScreen: function(point) {
+        var imageSize = [this.getWidth(), this.getHeight()];
+        var x = ((imageSize[0] - 1) * 0.5) - point[0];
+        var y = ((imageSize[1] - 1) * 0.5) - point[1];
+        return [x, y];
+    },
+    getRadialCamFromScreen: function(point) {
+        var p = new THREE.Vector3().fromArray(point);
+        var px = p.sub(new THREE.Vector3(this.getCentreOffset()[0], this.getCentreOffset()[1]));
 
-		if(r == 0) {
-			return [1, 0, 0];
-		}
-		var radiansPerPixel = Math.PI / this.getWidth();
-		var sx = Math.cos(radiansPerPixel * r);
-		var sy = Math.sin(radiansPerPixel * r) * (px.x / r);
-		var sz = Math.sin(radiansPerPixel * r) * (px.y / r);
+        var r = Math.sqrt( Math.pow(px.x, 2), Math.pow(px.y, 2));
 
-		return [sx, sy, sz];
-	},
+        if(r == 0) {
+            return [1, 0, 0];
+        }
+        var radiansPerPixel = Math.PI / this.getWidth();
+        var sx = Math.cos(radiansPerPixel * r);
+        var sy = Math.sin(radiansPerPixel * r) * (px.x / r);
+        var sz = Math.sin(radiansPerPixel * r) * (px.y / r);
+
+        return [sx, sy, sz];
+    },
     projectRadialCamSpaceToScreen: function(point) {
         var p = new THREE.Vector3().fromArray(point).normalize().toArray();
         var theta = Math.acos(p[0]);
         if (theta == 0) {
             return [0, 0];
         }
-		var radiansPerPixel = Math.PI / this.getWidth();
+        var radiansPerPixel = Math.PI / this.getWidth();
         var r = theta / radiansPerPixel;
         var sin_theta = Math.sin(theta);
         var px = r * p[1] / sin_theta;
@@ -672,168 +674,190 @@ Ext.define('NU.view.window.VisionController', {
 
         return [px + this.getCentreOffset()[0], py + this.getCentreOffset()[1]];
     },
-	onNUsightBalls: function(robot, balls) {
-		if (robot.get('id') !== this.getRobotId()) {
-			return;
-		}
+    onNUsightBalls: function(robot, balls) {
+        if (robot.get('id') !== this.getRobotId()) {
+            return;
+        }
 
-		this.drawBalls(balls.getBalls());
-	},
-	onNUsightGoals: function(robot, goals) {
-		if (robot.get('id') !== this.getRobotId()) {
-			return;
-		}
+        this.drawBalls(balls.getBalls());
+    },
+    onNUsightGoals: function(robot, goals) {
+        if (robot.get('id') !== this.getRobotId()) {
+            return;
+        }
 
-		this.drawGoals(goals.getGoals());
-	},
-	//TODO: implement this
-	onNUsightObstacles: function(robot, obstacles) {
-		if (robot.get('id') !== this.getRobotId()) {
-			return;
-		}
+        this.drawGoals(goals.getGoals());
+    },
+    //TODO: implement this
+    onNUsightObstacles: function(robot, obstacles) {
+        if (robot.get('id') !== this.getRobotId()) {
+            return;
+        }
 
-		console.log("NUsightObstacles CURRENTLY NOT SUPPORTED");
-	},
-	onNUsightLines: function(robot, lines) {
-		if (robot.get('id') !== this.getRobotId()) {
-			return;
-		}
-		this.drawLines(lines.getLines());
-	},
-	drawGoals: function (goals) {
-		var context = this.getContext('goals');
-		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+        this.drawObstacles(obstacles.getObstacles());
+    },
+    onNUsightLines: function(robot, lines) {
+        if (robot.get('id') !== this.getRobotId()) {
+            return;
+        }
+        this.drawLines(lines.getLines());
+    },
+    drawGoals: function (goals) {
+        var context = this.getContext('goals');
+        context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-		var interpolateCount = 20.0;
-		var interpolateFraction = 1.0 / interpolateCount;
-		goals.forEach(function(goal){
-			var points = [];
+        var interpolateCount = 20.0;
+        var interpolateFraction = 1.0 / interpolateCount;
+        goals.forEach(function(goal){
+            var points = [];
 
-			var frustum = goal.getFrustum();
+            var frustum = goal.getFrustum();
 
-			for(var i = 0; i < interpolateCount; i++) {
-				var pixel = this.interpolate(frustum.bl, frustum.tl, interpolateFraction * i);
-				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
-			}
+            for(var i = 0; i < interpolateCount; i++) {
+                var pixel = this.interpolate(frustum.bl, frustum.tl, interpolateFraction * i);
+                points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+            }
 
-			for(var i = 0; i < interpolateCount; i++) {
-				var pixel = this.interpolate(frustum.tl, frustum.tr, interpolateFraction * i);
-				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
-			}
+            for(var i = 0; i < interpolateCount; i++) {
+                var pixel = this.interpolate(frustum.tl, frustum.tr, interpolateFraction * i);
+                points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+            }
 
-			for(var i = 0; i < interpolateCount; i++) {
-				var pixel = this.interpolate(frustum.tr, frustum.br, interpolateFraction * i);
-				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
-			}
+            for(var i = 0; i < interpolateCount; i++) {
+                var pixel = this.interpolate(frustum.tr, frustum.br, interpolateFraction * i);
+                points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+            }
 
-			for(var i = 0; i < interpolateCount; i++) {
-				var pixel = this.interpolate(frustum.br, frustum.bl, interpolateFraction * i);
-				points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
-			}
+            for(var i = 0; i < interpolateCount; i++) {
+                var pixel = this.interpolate(frustum.br, frustum.bl, interpolateFraction * i);
+                points.push(this.screenToImage(this.projectCamSpaceToScreen(pixel)));
+            }
 
-			context.beginPath();
+            context.beginPath();
 
-			points.forEach(function(point, i) {
-				if(i == 0) {
-					context.moveTo(point[0], point[1]);
-					return;
-				}
+            points.forEach(function(point, i) {
+                if(i == 0) {
+                    context.moveTo(point[0], point[1]);
+                    return;
+                }
 
-				context.lineTo(point[0], point[1]);
-			}.bind(this));
+                context.lineTo(point[0], point[1]);
+            }.bind(this));
 
-			context.closePath();
-			context.shadowColor = 'black';
-			context.shadowBlur = 5;
-			context.shadowOffsetX = 0;
-			context.shadowOffsetY = 0;
+            context.closePath();
+            context.shadowColor = 'black';
+            context.shadowBlur = 5;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
 
-			context.fillStyle = "rgba(255, 242, 0, 0.2)";
-			context.fill();
+            context.fillStyle = "rgba(255, 242, 0, 0.2)";
+            context.fill();
 
-			context.strokeStyle = "rgba(255, 242, 0, 1)";
-			context.lineWidth = 2;
+            context.strokeStyle = "rgba(255, 242, 0, 1)";
+            context.lineWidth = 2;
 
-			context.stroke();
-		}.bind(this));
-	},
-	drawBalls: function (balls) {
-		var context = this.getContext('balls');
-		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+            context.stroke();
+        }.bind(this));
+    },
+    drawObstacles: function(obstacles) {
+        var context = this.getContext('obstacles');
+        context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-		balls.forEach(function(ball){
-			var ballCentre = ball.cone.axis;
-			var p = new THREE.Vector3(ballCentre.x, ballCentre.y, ballCentre.z);
-			var q = new THREE.Vector3(p.y, -p.x, 0).normalize();
-			var r = new THREE.Vector3().crossVectors(q, p).normalize();
-	 
-			var theta = 0;
-			var theta_count = 100.0;
-			var theta_step = 2.0 * Math.PI / theta_count; // not fully correct
+        obstacles.forEach(function(obstacle){
+            context.beginPath();
+            context.fillStyle = 'rgba(255, 0, 0, 0.5)';;
 
-			var points = [];
+            // Get the first point of the polygon and move to it.
+            var startPoint = obstacle.shape.points[0];
+            context.moveTo(startPoint.x, startPoint.y);
 
-			var radius = ball.cone.gradient; // probably not hard coded
+            // Draw lines to each of the remaining points.
+            for (var i = 1; i < obstacle.shape.points.length; i++) {
+                context.lineTo(obstacle.shape.points[i].x, obstacle.shape.points[i].y);
+            }
 
-			while(theta < 2 * Math.PI) {
-				var a = q.clone().multiplyScalar(Math.cos(theta));
-				var b = r.clone().multiplyScalar(Math.sin(theta)); 
-				a.add(b).multiplyScalar(radius); 
+            // Finish off the polygon and fill it.
+            context.closePath();
+            context.fill();
+        }.bind(this));
+    },
+    drawBalls: function (balls) {
+        var context = this.getContext('balls');
+        context.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-				// P = p + radius * (q * cos(theta) + r * sin(theta));
-				var P = new THREE.Vector3().copy(p.clone().add(a));
+        balls.forEach(function(ball){
+            var ballCentre = ball.cone.axis;
+            var p = new THREE.Vector3(ballCentre.x, ballCentre.y, ballCentre.z);
+            var q = new THREE.Vector3(p.y, -p.x, 0).normalize();
+            var r = new THREE.Vector3().crossVectors(q, p).normalize();
 
-				var pixel = this.projectCamSpaceToScreen(P.toArray());
-				points.push(this.screenToImage(pixel));
-				
-				theta += theta_step;
-			}
+            var theta = 0;
+            var theta_count = 100.0;
+            var theta_step = 2.0 * Math.PI / theta_count; // not fully correct
 
-			context.beginPath();
-			points.forEach(function(point, i) {
-				if(i == 0) {
-					context.moveTo(point[0], point[1]);
-					return;
-				}
-				context.lineTo(point[0], point[1]);
-			}.bind(this));
-			context.shadowColor = 'black';
-	        context.shadowBlur = 5;
-	        context.shadowOffsetX = 0;
-	        context.shadowOffsetY = 0;
+            var points = [];
 
-	        context.strokeStyle = "rgba(255, 255, 255, 1)";
-	        context.lineWidth = 2;
-	        context.stroke();
-		}.bind(this));
-	},
-	drawLines: function (lines) {
+            var radius = ball.cone.gradient; // probably not hard coded
 
-		var context = this.getContext('lines');
-		context.clearRect(0, 0, this.getWidth(), this.getHeight());
+            while(theta < 2 * Math.PI) {
+                var a = q.clone().multiplyScalar(Math.cos(theta));
+                var b = r.clone().multiplyScalar(Math.sin(theta));
+                a.add(b).multiplyScalar(radius);
 
-		function colourToRGBA(colour) {
-			return "rgba("
-				+ Math.floor(colour.getX() * 255) + ", "
-				+ Math.floor(colour.getY() * 255) + ", "
-				+ Math.floor(colour.getZ() * 255) + ", "
-				+ colour.getT() + ")";
-		}
+                // P = p + radius * (q * cos(theta) + r * sin(theta));
+                var P = new THREE.Vector3().copy(p.clone().add(a));
 
-		for (var i = 0; i < lines.length; i++) {
-			var line = lines[i];
-			context.beginPath();
+                var pixel = this.projectCamSpaceToScreen(P.toArray());
+                points.push(this.screenToImage(pixel));
 
-			var start = line.getStart();
-			context.moveTo(start.getX(), start.getY());
-			context.strokeStyle = colourToRGBA(line.getColour());
-			context.lineWidth = 1;
-			var end = line.getEnd();
-			context.lineTo(end.getX(), end.getY());
-			context.stroke();
-		}
+                theta += theta_step;
+            }
 
-	},
+            context.beginPath();
+            points.forEach(function(point, i) {
+                if(i == 0) {
+                    context.moveTo(point[0], point[1]);
+                    return;
+                }
+                context.lineTo(point[0], point[1]);
+            }.bind(this));
+            context.shadowColor = 'black';
+            context.shadowBlur = 5;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+
+            context.strokeStyle = "rgba(255, 255, 255, 1)";
+            context.lineWidth = 2;
+            context.stroke();
+        }.bind(this));
+    },
+    drawLines: function (lines) {
+
+        var context = this.getContext('lines');
+        context.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+        function colourToRGBA(colour) {
+            return "rgba("
+                + Math.floor(colour.getX() * 255) + ", "
+                + Math.floor(colour.getY() * 255) + ", "
+                + Math.floor(colour.getZ() * 255) + ", "
+                + colour.getT() + ")";
+        }
+
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            context.beginPath();
+
+            var start = line.getStart();
+            context.moveTo(start.getX(), start.getY());
+            context.strokeStyle = colourToRGBA(line.getColour());
+            context.lineWidth = 1;
+            var end = line.getEnd();
+            context.lineTo(end.getX(), end.getY());
+            context.stroke();
+        }
+
+    },
     segmentColourToRGB: function (colourType)
     {
         var colour;
@@ -866,11 +890,11 @@ Ext.define('NU.view.window.VisionController', {
         }
         return colour;
     },
-	interpolate: function(a, b, fracttion) {
-		var nx = a.x+(b.x-a.x)*fracttion;
-		var ny = a.y+(b.y-a.y)*fracttion;
-		var nz = a.z+(b.z-a.z)*fracttion;
+    interpolate: function(a, b, fracttion) {
+        var nx = a.x+(b.x-a.x)*fracttion;
+        var ny = a.y+(b.y-a.y)*fracttion;
+        var nz = a.z+(b.z-a.z)*fracttion;
 
-		return [nx, ny, nz];
-	}
+        return [nx, ny, nz];
+    }
 });
