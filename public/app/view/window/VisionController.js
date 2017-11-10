@@ -43,6 +43,20 @@ Ext.define('NU.view.window.VisionController', {
             autoRender: false
         });
 
+        var reprojectedImageLayer = layeredCanvas.add('reprojected_image', {
+            webgl: true,
+            webglAttributes: {
+                antialias: false
+            }
+        });
+
+        this.reprojectedImageRenderer = Ext.create('NU.view.webgl.Vision', {
+            shader: 'Vision',
+            canvas: reprojectedImageLayer.canvas,
+            context: reprojectedImageLayer.context,
+            autoRender: false
+        });
+
         var imageDiffLayer = layeredCanvas.add('image_diff', {
             webgl: true,
             webglAttributes: {
@@ -81,6 +95,7 @@ Ext.define('NU.view.window.VisionController', {
         layeredCanvas.add('lines');
         layeredCanvas.add('imageText');
         //hide image diff by default
+        layeredCanvas.hide('reprojected_image');
         layeredCanvas.hide('image_diff');
         layeredCanvas.hide('localisation');
 
@@ -92,6 +107,7 @@ Ext.define('NU.view.window.VisionController', {
 
         Promise.all([
             this.imageRenderer.onReady(),
+            this.reprojectedImageRenderer.onReady(),
             this.imageDiffRenderer.onReady(),
             this.localisationRenderer.onReady()
         ]).then(function () {
@@ -101,7 +117,8 @@ Ext.define('NU.view.window.VisionController', {
 
     addEvents: function () {
         this.mon(NU.Network, {
-            'message.input.Image': this.onImage,
+            'message.input.Image': this.onRawImage,
+            'message.vision.ReprojectedImage': this.onReprojectedImage,
             'message.vision.ClassifiedImage': this.onClassifiedImage,
             'message.vision.NUsightBalls': this.onNUsightBalls,
             'message.vision.NUsightGoals': this.onNUsightGoals,
@@ -173,12 +190,19 @@ Ext.define('NU.view.window.VisionController', {
                 case 'all_but_image_diff':
                     layeredCanvas.showAll();
                     layeredCanvas.hide('image_diff');
+                    layeredCanvas.hide('reprojected_image');
                     break;
                 case 'all':
                     layeredCanvas.showAll();
                     break;
                 case 'raw':
+                    layeredCanvas.hide('reprojected_image');
                     layeredCanvas.show('image');
+                    layeredCanvas.show('imageText');
+                    break;
+                case 'reprojected':
+                    layeredCanvas.hide('image');
+                    layeredCanvas.show('reprojected_image');
                     layeredCanvas.show('imageText');
                     break;
                 case 'image_diff':
@@ -223,7 +247,7 @@ Ext.define('NU.view.window.VisionController', {
         this.setHeight(height);
         this.getLayeredCanvas().setCanvasSize(width, height);
     },
-    onImage: function (robot, image) {
+    onImage: function (robot, image, useReprojected) {
 
         if (robot.get('id') != this.getRobotId()) {
             return;
@@ -265,56 +289,68 @@ Ext.define('NU.view.window.VisionController', {
 
         switch (image.format) {
             case Format.JPEG:
-                this.drawImageFormatName('JPEG');
+                this.drawImageFormatName('JPEG', useReprojected);
                 // 1st implementation - potentially slower
                 //          this.drawImageURL(image);
 
                 // 2nd implementation - potentially faster
-                this.drawImageB64(image);
+                this.drawImageB64(image, useReprojected);
                 break;
             case Format.YUYV:
-                this.drawImageFormatName('YUYV');
-                this.drawImageYbCr422(image);
+                this.drawImageFormatName('YUYV', useReprojected);
+                this.drawImageYbCr422(image, useReprojected);
                 //this.drawImageBayer(image);
                 break;
             case Format.YM24:
-                this.drawImageFormatName('YM24');
-                this.drawImageYbCr444(image);
+                this.drawImageFormatName('YM24', useReprojected);
+                this.drawImageYbCr444(image, useReprojected);
                 //this.drawImageBayer(image);
                 break;
             case Format.UYVY:
-                this.drawImageFormatName('UYVY');
-                this.drawImageY422(image);
+                this.drawImageFormatName('UYVY', useReprojected);
+                this.drawImageY422(image, useReprojected);
                 break;
             case Format.GRBG:
-                this.drawImageFormatName('Bayer - GRBG');
-                this.drawImageBayer(image);
+                this.drawImageFormatName('Bayer - GRBG', useReprojected);
+                this.drawImageBayer(image, useReprojected);
                 break;
             case Format.RGGB:
-                this.drawImageFormatName('Bayer - RGGB');
-                this.drawImageBayer(image);
+                this.drawImageFormatName('Bayer - RGGB', useReprojected);
+                this.drawImageBayer(image, useReprojected);
                 break;
             case Format.GBRG:
-                this.drawImageFormatName('Bayer - GBRG');
-                this.drawImageBayer(image);
+                this.drawImageFormatName('Bayer - GBRG', useReprojected);
+                this.drawImageBayer(image, useReprojected);
                 break;
             case Format.BGGR:
-                this.drawImageFormatName('Bayer - BGGR');
-                this.drawImageBayer(image);
+                this.drawImageFormatName('Bayer - BGGR', useReprojected);
+                this.drawImageBayer(image, useReprojected);
                 break;
             case Format.RGB3:
-                this.drawImageFormatName('RGB3');
-                this.drawImageRGB3(image);
+                this.drawImageFormatName('RGB3', useReprojected);
+                this.drawImageRGB3(image, useReprojected);
                 break;
             default:
                 console.log('Format: ', image.format);
                 throw 'Unsupported Format';
         }
     },
+    onRawImage: function (robot, image) {
+        this.onImage(robot, image, false);
+    },
+    onReprojectedImage: function (robot, image) {
+        this.onImage(robot, image, true);
+    },
+    drawImageFormatName: function(name, useReprojected) {
+        var height = 0;
 
-    drawImageFormatName: function(name) {
-        var imageContext = this.getContext('image');
-        var height = imageContext.canvas.height;
+        if (useReprojected) {
+            height = this.getContext('reprojected_image').canvas.height;
+        }
+
+        else {
+            height = this.getContext('image').canvas.height;
+        }
 
         var context = this.getContext('imageText');
         context.fillStyle = 'white';
@@ -322,56 +358,77 @@ Ext.define('NU.view.window.VisionController', {
         context.fillText(name, 5, height - 5);
     },
 
-    drawImageURL: function (image) {
+    drawImageURL: function (image, useReprojected) {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
         var url = URL.createObjectURL(blob);
+        var context = this.getContext('image');
         var imageObj = new Image();
-        var ctx = this.getContext('image');
         imageObj.src = url;
         imageObj.onload = function () {
-            ctx.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
+            context.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
             URL.revokeObjectURL(url);
         };
     },
-    drawImageY422: function(image) {
+    drawImageY422: function(image, useReprojected) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
         var bytesPerPixel = 2;
-        this.imageRenderer.resize(width, height);
-        this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
-        this.imageRenderer.updateUniform('imageWidth', width);
-        this.imageRenderer.updateUniform('imageHeight', height);
-        this.imageRenderer.render();
+        if (useReprojected) {
+            this.reprojectedImageRenderer.resize(width, height);
+            this.reprojectedImageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
+            this.reprojectedImageRenderer.updateUniform('imageWidth', width);
+            this.reprojectedImageRenderer.updateUniform('imageHeight', height);
+            this.reprojectedImageRenderer.render();
+        }
 
-        this.imageDiffRenderer.resize(width, height);
-        this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
-        this.imageDiffRenderer.updateUniform('imageWidth', width);
-        this.imageDiffRenderer.updateUniform('imageHeight', height);
-        this.imageDiffRenderer.render();
-    },
-    drawImageYbCr422: function (image) {
-        var width = this.getWidth();
-        var height = this.getHeight();
-        var data = new Uint8Array(image.data.toArrayBuffer());
-        var bytesPerPixel = 2;
-        this.imageRenderer.resize(width, height);
-        this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
-        this.imageRenderer.updateUniform('imageWidth', width);
-        this.imageRenderer.updateUniform('imageHeight', height);
-        this.imageRenderer.render();
+        else {
+            this.imageRenderer.resize(width, height);
+            this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+            this.imageRenderer.updateUniform('imageFormat', image.format);
+            this.imageRenderer.updateUniform('imageWidth', width);
+            this.imageRenderer.updateUniform('imageHeight', height);
+            this.imageRenderer.render();
+        }
 
-        this.imageDiffRenderer.resize(width, height);
         this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
         this.imageDiffRenderer.updateUniform('imageFormat', image.format);
         this.imageDiffRenderer.updateUniform('imageWidth', width);
         this.imageDiffRenderer.updateUniform('imageHeight', height);
         this.imageDiffRenderer.render();
     },
-    drawImageYbCr444: function (image) {
+    drawImageYbCr422: function (image, useReprojected) {
+        var width = this.getWidth();
+        var height = this.getHeight();
+        var data = new Uint8Array(image.data.toArrayBuffer());
+        var bytesPerPixel = 2;
+        if (useReprojected) {
+            this.reprojectedImageRenderer.resize(width, height);
+            this.reprojectedImageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
+            this.reprojectedImageRenderer.updateUniform('imageWidth', width);
+            this.reprojectedImageRenderer.updateUniform('imageHeight', height);
+            this.reprojectedImageRenderer.render();
+        }
+
+        else {
+            this.imageRenderer.resize(width, height);
+            this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+            this.imageRenderer.updateUniform('imageFormat', image.format);
+            this.imageRenderer.updateUniform('imageWidth', width);
+            this.imageRenderer.updateUniform('imageHeight', height);
+            this.imageRenderer.render();
+        }
+
+
+        this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+        this.imageDiffRenderer.updateUniform('imageFormat', image.format);
+        this.imageDiffRenderer.updateUniform('imageWidth', width);
+        this.imageDiffRenderer.updateUniform('imageHeight', height);
+        this.imageDiffRenderer.render();
+    },
+    drawImageYbCr444: function (image, useReprojected) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
@@ -380,40 +437,61 @@ Ext.define('NU.view.window.VisionController', {
         this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
         this.imageRenderer.updateUniform('imageFormat', image.format);
     },
-    drawImageRGB3: function (image) {
+    drawImageRGB3: function (image, useReprojected) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
-        this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
-        this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
+        if (useReprojected) {
+            this.reprojectedImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
+            this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
+        }
+
+        else {
+            this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+            this.imageRenderer.updateUniform('imageFormat', image.format);
+            this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+            this.imageRenderer.updateUniform('imageFormat', image.format);
+        }
     },
-    drawImageB64: function (image) {
+    drawImageB64: function (image, useReprojected) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
         var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
         var imageObj = new Image();
-        var ctx = this.getContext('image');
+        var context = this.getContext('image');
         imageObj.src = uri;
         imageObj.onload = function () {
             // flip image vertically
-//          ctx.save();
-//          ctx.scale(-1, -1);
-//          ctx.drawImage(imageObj, -image.dimensions.x, -image.dimensions.y, image.dimensions.x, image.dimensions.y);
-            ctx.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
-//          ctx.restore();
+//          context.save();
+//          context.scale(-1, -1);
+//          context.drawImage(imageObj, -image.dimensions.x, -image.dimensions.y, image.dimensions.x, image.dimensions.y);
+            context.drawImage(imageObj, 0, 0, image.dimensions.x, image.dimensions.y);
+//          context.restore();
         };
     },
-    drawImageBayer: function(image) {
+    drawImageBayer: function(image, useReprojected) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
-        this.imageRenderer.resize(width, height);
-        this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
-        this.imageRenderer.updateUniform('imageWidth', width);
-        this.imageRenderer.updateUniform('imageHeight', height);
-        this.imageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
+        if (useReprojected) {
+            this.reprojectedImageRenderer.resize(width, height);
+            this.reprojectedImageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
+            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
+            this.reprojectedImageRenderer.updateUniform('imageWidth', width);
+            this.reprojectedImageRenderer.updateUniform('imageHeight', height);
+            this.reprojectedImageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
+        }
+
+        else {
+            this.imageRenderer.resize(width, height);
+            this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
+            this.imageRenderer.updateUniform('imageFormat', image.format);
+            this.imageRenderer.updateUniform('imageWidth', width);
+            this.imageRenderer.updateUniform('imageHeight', height);
+            this.imageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
+        }
+
 
         this.imageDiffRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
         this.imageDiffRenderer.updateUniform('imageFormat', image.format);
@@ -436,24 +514,30 @@ Ext.define('NU.view.window.VisionController', {
             BG16: 0x36314742
         };
 
+        var firstRed = new THREE.Vector2(0, 0);
         if(image.format == Format.GRBG) {
-            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
-            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(1, 0));
+            firstRed = new THREE.Vector2(1, 0);
         }else if(image.format == Format.RGGB) {
-            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            firstRed = new THREE.Vector2(0, 0);
         }else if(image.format == Format.GBRG) {
-            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
-            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0 , 1));
+            firstRed = new THREE.Vector2(0, 1);
         }else if(image.format == Format.BGGR) {
-            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
-            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(1, 1));
+            firstRed = new THREE.Vector2(1, 1);
         } else {
-            this.imageRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
-            this.imageDiffRenderer.updateUniform('firstRed', new THREE.Vector2(0, 0));
+            firstRed = new THREE.Vector2(0, 0);
         }
 
-        this.imageRenderer.render();
+        if (useReprojected) {
+            this.reprojectedImageRenderer.updateUniform('firstRed', firstRed);
+            this.reprojectedImageRenderer.render();
+        }
+
+        else {
+            this.imageRenderer.updateUniform('firstRed', firstRed);
+            this.imageRenderer.render();
+        }
+
+        this.imageDiffRenderer.updateUniform('firstRed', firstRed);
         this.imageDiffRenderer.render();
     },
     arrayBufferToBase64: function (buffer) {
