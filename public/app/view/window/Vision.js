@@ -59,6 +59,7 @@ Ext.define('NU.view.window.Vision', {
             store: [
                 ['all_but_image_diff', 'All but Image Diff'],
                 ['raw', 'Raw Image'],
+                ['reprojected', 'Reprojected Image'],
                 ['image_diff', 'Image Diff'],
                 ['classified_search', 'Classified Search'],
                 ['classified_refine', 'Classified Refined'],
