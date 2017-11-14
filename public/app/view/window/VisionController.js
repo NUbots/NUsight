@@ -116,6 +116,19 @@ Ext.define('NU.view.window.VisionController', {
     },
 
     addEvents: function () {
+        
+        // very hacky code, dont merge to master?
+        // need to clear the obstacles every X seconds
+        this.lastObstacleSeen = 0;
+        this.pedestrianIntervalId = setInterval(() => {
+            if(performance.now() - this.lastObstacleSeen >= 5000) {
+                console.log('cleared')
+                var context = this.getContext('obstacles');
+                this.lastObstacleSeen = 0;
+                context.clearRect(0, 0, this.getWidth(), this.getHeight());
+            }
+        }, 500);
+
         this.mon(NU.Network, {
             'message.input.Image': this.onRawImage,
             'message.vision.ReprojectedImage': this.onReprojectedImage,
@@ -248,12 +261,12 @@ Ext.define('NU.view.window.VisionController', {
         this.getLayeredCanvas().setCanvasSize(width, height);
     },
     onImage: function (robot, image, useReprojected) {
-
         if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
         if (image.getCameraId() !== this.getCameraId()) {
+            console.log(image.getCameraId())
             return;
         }
 
@@ -442,10 +455,19 @@ Ext.define('NU.view.window.VisionController', {
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
         if (useReprojected) {
-            this.reprojectedImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+            console.log('test abc');
+            this.reprojectedImageRenderer.resize(width, height);
+            this.reprojectedImageRenderer.updateTexture('rawImage', data, width, height, THREE.RGBFormat);
             this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
-            this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
+            this.reprojectedImageRenderer.updateUniform('imageWidth', width);
+            this.reprojectedImageRenderer.updateUniform('imageHeight', height);
+            this.reprojectedImageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
+
+            this.reprojectedImageRenderer.render()
+            // this.reprojectedImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+            // this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
+            // this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
+            // this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
         }
 
         else {
@@ -453,6 +475,7 @@ Ext.define('NU.view.window.VisionController', {
             this.imageRenderer.updateUniform('imageFormat', image.format);
             this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
             this.imageRenderer.updateUniform('imageFormat', image.format);
+            this.imageRenderer.render();
         }
     },
     drawImageB64: function (image, useReprojected) {
@@ -528,6 +551,7 @@ Ext.define('NU.view.window.VisionController', {
         }
 
         if (useReprojected) {
+            console.log('test')
             this.reprojectedImageRenderer.updateUniform('firstRed', firstRed);
             this.reprojectedImageRenderer.render();
         }
@@ -777,7 +801,8 @@ Ext.define('NU.view.window.VisionController', {
         if (robot.get('id') !== this.getRobotId()) {
             return;
         }
-
+        console.log('new obstacles');
+        this.lastObstacleSeen = performance.now();
         this.drawObstacles(obstacles.getObstacles());
     },
     onNUsightLines: function(robot, lines) {
