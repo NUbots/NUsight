@@ -23,7 +23,8 @@ Ext.define('NU.view.window.VisionController', {
         FOV: [3.351, 3.351],
         focalLengthPixels: (320 * 0.5) / Math.tan(3.351 * 0.5), //pinhole
         distortionFactor: null, //pinhole
-        centreOffset: [0, 0]
+        centreOffset: [0, 0],
+        pedestrianIntervalId: -1,
     },
     onAfterRender: function () {
         var layeredCanvas = this.lookupReference('canvas').getController();
@@ -54,6 +55,21 @@ Ext.define('NU.view.window.VisionController', {
             shader: 'Vision',
             canvas: reprojectedImageLayer.canvas,
             context: reprojectedImageLayer.context,
+            autoRender: false
+        });
+
+        // pedestrian detection
+        var pedestrianImageLayer = layeredCanvas.add('pedestrian_image', {
+            webgl: true,
+            webglAttributes: {
+                antialias: false
+            }
+        });
+
+        this.pedestrianImageRenderer = Ext.create('NU.view.webgl.Vision', {
+            shader: 'Vision',
+            canvas: pedestrianImageLayer.canvas,
+            context: pedestrianImageLayer.context,
             autoRender: false
         });
 
@@ -108,6 +124,7 @@ Ext.define('NU.view.window.VisionController', {
         Promise.all([
             this.imageRenderer.onReady(),
             this.reprojectedImageRenderer.onReady(),
+            this.pedestrianImageRenderer.onReady(),
             this.imageDiffRenderer.onReady(),
             this.localisationRenderer.onReady()
         ]).then(function () {
@@ -115,22 +132,16 @@ Ext.define('NU.view.window.VisionController', {
         }.bind(this));
     },
 
-    addEvents: function () {
-        
-        // very hacky code, dont merge to master?
-        // need to clear the obstacles every X seconds
-        this.lastObstacleSeen = 0;
-        this.pedestrianIntervalId = setInterval(() => {
-            if(performance.now() - this.lastObstacleSeen >= 5000) {
-                console.log('cleared')
-                var context = this.getContext('obstacles');
-                this.lastObstacleSeen = 0;
-                context.clearRect(0, 0, this.getWidth(), this.getHeight());
-            }
-        }, 500);
+    onClose: function() {
+        if (this.getPedestrianIntervalId() != -1) {
+            clearInterval(this.getPedestrianIntervalId());
+        }
+    },
 
+    addEvents: function () {
         this.mon(NU.Network, {
             'message.input.Image': this.onRawImage,
+            'message.vision.BakedImage': this.onPedestrianImage,
             'message.vision.ReprojectedImage': this.onReprojectedImage,
             'message.vision.ClassifiedImage': this.onClassifiedImage,
             'message.vision.NUsightBalls': this.onNUsightBalls,
@@ -218,6 +229,10 @@ Ext.define('NU.view.window.VisionController', {
                     layeredCanvas.show('reprojected_image');
                     layeredCanvas.show('imageText');
                     break;
+                case 'pedestrian':
+                    layeredCanvas.show('pedestrian_image');
+                    layeredCanvas.show('imageText');
+                    break;
                 case 'image_diff':
                     layeredCanvas.show('image_diff');
                     break;
@@ -260,13 +275,12 @@ Ext.define('NU.view.window.VisionController', {
         this.setHeight(height);
         this.getLayeredCanvas().setCanvasSize(width, height);
     },
-    onImage: function (robot, image, useReprojected) {
+    onImage: function (robot, image, renderer) {
         if (robot.get('id') != this.getRobotId()) {
             return;
         }
 
         if (image.getCameraId() !== this.getCameraId()) {
-            console.log(image.getCameraId())
             return;
         }
 
@@ -307,41 +321,41 @@ Ext.define('NU.view.window.VisionController', {
                 //          this.drawImageURL(image);
 
                 // 2nd implementation - potentially faster
-                this.drawImageB64(image, useReprojected);
+                this.drawImageB64(image, renderer);
                 break;
             case Format.YUYV:
                 this.drawImageFormatName('YUYV', useReprojected);
-                this.drawImageYbCr422(image, useReprojected);
+                this.drawImageYbCr422(image, renderer);
                 //this.drawImageBayer(image);
                 break;
             case Format.YM24:
                 this.drawImageFormatName('YM24', useReprojected);
-                this.drawImageYbCr444(image, useReprojected);
+                this.drawImageYbCr444(image, renderer);
                 //this.drawImageBayer(image);
                 break;
             case Format.UYVY:
                 this.drawImageFormatName('UYVY', useReprojected);
-                this.drawImageY422(image, useReprojected);
+                this.drawImageY422(image, renderer);
                 break;
             case Format.GRBG:
                 this.drawImageFormatName('Bayer - GRBG', useReprojected);
-                this.drawImageBayer(image, useReprojected);
+                this.drawImageBayer(image, renderer);
                 break;
             case Format.RGGB:
                 this.drawImageFormatName('Bayer - RGGB', useReprojected);
-                this.drawImageBayer(image, useReprojected);
+                this.drawImageBayer(image, renderer);
                 break;
             case Format.GBRG:
                 this.drawImageFormatName('Bayer - GBRG', useReprojected);
-                this.drawImageBayer(image, useReprojected);
+                this.drawImageBayer(image, renderer);
                 break;
             case Format.BGGR:
                 this.drawImageFormatName('Bayer - BGGR', useReprojected);
-                this.drawImageBayer(image, useReprojected);
+                this.drawImageBayer(image, renderer);
                 break;
             case Format.RGB3:
                 this.drawImageFormatName('RGB3', useReprojected);
-                this.drawImageRGB3(image, useReprojected);
+                this.drawImageRGB3(image, renderer);
                 break;
             default:
                 console.log('Format: ', image.format);
@@ -349,10 +363,13 @@ Ext.define('NU.view.window.VisionController', {
         }
     },
     onRawImage: function (robot, image) {
-        this.onImage(robot, image, false);
+        this.onImage(robot, image, this.imageRenderer);
     },
     onReprojectedImage: function (robot, image) {
-        this.onImage(robot, image, true);
+        this.onImage(robot, image, this.reprojectedImageRenderer);
+    },
+    onPedestrianImage: function(robot, image) {
+        this.onImage(robot, image, this.pedestrianImageRenderer);
     },
     drawImageFormatName: function(name, useReprojected) {
         var height = 0;
@@ -382,28 +399,18 @@ Ext.define('NU.view.window.VisionController', {
             URL.revokeObjectURL(url);
         };
     },
-    drawImageY422: function(image, useReprojected) {
+    drawImageY422: function(image, renderer, renderDiff) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
         var bytesPerPixel = 2;
-        if (useReprojected) {
-            this.reprojectedImageRenderer.resize(width, height);
-            this.reprojectedImageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
-            this.reprojectedImageRenderer.updateUniform('imageWidth', width);
-            this.reprojectedImageRenderer.updateUniform('imageHeight', height);
-            this.reprojectedImageRenderer.render();
-        }
-
-        else {
-            this.imageRenderer.resize(width, height);
-            this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-            this.imageRenderer.updateUniform('imageFormat', image.format);
-            this.imageRenderer.updateUniform('imageWidth', width);
-            this.imageRenderer.updateUniform('imageHeight', height);
-            this.imageRenderer.render();
-        }
+        
+        renderer.resize(width, height);
+        renderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+        renderer.updateUniform('imageFormat', image.format);
+        renderer.updateUniform('imageWidth', width);
+        renderer.updateUniform('imageHeight', height);
+        renderer.render();
 
         this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
         this.imageDiffRenderer.updateUniform('imageFormat', image.format);
@@ -411,29 +418,18 @@ Ext.define('NU.view.window.VisionController', {
         this.imageDiffRenderer.updateUniform('imageHeight', height);
         this.imageDiffRenderer.render();
     },
-    drawImageYbCr422: function (image, useReprojected) {
+    drawImageYbCr422: function (image, renderer, renderDiff) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
         var bytesPerPixel = 2;
-        if (useReprojected) {
-            this.reprojectedImageRenderer.resize(width, height);
-            this.reprojectedImageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
-            this.reprojectedImageRenderer.updateUniform('imageWidth', width);
-            this.reprojectedImageRenderer.updateUniform('imageHeight', height);
-            this.reprojectedImageRenderer.render();
-        }
-
-        else {
-            this.imageRenderer.resize(width, height);
-            this.imageRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
-            this.imageRenderer.updateUniform('imageFormat', image.format);
-            this.imageRenderer.updateUniform('imageWidth', width);
-            this.imageRenderer.updateUniform('imageHeight', height);
-            this.imageRenderer.render();
-        }
-
+        
+        renderer.resize(width, height);
+        renderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
+        renderer.updateUniform('imageFormat', image.format);
+        renderer.updateUniform('imageWidth', width);
+        renderer.updateUniform('imageHeight', height);
+        renderer.render();
 
         this.imageDiffRenderer.updateTexture('rawImage', data, width * bytesPerPixel, height, THREE.LuminanceFormat);
         this.imageDiffRenderer.updateUniform('imageFormat', image.format);
@@ -441,44 +437,30 @@ Ext.define('NU.view.window.VisionController', {
         this.imageDiffRenderer.updateUniform('imageHeight', height);
         this.imageDiffRenderer.render();
     },
-    drawImageYbCr444: function (image, useReprojected) {
+    drawImageYbCr444: function (image, renderer, renderDiff) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
-        this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
+        renderer.updateRawImage(data, width, height, THREE.RGBFormat);
+        renderer.updateUniform('imageFormat', image.format);
         this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-        this.imageRenderer.updateUniform('imageFormat', image.format);
+        this.imageDiffRenderer.updateUniform('imageFormat', image.format);
     },
-    drawImageRGB3: function (image, useReprojected) {
+    drawImageRGB3: function (image, renderer, renderDiff) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
-        if (useReprojected) {
-            console.log('test abc');
-            this.reprojectedImageRenderer.resize(width, height);
-            this.reprojectedImageRenderer.updateTexture('rawImage', data, width, height, THREE.RGBFormat);
-            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
-            this.reprojectedImageRenderer.updateUniform('imageWidth', width);
-            this.reprojectedImageRenderer.updateUniform('imageHeight', height);
-            this.reprojectedImageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 
-            this.reprojectedImageRenderer.render()
-            // this.reprojectedImageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-            // this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
-            // this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-            // this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
-        }
+        renderer.resize(width, height);
+        renderer.updateTexture('rawImage', data, width, height, THREE.RGBFormat);
+        renderer.updateUniform('imageFormat', image.format);
+        renderer.updateUniform('imageWidth', width);
+        renderer.updateUniform('imageHeight', height);
+        renderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 
-        else {
-            this.imageRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-            this.imageRenderer.updateUniform('imageFormat', image.format);
-            this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
-            this.imageRenderer.updateUniform('imageFormat', image.format);
-            this.imageRenderer.render();
-        }
+        renderer.render();
     },
-    drawImageB64: function (image, useReprojected) {
+    drawImageB64: function (image, renderer, renderDiff) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
         var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
         var imageObj = new Image();
@@ -493,27 +475,17 @@ Ext.define('NU.view.window.VisionController', {
 //          context.restore();
         };
     },
-    drawImageBayer: function(image, useReprojected) {
+    drawImageBayer: function(image, renderer, renderDiff) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
-        if (useReprojected) {
-            this.reprojectedImageRenderer.resize(width, height);
-            this.reprojectedImageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
-            this.reprojectedImageRenderer.updateUniform('imageFormat', image.format);
-            this.reprojectedImageRenderer.updateUniform('imageWidth', width);
-            this.reprojectedImageRenderer.updateUniform('imageHeight', height);
-            this.reprojectedImageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
-        }
-
-        else {
-            this.imageRenderer.resize(width, height);
-            this.imageRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
-            this.imageRenderer.updateUniform('imageFormat', image.format);
-            this.imageRenderer.updateUniform('imageWidth', width);
-            this.imageRenderer.updateUniform('imageHeight', height);
-            this.imageRenderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
-        }
+        
+        renderer.resize(width, height);
+        renderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
+        renderer.updateUniform('imageFormat', image.format);
+        renderer.updateUniform('imageWidth', width);
+        renderer.updateUniform('imageHeight', height);
+        renderer.updateUniform('resolution', new THREE.Vector2(image.dimensions.x, image.dimensions.y));
 
 
         this.imageDiffRenderer.updateTexture('rawImage', data, width, height, THREE.LuminanceFormat);
@@ -550,16 +522,8 @@ Ext.define('NU.view.window.VisionController', {
             firstRed = new THREE.Vector2(0, 0);
         }
 
-        if (useReprojected) {
-            console.log('test')
-            this.reprojectedImageRenderer.updateUniform('firstRed', firstRed);
-            this.reprojectedImageRenderer.render();
-        }
-
-        else {
-            this.imageRenderer.updateUniform('firstRed', firstRed);
-            this.imageRenderer.render();
-        }
+        renderer.updateUniform('firstRed', firstRed);
+        renderer.render();
 
         this.imageDiffRenderer.updateUniform('firstRed', firstRed);
         this.imageDiffRenderer.render();
@@ -801,7 +765,22 @@ Ext.define('NU.view.window.VisionController', {
         if (robot.get('id') !== this.getRobotId()) {
             return;
         }
-        console.log('new obstacles');
+        // very hacky code, dont merge to master?
+        // need to clear the obstacles every X seconds
+        this.lastObstacleSeen = 0;
+
+        if (this.getPedestrianIntervalId() == -1) {
+            id = setInterval(() => {
+                if(performance.now() - this.lastObstacleSeen >= 5000) {
+                    var context = this.getContext('obstacles');
+                    this.lastObstacleSeen = 0;
+                    context.clearRect(0, 0, this.getWidth(), this.getHeight());
+                }
+            }, 500);
+
+            this.setPedestrianIntervalId(id);
+        }
+
         this.lastObstacleSeen = performance.now();
         this.drawObstacles(obstacles.getObstacles());
     },

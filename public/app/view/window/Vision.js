@@ -17,7 +17,8 @@ Ext.define('NU.view.window.Vision', {
 //    },
     layout: 'border',
     listeners: {
-        afterrender: 'onAfterRender'
+        afterrender: 'onAfterRender',
+        close: 'onClose'
     },
 	tbar: {
         xtype: 'toolbar',
@@ -59,6 +60,7 @@ Ext.define('NU.view.window.Vision', {
             store: [
                 ['all_but_image_diff', 'All but Image Diff'],
                 ['raw', 'Raw Image'],
+                ['pedestrian', 'Pedestrian Image'],
                 ['reprojected', 'Reprojected Image'],
                 ['image_diff', 'Image Diff'],
                 ['classified_search', 'Classified Search'],
