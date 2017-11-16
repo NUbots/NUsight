@@ -316,7 +316,7 @@ Ext.define('NU.view.window.VisionController', {
 
         switch (image.format) {
             case Format.JPEG:
-                this.drawImageFormatName('JPEG', useReprojected);
+                this.drawImageFormatName('JPEG', renderer);
                 // 1st implementation - potentially slower
                 //          this.drawImageURL(image);
 
@@ -324,37 +324,37 @@ Ext.define('NU.view.window.VisionController', {
                 this.drawImageB64(image, renderer);
                 break;
             case Format.YUYV:
-                this.drawImageFormatName('YUYV', useReprojected);
+                this.drawImageFormatName('YUYV', renderer);
                 this.drawImageYbCr422(image, renderer);
                 //this.drawImageBayer(image);
                 break;
             case Format.YM24:
-                this.drawImageFormatName('YM24', useReprojected);
+                this.drawImageFormatName('YM24', renderer);
                 this.drawImageYbCr444(image, renderer);
                 //this.drawImageBayer(image);
                 break;
             case Format.UYVY:
-                this.drawImageFormatName('UYVY', useReprojected);
+                this.drawImageFormatName('UYVY', renderer);
                 this.drawImageY422(image, renderer);
                 break;
             case Format.GRBG:
-                this.drawImageFormatName('Bayer - GRBG', useReprojected);
+                this.drawImageFormatName('Bayer - GRBG', renderer);
                 this.drawImageBayer(image, renderer);
                 break;
             case Format.RGGB:
-                this.drawImageFormatName('Bayer - RGGB', useReprojected);
+                this.drawImageFormatName('Bayer - RGGB', renderer);
                 this.drawImageBayer(image, renderer);
                 break;
             case Format.GBRG:
-                this.drawImageFormatName('Bayer - GBRG', useReprojected);
+                this.drawImageFormatName('Bayer - GBRG', renderer);
                 this.drawImageBayer(image, renderer);
                 break;
             case Format.BGGR:
-                this.drawImageFormatName('Bayer - BGGR', useReprojected);
+                this.drawImageFormatName('Bayer - BGGR', renderer);
                 this.drawImageBayer(image, renderer);
                 break;
             case Format.RGB3:
-                this.drawImageFormatName('RGB3', useReprojected);
+                this.drawImageFormatName('RGB3', renderer);
                 this.drawImageRGB3(image, renderer);
                 break;
             default:
@@ -371,24 +371,16 @@ Ext.define('NU.view.window.VisionController', {
     onPedestrianImage: function(robot, image) {
         this.onImage(robot, image, this.pedestrianImageRenderer);
     },
-    drawImageFormatName: function(name, useReprojected) {
-        var height = 0;
-
-        if (useReprojected) {
-            height = this.getContext('reprojected_image').canvas.height;
-        }
-
-        else {
-            height = this.getContext('image').canvas.height;
-        }
-
+    drawImageFormatName: function(name, renderer) {
+        var height = renderer.getCanvas().el.dom.height;
         var context = this.getContext('imageText');
+
         context.fillStyle = 'white';
         context.font = "20px Arial";
         context.fillText(name, 5, height - 5);
     },
 
-    drawImageURL: function (image, useReprojected) {
+    drawImageURL: function (image, renderer) {
         var blob = new Blob([image.data.toArrayBuffer()], {type: 'image/jpeg'});
         var url = URL.createObjectURL(blob);
         var context = this.getContext('image');
@@ -399,7 +391,7 @@ Ext.define('NU.view.window.VisionController', {
             URL.revokeObjectURL(url);
         };
     },
-    drawImageY422: function(image, renderer, renderDiff) {
+    drawImageY422: function(image, renderer) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
@@ -418,7 +410,7 @@ Ext.define('NU.view.window.VisionController', {
         this.imageDiffRenderer.updateUniform('imageHeight', height);
         this.imageDiffRenderer.render();
     },
-    drawImageYbCr422: function (image, renderer, renderDiff) {
+    drawImageYbCr422: function (image, renderer) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
@@ -437,7 +429,7 @@ Ext.define('NU.view.window.VisionController', {
         this.imageDiffRenderer.updateUniform('imageHeight', height);
         this.imageDiffRenderer.render();
     },
-    drawImageYbCr444: function (image, renderer, renderDiff) {
+    drawImageYbCr444: function (image, renderer) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
@@ -446,7 +438,7 @@ Ext.define('NU.view.window.VisionController', {
         this.imageDiffRenderer.updateRawImage(data, width, height, THREE.RGBFormat);
         this.imageDiffRenderer.updateUniform('imageFormat', image.format);
     },
-    drawImageRGB3: function (image, renderer, renderDiff) {
+    drawImageRGB3: function (image, renderer) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
@@ -460,7 +452,7 @@ Ext.define('NU.view.window.VisionController', {
 
         renderer.render();
     },
-    drawImageB64: function (image, renderer, renderDiff) {
+    drawImageB64: function (image, renderer) {
 //        var data = String.fromCharCode.apply(null, new Uint8ClampedArray(image.data.toArrayBuffer()));
         var uri = 'data:image/jpeg;base64,' + this.arrayBufferToBase64(image.data.toArrayBuffer());//btoa(data);
         var imageObj = new Image();
@@ -475,7 +467,7 @@ Ext.define('NU.view.window.VisionController', {
 //          context.restore();
         };
     },
-    drawImageBayer: function(image, renderer, renderDiff) {
+    drawImageBayer: function(image, renderer) {
         var width = this.getWidth();
         var height = this.getHeight();
         var data = new Uint8Array(image.data.toArrayBuffer());
