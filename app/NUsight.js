@@ -97,7 +97,7 @@ function NUsight (io) {
 
 			// Remove all our listeners
 			Object.keys(client[0].listeners).forEach(function (key) {
-				this.network.removeListener('NUsight<' + key + '>', client[0].listeners[key]);
+				this.network.removeListener(key, client[0].listeners[key]);
 			}, this);
 		}.bind(this));
 
@@ -110,9 +110,9 @@ function NUsight (io) {
 				var source = packet.peer;
 				var data = packet.payload;
 
-				var filterId = data.readUInt8(0);
-				var timestamp = int53.readUInt64LE(data, 1);
-				var protobuf = data.slice(9);
+				var filterId = packet.reliable ? 0 : 1;
+				var timestamp = Date.now();
+				var protobuf = data;
 
 				if(robots[packet.peer.name].recording) {
 					const MAX_UINT32 = 0xFFFFFFFF;
@@ -144,7 +144,7 @@ function NUsight (io) {
 			}.bind(client);
 
 			// Link it to the NUClear networking using the NUsight wrapper
-			this.network.on('NUsight<' + messageType + '>', client.listeners[messageType]);
+			this.network.on(messageType, client.listeners[messageType]);
 		}.bind(this, client));
 
 		socket.on('dropType', function (client, messageType) {
@@ -152,7 +152,7 @@ function NUsight (io) {
 			// Remove listeners and stop sending stuff
 			var func = client.listeners[messageType];
 			if(func) {
-				this.network.removeListener('NUsight<' + messageType + '>', func);
+				this.network.removeListener(messageType, func);
 				delete client.listeners[messageType];
 			}
 		}.bind(this, client));

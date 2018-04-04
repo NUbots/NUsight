@@ -122,17 +122,13 @@ RobotSimulator.prototype.getLUTIndex = function (ycbcr, bitsY, bitsCb, bitsCr) {
 
 RobotSimulator.prototype.sendMessage = function (message, reliable) {
 	// Our message type
-	var messageType = 'NUsight<' + message.$type.toString().substr(1) + '>';
+	var messageType = message.$type.toString().substr(1);
 
-	// Make our buffer for our metadata
-	var header = new Buffer(9);
-	header.writeUInt8(0, 0);
-	header.writeUInt64LE(Date.now(), 1)
 	this.net.send({
 		type: messageType,
-		payload: Buffer.concat([header, message.toBuffer()]),
+		payload: message.toBuffer(),
 		target: 'nusight',
-		'reliable': reliable,
+		reliable: reliable,
 	});
 };
 
@@ -144,7 +140,7 @@ RobotSimulator.prototype.onMessage = function (messageType, callback) {
 	this.listenerCallbacks[messageType] = callbacks;
 
 	if (isFirstListener) {
-		this.net.on('NUsight<' + messageType + '>', function (packet) {
+		this.net.on(messageType, function (packet) {
 			var source = packet.peer.name;
 			var data = packet.payload;
 
