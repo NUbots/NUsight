@@ -15,6 +15,7 @@
     "threejs": "r72",
     "extjs": "~5.0.x",
     "protobuf": "5.0.1",
+    "long": "3.2.0",
     "smoothie": "*",
     "jpgjs": "notmasteryet/jpgjs",
     "numericjs": "~1.2.6",
