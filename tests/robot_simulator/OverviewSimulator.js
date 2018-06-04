@@ -3,7 +3,7 @@ var RobotSimulator = require('./RobotSimulator');
 
 function OverviewSimulator () {
 	RobotSimulator.call(this);
-	this.loadProto('message.support.nubugger.Overview');
+	this.loadProto('message.support.nusight.Overview');
 }
 util.inherits(OverviewSimulator, RobotSimulator);
 
@@ -14,7 +14,7 @@ OverviewSimulator.prototype.run = function () {
 	var ballPosition = this.randomFieldPosition();
 	var ballWorldPosition = this.randomFieldPosition();
 
-	var message = new this.API.message.support.nubugger.Overview({
+	var message = new this.API.message.support.nusight.Overview({
 		roleName: 'Overview Simulator',
 		voltage: this.randFloat(10, 13),
 		battery: Math.random(),

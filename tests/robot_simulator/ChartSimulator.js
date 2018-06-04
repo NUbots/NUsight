@@ -3,7 +3,7 @@ var RobotSimulator = require('./RobotSimulator');
 
 function ChartSimulator () {
 	RobotSimulator.call(this);
-	this.loadProto('message.support.nubugger.DataPoint');
+	this.loadProto('message.support.nusight.DataPoint');
 }
 util.inherits(ChartSimulator, RobotSimulator);
 
@@ -13,7 +13,7 @@ ChartSimulator.prototype.run = function () {
 	var theta = 2 * Math.PI * now / period;
 	var sine = Math.sin(theta);
 	var cosine = Math.cos(theta);
-	var message = new this.API.message.support.nubugger.DataPoint({
+	var message = new this.API.message.support.nusight.DataPoint({
 		label: 'Debug Waves',
 		value: [sine, cosine, 2 * sine, 4 * cosine],
 		type: 'FLOAT_LIST'

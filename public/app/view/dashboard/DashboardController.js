@@ -22,7 +22,7 @@ Ext.define('NU.view.dashboard.DashboardController', {
 		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
 			removeRobot: this.onRemoveRobot,
-			'message.support.nubugger.Overview': this.onOverview,
+			'message.support.nusight.Overview': this.onOverview,
 			scope: this
 		});
 	},

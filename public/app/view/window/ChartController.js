@@ -33,7 +33,7 @@ Ext.define('NU.view.window.ChartController', {
 
     addEvents: function () {
         this.mon(NU.Network, {
-            'message.support.nubugger.DataPoint': this.onDataPoint,
+            'message.support.nusight.DataPoint': this.onDataPoint,
             'message.input.Sensors': this.onSensorData,
             scope: this
         });

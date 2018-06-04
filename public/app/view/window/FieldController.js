@@ -40,7 +40,7 @@ Ext.define('NU.view.window.FieldController', {
 			addRobot: this.onAddRobot,
 			'message.localisation.Field': this.onLocalisation,
 			'message.localisation.Ball': this.onBallLocalisation,
-			'message.support.nubugger.DrawObjects': this.onDrawObjects,
+			'message.support.nusight.DrawObjects': this.onDrawObjects,
 			'message.input.Sensors': this.onSensorData,
 			scope: this
 		});
@@ -380,7 +380,7 @@ Ext.define('NU.view.window.FieldController', {
 
 	createModel: function (robot, object) {
 		// Create a new shape onto the specified robot.
-		var Shape = API.message.support.nubugger.DrawObject.Shape;
+		var Shape = API.message.support.nusight.DrawObject.Shape;
 		switch (object.getShape()) {
 			case Shape.ARROW:
 				return this.createArrowModel(robot, object);

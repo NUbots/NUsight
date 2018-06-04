@@ -54,7 +54,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
                     y: Object.values(me.getGraphUpdateY()),
                     z: Object.values(me.getGraphUpdateZ())
                 }
-                
+
                 //extend the graph
                 Plotly.extendTraces(me.getDivID(), update, Object.keys(me.getGraphUpdateX()).map(Number), me.getMaxPoints());
 
@@ -68,7 +68,7 @@ Ext.define('NU.view.window.ScatterPlotController', {
 
     addEvents: function () {
         this.mon(NU.Network, {
-            'message.support.nubugger.DataPoint': this.onDataPoint,
+            'message.support.nusight.DataPoint': this.onDataPoint,
             'message.input.Sensors': this.onSensorData,
             scope: this
         });
