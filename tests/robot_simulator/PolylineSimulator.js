@@ -4,12 +4,12 @@ var RobotSimulator = require('./RobotSimulator');
 function PolylineSimulator () {
 	RobotSimulator.call(this);
 
-	this.loadProto('message.support.nubugger.DrawObjects');
+	this.loadProto('message.support.nusight.DrawObjects');
 }
 util.inherits(PolylineSimulator, RobotSimulator);
 
 PolylineSimulator.prototype.run = function () {
-	var message = new this.API.message.support.nubugger.DrawObjects({
+	var message = new this.API.message.support.nusight.DrawObjects({
 		objects: [{
 			shape: 'POLYLINE',
 			path: [{

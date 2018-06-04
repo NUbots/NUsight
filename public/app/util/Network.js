@@ -26,7 +26,7 @@ Ext.define('NU.util.Network', {
 		this.on('removeListener', this.removeHandler.bind(this));
 
 		// We use the command protocol buffer
-		this.loadProto('message.support.nubugger.Command');
+		this.loadProto('message.support.nusight.Command');
 
 		requestAnimationFrame(this.onAnimationFrame.bind(this));
 	},
@@ -207,7 +207,7 @@ Ext.define('NU.util.Network', {
 	 */
 	sendCommand: function (command, target) {
 
-		var msg = new API.message.support.nubugger.Command();
+		var msg = new API.message.support.nusight.Command();
 		msg.setCommand(command);
 
 		this.send(msg, target, true);
@@ -220,7 +220,7 @@ Ext.define('NU.util.Network', {
 	 * @param target The id of the robot associated with the command.
 	 */
 	sendNusightCommand: function (command, target) {
-		var message = new API.message.support.nubugger.Command();
+		var message = new API.message.support.nusight.Command();
 		message.setCommand(command);
 
 		var messageType = 'NUsight<' + message.$type.toString().substr(1) + '>';

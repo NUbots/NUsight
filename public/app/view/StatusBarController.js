@@ -15,7 +15,7 @@ Ext.define('NU.view.StatusBarController', {
 		this.mon(NU.Network, {
 			addRobot: this.onAddRobot,
 			removeRobot: this.onRemoveRobot,
-			'message.support.nubugger.Ping': function () {},
+			'message.support.nusight.Ping': function () {},
 			packet: this.onPacket,
 			scope: this
 		});
